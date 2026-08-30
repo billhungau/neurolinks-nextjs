@@ -2,7 +2,7 @@ import Image, { getImageProps } from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
 import { CtaBand } from "@/components/CtaBand";
 import { Eyebrow } from "@/components/Eyebrow";
-import { NumberedBlock } from "@/components/NumberedBlock";
+import { TreatmentBenefits } from "@/components/TreatmentBenefits";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
 import { HOME_HERO_ASSET, HOME_HERO_MOBILE_ASSET, MEDIA } from "@/lib/media";
@@ -258,56 +258,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[var(--nl-cream)] px-4 py-16 md:py-[4.5rem]">
-        <div className="mx-auto max-w-6xl">
-          <Reveal>
-            <Eyebrow>Treatment benefits</Eyebrow>
-            <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
-              What these treatments can offer
-            </h2>
-            <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
-              Outcomes vary. Treatment is recommended only when clinically appropriate. Medication
-              should not be changed without medical guidance.
-            </p>
-          </Reveal>
-          <div className="mt-10 grid gap-x-12 gap-y-9 md:grid-cols-2 lg:grid-cols-3">
-            <Reveal>
-              <NumberedBlock index="01" title="Non-invasive TMS">
-                Transcranial magnetic stimulation is an FDA-approved non-invasive neuromodulation
-                therapy. It does not require anesthesia.
-              </NumberedBlock>
-            </Reveal>
-            <Reveal delayMs={40}>
-              <NumberedBlock index="02" title="Compared with medication alone">
-                TMS is more effective than conventional medication treatments with minimal side
-                effects.
-              </NumberedBlock>
-            </Reveal>
-            <Reveal delayMs={80}>
-              <NumberedBlock index="03" title="Coverage in selected programs">
-                TMS is covered by Veterans Affair Canada and certain worker compensation programs.
-              </NumberedBlock>
-            </Reveal>
-            <Reveal>
-              <NumberedBlock index="04" title="Ketamine onset">
-                Ketamine&apos;s rapid onset of action distinguishes it from traditional
-                antidepressants, often alleviating symptoms within hours or days.
-              </NumberedBlock>
-            </Reveal>
-            <Reveal delayMs={40}>
-              <NumberedBlock index="05" title="Supervised administration">
-                Ketamine is administered in controlled clinical settings through intramuscular and
-                subcutaneous injections.
-              </NumberedBlock>
-            </Reveal>
-            <Reveal delayMs={80}>
-              <NumberedBlock index="06" title="MSP-covered assessment">
-                A comprehensive psychiatric evaluation is completely covered by MSP.
-              </NumberedBlock>
-            </Reveal>
-          </div>
-        </div>
-      </section>
+      <TreatmentBenefits />
 
       <section className="bg-white px-4 py-16 md:py-[4.5rem]">
         <div className="mx-auto max-w-6xl">
