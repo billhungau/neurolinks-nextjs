@@ -1,11 +1,12 @@
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ButtonLink";
 import { CtaBand } from "@/components/CtaBand";
 import { Eyebrow } from "@/components/Eyebrow";
 import { NumberedBlock } from "@/components/NumberedBlock";
+import { OVERLAY_ANCHOR_ID } from "@/components/SiteHeader";
 import { SiteChrome } from "@/components/SiteChrome";
-import { MEDIA } from "@/lib/media";
+import { HOME_HERO_ASSET, HOME_HERO_MOBILE_ASSET, MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
@@ -56,42 +57,88 @@ const SERVICES = [
   },
 ];
 
+const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLinks";
+
+/**
+ * The hero photograph is art-directed per viewport: the landscape diptych on
+ * desktop, the portrait re-crop on phones. `<picture>` keeps the hero to a
+ * single request instead of loading both crops.
+ */
+function HeroPhoto() {
+  const shared = { alt: HERO_ALT, sizes: IMG_SIZES.fullBleed, priority: true };
+  const {
+    props: { srcSet: desktopSrcSet },
+  } = getImageProps({
+    ...shared,
+    src: MEDIA.homeHero,
+    width: HOME_HERO_ASSET.width,
+    height: HOME_HERO_ASSET.height,
+  });
+  const { props: mobile } = getImageProps({
+    ...shared,
+    src: MEDIA.homeHeroMobile,
+    width: HOME_HERO_MOBILE_ASSET.width,
+    height: HOME_HERO_MOBILE_ASSET.height,
+  });
+  return (
+    <picture>
+      <source media="(min-width: 768px)" srcSet={desktopSrcSet} sizes={shared.sizes} />
+      <img
+        {...mobile}
+        alt={HERO_ALT}
+        className="hero-photo absolute inset-0 h-full w-full object-cover object-top md:object-center"
+      />
+    </picture>
+  );
+}
+
 export default function HomePage() {
   return (
-    <SiteChrome>
-      <section className="relative overflow-hidden bg-[var(--nl-navy)]">
-        <div className="relative aspect-[2/1] w-full md:absolute md:inset-0 md:aspect-auto">
-          <Image
-            src={MEDIA.homeHero}
-            alt="TMS coil on the left and ketamine vial on the right at NeuroLinks"
-            fill
-            priority
-            sizes={IMG_SIZES.fullBleed}
-            className="object-cover object-center"
+    <SiteChrome overlayHeader>
+      <section id={OVERLAY_ANCHOR_ID} className="relative overflow-hidden bg-[var(--nl-navy)]">
+        <div className="absolute inset-0">
+          <HeroPhoto />
+          <div className="hero-scrim pointer-events-none absolute inset-0 md:hidden" aria-hidden="true" />
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[var(--nl-navy)]/55 to-transparent md:hidden"
+            aria-hidden="true"
           />
           <div
             className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[var(--nl-navy)]/35 via-[var(--nl-navy)]/70 to-[var(--nl-navy)]/35 md:block"
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 px-4 py-10 md:mx-auto md:flex md:min-h-[min(42rem,calc(100svh-4.5rem))] md:max-w-6xl md:flex-col md:justify-end md:pb-16 md:pt-24 lg:pb-20">
+        <div className="relative z-10 flex min-h-[clamp(540px,72svh,610px)] flex-col justify-end px-5 pt-20 pb-8 md:mx-auto md:min-h-[min(42rem,calc(100svh-4.5rem))] md:max-w-6xl md:px-4 md:pt-24 md:pb-16 lg:pb-20">
           <div className="md:ml-[18%] md:max-w-xl lg:ml-[20%]">
-            <Eyebrow className="text-[var(--nl-yellow)]">NeuroLinks · Nanaimo, BC</Eyebrow>
-            <h1 className="mt-4 max-w-[16ch] font-serif text-[clamp(2rem,5.4vw,4.35rem)] font-semibold leading-[1.08] text-white">
+            {/* White over the photograph for AA; the accent yellow returns on desktop.
+                Below 360px the copy fills the hero, so the kicker steps aside. */}
+            <Eyebrow className="hero-enter max-[359px]:hidden text-white md:text-[var(--nl-yellow)]">
+              NeuroLinks · Nanaimo, BC
+            </Eyebrow>
+            {/* The mobile size tracks the viewport so the three-line break holds from 320px up. */}
+            <h1 className="hero-enter hero-enter-2 mt-3 font-serif text-[clamp(2.05rem,11.4vw,2.75rem)] leading-[1.02] font-semibold text-white md:mt-4 md:max-w-[16ch] md:text-[clamp(2rem,5.4vw,4.35rem)] md:leading-[1.08]">
               Expert care for complex mental challenges
             </h1>
-            <p className="prose-measure mt-5 text-lg leading-relaxed text-white/90">
+            <p className="hero-enter hero-enter-3 mt-4 max-w-[32ch] text-[0.9375rem] leading-[1.55] text-white/90 md:mt-5 md:max-w-[38rem] md:text-lg md:leading-relaxed">
               No matter how hard the past. We can always begin again.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/about-tms-treatment-on-psychiatric-illness/" variant="accent">
+            <div className="hero-enter hero-enter-4 mt-6 flex flex-wrap gap-3 md:mt-8">
+              <ButtonLink
+                href="/about-tms-treatment-on-psychiatric-illness/"
+                variant="accent"
+                className="grow basis-34 whitespace-nowrap md:grow-0 md:basis-auto"
+              >
                 Explore TMS
               </ButtonLink>
-              <ButtonLink href="/ketamine-treatment-resistant-depression-nanaimo/" variant="on-dark">
+              <ButtonLink
+                href="/ketamine-treatment-resistant-depression-nanaimo/"
+                variant="on-dark"
+                className="grow basis-34 whitespace-nowrap md:grow-0 md:basis-auto"
+              >
                 Explore Ketamine
               </ButtonLink>
             </div>
-            <p className="mt-6 text-sm text-white/80">
+            <p className="hero-enter hero-enter-4 mt-5 text-sm text-white/80 md:mt-6">
               Referring a patient?{" "}
               <Link
                 className="font-semibold text-[var(--nl-yellow)] underline underline-offset-4"
