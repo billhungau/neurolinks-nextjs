@@ -109,11 +109,13 @@ h3,
 .hero-scrim {
   background: linear-gradient(
     to bottom,
-    rgb(var(--nl-hero-navy) / 0.1) 0%,
-    rgb(var(--nl-hero-navy) / 0.24) 26%,
-    rgb(var(--nl-hero-navy) / 0.62) 36%,
-    rgb(var(--nl-hero-navy) / 0.88) 48%,
-    rgb(var(--nl-hero-navy) / 0.96) 64%,
+    rgb(var(--nl-hero-navy) / 0.08) 0%,
+    rgb(var(--nl-hero-navy) / 0.18) 16%,
+    rgb(var(--nl-hero-navy) / 0.34) 28%,
+    rgb(var(--nl-hero-navy) / 0.58) 36%,
+    rgb(var(--nl-hero-navy) / 0.78) 43%,
+    rgb(var(--nl-hero-navy) / 0.9) 52%,
+    rgb(var(--nl-hero-navy) / 0.97) 66%,
     rgb(var(--nl-hero-navy)) 100%
   );
 }
