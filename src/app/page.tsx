@@ -59,8 +59,8 @@ const SERVICES = [
 export default function HomePage() {
   return (
     <SiteChrome>
-      <section className="relative bg-[var(--nl-navy)]">
-        <div className="relative aspect-[2/1] w-full md:aspect-auto md:min-h-[min(38rem,calc(100svh-4.5rem))]">
+      <section className="relative overflow-hidden bg-[var(--nl-navy)]">
+        <div className="relative aspect-[2/1] w-full md:absolute md:inset-0 md:aspect-auto">
           <Image
             src={MEDIA.homeHero}
             alt="TMS coil on the left and ketamine vial on the right at NeuroLinks"
@@ -74,7 +74,7 @@ export default function HomePage() {
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 px-4 py-10 md:absolute md:inset-0 md:mx-auto md:flex md:max-w-6xl md:flex-col md:justify-end md:py-16 lg:pb-20">
+        <div className="relative z-10 px-4 py-10 md:mx-auto md:flex md:min-h-[min(42rem,calc(100svh-4.5rem))] md:max-w-6xl md:flex-col md:justify-end md:pb-16 md:pt-24 lg:pb-20">
           <div className="md:ml-[18%] md:max-w-xl lg:ml-[20%]">
             <Eyebrow className="text-[var(--nl-yellow)]">NeuroLinks · Nanaimo, BC</Eyebrow>
             <h1 className="mt-4 max-w-[16ch] font-serif text-[clamp(2rem,5.4vw,4.35rem)] font-semibold leading-[1.08] text-white">
