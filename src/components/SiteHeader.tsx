@@ -11,31 +11,22 @@ import { SITE } from "@/lib/site";
 export function SiteHeader() {
   const pathname = usePathname();
   const overlay = pathname === "/";
-  const [solid, setSolid] = useState(!overlay);
+  const [heroGone, setHeroGone] = useState(false);
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const menuId = useId();
+  const solid = !overlay || heroGone;
 
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (!overlay) {
-      setSolid(true);
-      return;
-    }
+    if (!overlay) return undefined;
 
     const hero = document.getElementById("home-hero");
-    if (!hero) {
-      setSolid(true);
-      return;
-    }
+    if (!hero) return undefined;
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        setSolid(!entry.isIntersecting);
+        setHeroGone(!entry.isIntersecting);
       },
       { rootMargin: "-64px 0px 0px 0px", threshold: 0 },
     );
@@ -44,7 +35,7 @@ export function SiteHeader() {
   }, [overlay]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) return undefined;
 
     const firstLink = panelRef.current?.querySelector("a");
     firstLink?.focus();
@@ -69,7 +60,12 @@ export function SiteHeader() {
       className={`${overlay ? "fixed" : "sticky"} top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow,color] duration-300 ease-out ${headerTone}`}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:h-16">
-        <Link href="/" className="shrink-0" aria-label="NeuroLinks home">
+        <Link
+          href="/"
+          className="shrink-0"
+          aria-label="NeuroLinks home"
+          onClick={() => setOpen(false)}
+        >
           <Image
             src={overHero ? SITE.logoWhite : SITE.logo}
             alt="NeuroLinks"
