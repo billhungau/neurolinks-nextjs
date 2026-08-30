@@ -1,11 +1,11 @@
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
 import { CtaBand } from "@/components/CtaBand";
 import { Eyebrow } from "@/components/Eyebrow";
 import { NumberedBlock } from "@/components/NumberedBlock";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
-import { MEDIA } from "@/lib/media";
+import { HOME_HERO_ASSET, HOME_HERO_MOBILE_ASSET, MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
@@ -55,21 +55,51 @@ const PATHWAY = [
   },
 ] as const;
 
+const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLinks";
+
+/**
+ * The hero photograph is art-directed per viewport: the landscape diptych on
+ * desktop, the portrait re-crop on phones. `<picture>` keeps the hero to a
+ * single request instead of loading both crops.
+ */
+function HeroPhoto() {
+  const shared = { alt: HERO_ALT, sizes: IMG_SIZES.fullBleed, priority: true };
+  const {
+    props: { srcSet: desktopSrcSet },
+  } = getImageProps({
+    ...shared,
+    src: MEDIA.homeHero,
+    width: HOME_HERO_ASSET.width,
+    height: HOME_HERO_ASSET.height,
+  });
+  const { props: mobile } = getImageProps({
+    ...shared,
+    src: MEDIA.homeHeroMobile,
+    width: HOME_HERO_MOBILE_ASSET.width,
+    height: HOME_HERO_MOBILE_ASSET.height,
+  });
+  return (
+    <picture>
+      <source media="(min-width: 768px)" srcSet={desktopSrcSet} sizes={shared.sizes} />
+      <img
+        {...mobile}
+        alt={HERO_ALT}
+        className="hero-photo absolute inset-0 h-full w-full object-cover object-top md:object-center lg:object-[center_40%]"
+      />
+    </picture>
+  );
+}
+
 export default function HomePage() {
   return (
     <SiteChrome>
-      <section id="home-hero" className="relative bg-[var(--nl-navy)]">
-        <div className="relative aspect-[2/1] w-full lg:absolute lg:inset-0 lg:aspect-auto">
-          <Image
-            src={MEDIA.homeHero}
-            alt="TMS coil on the left and ketamine vial on the right at NeuroLinks"
-            fill
-            priority
-            sizes={IMG_SIZES.fullBleed}
-            className="object-cover object-center lg:object-[center_40%]"
-          />
+      <section id="home-hero" className="relative overflow-hidden bg-[var(--nl-navy)]">
+        {/* Full bleed on phones; the banner-above-copy layout returns from md up. */}
+        <div className="absolute inset-0 md:relative md:aspect-[2/1] md:w-full lg:absolute lg:inset-0 lg:aspect-auto">
+          <HeroPhoto />
+          <div className="hero-scrim pointer-events-none absolute inset-0 md:hidden" aria-hidden="true" />
           <div
-            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--nl-navy)]/78 via-[var(--nl-navy)]/42 to-transparent max-lg:from-[var(--nl-navy)]/20 max-lg:via-transparent max-lg:to-[var(--nl-navy)]/15"
+            className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[var(--nl-navy)]/78 via-[var(--nl-navy)]/42 to-transparent md:block md:max-lg:from-[var(--nl-navy)]/20 md:max-lg:via-transparent md:max-lg:to-[var(--nl-navy)]/15"
             aria-hidden="true"
           />
           <div
@@ -81,19 +111,28 @@ export default function HomePage() {
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col justify-center px-4 py-10 lg:min-h-[clamp(540px,72vh,640px)] lg:py-16">
+        <div className="relative z-10 mx-auto flex min-h-[clamp(540px,72svh,610px)] max-w-6xl flex-col justify-end px-5 pt-20 pb-8 md:min-h-0 md:justify-center md:px-4 md:py-10 lg:min-h-[clamp(540px,72vh,640px)] lg:py-16">
           <div className="hero-intro max-w-[45rem]">
-            <h1 className="max-w-[16ch] font-serif text-[clamp(2.6rem,11vw,4rem)] font-semibold leading-[1.04] text-white lg:text-[clamp(3.5rem,5.3vw,5rem)] lg:leading-[1.02]">
+            {/* The mobile floor is low enough to keep the three-line break at 320px. */}
+            <h1 className="hero-enter max-w-[16ch] font-serif text-[clamp(2.05rem,11vw,4rem)] font-semibold leading-[1.02] text-white md:leading-[1.04] lg:text-[clamp(3.5rem,5.3vw,5rem)] lg:leading-[1.02]">
               Expert care for complex mental challenges
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/90">
+            <p className="hero-enter hero-enter-2 mt-4 max-w-[32ch] text-[0.9375rem] leading-[1.55] text-white/90 md:mt-5 md:max-w-xl md:text-lg md:leading-relaxed">
               No matter how hard the past. We can always begin again.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/about-tms-treatment-on-psychiatric-illness/" variant="accent">
+            <div className="hero-enter hero-enter-3 mt-6 flex flex-wrap gap-3 md:mt-8">
+              <ButtonLink
+                href="/about-tms-treatment-on-psychiatric-illness/"
+                variant="accent"
+                className="grow basis-34 whitespace-nowrap md:grow-0 md:basis-auto"
+              >
                 Explore TMS
               </ButtonLink>
-              <ButtonLink href="/ketamine-treatment-resistant-depression-nanaimo/" variant="on-dark">
+              <ButtonLink
+                href="/ketamine-treatment-resistant-depression-nanaimo/"
+                variant="on-dark"
+                className="grow basis-34 whitespace-nowrap md:grow-0 md:basis-auto"
+              >
                 Explore Ketamine
               </ButtonLink>
             </div>

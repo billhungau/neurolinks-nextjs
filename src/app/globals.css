@@ -12,6 +12,9 @@
   --nl-blue-bright: #3260eb;
   --nl-yellow: #e8b923;
   --nl-yellow-hover: #d4a017;
+  /* Mobile hero gradient target, as channels so it can carry an alpha. Deeper
+     than --nl-navy so text over the photograph keeps AA contrast. */
+  --nl-hero-navy: 7 29 52;
   --background: var(--nl-cream);
   --foreground: var(--nl-ink);
   --brand: var(--nl-blue-bright);
@@ -74,13 +77,16 @@ h3,
   letter-spacing: -0.018em;
 }
 
-.eyebrow {
-  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--nl-blue);
+/* Layered so a `text-*` utility on <Eyebrow> can override the default colour. */
+@layer components {
+  .eyebrow {
+    font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nl-blue);
+  }
 }
 
 .prose-measure {
@@ -103,8 +109,11 @@ h3,
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .hero-intro {
-    animation: hero-intro 0.8s ease both;
+  /* Phones run the staggered hero sequence below instead of this single fade. */
+  @media (min-width: 768px) {
+    .hero-intro {
+      animation: hero-intro 0.8s ease both;
+    }
   }
 
   .motion-ready .reveal:not(.is-visible) {
@@ -145,5 +154,71 @@ h3,
     right: 0.7rem;
     height: 1px;
     background: color-mix(in srgb, var(--nl-yellow) 35%, transparent);
+  }
+}
+
+/**
+ * Homepage mobile hero. The photograph runs the full height of the hero and
+ * dissolves into navy rather than meeting a panel edge, so the gradient — not a
+ * boundary — is what makes the copy readable.
+ */
+.hero-scrim {
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--nl-hero-navy) / 0.08) 0%,
+    rgb(var(--nl-hero-navy) / 0.18) 16%,
+    rgb(var(--nl-hero-navy) / 0.34) 28%,
+    rgb(var(--nl-hero-navy) / 0.58) 36%,
+    rgb(var(--nl-hero-navy) / 0.78) 43%,
+    rgb(var(--nl-hero-navy) / 0.9) 52%,
+    rgb(var(--nl-hero-navy) / 0.97) 66%,
+    rgb(var(--nl-hero-navy)) 100%
+  );
+}
+
+@keyframes nl-hero-photo {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes nl-hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* One restrained entrance, phones only: photograph, headline, copy, buttons. */
+@media (max-width: 767px) {
+  .hero-photo {
+    animation: nl-hero-photo 360ms ease-out both;
+  }
+
+  .hero-enter {
+    animation: nl-hero-enter 340ms cubic-bezier(0.22, 0.68, 0.31, 1) both;
+    animation-delay: 60ms;
+  }
+
+  .hero-enter-2 {
+    animation-delay: 170ms;
+  }
+
+  .hero-enter-3 {
+    animation-delay: 280ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo,
+  .hero-enter {
+    animation: none;
   }
 }

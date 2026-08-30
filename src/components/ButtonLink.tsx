@@ -4,9 +4,10 @@ type Props = {
   href: string;
   children: React.ReactNode;
   variant?: "primary" | "ghost" | "accent" | "on-dark";
+  className?: string;
 };
 
-export function ButtonLink({ href, children, variant = "primary" }: Props) {
+export function ButtonLink({ href, children, variant = "primary", className: extra = "" }: Props) {
   const base =
     "inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-6 py-2.5 text-sm font-semibold tracking-wide no-underline transition-colors";
   const styles =
@@ -17,7 +18,7 @@ export function ButtonLink({ href, children, variant = "primary" }: Props) {
         : variant === "ghost"
           ? "border border-[var(--nl-navy)]/25 text-[var(--nl-navy)] hover:border-[var(--nl-navy)]"
           : "bg-[var(--nl-navy)] text-white hover:bg-[var(--nl-navy-deep)]";
-  const className = `${base} ${styles}`;
+  const className = `${base} ${styles} ${extra}`.trim();
   const external = href.startsWith("http");
   if (external) {
     return (

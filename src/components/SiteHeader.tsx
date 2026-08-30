@@ -13,6 +13,7 @@ export function SiteHeader() {
   const overlay = pathname === "/";
   const [heroGone, setHeroGone] = useState(false);
   const [open, setOpen] = useState(false);
+  const barRef = useRef<HTMLElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const menuId = useId();
@@ -25,7 +26,10 @@ export function SiteHeader() {
     if (!hero) return undefined;
 
     const update = () => {
-      setHeroGone(hero.getBoundingClientRect().bottom <= 72);
+      // Go solid while the hero still fills the bar, so the white wordmark never
+      // sits on the pale section sliding up underneath it.
+      const clearance = (barRef.current?.offsetHeight ?? 56) + 72;
+      setHeroGone(hero.getBoundingClientRect().bottom <= clearance);
     };
 
     const frame = window.requestAnimationFrame(update);
@@ -61,7 +65,8 @@ export function SiteHeader() {
 
   return (
     <header
-      className={`${overlay ? "fixed" : "sticky"} top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow,color] duration-300 ease-out ${headerTone}`}
+      ref={barRef}
+      className={`${overlay ? "fixed" : "sticky"} top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow,color] duration-200 ease-out ${headerTone}`}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:h-16">
         <Link
@@ -109,7 +114,7 @@ export function SiteHeader() {
         <button
           ref={buttonRef}
           type="button"
-          className={`inline-flex min-h-10 items-center rounded-sm border px-3 py-1.5 text-sm font-medium lg:hidden ${
+          className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm border px-3 text-sm font-medium lg:hidden ${
             overHero
               ? "border-white/70 text-white"
               : "border-[var(--nl-navy)]/20 text-[var(--nl-navy)]"
