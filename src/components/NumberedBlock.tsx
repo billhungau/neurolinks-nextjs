@@ -25,7 +25,7 @@ export function NumberedBlock({
         {title}
       </h3>
       <p
-        className={`mt-3 max-w-md text-[0.95rem] leading-relaxed ${dark ? "text-white/75" : "text-[var(--nl-muted)]"}`}
+        className={`mt-3 text-[0.95rem] leading-relaxed ${dark ? "text-white/75" : "text-[var(--nl-muted)]"}`}
       >
         {children}
       </p>

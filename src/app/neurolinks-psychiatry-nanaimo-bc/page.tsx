@@ -283,8 +283,8 @@ export default function LandingPage() {
             ketamine therapy may be appropriate for your situation.
           </p>
           <p className="mt-2 text-sm text-slate-600">
-            The live landing page includes a lead form that is not in the approved Formidable
-            contact/referral rebuild. Use the contact page until that backend is chosen.
+            Please telephone the clinic or use the contact page. Forms on this preview are not
+            connected.
           </p>
           <div className="mt-6">
             <ButtonLink href="/contact/" variant="accent">

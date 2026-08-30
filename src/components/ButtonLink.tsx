@@ -17,8 +17,17 @@ export function ButtonLink({ href, children, variant = "primary" }: Props) {
         : variant === "ghost"
           ? "border border-[var(--nl-navy)]/25 text-[var(--nl-navy)] hover:border-[var(--nl-navy)]"
           : "bg-[var(--nl-navy)] text-white hover:bg-[var(--nl-navy-deep)]";
+  const className = `${base} ${styles}`;
+  const external = href.startsWith("http");
+  if (external) {
+    return (
+      <a className={className} href={href} rel="noopener noreferrer" target="_blank">
+        {children}
+      </a>
+    );
+  }
   return (
-    <Link className={`${base} ${styles}`} href={href}>
+    <Link className={className} href={href}>
       {children}
     </Link>
   );

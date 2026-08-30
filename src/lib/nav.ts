@@ -1,5 +1,4 @@
-export const NAV_ITEMS = [
-  { href: "/", label: "Home" },
+export const DESKTOP_NAV = [
   { href: "/about-tms-treatment-on-psychiatric-illness/", label: "About TMS" },
   {
     href: "/ketamine-treatment-resistant-depression-nanaimo/",
@@ -13,9 +12,13 @@ export const NAV_ITEMS = [
   {
     href: "/#location",
     label: "Location",
-    note: "WordPress Main Menu custom link destination: https://neurolinks.ca#location (Elementor menu-anchor id=location on the front page).",
   },
   { href: "/physician-referral/", label: "Physician Referral" },
+] as const;
+
+export const NAV_ITEMS = [
+  { href: "/", label: "Home" },
+  ...DESKTOP_NAV,
   { href: "/contact/", label: "Contact" },
 ] as const;
 

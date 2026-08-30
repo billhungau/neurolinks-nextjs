@@ -2,9 +2,11 @@ import Link from "next/link";
 import { SITE } from "@/lib/site";
 
 export function SiteFooter() {
+  const year = new Date().getFullYear();
+
   return (
     <footer className="mt-auto bg-[var(--nl-navy-deep)] text-[var(--nl-cream)]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-3">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-3">
         <div>
           <p className="font-serif text-2xl text-white">NeuroLinks</p>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">
@@ -40,7 +42,7 @@ export function SiteFooter() {
         </div>
       </div>
       <p className="border-t border-white/10 px-4 py-4 text-center text-xs text-white/50">
-        © NeuroLinks 2022 –
+        © NeuroLinks 2022–{year}
       </p>
     </footer>
   );
