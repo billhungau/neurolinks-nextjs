@@ -227,8 +227,42 @@ h3,
  * Homepage treatment-benefits cards. Distinct surfaces, one spacing system:
  * rail + rule + copy, with a decorative line motif that stays out of the type.
  */
-.benefits .reveal.is-visible {
-  transition-duration: 0.52s;
+.motion-ready .benefits-seq.reveal:not(.is-visible) {
+  opacity: 1;
+  transform: none;
+}
+
+.motion-ready .benefits-seq:not(.is-visible) .benefits-step {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.motion-ready .benefits-seq.is-visible .benefits-step {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.52s ease,
+    transform 0.52s ease;
+}
+
+.motion-ready .benefits-seq.is-visible .step-a {
+  transition-delay: 0ms;
+}
+
+.motion-ready .benefits-seq.is-visible .step-b {
+  transition-delay: 70ms;
+}
+
+.motion-ready .benefits-seq.is-visible .step-c {
+  transition-delay: 180ms;
+}
+
+.motion-ready .benefits-seq.is-visible .step-d {
+  transition-delay: 240ms;
+}
+
+.motion-ready .benefits-seq.is-visible .step-e {
+  transition-delay: 300ms;
 }
 
 .benefit-card,
@@ -352,6 +386,11 @@ h3,
   max-width: 38rem;
 }
 
+.benefit-card-tms .benefit-title,
+.benefit-card-ketamine .benefit-title {
+  max-width: 18rem;
+}
+
 .benefit-body {
   margin-top: 0.85rem;
   max-width: 40rem;
@@ -362,6 +401,22 @@ h3,
 .benefit-motif {
   transform: translate3d(0, 0, 0);
   transition: transform 220ms ease;
+}
+
+@media (max-width: 479px) {
+  .benefit-card-tms .benefit-motif,
+  .benefit-card-ketamine .benefit-motif {
+    right: -3.5rem;
+    bottom: -5rem;
+    width: 11rem;
+    height: 11rem;
+    opacity: 0.55;
+  }
+
+  .benefit-card-shared .benefit-motif {
+    width: min(36%, 9rem);
+    opacity: 0.7;
+  }
 }
 
 .benefit-funding {

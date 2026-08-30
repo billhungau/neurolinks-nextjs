@@ -62,8 +62,8 @@ function RippleMotif() {
 export function TreatmentBenefits() {
   return (
     <section className="benefits bg-[var(--nl-cream)] px-5 py-16 md:px-4 md:py-[4.5rem]">
-      <div className="mx-auto max-w-6xl">
-        <Reveal>
+      <Reveal className="benefits-seq mx-auto max-w-6xl">
+        <div className="benefits-step step-a">
           <Eyebrow>Treatment benefits</Eyebrow>
           <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
             What these treatments can offer
@@ -72,11 +72,10 @@ export function TreatmentBenefits() {
             TMS and ketamine offer different potential benefits. Treatment begins with psychiatric
             assessment and is recommended only when clinically appropriate.
           </p>
-        </Reveal>
+        </div>
 
         <div className="mt-8 grid gap-5 md:mt-10 md:gap-6">
-          <Reveal delayMs={80}>
-            <article className="benefit-card benefit-card-shared relative overflow-hidden">
+          <article className="benefit-card benefit-card-shared benefits-step step-b relative overflow-hidden">
               <WaveMotif />
               <div className="benefit-card-grid">
                 <div className="benefit-rail">
@@ -98,11 +97,9 @@ export function TreatmentBenefits() {
                 </div>
               </div>
             </article>
-          </Reveal>
 
           <div className="grid gap-5 md:grid-cols-2 md:gap-6">
-            <Reveal className="h-full" delayMs={160}>
-              <article className="benefit-card benefit-card-tms relative h-full overflow-hidden">
+              <article className="benefit-card benefit-card-tms benefits-step step-c relative h-full overflow-hidden">
                 <FieldMotif />
                 <div className="benefit-card-grid">
                   <div className="benefit-rail">
@@ -123,9 +120,7 @@ export function TreatmentBenefits() {
                   </div>
                 </div>
               </article>
-            </Reveal>
-            <Reveal className="h-full" delayMs={220}>
-              <article className="benefit-card benefit-card-ketamine relative h-full overflow-hidden">
+              <article className="benefit-card benefit-card-ketamine benefits-step step-d relative h-full overflow-hidden">
                 <RippleMotif />
                 <div className="benefit-card-grid">
                   <div className="benefit-rail">
@@ -146,12 +141,10 @@ export function TreatmentBenefits() {
                   </div>
                 </div>
               </article>
-            </Reveal>
           </div>
 
-          <Reveal delayMs={280}>
-            <aside className="benefit-funding" aria-labelledby="funding-heading">
-              <h3 id="funding-heading" className="benefit-title text-[var(--nl-navy)]">
+            <aside className="benefit-funding benefits-step step-e" aria-labelledby="funding-heading">
+              <h3 id="funding-heading" className="benefit-title max-w-none text-[var(--nl-navy)]">
                 Assessment and treatment funding
               </h3>
               <div className="benefit-funding-cols">
@@ -173,16 +166,13 @@ export function TreatmentBenefits() {
                 </div>
               </div>
             </aside>
-          </Reveal>
         </div>
 
-        <Reveal delayMs={340}>
-          <p className="benefit-note">
-            Individual outcomes vary. Treatment is recommended only when clinically appropriate.
-            Medication should not be changed without medical guidance.
-          </p>
-        </Reveal>
-      </div>
+        <p className="benefit-note benefits-step step-e">
+          Individual outcomes vary. Treatment is recommended only when clinically appropriate.
+          Medication should not be changed without medical guidance.
+        </p>
+      </Reveal>
     </section>
   );
 }
