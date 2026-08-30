@@ -68,7 +68,11 @@ export function SiteHeader() {
       ref={barRef}
       className={`${overlay ? "fixed" : "sticky"} top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow,color] duration-200 ease-out ${headerTone}`}
     >
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:h-16">
+      <div
+        className={`mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 md:h-16 ${
+          overHero ? "px-5 md:px-4" : "px-4"
+        }`}
+      >
         <Link
           href="/"
           className="shrink-0"
@@ -82,7 +86,9 @@ export function SiteHeader() {
             height={50}
             priority
             sizes={IMG_SIZES.logo}
-            className="h-8 w-auto md:h-9"
+            className={
+              overHero ? "h-auto w-[155px] md:h-9 md:w-auto" : "h-8 w-auto md:h-9"
+            }
           />
         </Link>
         <nav className="hidden min-w-0 flex-1 lg:block" aria-label="Primary">
@@ -114,10 +120,10 @@ export function SiteHeader() {
         <button
           ref={buttonRef}
           type="button"
-          className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm border px-3 text-sm font-medium lg:hidden ${
+          className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm border font-medium lg:hidden ${
             overHero
-              ? "border-white/70 text-white"
-              : "border-[var(--nl-navy)]/20 text-[var(--nl-navy)]"
+              ? "border-white/40 px-2.5 text-[13px] text-white"
+              : "border-[var(--nl-navy)]/20 px-3 text-sm text-[var(--nl-navy)]"
           }`}
           aria-expanded={open}
           aria-controls={menuId}
