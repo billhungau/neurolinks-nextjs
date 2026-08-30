@@ -17,6 +17,7 @@
   --brand: var(--nl-blue-bright);
   --navy: var(--nl-navy);
   --accent: var(--nl-yellow);
+  --site-max: 72rem;
 }
 
 html {
@@ -56,19 +57,25 @@ html {
 body {
   background: var(--nl-white);
   color: var(--nl-ink);
+  font-family: var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
 }
 
 h1,
 h2,
 h3,
 .font-serif {
-  font-family: var(--font-display), "Fraunces", serif;
+  font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
   font-optical-sizing: auto;
-  letter-spacing: -0.02em;
+  font-style: normal;
+  font-synthesis: none;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "dlig" 0, "calt" 0;
+  letter-spacing: -0.018em;
 }
 
 .eyebrow {
-  font-family: var(--font-body), "Source Sans 3", sans-serif;
+  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -91,6 +98,6 @@ h3,
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .group:hover .img-frame img,
   .img-frame:hover img {
-    transform: scale(1.04);
+    transform: scale(1.03);
   }
 }

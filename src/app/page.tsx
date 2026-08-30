@@ -59,28 +59,35 @@ const SERVICES = [
 export default function HomePage() {
   return (
     <SiteChrome>
-      <section className="relative overflow-hidden bg-[var(--nl-navy)]">
-        <div className="relative aspect-[2/1] w-full md:absolute md:inset-0 md:aspect-auto">
+      <section id="home-hero" className="relative bg-[var(--nl-navy)]">
+        <div className="relative aspect-[2/1] w-full lg:absolute lg:inset-0 lg:aspect-auto">
           <Image
             src={MEDIA.homeHero}
             alt="TMS coil on the left and ketamine vial on the right at NeuroLinks"
             fill
             priority
             sizes={IMG_SIZES.fullBleed}
-            className="object-cover object-center"
+            className="object-cover object-center lg:object-[center_40%]"
           />
           <div
-            className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[var(--nl-navy)]/35 via-[var(--nl-navy)]/70 to-[var(--nl-navy)]/35 md:block"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--nl-navy)]/78 via-[var(--nl-navy)]/42 to-transparent max-lg:from-[var(--nl-navy)]/20 max-lg:via-transparent max-lg:to-[var(--nl-navy)]/15"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[var(--nl-navy)]/55 to-transparent"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-28 bg-gradient-to-t from-[var(--nl-navy)]/50 to-transparent lg:block"
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 px-4 py-10 md:mx-auto md:flex md:min-h-[min(42rem,calc(100svh-4.5rem))] md:max-w-6xl md:flex-col md:justify-end md:pb-16 md:pt-24 lg:pb-20">
-          <div className="md:ml-[18%] md:max-w-xl lg:ml-[20%]">
-            <Eyebrow className="text-[var(--nl-yellow)]">NeuroLinks · Nanaimo, BC</Eyebrow>
-            <h1 className="mt-4 max-w-[16ch] font-serif text-[clamp(2rem,5.4vw,4.35rem)] font-semibold leading-[1.08] text-white">
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col justify-center px-4 py-10 lg:min-h-[clamp(540px,72vh,640px)] lg:py-16">
+          <div className="max-w-[45rem]">
+            <h1 className="max-w-[16ch] font-serif text-[clamp(2.6rem,11vw,4rem)] font-semibold leading-[1.04] text-white lg:text-[clamp(3.5rem,5.3vw,5rem)] lg:leading-[1.02]">
               Expert care for complex mental challenges
             </h1>
-            <p className="prose-measure mt-5 text-lg leading-relaxed text-white/90">
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/90">
               No matter how hard the past. We can always begin again.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -91,23 +98,14 @@ export default function HomePage() {
                 Explore Ketamine
               </ButtonLink>
             </div>
-            <p className="mt-6 text-sm text-white/80">
-              Referring a patient?{" "}
-              <Link
-                className="font-semibold text-[var(--nl-yellow)] underline underline-offset-4"
-                href="/physician-referral/"
-              >
-                Physician referral
-              </Link>
-            </p>
           </div>
         </div>
       </section>
 
-      <section className="bg-[var(--nl-cream)] px-4 py-14 md:py-20">
+      <section className="bg-[var(--nl-cream)] px-4 py-16 md:py-[4.5rem]">
         <div className="mx-auto max-w-6xl">
           <Eyebrow>Treatment options</Eyebrow>
-          <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
+          <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.75rem,3.4vw,2.75rem)] font-semibold leading-tight text-[var(--nl-navy)]">
             Two distinct, psychiatrist-led therapies
           </h2>
           <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
@@ -115,7 +113,7 @@ export default function HomePage() {
             psychiatric assessment, not a one-size-fits-all protocol.
           </p>
           <div className="mt-10 grid gap-8 lg:grid-cols-2">
-            <article className="group overflow-hidden bg-white">
+            <article className="group bg-white">
               <div className="img-frame relative aspect-[16/10]">
                 <Image
                   src={MEDIA.tmsMachine}
@@ -143,7 +141,7 @@ export default function HomePage() {
                 </div>
               </div>
             </article>
-            <article className="group overflow-hidden bg-white lg:mt-10">
+            <article className="group bg-white">
               <div className="img-frame relative aspect-[16/10]">
                 <Image
                   src={MEDIA.reception}
@@ -174,10 +172,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-white px-4 py-14 md:py-20">
+      <section className="bg-white px-4 py-16 md:py-[4.5rem]">
         <div className="mx-auto max-w-6xl">
           <Eyebrow>Care at NeuroLinks</Eyebrow>
-          <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
+          <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.75rem,3.4vw,2.75rem)] font-semibold leading-tight text-[var(--nl-navy)]">
             Our services
           </h2>
           <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
@@ -185,10 +183,10 @@ export default function HomePage() {
             on this site is an automatic indication for TMS or ketamine; treatment is recommended
             only when clinically appropriate.
           </p>
-          <div className="mt-10 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid items-stretch gap-8 lg:grid-cols-3">
             {SERVICES.map((item) => (
-              <article key={item.title} className="flex h-full flex-col bg-[var(--nl-cream)]">
-                <div className="img-frame relative aspect-[4/3]">
+              <article key={item.title} className="flex h-full flex-col">
+                <div className="img-frame relative aspect-[16/10]">
                   <Image
                     src={item.img}
                     alt={item.alt}
@@ -197,7 +195,7 @@ export default function HomePage() {
                     className="object-cover"
                   />
                 </div>
-                <div className="flex flex-1 flex-col p-6">
+                <div className="flex flex-1 flex-col pt-5">
                   <h3 className="font-serif text-xl font-semibold text-[var(--nl-navy)]">
                     <Link className="hover:underline" href={item.href}>
                       {item.title}
@@ -226,17 +224,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[var(--nl-cream)] px-4 py-14 md:py-20">
+      <section className="bg-[var(--nl-cream)] px-4 py-16 md:py-[4.5rem]">
         <div className="mx-auto max-w-6xl">
           <Eyebrow>Treatment benefits</Eyebrow>
-          <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
+          <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.75rem,3.4vw,2.75rem)] font-semibold leading-tight text-[var(--nl-navy)]">
             What these treatments can offer
           </h2>
           <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
             Outcomes vary. Treatment is recommended only when clinically appropriate. Medication
             should not be changed without medical guidance.
           </p>
-          <div className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
             <NumberedBlock index="01" title="Non-invasive TMS">
               Transcranial magnetic stimulation is an FDA-approved non-invasive neuromodulation
               therapy. It does not require anesthesia.
@@ -263,17 +261,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[var(--nl-navy)] px-4 py-14 text-white md:py-20">
+      <section className="bg-[var(--nl-navy)] px-4 py-16 text-white md:py-[4.5rem]">
         <div className="mx-auto max-w-6xl">
           <Eyebrow className="text-[var(--nl-yellow)]">Patient pathway</Eyebrow>
-          <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-semibold leading-tight">
+          <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.75rem,3.4vw,2.75rem)] font-semibold leading-tight">
             How care typically proceeds
           </h2>
           <p className="prose-measure mt-4 text-sm leading-relaxed text-white/75">
             An inquiry or referral leads to assessment. Treatment is offered only when it is
             clinically appropriate.
           </p>
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+          <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
             <NumberedBlock tone="dark" index="01" title="Referral or inquiry">
               Patients and families may contact the clinic. Physicians can complete the online
               referral or fax the PDF form.
@@ -294,8 +292,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-white px-4 py-14 md:py-20">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-14">
+      <section className="bg-white px-4 py-16 md:py-[4.5rem]">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="img-frame relative aspect-[4/3]">
             <Image
               src={MEDIA.team}
@@ -307,7 +305,7 @@ export default function HomePage() {
           </div>
           <div>
             <Eyebrow>The clinic</Eyebrow>
-            <h2 className="mt-3 font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
+            <h2 className="mt-3 font-serif text-[clamp(1.75rem,3.4vw,2.75rem)] font-semibold leading-tight text-[var(--nl-navy)]">
               About us
             </h2>
             <p className="mt-4 text-lg text-[var(--nl-navy)]">
@@ -325,10 +323,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[var(--nl-cream)] px-4 py-14 md:py-20">
+      <section className="bg-[var(--nl-cream)] px-4 py-16 md:py-[4.5rem]">
         <div className="mx-auto max-w-6xl">
           <Eyebrow>Google reviews</Eyebrow>
-          <h2 className="mt-3 font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-semibold text-[var(--nl-navy)]">
+          <h2 className="mt-3 font-serif text-[clamp(1.75rem,3.4vw,2.75rem)] font-semibold text-[var(--nl-navy)]">
             What our patients say
           </h2>
           <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
@@ -344,28 +342,24 @@ export default function HomePage() {
               View all Google reviews
             </a>
           </p>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="mt-10 grid gap-8 md:grid-cols-3">
             {REVIEWS.map((r) => (
-              <blockquote
-                key={r.name}
-                className="border-l-2 border-[var(--nl-yellow)] bg-white px-6 py-5 text-sm leading-relaxed"
-              >
-                <p className="text-[1.35rem] leading-none text-[var(--nl-yellow)]" aria-hidden="true">
-                  “
-                </p>
-                <p className="mt-1">{r.text}</p>
-                <footer className="mt-4 font-semibold text-[var(--nl-navy)]">— {r.name}</footer>
+              <blockquote key={r.name} className="border-l-2 border-[var(--nl-yellow)] pl-5">
+                <p className="text-sm leading-relaxed text-[var(--nl-ink)]">{r.text}</p>
+                <footer className="mt-4 text-sm font-semibold text-[var(--nl-navy)]">
+                  — {r.name}
+                </footer>
               </blockquote>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="location" className="scroll-mt-24 bg-white px-4 py-14 md:py-20">
-        <div className="mx-auto grid max-w-6xl items-stretch gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <div className="flex flex-col justify-start pt-1">
+      <section id="location" className="scroll-mt-24 bg-white px-4 py-16 md:py-[4.5rem]">
+        <div className="mx-auto grid max-w-6xl items-stretch gap-8 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
+          <div className="flex flex-col justify-center">
             <Eyebrow>Visit</Eyebrow>
-            <h2 className="mt-3 font-serif text-[clamp(1.75rem,3.6vw,3rem)] font-semibold text-[var(--nl-navy)]">
+            <h2 className="mt-3 font-serif text-[clamp(1.75rem,3.4vw,2.75rem)] font-semibold text-[var(--nl-navy)]">
               Find the clinic
             </h2>
             <p className="mt-4 max-w-md leading-relaxed">{SITE.addressLine}</p>
@@ -384,7 +378,7 @@ export default function HomePage() {
               </ButtonLink>
             </div>
           </div>
-          <div className="relative min-h-[16rem] overflow-hidden bg-[var(--nl-cream)] md:min-h-[18rem] lg:min-h-[20rem]">
+          <div className="relative min-h-[18rem] overflow-hidden bg-[var(--nl-cream)] md:min-h-[22rem] lg:min-h-[24rem]">
             <iframe
               title="6010 Brickyard Road, Nanaimo, BC"
               className="absolute inset-0 h-full w-full border-0"
