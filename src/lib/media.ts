@@ -1,6 +1,6 @@
 export const MEDIA = {
   logo: "/media/images/New-Logo.png",
-  logoReversed: "/media/images/New-Logo-reversed.png",
+  logoWhite: "/media/images/New-Logo-white.png",
   landingLogo: "/media/images/neurolinks-logo-BL-mDCNZ.webp",
   eval: "/media/images/0N4A2677-768x512.jpg",
   tmsClinic: "/media/images/0N4A2661-768x512.jpg",

@@ -20,6 +20,7 @@
   --brand: var(--nl-blue-bright);
   --navy: var(--nl-navy);
   --accent: var(--nl-yellow);
+  --site-max: 72rem;
 }
 
 html {
@@ -59,21 +60,27 @@ html {
 body {
   background: var(--nl-white);
   color: var(--nl-ink);
+  font-family: var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
 }
 
 h1,
 h2,
 h3,
 .font-serif {
-  font-family: var(--font-display), "Fraunces", serif;
+  font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
   font-optical-sizing: auto;
-  letter-spacing: -0.02em;
+  font-style: normal;
+  font-synthesis: none;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "dlig" 0, "calt" 0;
+  letter-spacing: -0.018em;
 }
 
 /* Layered so a `text-*` utility on <Eyebrow> can override the default colour. */
 @layer components {
   .eyebrow {
-    font-family: var(--font-body), "Source Sans 3", sans-serif;
+    font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.16em;
@@ -97,7 +104,56 @@ h3,
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .group:hover .img-frame img,
   .img-frame:hover img {
-    transform: scale(1.04);
+    transform: scale(1.03);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Phones run the staggered hero sequence below instead of this single fade. */
+  @media (min-width: 768px) {
+    .hero-intro {
+      animation: hero-intro 0.8s ease both;
+    }
+  }
+
+  .motion-ready .reveal:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(0.7rem);
+  }
+
+  .motion-ready .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.65s ease,
+      transform 0.65s ease;
+  }
+}
+
+@keyframes hero-intro {
+  from {
+    opacity: 0;
+    transform: translateY(0.65rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pathway {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .pathway::before {
+    content: "";
+    position: absolute;
+    top: 0.55rem;
+    left: 0.7rem;
+    right: 0.7rem;
+    height: 1px;
+    background: color-mix(in srgb, var(--nl-yellow) 35%, transparent);
   }
 }
 
@@ -152,15 +208,11 @@ h3,
   }
 
   .hero-enter-2 {
-    animation-delay: 120ms;
+    animation-delay: 170ms;
   }
 
   .hero-enter-3 {
-    animation-delay: 210ms;
-  }
-
-  .hero-enter-4 {
-    animation-delay: 290ms;
+    animation-delay: 280ms;
   }
 }
 
