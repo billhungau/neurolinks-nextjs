@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DESKTOP_NAV } from "@/lib/nav";
 import { SITE } from "@/lib/site";
 
 export function SiteFooter() {
@@ -6,7 +7,7 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-auto bg-[var(--nl-navy-deep)] text-[var(--nl-cream)]">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-3">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="font-serif text-2xl text-white">NeuroLinks</p>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">
@@ -24,21 +25,49 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="text-sm">
+          <p className="eyebrow text-[var(--nl-yellow)]">Care</p>
+          <ul className="mt-3 flex flex-col gap-2">
+            {DESKTOP_NAV.filter((item) => item.href !== "/#location").map((item) => (
+              <li key={item.href}>
+                <Link className="text-white/90 underline-offset-4 hover:underline" href={item.href}>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="text-sm">
           <p className="eyebrow text-[var(--nl-yellow)]">Visit</p>
-          <p className="mt-3 flex flex-col gap-2">
-            <Link className="text-white underline-offset-4 hover:underline" href="/contact/">
-              Contact
-            </Link>
-            <Link className="text-white underline-offset-4 hover:underline" href="/physician-referral/">
-              Physician referral
-            </Link>
-            <a href={SITE.facebook} rel="noopener noreferrer" target="_blank">
-              Facebook
-            </a>
-            <a href={SITE.instagram} rel="noopener noreferrer" target="_blank">
-              Instagram
-            </a>
-          </p>
+          <ul className="mt-3 flex flex-col gap-2">
+            <li>
+              <Link className="text-white/90 underline-offset-4 hover:underline" href="/#location">
+                Location
+              </Link>
+            </li>
+            <li>
+              <Link className="text-white/90 underline-offset-4 hover:underline" href="/contact/">
+                Contact
+              </Link>
+            </li>
+            <li>
+              <Link
+                className="text-white/90 underline-offset-4 hover:underline"
+                href="/physician-referral/"
+              >
+                Physician referral
+              </Link>
+            </li>
+            <li>
+              <a href={SITE.facebook} rel="noopener noreferrer" target="_blank">
+                Facebook
+              </a>
+            </li>
+            <li>
+              <a href={SITE.instagram} rel="noopener noreferrer" target="_blank">
+                Instagram
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
       <p className="border-t border-white/10 px-4 py-4 text-center text-xs text-white/50">

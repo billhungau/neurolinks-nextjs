@@ -13,6 +13,7 @@ export const SITE = {
   facebook: "https://facebook.com/neurolinks.tms",
   instagram: "https://www.instagram.com/neurolinks.tms/",
   logo: "/media/images/New-Logo.png",
+  logoWhite: "/media/images/New-Logo-white.png",
 } as const;
 
 /** Search indexing is off unless explicitly enabled (never on Vercel preview). */
