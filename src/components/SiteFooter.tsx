@@ -3,34 +3,45 @@ import { SITE } from "@/lib/site";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-slate-200 bg-[#1a2744] text-slate-200">
-      <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-sm">
-        <p className="italic">
-          NeuroLinks — Specialist care for treatment-resistant mental health
-          conditions.
-        </p>
-        <p>© NeuroLinks 2022 –</p>
-        <p>{SITE.addressLine}</p>
-        <p>
-          Tel:{" "}
-          <a className="text-[#e8b923] underline" href={SITE.phoneHref}>
-            {SITE.phone}
-          </a>
-        </p>
-        <p className="flex gap-4">
-          <a href={SITE.facebook} rel="noopener noreferrer" target="_blank">
-            Facebook
-          </a>
-          <a href={SITE.instagram} rel="noopener noreferrer" target="_blank">
-            Instagram
-          </a>
-        </p>
-        <p>
-          <Link className="text-white underline" href="/contact/">
-            Contact
-          </Link>
-        </p>
+    <footer className="mt-auto bg-[var(--nl-navy-deep)] text-[var(--nl-cream)]">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-3">
+        <div>
+          <p className="font-serif text-2xl text-white">NeuroLinks</p>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">
+            Specialist care for treatment-resistant mental health conditions in Nanaimo, BC.
+          </p>
+        </div>
+        <div className="text-sm leading-relaxed">
+          <p className="eyebrow text-[var(--nl-yellow)]">Clinic</p>
+          <p className="mt-3">{SITE.addressLine}</p>
+          <p className="mt-2">
+            Tel:{" "}
+            <a className="text-[var(--nl-yellow)] underline" href={SITE.phoneHref}>
+              {SITE.phone}
+            </a>
+          </p>
+        </div>
+        <div className="text-sm">
+          <p className="eyebrow text-[var(--nl-yellow)]">Visit</p>
+          <p className="mt-3 flex flex-col gap-2">
+            <Link className="text-white underline-offset-4 hover:underline" href="/contact/">
+              Contact
+            </Link>
+            <Link className="text-white underline-offset-4 hover:underline" href="/physician-referral/">
+              Physician referral
+            </Link>
+            <a href={SITE.facebook} rel="noopener noreferrer" target="_blank">
+              Facebook
+            </a>
+            <a href={SITE.instagram} rel="noopener noreferrer" target="_blank">
+              Instagram
+            </a>
+          </p>
+        </div>
       </div>
+      <p className="border-t border-white/10 px-4 py-4 text-center text-xs text-white/50">
+        © NeuroLinks 2022 –
+      </p>
     </footer>
   );
 }

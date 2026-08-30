@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Sans_3 } from "next/font/google";
+import { Fraunces, Source_Sans_3 } from "next/font/google";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
 import { SkipLink } from "@/components/SkipLink";
 import { isSearchIndexable, SITE, siteOrigin } from "@/lib/site";
 import "./globals.css";
 
-const display = Playfair_Display({
+const display = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["700"],
+  weight: ["500", "600", "700"],
 });
 
 const body = Source_Sans_3({

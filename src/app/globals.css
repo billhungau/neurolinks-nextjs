@@ -1,20 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #111111;
-  --brand: #3260eb;
-  --navy: #1a2744;
-  --accent: #e8b923;
+  --nl-navy: #1a2744;
+  --nl-navy-deep: #121a2e;
+  --nl-ink: #1c2438;
+  --nl-muted: #4f5d73;
+  --nl-cream: #f4f0e8;
+  --nl-cream-deep: #e8e2d6;
+  --nl-white: #ffffff;
+  --nl-blue: #3d5a8c;
+  --nl-blue-bright: #3260eb;
+  --nl-yellow: #e8b923;
+  --nl-yellow-hover: #d4a017;
+  --background: var(--nl-cream);
+  --foreground: var(--nl-ink);
+  --brand: var(--nl-blue-bright);
+  --navy: var(--nl-navy);
+  --accent: var(--nl-yellow);
 }
 
 html {
-  scroll-padding-top: 5.5rem;
+  scroll-padding-top: 5.75rem;
 }
 
 :focus-visible {
-  outline: 2px solid #3260eb;
-  outline-offset: 2px;
+  outline: 2px solid var(--nl-blue-bright);
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -33,18 +44,53 @@ html {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-navy: var(--nl-navy);
+  --color-ink: var(--nl-ink);
+  --color-muted: var(--nl-muted);
+  --color-cream: var(--nl-cream);
+  --color-yellow: var(--nl-yellow);
   --font-sans: var(--font-body);
   --font-serif: var(--font-display);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--nl-white);
+  color: var(--nl-ink);
 }
 
 h1,
 h2,
 h3,
 .font-serif {
-  font-family: var(--font-display), "Playfair Display", serif;
+  font-family: var(--font-display), "Fraunces", serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+}
+
+.eyebrow {
+  font-family: var(--font-body), "Source Sans 3", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--nl-blue);
+}
+
+.prose-measure {
+  max-width: 38rem;
+}
+
+.img-frame {
+  overflow: hidden;
+}
+
+.img-frame img {
+  transition: transform 0.5s ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .group:hover .img-frame img,
+  .img-frame:hover img {
+    transform: scale(1.04);
+  }
 }
