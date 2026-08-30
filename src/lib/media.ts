@@ -1,5 +1,6 @@
 export const MEDIA = {
   logo: "/media/images/New-Logo.png",
+  logoReversed: "/media/images/New-Logo-reversed.png",
   landingLogo: "/media/images/neurolinks-logo-BL-mDCNZ.webp",
   eval: "/media/images/0N4A2677-768x512.jpg",
   tmsClinic: "/media/images/0N4A2661-768x512.jpg",
@@ -21,6 +22,7 @@ export const MEDIA = {
   referralPdf: "/media/pdfs/physician_referral_form-2.pdf",
   landingHero: "/media/images/hero-treatment-modalities-CnTkU5m8.webp",
   homeHero: "/media/images/home-hero-banner.jpg",
+  homeHeroMobile: "/media/images/home-hero-mobile.webp",
   tmsBanner: "/media/images/tms-banner.jpg",
   ketamineBanner: "/media/images/ketamine-banner.jpg",
   servicesBanner: "/media/images/services-banner.jpg",
@@ -40,6 +42,18 @@ export const HOME_HERO_ASSET = {
   width: 1536,
   height: 768,
   restAlt: "",
+} as const;
+
+/**
+ * Portrait art direction of the same photograph for the mobile hero: the 2:1
+ * diptych cropped to a phone viewport keeps only its centre seam, losing both
+ * subjects. Regenerate with `node scripts/build-home-hero-mobile.mjs`.
+ */
+export const HOME_HERO_MOBILE_ASSET = {
+  local: "/media/images/home-hero-mobile.webp",
+  width: 1080,
+  height: 1560,
+  source: HOME_HERO_ASSET.wpUrl,
 } as const;
 
 /** WP media 5946. Live Elementor image widget (not a CSS background). */
