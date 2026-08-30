@@ -77,68 +77,47 @@ export function TreatmentBenefits() {
         <div className="mt-8 grid gap-5 md:mt-10 md:gap-6">
           <article className="benefit-card benefit-card-shared benefits-step step-b relative overflow-hidden">
               <WaveMotif />
-              <div className="benefit-card-grid">
-                <div className="benefit-rail">
-                  <p className="benefit-label text-[var(--nl-yellow)]">Applies to both treatments</p>
-                  <p className="benefit-num text-[var(--nl-yellow)]" aria-hidden="true">
-                    01
-                  </p>
-                </div>
-                <div className="benefit-copy">
-                  <h3 className="benefit-title text-white">
-                    Psychiatrist-led assessment and careful monitoring
-                  </h3>
-                  <p className="benefit-body text-white/90">
-                    Before either treatment is recommended, a psychiatrist reviews your diagnosis,
-                    treatment history and relevant medical factors. Treatment response, tolerability
-                    and safety are monitored throughout care, with recommendations adjusted according
-                    to clinical progress and individual needs.
-                  </p>
-                </div>
+              <div className="benefit-copy">
+                <p className="benefit-name text-[var(--nl-yellow)]">Applies to both treatments</p>
+                <h3 className="benefit-title text-white">
+                  Psychiatrist-led assessment and careful monitoring
+                </h3>
+                <p className="benefit-body text-white/90">
+                  Before either treatment is recommended, a psychiatrist reviews your diagnosis,
+                  treatment history and relevant medical factors. Treatment response, tolerability
+                  and safety are monitored throughout care, with recommendations adjusted according
+                  to clinical progress and individual needs.
+                </p>
               </div>
             </article>
 
           <div className="grid gap-5 md:grid-cols-2 md:gap-6">
               <article className="benefit-card benefit-card-tms benefits-step step-c relative h-full overflow-hidden">
                 <FieldMotif />
-                <div className="benefit-card-grid">
-                  <div className="benefit-rail">
-                    <p className="benefit-label text-[var(--nl-blue)]">TMS</p>
-                    <p className="benefit-num text-[var(--nl-blue)]" aria-hidden="true">
-                      02
-                    </p>
-                  </div>
-                  <div className="benefit-copy">
-                    <h3 className="benefit-title text-[var(--nl-navy)]">
-                      An effective, non-invasive option
-                    </h3>
-                    <p className="benefit-body text-[var(--nl-muted)]">
-                      For people whose depression has not improved sufficiently with antidepressants,
-                      TMS can be more effective than trying another conventional medication. TMS is
-                      non-invasive, requires no anesthesia and is generally well tolerated.
-                    </p>
-                  </div>
+                <div className="benefit-copy">
+                  <p className="benefit-name text-[var(--nl-blue)]">TMS</p>
+                  <h3 className="benefit-title text-[var(--nl-navy)]">
+                    An effective, non-invasive option
+                  </h3>
+                  <p className="benefit-body text-[var(--nl-muted)]">
+                    For people whose depression has not improved sufficiently with antidepressants,
+                    TMS can be more effective than trying another conventional medication. TMS is
+                    non-invasive, requires no anesthesia and is generally well tolerated.
+                  </p>
                 </div>
               </article>
               <article className="benefit-card benefit-card-ketamine benefits-step step-d relative h-full overflow-hidden">
                 <RippleMotif />
-                <div className="benefit-card-grid">
-                  <div className="benefit-rail">
-                    <p className="benefit-label text-[var(--nl-yellow-hover)]">Ketamine</p>
-                    <p className="benefit-num text-[var(--nl-yellow-hover)]" aria-hidden="true">
-                      03
-                    </p>
-                  </div>
-                  <div className="benefit-copy">
-                    <h3 className="benefit-title text-[var(--nl-navy)]">
-                      Improvement may begin within hours or days
-                    </h3>
-                    <p className="benefit-body text-[var(--nl-muted)]">
-                      Ketamine can reduce depressive symptoms within hours to days in some
-                      people—considerably faster than conventional antidepressants. Ketamine is
-                      administered in a controlled clinical setting with medical supervision.
-                    </p>
-                  </div>
+                <div className="benefit-copy">
+                  <p className="benefit-name text-[var(--nl-yellow-hover)]">Ketamine</p>
+                  <h3 className="benefit-title text-[var(--nl-navy)]">
+                    Improvement may begin within hours or days
+                  </h3>
+                  <p className="benefit-body text-[var(--nl-muted)]">
+                    Ketamine can reduce depressive symptoms within hours to days in some
+                    people—considerably faster than conventional antidepressants. Ketamine is
+                    administered in a controlled clinical setting with medical supervision.
+                  </p>
                 </div>
               </article>
           </div>

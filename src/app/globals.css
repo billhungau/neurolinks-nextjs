@@ -322,61 +322,42 @@ h3,
   color: #c4a44a;
 }
 
-.benefit-card-grid {
+.benefit-copy {
   position: relative;
   z-index: 1;
-  display: grid;
-  gap: 1.1rem;
 }
 
-@media (min-width: 480px) {
-  .benefit-card-grid {
-    grid-template-columns: 6.25rem minmax(0, 1fr);
-    gap: 1.35rem;
-  }
+.benefit-name {
+  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
+  font-size: clamp(1.7rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
 
-  .benefit-rail {
-    border-right: 1px solid currentColor;
-    padding-right: 1.15rem;
-  }
-
-  .benefit-card-shared .benefit-rail {
-    border-color: rgb(232 185 35 / 0.38);
-  }
-
-  .benefit-card-tms .benefit-rail {
-    border-color: rgb(61 90 140 / 0.28);
-  }
-
-  .benefit-card-ketamine .benefit-rail {
-    border-color: rgb(232 185 35 / 0.42);
-  }
+.benefit-card-shared .benefit-name {
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .benefit-label {
   font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.benefit-num {
-  margin-top: 0.65rem;
-  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
-  font-size: clamp(2.15rem, 4vw, 2.75rem);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1;
-}
-
 .benefit-title {
-  max-width: 22ch;
+  margin-top: 0.7rem;
+  max-width: 24ch;
   font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
-  font-size: clamp(1.25rem, 2.1vw, 1.55rem);
+  font-size: clamp(1.4rem, 2.3vw, 1.75rem);
   font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.25;
+  letter-spacing: -0.018em;
+  line-height: 1.22;
   font-feature-settings: normal;
   font-variant-ligatures: normal;
 }
