@@ -78,7 +78,6 @@ export function TreatmentBenefits() {
           <article className="benefit-card benefit-card-shared benefits-step step-b relative overflow-hidden">
               <WaveMotif />
               <div className="benefit-copy">
-                <p className="benefit-name text-[var(--nl-yellow)]">Applies to both treatments</p>
                 <h3 className="benefit-title text-white">
                   Psychiatrist-led assessment and careful monitoring
                 </h3>
@@ -135,7 +134,7 @@ export function TreatmentBenefits() {
                   </p>
                 </div>
                 <div>
-                  <h4 className="benefit-label text-[var(--nl-blue)]">TMS funding</h4>
+                  <h4 className="benefit-label text-[var(--nl-blue)]">Funding</h4>
                   <p className="benefit-body mt-3 text-[var(--nl-muted)]">
                     TMS funding may be available to eligible patients through Veterans Affairs
                     Canada, WorkSafeBC and other third-party programs. Approval depends on the

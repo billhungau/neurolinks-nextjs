@@ -335,11 +335,8 @@ h3,
   line-height: 1.15;
 }
 
-.benefit-card-shared .benefit-name {
-  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.benefit-copy > .benefit-title:first-child {
+  margin-top: 0;
 }
 
 .benefit-label {
