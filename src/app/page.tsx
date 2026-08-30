@@ -70,7 +70,7 @@ export default function HomePage() {
             className="object-cover object-center lg:object-[center_40%]"
           />
           <div
-            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--nl-navy)]/82 via-[var(--nl-navy)]/48 to-[var(--nl-navy)]/12 max-lg:from-[var(--nl-navy)]/25 max-lg:via-transparent max-lg:to-[var(--nl-navy)]/20"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--nl-navy)]/78 via-[var(--nl-navy)]/42 to-transparent max-lg:from-[var(--nl-navy)]/20 max-lg:via-transparent max-lg:to-[var(--nl-navy)]/15"
             aria-hidden="true"
           />
           <div

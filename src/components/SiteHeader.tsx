@@ -52,7 +52,7 @@ export function SiteHeader() {
 
   const overHero = overlay && !solid;
   const headerTone = overHero
-    ? "border-transparent bg-[var(--nl-navy)]/20 text-white backdrop-blur-[2px]"
+    ? "border-transparent bg-transparent text-white"
     : "border-[var(--nl-navy)]/10 bg-[var(--nl-white)]/95 text-[var(--nl-navy)] shadow-[0_1px_0_rgba(26,39,68,0.06)] backdrop-blur-sm";
 
   return (
