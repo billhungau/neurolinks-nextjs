@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Source_Sans_3 } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
 import { SkipLink } from "@/components/SkipLink";
 import { isSearchIndexable, SITE, siteOrigin } from "@/lib/site";
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SkipLink />
         <ClinicJsonLd />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
