@@ -24,14 +24,18 @@ export function SiteHeader() {
     const hero = document.getElementById("home-hero");
     if (!hero) return undefined;
 
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        setHeroGone(!entry.isIntersecting);
-      },
-      { rootMargin: "-64px 0px 0px 0px", threshold: 0 },
-    );
-    io.observe(hero);
-    return () => io.disconnect();
+    const update = () => {
+      setHeroGone(hero.getBoundingClientRect().bottom <= 72);
+    };
+
+    const frame = window.requestAnimationFrame(update);
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, [overlay]);
 
   useEffect(() => {
