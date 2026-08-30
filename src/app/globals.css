@@ -101,3 +101,49 @@ h3,
     transform: scale(1.03);
   }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-intro {
+    animation: hero-intro 0.8s ease both;
+  }
+
+  .motion-ready .reveal:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(0.7rem);
+  }
+
+  .motion-ready .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.65s ease,
+      transform 0.65s ease;
+  }
+}
+
+@keyframes hero-intro {
+  from {
+    opacity: 0;
+    transform: translateY(0.65rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pathway {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .pathway::before {
+    content: "";
+    position: absolute;
+    top: 0.55rem;
+    left: 0.7rem;
+    right: 0.7rem;
+    height: 1px;
+    background: color-mix(in srgb, var(--nl-yellow) 35%, transparent);
+  }
+}
