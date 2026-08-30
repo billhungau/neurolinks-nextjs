@@ -29,6 +29,19 @@ export const MEDIA = {
   referralBanner: "/media/images/referral-banner.jpg",
 } as const;
 
+/** Homepage hero: WP media 5544 (page 1318 section ca7541c). Combined TMS + ketamine JPEG. Full 1920 URL is CDN-rewritten to WebP 5946; local file is the 1536×768 JPEG derivative (116,907 bytes, FF D8). */
+export const HOME_HERO_ASSET = {
+  wpId: 5544,
+  wpUrl:
+    "https://neurolinks.ca/wp-content/uploads/2024/06/Orange-And-Blue-Modern-Professional-Construction-Banner-Design-2.jpg",
+  wpDerivativeUrl:
+    "https://neurolinks.ca/wp-content/uploads/2024/06/Orange-And-Blue-Modern-Professional-Construction-Banner-Design-2-1536x768.jpg",
+  local: "/media/images/home-hero-banner.jpg",
+  width: 1536,
+  height: 768,
+  restAlt: "",
+} as const;
+
 /** WP media 5946. Live Elementor image widget (not a CSS background). */
 export const LANDING_HERO_ASSET = {
   wpId: 5946,

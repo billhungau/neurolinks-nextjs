@@ -59,44 +59,48 @@ const SERVICES = [
 export default function HomePage() {
   return (
     <SiteChrome>
-      <section className="relative min-h-[min(36rem,calc(100svh-4.5rem))] overflow-hidden bg-[var(--nl-navy)] md:min-h-[min(42rem,calc(100svh-4.5rem))]">
-        <Image
-          src={MEDIA.tmsClinic}
-          alt="TMS treatment at NeuroLinks in Nanaimo"
-          fill
-          priority
-          sizes={IMG_SIZES.fullBleed}
-          className="object-cover object-[58%_30%] md:object-[72%_32%]"
-        />
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-[var(--nl-navy)] from-10% via-[var(--nl-navy)]/78 to-[var(--nl-navy)]/20"
-          aria-hidden="true"
-        />
-        <div className="relative z-10 mx-auto flex min-h-[min(36rem,calc(100svh-4.5rem))] max-w-6xl flex-col justify-center px-4 py-12 md:min-h-[min(42rem,calc(100svh-4.5rem))] md:py-16 lg:justify-end lg:pb-20">
-          <Eyebrow className="text-[var(--nl-yellow)]">NeuroLinks · Nanaimo, BC</Eyebrow>
-          <h1 className="mt-4 max-w-[16ch] font-serif text-[clamp(2rem,5.4vw,4.35rem)] font-semibold leading-[1.08] text-white">
-            Expert care for complex mental challenges
-          </h1>
-          <p className="prose-measure mt-5 text-lg leading-relaxed text-white/90">
-            No matter how hard the past. We can always begin again.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <ButtonLink href="/about-tms-treatment-on-psychiatric-illness/" variant="accent">
-              Explore TMS
-            </ButtonLink>
-            <ButtonLink href="/ketamine-treatment-resistant-depression-nanaimo/" variant="on-dark">
-              Explore Ketamine
-            </ButtonLink>
+      <section className="relative bg-[var(--nl-navy)]">
+        <div className="relative aspect-[2/1] w-full md:aspect-auto md:min-h-[min(38rem,calc(100svh-4.5rem))]">
+          <Image
+            src={MEDIA.homeHero}
+            alt="TMS coil on the left and ketamine vial on the right at NeuroLinks"
+            fill
+            priority
+            sizes={IMG_SIZES.fullBleed}
+            className="object-cover object-center"
+          />
+          <div
+            className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[var(--nl-navy)]/35 via-[var(--nl-navy)]/70 to-[var(--nl-navy)]/35 md:block"
+            aria-hidden="true"
+          />
+        </div>
+        <div className="relative z-10 px-4 py-10 md:absolute md:inset-0 md:mx-auto md:flex md:max-w-6xl md:flex-col md:justify-end md:py-16 lg:pb-20">
+          <div className="md:ml-[18%] md:max-w-xl lg:ml-[20%]">
+            <Eyebrow className="text-[var(--nl-yellow)]">NeuroLinks · Nanaimo, BC</Eyebrow>
+            <h1 className="mt-4 max-w-[16ch] font-serif text-[clamp(2rem,5.4vw,4.35rem)] font-semibold leading-[1.08] text-white">
+              Expert care for complex mental challenges
+            </h1>
+            <p className="prose-measure mt-5 text-lg leading-relaxed text-white/90">
+              No matter how hard the past. We can always begin again.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <ButtonLink href="/about-tms-treatment-on-psychiatric-illness/" variant="accent">
+                Explore TMS
+              </ButtonLink>
+              <ButtonLink href="/ketamine-treatment-resistant-depression-nanaimo/" variant="on-dark">
+                Explore Ketamine
+              </ButtonLink>
+            </div>
+            <p className="mt-6 text-sm text-white/80">
+              Referring a patient?{" "}
+              <Link
+                className="font-semibold text-[var(--nl-yellow)] underline underline-offset-4"
+                href="/physician-referral/"
+              >
+                Physician referral
+              </Link>
+            </p>
           </div>
-          <p className="mt-6 text-sm text-white/80">
-            Referring a patient?{" "}
-            <Link
-              className="font-semibold text-[var(--nl-yellow)] underline underline-offset-4"
-              href="/physician-referral/"
-            >
-              Physician referral
-            </Link>
-          </p>
         </div>
       </section>
 
