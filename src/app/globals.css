@@ -2894,11 +2894,17 @@ html.js .form-embed.is-ready .form-embed-status {
 html.js .form-embed:not(.is-ready) .form-embed-fallback {
   position: absolute;
   inset-inline: 0;
-  bottom: 0;
+  top: 2.45rem;
+  bottom: auto;
   z-index: 3;
   display: block;
-  padding: 1rem 1.1rem 1.15rem;
-  background: color-mix(in srgb, var(--nl-surface) 94%, var(--nl-navy));
+  padding: 0.85rem 1.1rem 0.95rem;
+  background: color-mix(in srgb, var(--nl-surface) 96%, var(--nl-navy));
+  border-bottom: 1px solid var(--nl-border);
+}
+
+html.js .form-embed:not(.is-ready):has(.form-embed-fallback) .form-skel {
+  padding-top: 8.25rem;
 }
 
 .form-embed-frame {
