@@ -128,12 +128,20 @@ export default function KetaminePage() {
       <section id="ket-hero" className="ket-hero relative overflow-hidden bg-[var(--nl-navy)]">
         <div className="absolute inset-0">
           <Image
+            src={MEDIA.ketamineHeroMobile}
+            alt={HERO_ALT}
+            fill
+            priority
+            sizes={IMG_SIZES.fullBleed}
+            className="hero-photo object-cover object-top md:hidden"
+          />
+          <Image
             src={MEDIA.ketamineHero}
             alt={HERO_ALT}
             fill
             priority
             sizes={IMG_SIZES.fullBleed}
-            className="hero-photo object-cover object-[78%_center] md:object-center"
+            className="hero-photo hidden object-cover object-center md:block"
           />
           <div className="hero-scrim pointer-events-none absolute inset-0 md:hidden" aria-hidden="true" />
           <div className="ket-hero-wash pointer-events-none absolute inset-0 hidden md:block" aria-hidden="true" />

@@ -1182,6 +1182,19 @@ h3,
     );
 }
 
+@media (max-width: 767px) {
+  .ket-hero .hero-scrim {
+    background: linear-gradient(
+      to bottom,
+      rgb(var(--nl-hero-navy) / 0.1) 0%,
+      rgb(var(--nl-hero-navy) / 0.22) 38%,
+      rgb(var(--nl-hero-navy) / 0.62) 62%,
+      rgb(var(--nl-hero-navy) / 0.94) 82%,
+      rgb(var(--nl-hero-navy)) 100%
+    );
+  }
+}
+
 .ket-ivory {
   background: #f6f1e6;
 }
