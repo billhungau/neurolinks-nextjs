@@ -7,4 +7,5 @@ export const JOTFORM_REFERRAL = {
   handlerSrc: "https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js",
   selector: "iframe[id='JotFormIFrame-262418577500054']",
   initialMinHeight: 850,
+  pdfUrl: "https://neurolinks.ca/wp-content/uploads/2024/04/physician_referral_form-2.pdf",
 } as const;

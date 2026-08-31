@@ -37,16 +37,6 @@ export function JotformReferralEmbed() {
   }, [initHandler]);
 
   useEffect(() => {
-    const iframe = document.getElementById(JOTFORM_REFERRAL.iframeId);
-    if (!(iframe instanceof HTMLIFrameElement)) return undefined;
-    const observer = new ResizeObserver(() => {
-      if (iframe.getBoundingClientRect().height > 860) setIframeReady(true);
-    });
-    observer.observe(iframe);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
     failTimer.current = window.setTimeout(() => {
       setSlow((current) => (iframeReady ? current : true));
     }, 12000);
