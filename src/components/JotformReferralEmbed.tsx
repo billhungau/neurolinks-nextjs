@@ -5,11 +5,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { JOTFORM_REFERRAL } from "@/lib/jotform-referral";
 
 const initializedIframes = new Set<string>();
+const readyIframes = new Set<string>();
 
 export function JotformReferralEmbed() {
-  const [iframeReady, setIframeReady] = useState(false);
+  const [iframeReady, setIframeReady] = useState(() => readyIframes.has(JOTFORM_REFERRAL.iframeId));
   const [slow, setSlow] = useState(false);
   const failTimer = useRef<number>(0);
+
+  const markReady = useCallback(() => {
+    readyIframes.add(JOTFORM_REFERRAL.iframeId);
+    setIframeReady(true);
+  }, []);
 
   const initHandler = useCallback(() => {
     if (typeof window.jotformEmbedHandler !== "function") return;
@@ -41,7 +47,6 @@ export function JotformReferralEmbed() {
     const iframe = document.getElementById(JOTFORM_REFERRAL.iframeId);
     if (!(iframe instanceof HTMLIFrameElement)) return undefined;
 
-    const markReady = () => setIframeReady(true);
     iframe.addEventListener("load", markReady);
 
     // React onLoad can miss if the iframe finishes before hydration.
@@ -55,7 +60,7 @@ export function JotformReferralEmbed() {
     } catch {
       alreadyLoaded = true;
     }
-    if (alreadyLoaded) markReady();
+    if (alreadyLoaded) queueMicrotask(markReady);
 
     const reserved = window.matchMedia("(min-width: 768px)").matches
       ? JOTFORM_REFERRAL.initialMinHeight
@@ -71,7 +76,7 @@ export function JotformReferralEmbed() {
       iframe.removeEventListener("load", markReady);
       window.clearInterval(poll);
     };
-  }, []);
+  }, [markReady]);
 
   useEffect(() => {
     failTimer.current = window.setTimeout(() => {
@@ -82,7 +87,14 @@ export function JotformReferralEmbed() {
 
   return (
     <div className={`ref-embed${iframeReady ? " is-ready" : ""}`} aria-busy={!iframeReady}>
-      <Script src={JOTFORM_REFERRAL.handlerSrc} strategy="afterInteractive" onLoad={initHandler} />
+      <Script
+        src={JOTFORM_REFERRAL.handlerSrc}
+        strategy="afterInteractive"
+        onLoad={() => {
+          initHandler();
+          markReady();
+        }}
+      />
       {!iframeReady ? (
         <p className="ref-embed-status" role="status" aria-live="polite">
           Loading referral form…
@@ -96,7 +108,7 @@ export function JotformReferralEmbed() {
         scrolling="no"
         loading="eager"
         referrerPolicy="strict-origin-when-cross-origin"
-        onLoad={() => setIframeReady(true)}
+        onLoad={markReady}
         className="ref-embed-frame"
       />
       {slow && !iframeReady ? (
