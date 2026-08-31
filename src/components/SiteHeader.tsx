@@ -15,6 +15,7 @@ function overlayHeroId(pathname: string) {
   if (path === "/ketamine-treatment-resistant-depression-nanaimo") return "ket-hero";
   if (path === "/services-psychiatric-tms-ketamine-treatment") return "svc-hero";
   if (path === "/psychiatrist-tms-nanaimo") return "about-hero";
+  if (path === "/physician-referral") return "referral-hero";
   return null;
 }
 

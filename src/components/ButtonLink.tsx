@@ -19,8 +19,8 @@ export function ButtonLink({ href, children, variant = "primary", className: ext
           ? "border border-[var(--nl-navy)]/25 text-[var(--nl-navy)] hover:border-[var(--nl-navy)]"
           : "bg-[var(--nl-navy)] text-white hover:bg-[var(--nl-navy-deep)]";
   const className = `${base} ${styles} ${extra}`.trim();
-  const external = href.startsWith("http");
-  if (external) {
+  const newTab = href.startsWith("http") || href.endsWith(".pdf");
+  if (newTab) {
     return (
       <a className={className} href={href} rel="noopener noreferrer" target="_blank">
         {children}
