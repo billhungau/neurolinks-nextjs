@@ -25,6 +25,9 @@ export const MEDIA = {
   landingHero: "/media/images/hero-treatment-modalities-CnTkU5m8.webp",
   homeHero: "/media/images/home-hero-banner.jpg",
   homeHeroMobile: "/media/images/home-hero-mobile.webp",
+  /** Ketamine page hero. Treatment-room photograph; homepage keeps homeHero. */
+  ketamineHero: "/media/images/ketamine-treatment-room-hero.webp",
+  ketamineHeroMobile: "/media/images/ketamine-treatment-room-hero-mobile.webp",
   tmsBanner: "/media/images/tms-banner.jpg",
   ketamineBanner: "/media/images/ketamine-banner.jpg",
   servicesBanner: "/media/images/services-banner.jpg",

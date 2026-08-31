@@ -1174,13 +1174,25 @@ h3,
 .ket-hero-wash {
   background:
     linear-gradient(
-      108deg,
-      rgb(var(--nl-hero-navy) / 0.93) 0%,
-      rgb(18 26 46 / 0.82) 28%,
-      rgb(42 34 18 / 0.38) 52%,
-      rgb(232 185 35 / 0.08) 72%,
-      transparent 90%
+      98deg,
+      rgb(var(--nl-hero-navy) / 0.86) 0%,
+      rgb(var(--nl-hero-navy) / 0.6) 38%,
+      rgb(var(--nl-hero-navy) / 0.16) 60%,
+      transparent 78%
     );
+}
+
+@media (max-width: 767px) {
+  .ket-hero .hero-scrim {
+    background: linear-gradient(
+      to bottom,
+      rgb(var(--nl-hero-navy) / 0.1) 0%,
+      rgb(var(--nl-hero-navy) / 0.22) 38%,
+      rgb(var(--nl-hero-navy) / 0.62) 62%,
+      rgb(var(--nl-hero-navy) / 0.94) 82%,
+      rgb(var(--nl-hero-navy)) 100%
+    );
+  }
 }
 
 .ket-ivory {
