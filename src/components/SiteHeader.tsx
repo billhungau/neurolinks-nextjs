@@ -13,6 +13,7 @@ function overlayHeroId(pathname: string) {
   if (path === "/") return "home-hero";
   if (path === "/about-tms-treatment-on-psychiatric-illness") return "tms-hero";
   if (path === "/ketamine-treatment-resistant-depression-nanaimo") return "ket-hero";
+  if (path === "/services-psychiatric-tms-ketamine-treatment") return "svc-hero";
   return null;
 }
 
