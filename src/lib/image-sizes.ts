@@ -5,6 +5,7 @@ export const IMG_SIZES = {
   third: "(max-width: 768px) 100vw, 33vw",
   staff: "(max-width: 768px) 100vw, 240px",
   logo: "160px",
+  footerLogo: "162px",
   landingLogo: "48px",
   diagram: "(max-width: 640px) 50vw, 300px",
 } as const;

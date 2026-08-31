@@ -27,6 +27,21 @@ export const CONTACT_NAV = {
 /** Desktop text links (Contact is the yellow button, not this list). */
 export const DESKTOP_NAV = PRIMARY_NAV;
 
+export const FOOTER_TREATMENTS = [
+  { href: "/about-tms-treatment-on-psychiatric-illness/", label: "About TMS" },
+  {
+    href: "/ketamine-treatment-resistant-depression-nanaimo/",
+    label: "About Ketamine",
+  },
+  { href: "/services-psychiatric-tms-ketamine-treatment/", label: "Services" },
+] as const satisfies readonly NavItem[];
+
+export const FOOTER_QUICK_LINKS = [
+  { href: "/psychiatrist-tms-nanaimo/", label: "About Us" },
+  { href: "/contact/", label: "Contact" },
+  { href: "/physician-referral/", label: "Physician Referral" },
+] as const satisfies readonly NavItem[];
+
 export const LANDING_NAV = [
   { href: "/neurolinks-psychiatry-nanaimo-bc/#treatment", label: "Treatments" },
   { href: "/psychiatrist-tms-nanaimo/", label: "About NeuroLinks" },
