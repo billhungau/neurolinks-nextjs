@@ -6,8 +6,10 @@ export const REFERRAL_PDF_URL =
 export const REFERRAL_SUCCESS_MESSAGE =
   "Thank you. The referral has been submitted to NeuroLinks.";
 export const REFERRAL_ERROR_MESSAGE =
-  "The referral could not be submitted. Please try again or use the PDF referral form and fax it to 250-739-5530.";
-export const REFERRAL_UPSTREAM_LOG = "Referral submission rejected by upstream service";
+  "We could not submit the referral. Please try again or use the PDF and fax option.";
+export const REFERRAL_UPSTREAM_LOG = "referral_upstream_event";
+export const EXPECTED_JOTFORM_REFERRAL_FORM_ID = "262418577500054";
+export const JOTFORM_PHONE_MASK_HINT = "Format: (000) 000-0000.";
 
 export const HONEYPOT_FIELD = "website";
 export const MAX_REFERRAL_BODY_BYTES = 64 * 1024;
@@ -123,10 +125,92 @@ export function referralTimeoutMs() {
   return JOTFORM_SUBMIT_TIMEOUT_MS;
 }
 
-export function approvedJotformApiBaseUrl(): string | null {
-  const raw = process.env.JOTFORM_REFERRAL_API_BASE_URL?.trim();
-  const candidate = (raw && raw.length > 0 ? raw : DEFAULT_JOTFORM_API_BASE_URL).replace(/\/+$/, "");
+export type ReferralJotformConfig =
+  | {
+      ok: true;
+      apiKey: string;
+      formId: string;
+      apiBase: string;
+      apiHost: string;
+    }
+  | { ok: false; reason: "missing" | "invalid_base_url" };
+
+function normalizeApiBase(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return DEFAULT_JOTFORM_API_BASE_URL;
+  if (/\/form\//i.test(trimmed)) return null;
+  const candidate = trimmed.replace(/\/+$/, "");
   return (JOTFORM_API_BASE_URLS as readonly string[]).includes(candidate) ? candidate : null;
+}
+
+export function approvedJotformApiBaseUrl(): string | null {
+  return normalizeApiBase(process.env.JOTFORM_REFERRAL_API_BASE_URL ?? "");
+}
+
+export function resolveReferralJotformConfig(): ReferralJotformConfig {
+  const apiKey = process.env.JOTFORM_API_KEY?.trim() ?? "";
+  const formId = (process.env.JOTFORM_REFERRAL_FORM_ID ?? "").trim();
+  const apiBase = normalizeApiBase(process.env.JOTFORM_REFERRAL_API_BASE_URL ?? "");
+  if (!apiKey || !formId) return { ok: false, reason: "missing" };
+  if (!apiBase) return { ok: false, reason: "invalid_base_url" };
+  return {
+    ok: true,
+    apiKey,
+    formId,
+    apiBase,
+    apiHost: new URL(apiBase).host,
+  };
+}
+
+export function newReferralRequestId() {
+  return `ref_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+export function sanitizeJotformResponseCode(data: unknown): string | number | undefined {
+  if (!data || typeof data !== "object") return undefined;
+  const code = (data as Record<string, unknown>).responseCode;
+  if (typeof code === "number" && Number.isFinite(code)) return code;
+  if (typeof code === "string" && /^\d{1,5}$/.test(code.trim())) return code.trim();
+  return undefined;
+}
+
+export function isJotformReferralSuccessPayload(data: unknown): boolean {
+  if (!data || typeof data !== "object") return false;
+  const record = data as Record<string, unknown>;
+  const code = record.responseCode;
+  if (code !== 200 && code !== "200") return false;
+  const content = record.content;
+  if (!content || typeof content !== "object") return false;
+  const id = (content as Record<string, unknown>).submissionID;
+  if (typeof id === "string") return id.length > 0;
+  if (typeof id === "number") return Number.isFinite(id) && id > 0;
+  return false;
+}
+
+export function logReferralDiagnostic(
+  event: string,
+  details: {
+    requestId?: string;
+    jotformStatus?: number;
+    jotformCode?: string | number;
+    formId?: string;
+    apiHost?: string;
+  },
+) {
+  const payload: Record<string, string | number> = { event };
+  if (details.requestId) payload.requestId = details.requestId;
+  if (typeof details.jotformStatus === "number") payload.jotformStatus = details.jotformStatus;
+  if (details.jotformCode !== undefined) payload.jotformCode = details.jotformCode;
+  if (details.formId) payload.formId = details.formId;
+  if (details.apiHost) payload.apiHost = details.apiHost;
+  console.error(JSON.stringify(payload));
+}
+
+export function formatJotformMaskedPhone(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  const national = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  if (national.length !== 10) return value;
+  return `(${national.slice(0, 3)}) ${national.slice(3, 6)}-${national.slice(6)}`;
 }
 
 function asString(value: unknown): string {
@@ -278,22 +362,24 @@ export function parseReferralPayload(raw: unknown): ValidatedReferral {
 }
 
 export const JOTFORM_REFERRAL_SCALAR_KEYS = [
-  "submission[3_first]",
-  "submission[3_last]",
+  "submission[3][first]",
+  "submission[3][last]",
   "submission[23]",
-  "submission[5_full]",
+  "submission[5][full]",
   "submission[21]",
 ] as const;
 
 export function jotformReferralSubmissionBody(fields: ReferralFields): URLSearchParams {
   const submission = new URLSearchParams();
-  submission.set("submission[3_first]", fields.patientFirstName);
-  submission.set("submission[3_last]", fields.patientLastName);
+  submission.set("submission[3][first]", fields.patientFirstName);
+  submission.set("submission[3][last]", fields.patientLastName);
   submission.set("submission[23]", fields.phn);
-  submission.set("submission[5_full]", fields.patientPhone);
+  submission.set("submission[5][full]", formatJotformMaskedPhone(fields.patientPhone));
   submission.set("submission[21]", fields.referrerName);
   if (fields.mspNumber) submission.set("submission[10]", fields.mspNumber);
-  if (fields.referrerPhone) submission.set("submission[11_full]", fields.referrerPhone);
+  if (fields.referrerPhone) {
+    submission.set("submission[11][full]", formatJotformMaskedPhone(fields.referrerPhone));
+  }
   if (fields.faxNumber) submission.set("submission[12]", fields.faxNumber);
   for (const diagnosis of fields.diagnoses) {
     submission.append("submission[15][]", diagnosis);
