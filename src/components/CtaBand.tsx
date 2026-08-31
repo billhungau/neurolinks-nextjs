@@ -15,8 +15,8 @@ export function CtaBand({
   label: string;
 }) {
   return (
-    <section className="bg-[var(--nl-navy)] px-4 py-16 text-white md:py-[4.5rem]">
-      <div className="mx-auto max-w-6xl">
+    <section className="bg-[var(--nl-navy)] nl-section px-0 text-white">
+      <div className="nl-wrap">
         <Eyebrow className="text-[var(--nl-yellow)]">{eyebrow}</Eyebrow>
         <h2 className="mt-4 max-w-2xl font-serif text-[clamp(1.75rem,3.4vw,2.75rem)] font-semibold leading-tight">
           {title}

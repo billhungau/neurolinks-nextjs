@@ -13,7 +13,7 @@ export function LandingHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#E7E2DA] bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <div className="nl-wrap flex items-center justify-between gap-4 py-3">
         <Link
           href="/neurolinks-psychiatry-nanaimo-bc/"
           className="flex items-center gap-2 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3260eb]"

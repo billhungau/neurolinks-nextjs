@@ -94,7 +94,7 @@ export default function AboutUsPage() {
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 mx-auto flex min-h-[clamp(500px,56svh,560px)] max-w-6xl flex-col justify-end px-5 pt-20 pb-8 md:justify-center md:px-6 md:py-16 lg:px-8">
+        <div className="nl-wrap relative z-10 flex min-h-[clamp(500px,56svh,560px)] flex-col justify-end pt-20 pb-8 md:justify-center md:py-16">
           <div className="hero-intro max-w-[36rem]">
             <p className="hero-enter eyebrow text-white/80">Our clinic and team</p>
             <h1 className="hero-enter mt-3 font-serif text-[clamp(2.375rem,5.2vw,4rem)] font-semibold leading-[1.04] text-white">

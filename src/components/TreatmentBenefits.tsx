@@ -61,8 +61,8 @@ function RippleMotif() {
 
 export function TreatmentBenefits() {
   return (
-    <section className="benefits bg-[var(--nl-cream)] px-5 py-16 md:px-4 md:py-[4.5rem]">
-      <Reveal className="benefits-seq mx-auto max-w-6xl">
+    <section className="benefits bg-[var(--nl-cream)] nl-section">
+      <Reveal className="benefits-seq nl-wrap">
         <div className="benefits-step step-a">
           <Eyebrow>Treatment benefits</Eyebrow>
           <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">

@@ -116,7 +116,7 @@ export function SiteHeader() {
       className={`site-header ${overlay ? "fixed" : "sticky"} top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow,color] duration-200 ease-out ${headerTone}`}
     >
       {overHero ? <div className="site-header-wash" aria-hidden="true" /> : null}
-      <div className="relative z-10 mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-5 md:h-16 md:px-4">
+      <div className="nl-wrap relative z-10 flex h-14 items-center justify-between gap-3 md:h-16">
         <Link
           href="/"
           className="shrink-0"
@@ -134,7 +134,7 @@ export function SiteHeader() {
           />
         </Link>
         <nav className="hidden min-w-0 flex-1 lg:block" aria-label="Primary">
-          <ul className="flex flex-nowrap items-center justify-end gap-x-3.5 text-[13px] font-medium tracking-[0.01em] text-white xl:gap-x-5 xl:text-[14px]">
+          <ul className="flex flex-nowrap items-center justify-end gap-x-4 text-[13px] font-medium tracking-[0.01em] text-white xl:gap-x-6 xl:text-[14px]">
             {PRIMARY_NAV.map((item) => {
               const current = isActivePath(pathname, item.href);
               return (
@@ -153,7 +153,7 @@ export function SiteHeader() {
         </nav>
         <Link
           href={CONTACT_NAV.href}
-          className={`site-nav-contact hidden min-h-9 shrink-0 items-center rounded-sm bg-[var(--nl-yellow)] px-3.5 text-sm font-semibold text-[var(--nl-navy)] lg:inline-flex ${
+          className={`site-nav-contact hidden min-h-9 shrink-0 items-center rounded-[var(--nl-radius)] bg-[var(--nl-yellow)] px-4 text-sm font-semibold text-[var(--nl-navy)] lg:inline-flex ${
             isActivePath(pathname, CONTACT_NAV.href) ? "is-current" : ""
           }`}
           aria-current={isActivePath(pathname, CONTACT_NAV.href) ? "page" : undefined}
@@ -187,7 +187,7 @@ export function SiteHeader() {
             className="site-header-panel relative z-10 lg:hidden"
             aria-label="Mobile"
           >
-            <ul className="mx-auto flex max-w-6xl flex-col gap-0.5 px-4 pt-3 pb-5">
+            <ul className="nl-wrap flex flex-col gap-0.5 pt-3 pb-5">
               {PRIMARY_NAV.map((item) => {
                 const current = isActivePath(pathname, item.href);
                 return (
