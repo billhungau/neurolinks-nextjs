@@ -3,9 +3,26 @@
 import { useId, useState } from "react";
 import type { FaqItem } from "@/content/faqs";
 
-export function FaqAccordion({ items }: { items: FaqItem[] }) {
+export function FaqAccordion({
+  items,
+  variant = "default",
+}: {
+  items: FaqItem[];
+  variant?: "default" | "editorial";
+}) {
   const base = useId();
   const [open, setOpen] = useState<number | null>(null);
+  const editorial = variant === "editorial";
+
+  if (editorial) {
+    return (
+      <div className="tms-faq">
+        {items.map((item) => (
+          <EditorialFaqItem key={item.q} item={item} />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="divide-y divide-slate-200 border-y border-slate-200">
@@ -41,5 +58,22 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
         );
       })}
     </div>
+  );
+}
+
+function EditorialFaqItem({ item }: { item: FaqItem }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <details
+      className="tms-faq-item"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary className="tms-faq-question" aria-expanded={open}>
+        <h3>{item.q}</h3>
+        <span className="tms-faq-mark" aria-hidden="true" />
+      </summary>
+      <p className="tms-faq-answer">{item.a}</p>
+    </details>
   );
 }
