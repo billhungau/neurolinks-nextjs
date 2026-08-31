@@ -2369,4 +2369,239 @@ h3,
   }
 }
 
+/**
+ * Contact page. Compact reception hero, Jotform + clinic details.
+ * Iframe internals are cross-origin and are not styled from here.
+ */
+.ct-hero-wash {
+  background:
+    linear-gradient(
+      100deg,
+      rgb(var(--nl-hero-navy) / 0.92) 0%,
+      rgb(var(--nl-hero-navy) / 0.78) 26%,
+      rgb(var(--nl-hero-navy) / 0.42) 46%,
+      rgb(var(--nl-hero-navy) / 0.1) 64%,
+      transparent 80%
+    );
+}
+
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .ct-hero .hero-photo {
+    animation: nl-hero-photo 400ms ease-out both;
+  }
+
+  .ct-hero .hero-enter {
+    animation: nl-hero-enter 480ms cubic-bezier(0.22, 0.68, 0.31, 1) both;
+    animation-delay: 30ms;
+  }
+
+  .ct-hero .hero-enter-2 {
+    animation-delay: 70ms;
+  }
+
+  .ct-hero .hero-enter-3 {
+    animation-delay: 110ms;
+  }
+}
+
+.ct-body {
+  max-width: 75rem;
+  margin-inline: auto;
+  padding: 2.25rem 0.75rem 3.5rem;
+}
+
+@media (min-width: 768px) {
+  .ct-body {
+    padding: 2.75rem 1.5rem 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ct-body {
+    padding: 3rem 2rem 5rem;
+  }
+}
+
+.ct-layout {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 960px) {
+  .ct-layout {
+    grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 1fr);
+    gap: 3.25rem;
+    align-items: start;
+  }
+}
+
+.ct-section-title {
+  font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
+  font-size: clamp(1.75rem, 3vw, 2.15rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--nl-navy);
+}
+
+.ct-privacy {
+  margin: 0.75rem 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: rgb(61 90 140 / 0.08);
+  color: var(--nl-navy);
+  font-size: 0.975rem;
+  line-height: 1.55;
+}
+
+.ct-details a,
+.ct-directions a,
+.ct-map-link a,
+.ct-embed-fallback a {
+  color: var(--nl-navy);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.ct-form-frame {
+  width: 100%;
+  padding: 0.5rem 0.4rem 0.75rem;
+  border: 1px solid rgb(26 39 68 / 0.1);
+  border-radius: 24px;
+  background: var(--nl-white);
+  box-shadow: 0 10px 28px rgb(26 39 68 / 0.05);
+}
+
+@media (min-width: 768px) {
+  .ct-form-frame {
+    padding: 1.35rem 1.25rem 1.5rem;
+  }
+}
+
+.ct-embed {
+  position: relative;
+  width: 100%;
+  min-height: 680px;
+}
+
+@media (min-width: 768px) {
+  .ct-embed {
+    min-height: 620px;
+  }
+}
+
+.ct-embed-status {
+  position: absolute;
+  inset-inline: 0.75rem;
+  top: 1rem;
+  z-index: 1;
+  font-size: 0.9375rem;
+  color: var(--nl-muted);
+  pointer-events: none;
+}
+
+.ct-embed.is-ready .ct-embed-status {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.ct-embed-frame {
+  display: block;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  min-height: 680px;
+  border: 0;
+  background: transparent;
+}
+
+@media (min-width: 768px) {
+  .ct-embed-frame {
+    min-height: 620px;
+  }
+}
+
+.ct-embed-fallback {
+  margin: 0.75rem 0 0;
+  font-size: 0.9375rem;
+}
+
+.ct-details {
+  display: grid;
+  gap: 1.15rem;
+  margin-top: 1.25rem;
+}
+
+.ct-details dt {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--nl-muted);
+}
+
+.ct-details dd {
+  margin-top: 0.3rem;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: var(--nl-ink);
+}
+
+.ct-directions {
+  margin: 1.25rem 0 1.5rem;
+  font-size: 1rem;
+}
+
+.ct-map {
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgb(26 39 68 / 0.1);
+  background: var(--nl-cream);
+  min-height: 14rem;
+}
+
+@media (min-width: 768px) {
+  .ct-map {
+    min-height: 16rem;
+  }
+}
+
+.ct-map-frame {
+  display: block;
+  width: 100%;
+  height: 14rem;
+  border: 0;
+}
+
+@media (min-width: 768px) {
+  .ct-map-frame {
+    height: 16rem;
+  }
+}
+
+.ct-map-link {
+  margin-top: 0.75rem;
+  font-size: 0.975rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ct-embed.is-ready .ct-embed-status {
+    transition: opacity 0.25s ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-hero .hero-photo,
+  .ct-hero .hero-enter,
+  .ct-embed-status {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .ct-embed.is-ready .ct-embed-status {
+    opacity: 0;
+  }
+}
+
 
