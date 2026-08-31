@@ -197,14 +197,14 @@ export default function AboutUsPage() {
                 className="object-cover object-[center_18%]"
               />
             </div>
-            <div>
+            <div className="about-au-identity">
               <h2 className="about-au-name">Dr Chi Hung Au</h2>
               <p className="about-role">Psychiatrist</p>
-              <div className="about-bio">
-                {DR_AU_PARAS.map((para) => (
-                  <p key={para}>{para}</p>
-                ))}
-              </div>
+            </div>
+            <div className="about-bio">
+              {DR_AU_PARAS.map((para) => (
+                <p key={para}>{para}</p>
+              ))}
             </div>
             <ul className="about-credentials">
               {CREDENTIALS.map((item) => (

@@ -1997,18 +1997,62 @@ h3,
 
 .about-au {
   display: grid;
-  gap: 2rem;
+  gap: 1.5rem;
+}
+
+.about-au-portrait {
+  order: 1;
+}
+
+.about-au-identity {
+  order: 2;
+}
+
+.about-credentials {
+  order: 3;
+}
+
+.about-au .about-bio {
+  order: 4;
 }
 
 @media (min-width: 768px) {
   .about-au {
     grid-template-columns: minmax(14rem, 0.85fr) minmax(0, 1.4fr);
-    gap: 2.75rem;
+    gap: 1.25rem 2.5rem;
     align-items: start;
+  }
+
+  .about-au-portrait,
+  .about-au-identity,
+  .about-au .about-bio,
+  .about-credentials {
+    order: unset;
+  }
+
+  .about-au-portrait {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: start;
+  }
+
+  .about-au-identity,
+  .about-au .about-bio {
+    grid-column: 2;
+  }
+
+  .about-au-identity {
+    grid-row: 1;
+  }
+
+  .about-au .about-bio {
+    grid-row: 2;
+    margin-top: 0;
   }
 
   .about-credentials {
     grid-column: 1 / -1;
+    grid-row: 3;
   }
 }
 
@@ -2017,9 +2061,20 @@ h3,
     grid-template-columns: minmax(0, 4fr) minmax(0, 6fr) minmax(12rem, 2.2fr);
   }
 
+  .about-au-portrait {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .about-au-identity,
+  .about-au .about-bio {
+    grid-column: 2;
+  }
+
   .about-credentials {
-    grid-column: auto;
-    padding-top: 0.25rem;
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    padding-top: 0.35rem;
   }
 }
 
