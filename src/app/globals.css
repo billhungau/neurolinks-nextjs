@@ -639,6 +639,7 @@ h3,
   .home-hero-lede {
     font-size: 1.125rem;
     line-height: 1.62;
+    max-width: 44ch;
   }
 }
 
