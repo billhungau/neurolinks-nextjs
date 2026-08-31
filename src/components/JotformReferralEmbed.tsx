@@ -1,23 +1,14 @@
 "use client";
 
-import Script from "next/script";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { JOTFORM_REFERRAL } from "@/lib/jotform-referral";
-import { MEDIA } from "@/lib/media";
 
 const initializedIframes = new Set<string>();
 
 export function JotformReferralEmbed() {
   const [iframeReady, setIframeReady] = useState(false);
-  const [scriptReady, setScriptReady] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [slow, setSlow] = useState(false);
   const failTimer = useRef<number>(0);
-
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("embed") === "unavailable") {
-      setFailed(true);
-    }
-  }, []);
 
   const initHandler = useCallback(() => {
     if (typeof window.jotformEmbedHandler !== "function") return;
@@ -29,33 +20,34 @@ export function JotformReferralEmbed() {
   }, []);
 
   useEffect(() => {
-    if (iframeReady && scriptReady) initHandler();
-  }, [iframeReady, scriptReady, initHandler]);
-
-  useEffect(() => {
-    failTimer.current = window.setTimeout(() => {
-      setFailed((current) => (iframeReady ? current : true));
-    }, 18000);
+    initHandler();
+    if (typeof window.jotformEmbedHandler === "function") return undefined;
+    const id = window.setInterval(() => {
+      if (typeof window.jotformEmbedHandler === "function") {
+        window.clearInterval(id);
+        initHandler();
+      }
+    }, 50);
     return () => {
-      window.clearTimeout(failTimer.current);
+      window.clearInterval(id);
       if (!document.getElementById(JOTFORM_REFERRAL.iframeId)) {
         initializedIframes.delete(JOTFORM_REFERRAL.iframeId);
       }
     };
+  }, [initHandler]);
+
+  useEffect(() => {
+    failTimer.current = window.setTimeout(() => {
+      setSlow((current) => (iframeReady ? current : true));
+    }, 12000);
+    return () => window.clearTimeout(failTimer.current);
   }, [iframeReady]);
 
-  if (failed && !iframeReady) {
-    return <ReferralEmbedFallback />;
-  }
-
   return (
-    <div
-      className={`ref-embed${iframeReady ? " is-ready" : ""}`}
-      aria-busy={!iframeReady}
-    >
+    <div className={`ref-embed${iframeReady ? " is-ready" : ""}`} aria-busy={!iframeReady}>
       {!iframeReady ? (
         <p className="ref-embed-status" role="status" aria-live="polite">
-          Loading the physician referral form.
+          Loading referral form…
         </p>
       ) : null}
       <iframe
@@ -67,39 +59,15 @@ export function JotformReferralEmbed() {
         loading="eager"
         referrerPolicy="strict-origin-when-cross-origin"
         onLoad={() => setIframeReady(true)}
-        onError={() => setFailed(true)}
         className="ref-embed-frame"
       />
-      <Script
-        src={JOTFORM_REFERRAL.handlerSrc}
-        strategy="afterInteractive"
-        onLoad={() => setScriptReady(true)}
-      />
-    </div>
-  );
-}
-
-function ReferralEmbedFallback() {
-  return (
-    <div className="ref-embed-fallback" role="alert">
-      <p>The online referral form could not be loaded.</p>
-      <ul>
-        <li>
-          <a
-            href={JOTFORM_REFERRAL.src}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
+      {slow && !iframeReady ? (
+        <p className="ref-embed-fallback">
+          <a href={JOTFORM_REFERRAL.src} rel="noopener noreferrer" target="_blank">
             Open the referral form directly
           </a>
-        </li>
-        <li>
-          <a href={MEDIA.referralPdf} rel="noopener noreferrer" target="_blank">
-            Download the PDF referral form
-          </a>
-        </li>
-        <li>Fax number: 250-739-5530</li>
-      </ul>
+        </p>
+      ) : null}
     </div>
   );
 }
