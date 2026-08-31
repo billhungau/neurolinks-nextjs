@@ -1,5 +1,6 @@
 "use client";
 
+import Script from "next/script";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { JOTFORM_REFERRAL } from "@/lib/jotform-referral";
 
@@ -44,9 +45,16 @@ export function JotformReferralEmbed() {
     iframe.addEventListener("load", markReady);
 
     // React onLoad can miss if the iframe finishes before hydration.
-    const alreadyLoaded = performance
+    // A cross-origin document is already present when location.href throws.
+    let alreadyLoaded = performance
       .getEntriesByType("resource")
       .some((entry) => entry.name.includes(JOTFORM_REFERRAL.formId));
+    try {
+      const href = iframe.contentWindow?.location.href ?? "";
+      if (href && href !== "about:blank") alreadyLoaded = true;
+    } catch {
+      alreadyLoaded = true;
+    }
     if (alreadyLoaded) markReady();
 
     const reserved = window.matchMedia("(min-width: 768px)").matches
@@ -74,6 +82,7 @@ export function JotformReferralEmbed() {
 
   return (
     <div className={`ref-embed${iframeReady ? " is-ready" : ""}`} aria-busy={!iframeReady}>
+      <Script src={JOTFORM_REFERRAL.handlerSrc} strategy="afterInteractive" onLoad={initHandler} />
       {!iframeReady ? (
         <p className="ref-embed-status" role="status" aria-live="polite">
           Loading referral form…
