@@ -27,7 +27,7 @@ export function SiteFooter() {
         <div className="text-sm">
           <p className="eyebrow text-[var(--nl-yellow)]">Care</p>
           <ul className="mt-3 flex flex-col gap-2">
-            {DESKTOP_NAV.filter((item) => item.href !== "/#location").map((item) => (
+            {DESKTOP_NAV.map((item) => (
               <li key={item.href}>
                 <Link className="text-white/90 underline-offset-4 hover:underline" href={item.href}>
                   {item.label}
@@ -40,9 +40,15 @@ export function SiteFooter() {
           <p className="eyebrow text-[var(--nl-yellow)]">Visit</p>
           <ul className="mt-3 flex flex-col gap-2">
             <li>
-              <Link className="text-white/90 underline-offset-4 hover:underline" href="/#location">
-                Location
-              </Link>
+              <a
+                className="text-white/90 underline-offset-4 hover:underline"
+                href={SITE.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Get directions to NeuroLinks (opens in Google Maps)"
+              >
+                Get directions
+              </a>
             </li>
             <li>
               <Link className="text-white/90 underline-offset-4 hover:underline" href="/contact/">
