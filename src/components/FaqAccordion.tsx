@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { FaqAnswerText } from "@/components/FaqAnswer";
 import type { FaqItem } from "@/content/faqs";
 
 export function FaqAccordion({
@@ -52,7 +53,11 @@ export function FaqAccordion({
               hidden={!expanded}
               className="pb-4 text-sm leading-relaxed text-slate-800"
             >
-              {expanded ? <p>{item.a}</p> : null}
+              {expanded ? (
+                <p>
+                  <FaqAnswerText answer={item.a} />
+                </p>
+              ) : null}
             </div>
           </div>
         );
@@ -63,17 +68,20 @@ export function FaqAccordion({
 
 function EditorialFaqItem({ item }: { item: FaqItem }) {
   const [open, setOpen] = useState(false);
+  const panelId = useId();
 
   return (
     <details
       className="tms-faq-item"
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
-      <summary className="tms-faq-question" aria-expanded={open}>
+      <summary className="tms-faq-question" aria-expanded={open} aria-controls={panelId}>
         <h3>{item.q}</h3>
         <span className="tms-faq-mark" aria-hidden="true" />
       </summary>
-      <p className="tms-faq-answer">{item.a}</p>
+      <p className="tms-faq-answer" id={panelId} inert={!open || undefined}>
+        <FaqAnswerText answer={item.a} />
+      </p>
     </details>
   );
 }

@@ -1,4 +1,5 @@
 import type { FaqItem } from "@/content/faqs";
+import { faqAnswerText } from "@/content/faqs";
 
 export function FaqJsonLd({ items }: { items: FaqItem[] }) {
   const data = {
@@ -7,7 +8,7 @@ export function FaqJsonLd({ items }: { items: FaqItem[] }) {
     mainEntity: items.map((item) => ({
       "@type": "Question",
       name: item.q,
-      acceptedAnswer: { "@type": "Answer", text: item.a },
+      acceptedAnswer: { "@type": "Answer", text: faqAnswerText(item.a) },
     })),
   };
   return (
