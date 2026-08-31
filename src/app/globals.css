@@ -514,6 +514,134 @@ h3,
   );
 }
 
+/**
+ * Homepage hero only. Copy sits in the photograph via a localized wash that
+ * dissolves into the image — not a rectangular panel, and not the shared
+ * .hero-scrim used by other treatment pages.
+ */
+.home-hero-copy {
+  max-width: 22.5rem;
+}
+
+.home-hero-heading {
+  max-width: 16ch;
+  font-size: clamp(2.05rem, 8.4vw, 2.7rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+  color: #fff;
+  text-shadow: 0 1px 18px rgb(7 29 52 / 0.35);
+}
+
+.home-hero-lede {
+  margin-top: 0.95rem;
+  max-width: 28ch;
+  font-size: 1rem;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: rgb(255 255 255 / 0.94);
+  text-shadow: 0 1px 14px rgb(7 29 52 / 0.4);
+}
+
+.home-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-top: 1.6rem;
+}
+
+.home-hero-actions a {
+  flex: 1 1 9.5rem;
+  white-space: nowrap;
+}
+
+#home-hero .home-hero-actions a:last-child {
+  border-color: rgb(255 255 255 / 0.88);
+}
+
+.home-hero-wash {
+  background:
+    radial-gradient(
+      ellipse 120% 70% at 18% 88%,
+      rgb(var(--nl-hero-navy) / 0.7) 0%,
+      rgb(var(--nl-hero-navy) / 0.38) 38%,
+      rgb(var(--nl-hero-navy) / 0.1) 62%,
+      transparent 78%
+    ),
+    linear-gradient(
+      to top,
+      rgb(var(--nl-hero-navy) / 0.52) 0%,
+      rgb(var(--nl-hero-navy) / 0.22) 28%,
+      rgb(var(--nl-hero-navy) / 0.06) 52%,
+      transparent 72%
+    );
+}
+
+@media (max-width: 379px) {
+  .home-hero-actions a {
+    flex: 1 1 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .home-hero-copy {
+    max-width: 34rem;
+  }
+
+  .home-hero-heading {
+    max-width: 16ch;
+    font-size: clamp(2.55rem, 4.1vw, 3.35rem);
+    line-height: 1.07;
+    letter-spacing: -0.032em;
+  }
+
+  .home-hero-lede {
+    margin-top: 1.15rem;
+    max-width: 34ch;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+
+  .home-hero-actions {
+    margin-top: 1.75rem;
+  }
+
+  .home-hero-actions a {
+    flex: 0 0 auto;
+  }
+
+  .home-hero-wash {
+    background:
+      radial-gradient(
+        ellipse 72% 90% at 16% 58%,
+        rgb(var(--nl-hero-navy) / 0.58) 0%,
+        rgb(var(--nl-hero-navy) / 0.28) 42%,
+        rgb(var(--nl-hero-navy) / 0.08) 64%,
+        transparent 78%
+      ),
+      linear-gradient(
+        90deg,
+        rgb(var(--nl-hero-navy) / 0.46) 0%,
+        rgb(var(--nl-hero-navy) / 0.22) 28%,
+        rgb(var(--nl-hero-navy) / 0.06) 46%,
+        transparent 60%
+      );
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-hero-heading {
+    font-size: clamp(3.05rem, 4vw, 4.15rem);
+    line-height: 1.06;
+  }
+
+  .home-hero-lede {
+    font-size: 1.125rem;
+    line-height: 1.62;
+  }
+}
+
 @keyframes nl-hero-photo {
   from {
     opacity: 0;

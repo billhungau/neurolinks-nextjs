@@ -24,6 +24,7 @@ export const MEDIA = {
   referralPdf: "/media/pdfs/physician_referral_form-2.pdf",
   landingHero: "/media/images/hero-treatment-modalities-CnTkU5m8.webp",
   homeHero: "/media/images/home-hero-banner.jpg",
+  homeHeroIntegrated: "/media/images/home-hero-integrated.webp",
   homeHeroMobile: "/media/images/home-hero-mobile.webp",
   /** Ketamine page hero. Treatment-room photograph; homepage keeps homeHero. */
   ketamineHero: "/media/images/ketamine-treatment-room-hero.webp",
@@ -36,28 +37,32 @@ export const MEDIA = {
   referralBanner: "/media/images/referral-banner.jpg",
 } as const;
 
-/** Homepage hero: WP media 5544 (page 1318 section ca7541c). Combined TMS + ketamine JPEG. Full 1920 URL is CDN-rewritten to WebP 5946; local file is the 1536×768 JPEG derivative (116,907 bytes, FF D8). */
+/**
+ * Homepage hero: the same TMS + ketamine photographs as WP media 5544, recomposed
+ * without the banner's navy polygon. Source JPEG remains at home-hero-banner.jpg.
+ * Regenerate both crops with `node scripts/build-home-hero-integrated.mjs`.
+ */
 export const HOME_HERO_ASSET = {
   wpId: 5544,
   wpUrl:
     "https://neurolinks.ca/wp-content/uploads/2024/06/Orange-And-Blue-Modern-Professional-Construction-Banner-Design-2.jpg",
   wpDerivativeUrl:
     "https://neurolinks.ca/wp-content/uploads/2024/06/Orange-And-Blue-Modern-Professional-Construction-Banner-Design-2-1536x768.jpg",
-  local: "/media/images/home-hero-banner.jpg",
-  width: 1536,
-  height: 768,
+  sourceLocal: "/media/images/home-hero-banner.jpg",
+  local: "/media/images/home-hero-integrated.webp",
+  width: 1920,
+  height: 900,
   restAlt: "",
 } as const;
 
 /**
- * Portrait art direction of the same photograph for the mobile hero: the 2:1
- * diptych cropped to a phone viewport keeps only its centre seam, losing both
- * subjects. Regenerate with `node scripts/build-home-hero-mobile.mjs`.
+ * Portrait art direction of the same two photographs. A landscape crop of the
+ * diptych would keep only the centre seam. Regenerate with the integrated script.
  */
 export const HOME_HERO_MOBILE_ASSET = {
   local: "/media/images/home-hero-mobile.webp",
   width: 1080,
-  height: 1560,
+  height: 1600,
   source: HOME_HERO_ASSET.wpUrl,
 } as const;
 
