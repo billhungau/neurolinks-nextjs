@@ -12,6 +12,7 @@ function overlayHeroId(pathname: string) {
   const path = pathname !== "/" && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
   if (path === "/") return "home-hero";
   if (path === "/about-tms-treatment-on-psychiatric-illness") return "tms-hero";
+  if (path === "/ketamine-treatment-resistant-depression-nanaimo") return "ket-hero";
   return null;
 }
 
