@@ -163,12 +163,13 @@ h3,
  * boundary — is what makes the copy readable.
  */
 .hero-top-scrim {
-  height: 104px;
+  height: 108px;
   background: linear-gradient(
     to bottom,
-    rgb(var(--nl-hero-navy) / 0.74) 0%,
-    rgb(var(--nl-hero-navy) / 0.4) 46%,
-    rgb(var(--nl-hero-navy) / 0.1) 78%,
+    rgb(var(--nl-hero-navy) / 0.84) 0%,
+    rgb(var(--nl-hero-navy) / 0.52) 38%,
+    rgb(var(--nl-hero-navy) / 0.16) 68%,
+    rgb(var(--nl-hero-navy) / 0.04) 86%,
     transparent 100%
   );
 }
