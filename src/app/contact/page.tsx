@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { JotformContactEmbed } from "@/components/JotformContactEmbed";
 import { SiteChrome } from "@/components/SiteChrome";
 import { IMG_SIZES } from "@/lib/image-sizes";
@@ -43,14 +42,6 @@ export default function ContactPage() {
             <h2 id="contact-form-heading" className="ct-section-title">
               Send a message
             </h2>
-            <p className="ct-privacy">
-              For general inquiries only. Please do not include personal health information, referral
-              details or urgent medical concerns.
-            </p>
-            <p className="ct-referral">
-              Healthcare professionals:{" "}
-              <Link href="/physician-referral/">Physician Referral Form</Link>
-            </p>
             <div className="ct-form-frame">
               <JotformContactEmbed />
             </div>

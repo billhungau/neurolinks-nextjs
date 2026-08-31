@@ -2637,27 +2637,8 @@ h3,
   color: var(--nl-navy);
 }
 
-.ct-privacy {
-  margin: 0.55rem 0 0.7rem;
-  padding: 0.65rem 0.85rem;
-  border-radius: 10px;
-  background: rgb(61 90 140 / 0.08);
-  color: var(--nl-navy);
-  font-size: 0.9375rem;
-  line-height: 1.5;
-}
-
-.ct-referral {
-  margin: 0 0 0.95rem;
-  color: var(--nl-navy);
-  font-size: 0.9375rem;
-  line-height: 1.45;
-}
-
-.ct-referral a {
-  font-weight: 600;
-  color: var(--nl-navy);
-  text-underline-offset: 3px;
+.ct-form-col .ct-section-title {
+  margin-bottom: 0.9rem;
 }
 
 .ct-details a,
