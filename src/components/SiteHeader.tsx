@@ -8,9 +8,17 @@ import { DESKTOP_NAV, NAV_ITEMS } from "@/lib/nav";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { SITE } from "@/lib/site";
 
+function overlayHeroId(pathname: string) {
+  const path = pathname !== "/" && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  if (path === "/") return "home-hero";
+  if (path === "/about-tms-treatment-on-psychiatric-illness") return "tms-hero";
+  return null;
+}
+
 export function SiteHeader() {
   const pathname = usePathname();
-  const overlay = pathname === "/";
+  const heroId = overlayHeroId(pathname);
+  const overlay = Boolean(heroId);
   const [heroGone, setHeroGone] = useState(false);
   const [open, setOpen] = useState(false);
   const barRef = useRef<HTMLElement>(null);
@@ -20,9 +28,9 @@ export function SiteHeader() {
   const solid = !overlay || heroGone;
 
   useEffect(() => {
-    if (!overlay) return undefined;
+    if (!heroId) return undefined;
 
-    const hero = document.getElementById("home-hero");
+    const hero = document.getElementById(heroId);
     if (!hero) return undefined;
 
     const update = () => {
@@ -40,7 +48,7 @@ export function SiteHeader() {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [overlay]);
+  }, [heroId, overlay]);
 
   useEffect(() => {
     if (!open) return undefined;
