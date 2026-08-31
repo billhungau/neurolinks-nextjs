@@ -25,7 +25,7 @@ export function JotformReferralEmbed() {
       <p className="form-embed-status" role="status" aria-live="polite">
         {iframeReady ? "Referral form loaded." : STATUS}
       </p>
-      <FormEmbedSkeleton variant="referral" />
+      <FormEmbedSkeleton />
       <iframe
         id={JOTFORM_REFERRAL.iframeId}
         title={JOTFORM_REFERRAL.title}

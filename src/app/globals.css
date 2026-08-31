@@ -3039,7 +3039,7 @@ html.js .form-embed:not(.is-ready) .form-embed-frame {
 }
 
 /**
- * Contact page. Shallow reception banner, then Jotform + clinic details.
+ * Contact page. Shallow reception banner, then native form + clinic details.
  * Iframe internals are cross-origin and are not styled from here.
  */
 .ct-hero {
@@ -3177,39 +3177,199 @@ html.js .form-embed:not(.is-ready) .form-embed-frame {
 }
 
 .ct-form-frame {
+  position: relative;
   width: 100%;
   margin-top: 0.9rem;
-  padding: 0.5rem 0.4rem 0.75rem;
+  padding: 1.15rem 1rem 1.25rem;
   border: 1px solid var(--nl-border);
   border-radius: var(--nl-radius-lg);
-  background: var(--nl-surface);
-  box-shadow: none;
+  background: var(--nl-white);
+  box-shadow: 0 8px 24px rgb(26 39 68 / 0.05);
 }
 
 @media (min-width: 768px) {
   .ct-form-frame {
-    padding: 1.35rem 1.25rem 1.5rem;
+    padding: 1.4rem 1.35rem 1.5rem;
   }
 }
 
-.ct-embed {
-  min-height: 680px;
+.ct-native {
+  display: grid;
+  gap: 0.95rem;
 }
 
-@media (min-width: 768px) {
-  .ct-embed {
-    min-height: 620px;
+.ct-privacy,
+.ct-referral-note {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--nl-muted);
+}
+
+.ct-referral-note a {
+  color: var(--nl-navy);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.ct-form {
+  position: relative;
+  display: grid;
+  gap: 0.95rem;
+}
+
+.ct-form-row {
+  display: grid;
+  gap: 0.95rem;
+}
+
+@media (min-width: 640px) {
+  .ct-form-row {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-.ct-embed-frame {
-  min-height: 680px;
+.ct-field {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
 }
 
-@media (min-width: 768px) {
-  .ct-embed-frame {
-    min-height: 620px;
-  }
+.ct-field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--nl-navy);
+}
+
+.ct-req {
+  color: var(--nl-error);
+}
+
+.ct-field input,
+.ct-field textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--nl-border);
+  border-radius: var(--nl-radius);
+  background: var(--nl-white);
+  color: var(--nl-ink);
+  font-size: 1rem;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.ct-field textarea {
+  min-height: 10rem;
+  resize: vertical;
+}
+
+.ct-field input:hover,
+.ct-field textarea:hover {
+  border-color: rgb(26 39 68 / 0.28);
+}
+
+.ct-field input:focus-visible,
+.ct-field textarea:focus-visible {
+  outline: 2px solid var(--nl-yellow);
+  outline-offset: 2px;
+  border-color: var(--nl-navy);
+}
+
+.ct-field.is-invalid input,
+.ct-field.is-invalid textarea {
+  border-color: var(--nl-error);
+  box-shadow: inset 0 0 0 1px var(--nl-error);
+}
+
+.ct-field-error {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--nl-error);
+}
+
+.ct-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.15rem;
+}
+
+.ct-submit {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.35rem;
+  border: 0;
+  border-radius: var(--nl-radius);
+  background: var(--nl-navy);
+  color: white;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ct-submit:hover:not(:disabled) {
+  background: var(--nl-navy-deep);
+}
+
+.ct-submit:focus-visible {
+  outline: 2px solid var(--nl-yellow);
+  outline-offset: 3px;
+}
+
+.ct-submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.ct-form-success,
+.ct-form-error-banner {
+  margin: 0;
+  padding: 0.8rem 0.9rem;
+  border-radius: var(--nl-radius);
+  font-size: 0.975rem;
+  line-height: 1.5;
+}
+
+.ct-form-success {
+  border: 1px solid color-mix(in srgb, var(--nl-success) 28%, var(--nl-border));
+  background: color-mix(in srgb, var(--nl-success) 8%, var(--nl-white));
+  color: var(--nl-navy);
+}
+
+.ct-form-success:focus-visible {
+  outline: 2px solid var(--nl-yellow);
+  outline-offset: 3px;
+}
+
+.ct-form-error-banner {
+  border: 1px solid color-mix(in srgb, var(--nl-error) 28%, var(--nl-border));
+  background: color-mix(in srgb, var(--nl-error) 7%, var(--nl-white));
+  color: var(--nl-ink);
+}
+
+.ct-form-error-banner a {
+  color: var(--nl-navy);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.ct-hp {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  pointer-events: none;
 }
 
 .ct-details {
