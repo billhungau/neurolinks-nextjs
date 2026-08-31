@@ -2316,6 +2316,7 @@ h3,
 
 .ref-embed.is-ready .ref-embed-status {
   opacity: 0;
+  visibility: hidden;
 }
 
 .ref-embed-frame {
