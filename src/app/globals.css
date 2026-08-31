@@ -2257,11 +2257,14 @@ h3,
 
 .ref-section.tms-section {
   padding-block: 3.5rem;
+  /* html already applies scroll-padding-top for the sticky header. */
+  scroll-margin-top: 0.25rem;
 }
 
 @media (min-width: 768px) {
   .ref-section.tms-section {
     padding-block: 5.25rem;
+    scroll-margin-top: 0.25rem;
   }
 }
 

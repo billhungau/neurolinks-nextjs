@@ -13,6 +13,12 @@ export function JotformReferralEmbed() {
   const [failed, setFailed] = useState(false);
   const failTimer = useRef<number>(0);
 
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("embed") === "unavailable") {
+      setFailed(true);
+    }
+  }, []);
+
   const initHandler = useCallback(() => {
     if (typeof window.jotformEmbedHandler !== "function") return;
     const iframe = document.getElementById(JOTFORM_REFERRAL.iframeId);
