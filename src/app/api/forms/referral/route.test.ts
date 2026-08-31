@@ -263,6 +263,16 @@ test("honeypot does not forward to Jotform and still returns success", async () 
   assert.equal(JSON.stringify(json).includes(VALID_BODY.phn), false);
 });
 
+test("malformed JSON returns 400 even when configuration is missing", async () => {
+  delete process.env.JOTFORM_API_KEY;
+  delete process.env.JOTFORM_REFERRAL_FORM_ID;
+  globalThis.fetch = async () => {
+    throw new Error("fetch should not be called");
+  };
+  const response = await handleReferralPost(request("{"));
+  assert.equal(response.status, 400);
+});
+
 test("missing environment variables return 503", async () => {
   delete process.env.JOTFORM_API_KEY;
   delete process.env.JOTFORM_REFERRAL_FORM_ID;

@@ -57,11 +57,6 @@ function isAbortError(error: unknown) {
 export async function handleReferralPost(request: Request, fetcher?: typeof fetch) {
   const send = fetcher ?? globalThis.fetch;
   const requestId = newReferralRequestId();
-  const config = resolveReferralJotformConfig();
-  if (!config.ok) {
-    logReferralDiagnostic("referral_config_unavailable", { requestId });
-    return genericError(503);
-  }
 
   if (!originIsAllowed(request)) {
     return genericError(403);
@@ -104,6 +99,12 @@ export async function handleReferralPost(request: Request, fetcher?: typeof fetc
 
   if (parsed.honeypot) {
     return json({ ok: true, success: true, message: REFERRAL_SUCCESS_MESSAGE }, 200);
+  }
+
+  const config = resolveReferralJotformConfig();
+  if (!config.ok) {
+    logReferralDiagnostic("referral_config_unavailable", { requestId });
+    return genericError(503);
   }
 
   const controller = new AbortController();
