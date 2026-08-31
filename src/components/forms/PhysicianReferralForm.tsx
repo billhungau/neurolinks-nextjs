@@ -13,6 +13,7 @@ import {
   EMPTY_REFERRAL_FIELDS,
   HONEYPOT_FIELD,
   KETAMINE_CONTRAINDICATIONS,
+  JOTFORM_PHONE_MASK_HINT,
   REFERRAL_LIMITS,
   REFERRAL_PDF_URL,
   REFERRAL_SUCCESS_MESSAGE,
@@ -160,9 +161,9 @@ export function PhysicianReferralForm() {
         body: JSON.stringify({ ...trimmed, [HONEYPOT_FIELD]: honeypot }),
       });
       const data = (await response.json().catch(() => null)) as
-        | { success?: boolean; message?: string }
+        | { ok?: boolean; success?: boolean; message?: string; error?: string }
         | null;
-      if (response.ok && data?.success) {
+      if (response.ok && (data?.ok === true || data?.success === true)) {
         setValues(EMPTY_REFERRAL_FIELDS);
         setHoneypot("");
         setStatus("success");
@@ -281,6 +282,7 @@ export function PhysicianReferralForm() {
               maxLength={REFERRAL_LIMITS.patientPhone}
               value={values.patientPhone}
               error={errors.patientPhone}
+              hint={JOTFORM_PHONE_MASK_HINT}
               inputRef={patientPhoneRef}
               disabled={submitting}
               autoComplete="off"
@@ -327,6 +329,7 @@ export function PhysicianReferralForm() {
               maxLength={REFERRAL_LIMITS.referrerPhone}
               value={values.referrerPhone}
               error={errors.referrerPhone}
+              hint={JOTFORM_PHONE_MASK_HINT}
               inputRef={referrerPhoneRef}
               disabled={submitting}
               autoComplete="off"

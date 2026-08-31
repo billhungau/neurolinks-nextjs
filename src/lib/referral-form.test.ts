@@ -12,8 +12,12 @@ import {
   REFERRAL_LIMITS,
   TMS_CONTRAINDICATIONS,
   TREATMENTS,
+  formatJotformMaskedPhone,
+  isJotformReferralSuccessPayload,
   jotformReferralSubmissionBody,
   parseReferralPayload,
+  resolveReferralJotformConfig,
+  sanitizeJotformResponseCode,
   trimReferralScalars,
   validateReferralFields,
 } from "./referral-form.ts";
@@ -43,13 +47,13 @@ test("valid submission maps every scalar field exactly", () => {
   assert.equal(parsed.ok, true);
   if (!parsed.ok) return;
   const body = jotformReferralSubmissionBody(parsed.fields);
-  assert.equal(body.get("submission[3_first]"), "Alex");
-  assert.equal(body.get("submission[3_last]"), "Nguyen-Smith");
+  assert.equal(body.get("submission[3][first]"), "Alex");
+  assert.equal(body.get("submission[3][last]"), "Nguyen-Smith");
   assert.equal(body.get("submission[23]"), "9876 543 210");
-  assert.equal(body.get("submission[5_full]"), "(250) 555-0199");
+  assert.equal(body.get("submission[5][full]"), "(250) 555-0199");
   assert.equal(body.get("submission[21]"), "Dr. Pat Lee");
   assert.equal(body.get("submission[10]"), "12345");
-  assert.equal(body.get("submission[11_full]"), "250-555-0100");
+  assert.equal(body.get("submission[11][full]"), "(250) 555-0100");
   assert.equal(body.get("submission[12]"), "250-739-5530");
   assert.equal(body.get("submission[22]"), "Previous SSRI trials without adequate response.");
   assert.equal(body.get("submission[19]"), "Please contact the clinic nurse first.");
@@ -164,6 +168,17 @@ test("PHN separators are preserved without aggressive normalization", () => {
   assert.equal(jotformReferralSubmissionBody(parsed.fields).get("submission[23]"), "9876-543-210");
 });
 
+test("phone values are encoded to the Jotform fill-mask format", () => {
+  assert.equal(formatJotformMaskedPhone("2505550199"), "(250) 555-0199");
+  assert.equal(formatJotformMaskedPhone("250-555-0199"), "(250) 555-0199");
+  assert.equal(formatJotformMaskedPhone("1 (250) 555-0199"), "(250) 555-0199");
+  assert.equal(formatJotformMaskedPhone("(250) 555-0199"), "(250) 555-0199");
+  const parsed = parseReferralPayload({ ...valid, patientPhone: "2505550199" });
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+  assert.equal(jotformReferralSubmissionBody(parsed.fields).get("submission[5][full]"), "(250) 555-0199");
+});
+
 test("fax is not treated as an email field", () => {
   const parsed = parseReferralPayload({ ...valid, faxNumber: "250-739-5530" });
   assert.equal(parsed.ok, true);
@@ -185,7 +200,7 @@ test("optional referrer fields may be omitted", () => {
   if (!parsed.ok) return;
   const keys = [...jotformReferralSubmissionBody(parsed.fields).keys()];
   assert.equal(keys.includes("submission[10]"), false);
-  assert.equal(keys.includes("submission[11_full]"), false);
+  assert.equal(keys.includes("submission[11][full]"), false);
   assert.equal(keys.includes("submission[12]"), false);
   assert.equal(keys.includes("submission[22]"), false);
   assert.equal(keys.includes("submission[19]"), false);
@@ -243,6 +258,52 @@ test("allowlists match the live Jotform choices", () => {
     "Severe liver disease",
     "Elevated intracranial/intraocular pressure",
   ]);
+});
+
+test("success payload accepts string or numeric Jotform submission IDs", () => {
+  assert.equal(
+    isJotformReferralSuccessPayload({ responseCode: 200, content: { submissionID: "abc" } }),
+    true,
+  );
+  assert.equal(
+    isJotformReferralSuccessPayload({ responseCode: "200", content: { submissionID: 123456 } }),
+    true,
+  );
+  assert.equal(
+    isJotformReferralSuccessPayload({ responseCode: 200, content: { submissionID: 0 } }),
+    false,
+  );
+});
+
+test("sanitized Jotform codes never copy message text", () => {
+  assert.equal(sanitizeJotformResponseCode({ responseCode: 400, message: "PHN invalid" }), 400);
+  assert.equal(sanitizeJotformResponseCode({ responseCode: "401" }), "401");
+  assert.equal(sanitizeJotformResponseCode({ responseCode: "bad key xyz" }), undefined);
+});
+
+test("config resolver trims values and rejects /form/ in the API base", () => {
+  const original = {
+    JOTFORM_API_KEY: process.env.JOTFORM_API_KEY,
+    JOTFORM_REFERRAL_FORM_ID: process.env.JOTFORM_REFERRAL_FORM_ID,
+    JOTFORM_REFERRAL_API_BASE_URL: process.env.JOTFORM_REFERRAL_API_BASE_URL,
+  };
+  process.env.JOTFORM_API_KEY = "  server-key  ";
+  process.env.JOTFORM_REFERRAL_FORM_ID = "  262418577500054  ";
+  delete process.env.JOTFORM_REFERRAL_API_BASE_URL;
+  const ok = resolveReferralJotformConfig();
+  assert.equal(ok.ok, true);
+  if (ok.ok) {
+    assert.equal(ok.formId, "262418577500054");
+    assert.equal(ok.apiHost, "api.jotform.com");
+    assert.equal(ok.apiKey, "server-key");
+  }
+  process.env.JOTFORM_REFERRAL_API_BASE_URL = "https://api.jotform.com/form/262418577500054";
+  const bad = resolveReferralJotformConfig();
+  assert.equal(bad.ok, false);
+  for (const [key, value] of Object.entries(original)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
 });
 
 test("client form source never references secrets, storage or analytics", () => {

@@ -5,7 +5,6 @@ import { JOTFORM_SUBMIT_TIMEOUT_MS } from "../../../../lib/contact-form.ts";
 import {
   REFERRAL_ERROR_MESSAGE,
   REFERRAL_SUCCESS_MESSAGE,
-  REFERRAL_UPSTREAM_LOG,
 } from "../../../../lib/referral-form.ts";
 
 const VALID_BODY = {
@@ -95,7 +94,7 @@ test("valid submission posts URL-encoded Jotform fields with APIKEY header only"
   const json = await response.json();
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("Cache-Control"), "no-store");
-  assert.deepEqual(json, { success: true, message: REFERRAL_SUCCESS_MESSAGE });
+  assert.deepEqual(json, { ok: true, success: true, message: REFERRAL_SUCCESS_MESSAGE });
   assert.equal(json.message.includes(VALID_BODY.phn), false);
   assert.equal(calls.length, 1);
   assert.equal(calls[0].url, "https://api.jotform.com/form/262418577500054/submissions");
@@ -107,13 +106,13 @@ test("valid submission posts URL-encoded Jotform fields with APIKEY header only"
   const body = String(calls[0].init.body);
   assert.equal(body.includes("test-server-key"), false);
   const params = new URLSearchParams(body);
-  assert.equal(params.get("submission[3_first]"), "Alex");
-  assert.equal(params.get("submission[3_last]"), "Nguyen");
+  assert.equal(params.get("submission[3][first]"), "Alex");
+  assert.equal(params.get("submission[3][last]"), "Nguyen");
   assert.equal(params.get("submission[23]"), "9876543210");
-  assert.equal(params.get("submission[5_full]"), "250-555-0199");
+  assert.equal(params.get("submission[5][full]"), "(250) 555-0199");
   assert.equal(params.get("submission[21]"), "Dr. Pat Lee");
   assert.equal(params.get("submission[10]"), "12345");
-  assert.equal(params.get("submission[11_full]"), "250-555-0100");
+  assert.equal(params.get("submission[11][full]"), "(250) 555-0100");
   assert.equal(params.get("submission[12]"), "250-739-5530");
   assert.deepEqual(params.getAll("submission[15][]"), VALID_BODY.diagnoses);
   assert.equal(params.get("submission[22]"), "Fictional test details only.");
@@ -146,6 +145,18 @@ test("unapproved API base URL returns a controlled 503", async () => {
   assert.equal(response.status, 503);
 });
 
+test("malformed JSON returns 400 without forwarding", async () => {
+  setEnv();
+  globalThis.fetch = async () => {
+    throw new Error("fetch should not be called");
+  };
+  const response = await handleReferralPost(request("{", { headers: { "content-type": "application/json" } }));
+  assert.equal(response.status, 400);
+  const json = await response.json();
+  assert.equal(json.ok, false);
+  assert.equal(json.error, REFERRAL_ERROR_MESSAGE);
+});
+
 test("missing required fields return 400 without forwarding", async () => {
   setEnv();
   globalThis.fetch = async () => {
@@ -154,8 +165,9 @@ test("missing required fields return 400 without forwarding", async () => {
   const response = await handleReferralPost(request({ ...VALID_BODY, phn: "" }));
   assert.equal(response.status, 400);
   const json = await response.json();
-  assert.equal(json.success, false);
-  assert.equal(json.message, REFERRAL_ERROR_MESSAGE);
+  assert.equal(json.ok, false);
+  assert.equal(json.error, REFERRAL_ERROR_MESSAGE);
+  assert.equal(json.success, undefined);
 });
 
 test("diagnosis and treatment groups require at least one value", async () => {
@@ -223,7 +235,16 @@ test("PHN is never included in logs or returned responses", async () => {
   assert.equal(text.includes("sub_ref_1"), false);
   assert.equal(logs.join("\n").includes(VALID_BODY.phn), false);
   assert.equal(logs.join("\n").includes(VALID_BODY.clinicalDetails), false);
-  assert.deepEqual(logs, [REFERRAL_UPSTREAM_LOG]);
+  assert.equal(logs.join("\n").includes(VALID_BODY.patientFirstName), false);
+  assert.equal(logs.length, 1);
+  const logged = JSON.parse(logs[0]) as Record<string, unknown>;
+  assert.equal(logged.event, "referral_upstream_rejected");
+  assert.equal(logged.jotformStatus, 500);
+  assert.equal(logged.jotformCode, 500);
+  assert.equal(logged.formId, "262418577500054");
+  assert.equal(logged.apiHost, "api.jotform.com");
+  assert.equal(typeof logged.requestId, "string");
+  assert.equal("message" in logged, false);
 });
 
 test("honeypot does not forward to Jotform and still returns success", async () => {
@@ -236,6 +257,7 @@ test("honeypot does not forward to Jotform and still returns success", async () 
   const response = await handleReferralPost(request({ ...VALID_BODY, website: "https://spam.test" }));
   const json = await response.json();
   assert.equal(response.status, 200);
+  assert.equal(json.ok, true);
   assert.equal(json.success, true);
   assert.equal(called, 0);
   assert.equal(JSON.stringify(json).includes(VALID_BODY.phn), false);
@@ -250,8 +272,31 @@ test("missing environment variables return 503", async () => {
   const response = await handleReferralPost(request(VALID_BODY));
   assert.equal(response.status, 503);
   const json = await response.json();
-  assert.equal(json.success, false);
-  assert.equal(json.message, REFERRAL_ERROR_MESSAGE);
+  assert.equal(json.ok, false);
+  assert.equal(json.error, REFERRAL_ERROR_MESSAGE);
+});
+
+test("base URL containing /form/ returns 503 without forwarding", async () => {
+  setEnv();
+  process.env.JOTFORM_REFERRAL_API_BASE_URL = "https://api.jotform.com/form/262418577500054";
+  globalThis.fetch = async () => {
+    throw new Error("fetch should not be called");
+  };
+  const response = await handleReferralPost(request(VALID_BODY));
+  assert.equal(response.status, 503);
+});
+
+test("numeric Jotform submission IDs are treated as success", async () => {
+  setEnv();
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ responseCode: 200, content: { submissionID: 987654321 } }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  const response = await handleReferralPost(request(VALID_BODY));
+  const json = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(json.ok, true);
 });
 
 test("Jotform failure returns a generic response without raw upstream details", async () => {
@@ -267,9 +312,10 @@ test("Jotform failure returns a generic response without raw upstream details", 
   assert.equal(text.includes("Invalid API Key"), false);
   assert.equal(text.includes("test-server-key"), false);
   assert.equal(text.includes(VALID_BODY.phn), false);
-  const json = JSON.parse(text) as { success: boolean; message: string };
-  assert.equal(json.success, false);
-  assert.equal(json.message, REFERRAL_ERROR_MESSAGE);
+  const json = JSON.parse(text) as { ok: boolean; error: string; success?: boolean };
+  assert.equal(json.ok, false);
+  assert.equal(json.error, REFERRAL_ERROR_MESSAGE);
+  assert.equal(json.success, undefined);
 });
 
 test("upstream timeout does not retry", async () => {
@@ -291,7 +337,7 @@ test("upstream timeout does not retry", async () => {
   };
 
   const response = await handleReferralPost(request(VALID_BODY));
-  assert.equal(response.status, 502);
+  assert.equal(response.status, 504);
   assert.equal(called, 1);
   assert.ok(JOTFORM_SUBMIT_TIMEOUT_MS >= 10_000);
 });
