@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ClinicMap } from "@/components/ClinicMap";
 import { JotformContactEmbed } from "@/components/JotformContactEmbed";
 import { SiteChrome } from "@/components/SiteChrome";
 import { IMG_SIZES } from "@/lib/image-sizes";
@@ -91,15 +92,7 @@ export default function ContactPage() {
         </div>
 
         <div className="ct-map-block">
-          <div className="ct-map">
-            <iframe
-              title="NeuroLinks at 202-6010 Brickyard Road, Nanaimo, BC"
-              className="ct-map-frame"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              src="https://maps.google.com/maps?q=6010%20Brickyard%20Road%2C%20Nanaimo%2C%20BC&t=m&z=15&output=embed&iwloc=near"
-            />
-          </div>
+          <ClinicMap className="map-embed--contact" />
           <p className="ct-map-link">
             <a href={SITE.mapsUrl} rel="noopener noreferrer" target="_blank">
               Open in Google Maps

@@ -39,7 +39,7 @@ export default function ReferralPage() {
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 mx-auto flex min-h-[clamp(250px,32svh,290px)] max-w-6xl flex-col justify-center px-4 pt-16 pb-8 md:min-h-[clamp(280px,28svh,320px)] md:px-6 md:pb-10 lg:px-8">
+        <div className="nl-wrap relative z-10 flex min-h-[clamp(250px,32svh,290px)] flex-col justify-center pt-16 pb-8 md:min-h-[clamp(280px,28svh,320px)] md:pb-10">
           <div className="hero-intro max-w-[40rem]">
             <p className="hero-enter eyebrow text-white/80">For referring clinicians</p>
             <h1 className="hero-enter mt-3 font-serif text-[clamp(2.4rem,8vw,2.75rem)] font-semibold leading-[1.05] text-white md:text-[clamp(3.25rem,5vw,3.75rem)]">

@@ -154,7 +154,7 @@ export default function KetaminePage() {
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 mx-auto flex min-h-[clamp(500px,64svh,570px)] max-w-6xl flex-col justify-end px-5 pt-20 pb-8 md:justify-center md:px-6 md:py-16 lg:px-8">
+        <div className="nl-wrap relative z-10 flex min-h-[clamp(500px,64svh,570px)] flex-col justify-end pt-20 pb-8 md:justify-center md:py-16">
           <div className="hero-intro max-w-[36rem]">
             <p className="hero-enter eyebrow text-white/80">Medically supervised ketamine treatment</p>
             <h1 className="hero-enter mt-3 font-serif text-[clamp(2.5rem,7vw,4.25rem)] font-semibold leading-[1.02] text-white">

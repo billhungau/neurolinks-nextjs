@@ -9,7 +9,7 @@ type Props = {
 
 export function ButtonLink({ href, children, variant = "primary", className: extra = "" }: Props) {
   const base =
-    "inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-6 py-2.5 text-sm font-semibold tracking-wide no-underline transition-colors";
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--nl-radius)] px-6 py-2.5 text-sm font-semibold tracking-wide no-underline transition-colors duration-[var(--nl-duration)] ease-[var(--nl-ease)]";
   const styles =
     variant === "accent"
       ? "bg-[var(--nl-yellow)] text-[var(--nl-navy)] hover:bg-[var(--nl-yellow-hover)]"

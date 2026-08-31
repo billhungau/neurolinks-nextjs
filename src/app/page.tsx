@@ -1,10 +1,12 @@
 import Image, { getImageProps } from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
+import { ClinicMap } from "@/components/ClinicMap";
 import { CtaBand } from "@/components/CtaBand";
 import { Eyebrow } from "@/components/Eyebrow";
 import { TreatmentBenefits } from "@/components/TreatmentBenefits";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
+import { TextLink } from "@/components/TextLink";
 import { HOME_HERO_ASSET, HOME_HERO_MOBILE_ASSET, MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { pageMetadata } from "@/lib/seo";
@@ -41,7 +43,7 @@ const PATHWAY = [
   {
     index: "02",
     title: "Psychiatric assessment",
-    body: "A comprehensive evaluation, covered by MSP, reviews your situation and possible options. A psychiatrist-led assessment reviews your history and explores options, including TMS and ketamine. This evaluation is completely covered by MSP.",
+    body: "A psychiatrist reviews your diagnosis, treatment history, medical factors and goals. The assessment is covered by MSP.",
   },
   {
     index: "03",
@@ -115,7 +117,7 @@ export default function HomePage() {
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 mx-auto flex min-h-[clamp(540px,72svh,610px)] max-w-6xl flex-col justify-end px-5 pt-20 pb-8 md:min-h-0 md:justify-center md:px-4 md:py-10 lg:min-h-[clamp(540px,72vh,640px)] lg:py-16">
+        <div className="nl-wrap relative z-10 flex min-h-[clamp(540px,72svh,610px)] flex-col justify-end pt-20 pb-8 md:min-h-0 md:justify-center md:py-10 lg:min-h-[clamp(520px,64vh,600px)] lg:py-16">
           <div className="hero-intro max-w-[45rem]">
             {/* The mobile floor is low enough to keep the three-line break at 320px. */}
             <h1 className="hero-enter max-w-[16ch] font-serif text-[clamp(2.15rem,10.5vw,4rem)] font-semibold leading-[1.02] text-white md:leading-[1.04] lg:text-[clamp(3.5rem,5.3vw,5rem)] lg:leading-[1.02]">
@@ -144,8 +146,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[var(--nl-cream)] px-4 py-16 md:py-[4.5rem]">
-        <div className="mx-auto max-w-6xl">
+      <section className="nl-section bg-[var(--nl-cream)]">
+        <div className="nl-wrap">
           <Reveal>
             <Eyebrow>Treatment options</Eyebrow>
             <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
@@ -162,7 +164,7 @@ export default function HomePage() {
           </Reveal>
           <div className="mt-10 grid gap-8 lg:grid-cols-2">
             <Reveal>
-              <article className="group bg-white">
+              <article className="tx-feature group">
                 <div className="img-frame relative aspect-[16/10]">
                   <Image
                     src={MEDIA.tmsMachine}
@@ -172,27 +174,25 @@ export default function HomePage() {
                     className="object-cover"
                   />
                 </div>
-                <div className="p-6 md:p-8">
+                <div className="tx-feature-copy">
                   <Eyebrow>01 · TMS</Eyebrow>
                   <h3 className="mt-3 font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.85rem]">
                     Transcranial Magnetic Stimulation
                   </h3>
                   <p className="mt-4 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
-                    Transcranial magnetic stimulation is an FDA-approved non-invasive neuromodulation
-                    therapy for treatment-resistant depression, obsessive-compulsive disorder, and
-                    post-traumatic stress disorder. TMS is covered by Veterans Affair Canada and
-                    certain worker compensation programs.
+                    TMS is a non-invasive neuromodulation treatment with established evidence for
+                    depression and certain other psychiatric conditions. Suitability depends on the
+                    diagnosis, treatment history and protocol being considered. TMS is covered by
+                    Veterans Affair Canada and certain worker compensation programs.
                   </p>
-                  <div className="mt-6">
-                    <ButtonLink href="/about-tms-treatment-on-psychiatric-illness/">
-                      How TMS transforms mental illness
-                    </ButtonLink>
-                  </div>
+                  <TextLink href="/about-tms-treatment-on-psychiatric-illness/">
+                    How TMS transforms mental illness
+                  </TextLink>
                 </div>
               </article>
             </Reveal>
             <Reveal delayMs={80}>
-              <article className="group bg-white">
+              <article className="tx-feature group">
                 <div className="img-frame relative aspect-[16/10]">
                   <Image
                     src={MEDIA.reception}
@@ -202,7 +202,7 @@ export default function HomePage() {
                     className="object-cover"
                   />
                 </div>
-                <div className="p-6 md:p-8">
+                <div className="tx-feature-copy">
                   <Eyebrow>02 · Ketamine</Eyebrow>
                   <h3 className="mt-3 font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.85rem]">
                     Ketamine therapy
@@ -212,30 +212,25 @@ export default function HomePage() {
                     subcutaneous injections. Its rapid onset of action distinguishes it from
                     traditional antidepressants, often alleviating symptoms within hours or days.
                   </p>
-                  <div className="mt-6">
-                    <ButtonLink
-                      href="/ketamine-treatment-resistant-depression-nanaimo/"
-                      variant="ghost"
-                    >
-                      How Ketamine uplifts mental wellbeing
-                    </ButtonLink>
-                  </div>
+                  <TextLink href="/ketamine-treatment-resistant-depression-nanaimo/">
+                    How Ketamine uplifts mental wellbeing
+                  </TextLink>
                 </div>
               </article>
             </Reveal>
           </div>
           <Reveal>
             <div className="mt-10">
-              <ButtonLink href="/services-psychiatric-tms-ketamine-treatment/">
+              <TextLink href="/services-psychiatric-tms-ketamine-treatment/">
                 More about our service
-              </ButtonLink>
+              </TextLink>
             </div>
           </Reveal>
         </div>
       </section>
 
-      <section className="bg-[var(--nl-navy)] px-4 py-16 text-white md:py-[4.5rem]">
-        <div className="mx-auto max-w-6xl">
+      <section className="nl-section bg-[var(--nl-navy)] text-white">
+        <div className="nl-wrap">
           <Reveal>
             <Eyebrow className="text-[var(--nl-yellow)]">Patient pathway</Eyebrow>
             <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight">
@@ -264,35 +259,37 @@ export default function HomePage() {
 
       <TreatmentBenefits />
 
-      <section className="bg-white px-4 py-16 md:py-[4.5rem]">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+      <section className="nl-section bg-white">
+        <div className="nl-wrap">
+          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-16">
             <Reveal>
-              <div className="img-frame relative aspect-[4/3]">
+              <div className="img-frame relative aspect-[4/3] overflow-hidden rounded-[var(--nl-radius-lg)]">
                 <Image
                   src={MEDIA.team}
                   alt="Neurolinks team"
                   fill
                   sizes={IMG_SIZES.half}
-                  className="object-cover"
+                  className="object-cover object-[center_20%]"
                 />
               </div>
             </Reveal>
             <Reveal delayMs={70}>
-              <Eyebrow>The clinic</Eyebrow>
+              <Eyebrow>Psychiatrist-led care</Eyebrow>
               <h2 className="mt-3 font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
-                About us
+                Specialist oversight from assessment through treatment
               </h2>
-              <p className="mt-4 text-lg text-[var(--nl-navy)]">
-                We are dedicated to helping people struggling with psychiatric illness.
-              </p>
               <p className="mt-4 leading-relaxed text-[var(--nl-muted)]">
-                We empathize with patients&apos; struggles and recognize the shortcomings of
-                conventional medicine. NeuroLinks was founded by psychiatrist Dr. Chi Hung Au in
-                Nanaimo.
+                NeuroLinks was founded by Nanaimo psychiatrist Dr. Chi Hung Au to provide carefully
+                assessed treatment options for people facing complex or treatment-resistant mental
+                health conditions. Treatment recommendations are based on diagnosis, treatment
+                history, medical factors and individual needs.
               </p>
-              <div className="mt-8">
-                <ButtonLink href="/psychiatrist-tms-nanaimo/">Find out more</ButtonLink>
+              <dl className="team-id">
+                <dt>Dr. Chi Hung Au</dt>
+                <dd>Psychiatrist · Clinical Assistant Professor, UBC</dd>
+              </dl>
+              <div className="mt-6">
+                <TextLink href="/psychiatrist-tms-nanaimo/">Meet the team</TextLink>
               </div>
             </Reveal>
           </div>
@@ -306,21 +303,17 @@ export default function HomePage() {
                 Selected reviews from patients who shared their experiences on Google.
               </p>
               <p className="mt-3">
-                <a
-                  className="text-sm font-semibold text-[var(--nl-blue-bright)] underline underline-offset-4"
-                  href={SITE.googleListingUrl}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  View all Google reviews
-                </a>
+                <TextLink href={SITE.googleListingUrl}>View all Google reviews</TextLink>
               </p>
-              <div className="mt-8 grid gap-8 md:grid-cols-3">
+              <div className="mt-8 grid gap-5 md:grid-cols-3 md:gap-6">
                 {REVIEWS.map((r) => (
-                  <blockquote key={r.name} className="border-l-2 border-[var(--nl-yellow)] pl-5">
+                  <blockquote key={r.name} className="review-card">
+                    <p className="review-mark" aria-hidden="true">
+                      “
+                    </p>
                     <p className="text-sm leading-relaxed text-[var(--nl-ink)]">{r.text}</p>
-                    <footer className="mt-4 text-sm font-semibold text-[var(--nl-navy)]">
-                      — {r.name}
+                    <footer className="mt-5 text-sm font-semibold text-[var(--nl-navy)]">
+                      {r.name}
                     </footer>
                   </blockquote>
                 ))}
@@ -330,9 +323,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="location" className="scroll-mt-24 bg-[var(--nl-cream)] px-4 py-16 md:py-[4.5rem]">
+      <section id="location" className="nl-section scroll-mt-24 bg-[var(--nl-cream)]">
         <Reveal>
-          <div className="mx-auto grid max-w-6xl items-stretch gap-8 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
+          <div className="nl-wrap grid items-stretch gap-8 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)] lg:gap-12">
             <div className="flex flex-col justify-center">
               <Eyebrow>Visit</Eyebrow>
               <h2 className="mt-3 font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold text-[var(--nl-navy)]">
@@ -342,27 +335,17 @@ export default function HomePage() {
               <p className="mt-2 text-[var(--nl-muted)]">Free parking is available</p>
               <p className="mt-6">
                 <a
-                  className="inline-flex min-h-11 items-center font-semibold text-[var(--nl-blue-bright)] underline"
+                  className="inline-flex min-h-11 items-center font-semibold text-[var(--nl-blue-bright)] underline underline-offset-4"
                   href={SITE.phoneHref}
                 >
                   {SITE.phone}
                 </a>
               </p>
-              <div className="mt-6">
-                <ButtonLink href={SITE.mapsUrl} variant="ghost">
-                  Get directions
-                </ButtonLink>
+              <div className="mt-4">
+                <TextLink href={SITE.mapsUrl}>Get directions</TextLink>
               </div>
             </div>
-            <div className="relative min-h-[18rem] overflow-hidden bg-white md:min-h-[22rem] lg:min-h-[24rem]">
-              <iframe
-                title="6010 Brickyard Road, Nanaimo, BC"
-                className="absolute inset-0 h-full w-full border-0"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                src="https://maps.google.com/maps?q=6010%20Brickyard%20Road%2C%20Nanaimo%2C%20BC&t=m&z=15&output=embed&iwloc=near"
-              />
-            </div>
+            <ClinicMap />
           </div>
         </Reveal>
       </section>
