@@ -139,18 +139,20 @@ async function buildDesktop(source, meta) {
 async function buildMobile(source, meta) {
   const { width, height } = MOBILE;
   const photoHeight = 1080;
-  const half = Math.round(width / 2);
+  const tmsWidth = Math.round(width * 0.56);
+  const ketWidth = Math.round(width * 0.56);
+  const ketLeft = width - ketWidth;
 
-  const tms = await extract(source, PANELS.tms, meta, half, photoHeight, { brighten: true });
-  const ket = await extract(source, PANELS.ketamine, meta, width - half, photoHeight);
-  const ketFaded = await withSideFade(ket, width - half, photoHeight, 160, "left");
+  const tms = await extract(source, PANELS.tms, meta, tmsWidth, photoHeight, { brighten: true });
+  const ket = await extract(source, PANELS.ketamine, meta, ketWidth, photoHeight);
+  const ketFaded = await withSideFade(ket, ketWidth, photoHeight, 200, "left");
 
   const band = await sharp({
     create: { width, height: photoHeight, channels: 3, background: NAVY },
   })
     .composite([
       { input: tms, left: 0, top: 0 },
-      { input: ketFaded, left: half, top: 0 },
+      { input: ketFaded, left: ketLeft, top: 0 },
     ])
     .png()
     .toBuffer();
