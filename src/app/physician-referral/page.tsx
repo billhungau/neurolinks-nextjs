@@ -60,7 +60,7 @@ export default function ReferralPage() {
               <a href={JOTFORM_REFERRAL.pdfUrl} rel="noopener noreferrer" target="_blank">
                 Download the referral form
               </a>{" "}
-              and fax the completed document to {SITE.fax}.
+              and fax the completed document to <a href={SITE.faxHref}>{SITE.fax}</a>.
             </dd>
           </div>
           <div>

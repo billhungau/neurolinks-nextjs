@@ -1,14 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const initializedIframes = new Set<string>();
 const readyIframes = new Set<string>();
-const emptySubscribe = () => () => {};
-
-function useClientFlag() {
-  return useSyncExternalStore(emptySubscribe, () => true, () => false);
-}
 
 type Options = {
   iframeId: string;
@@ -27,7 +22,6 @@ export function useJotformEmbed({
 }: Options) {
   const [iframeReady, setIframeReady] = useState(() => readyIframes.has(iframeId));
   const [slow, setSlow] = useState(false);
-  const waiting = useClientFlag();
 
   const markReady = useCallback(() => {
     readyIframes.add(iframeId);
@@ -98,5 +92,5 @@ export function useJotformEmbed({
     return () => window.clearTimeout(id);
   }, [iframeReady, timeoutMs]);
 
-  return { iframeReady, slow, waiting, initHandler, markReady };
+  return { iframeReady, slow, initHandler, markReady };
 }

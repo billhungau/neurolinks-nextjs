@@ -9,7 +9,7 @@ import { SITE } from "@/lib/site";
 const STATUS = "Loading secure contact form…";
 
 export function JotformContactEmbed() {
-  const { iframeReady, slow, waiting, initHandler } = useJotformEmbed({
+  const { iframeReady, slow, initHandler } = useJotformEmbed({
     iframeId: JOTFORM_CONTACT.iframeId,
     formId: JOTFORM_CONTACT.formId,
     selector: JOTFORM_CONTACT.selector,
@@ -18,8 +18,8 @@ export function JotformContactEmbed() {
 
   return (
     <div
-      className={`form-embed ct-embed${waiting ? " is-waiting" : ""}${iframeReady ? " is-ready" : ""}`}
-      aria-busy={waiting && !iframeReady}
+      className={`form-embed ct-embed${iframeReady ? " is-ready" : ""}`}
+      aria-busy={!iframeReady}
     >
       <Script src={JOTFORM_CONTACT.handlerSrc} strategy="afterInteractive" onLoad={initHandler} />
       <p className="form-embed-status" role="status" aria-live="polite">
@@ -36,6 +36,7 @@ export function JotformContactEmbed() {
         scrolling="no"
         loading="eager"
         referrerPolicy="strict-origin-when-cross-origin"
+        aria-hidden={!iframeReady}
         className="form-embed-frame ct-embed-frame"
       />
       {slow && !iframeReady ? (

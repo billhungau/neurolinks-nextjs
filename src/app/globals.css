@@ -705,9 +705,11 @@ h3,
   transform: none;
 }
 
-.motion-ready .benefits-seq.reveal-pending:not(.is-visible) .benefits-step {
-  opacity: 0;
-  transform: translateY(12px);
+@media (prefers-reduced-motion: no-preference) {
+  .motion-ready .benefits-seq.reveal-pending:not(.is-visible) .benefits-step {
+    opacity: 0;
+    transform: translateY(12px);
+  }
 }
 
 .motion-ready .benefits-seq.is-visible .benefits-step {
@@ -1602,9 +1604,11 @@ h3,
   animation: tms-mech-draw 700ms ease both;
 }
 
-.motion-ready .tms-mech.reveal-pending:not(.is-visible) .tms-mech-step {
-  opacity: 0;
-  transform: translateY(14px);
+@media (prefers-reduced-motion: no-preference) {
+  .motion-ready .tms-mech.reveal-pending:not(.is-visible) .tms-mech-step {
+    opacity: 0;
+    transform: translateY(14px);
+  }
 }
 
 .motion-ready .tms-mech.reveal.is-visible .tms-mech-step {
@@ -1926,10 +1930,12 @@ h3,
   animation: tms-mech-draw 700ms ease both;
 }
 
-.motion-ready .ket-onset.reveal-pending:not(.is-visible) .ket-onset-step,
-.motion-ready .ket-mech.reveal-pending:not(.is-visible) .ket-mech-grid > li {
-  opacity: 0;
-  transform: translateY(14px);
+@media (prefers-reduced-motion: no-preference) {
+  .motion-ready .ket-onset.reveal-pending:not(.is-visible) .ket-onset-step,
+  .motion-ready .ket-mech.reveal-pending:not(.is-visible) .ket-mech-grid > li {
+    opacity: 0;
+    transform: translateY(14px);
+  }
 }
 
 .motion-ready .ket-onset.reveal.is-visible .ket-onset-step,
@@ -2305,9 +2311,11 @@ h3,
   animation: tms-mech-draw 700ms ease both;
 }
 
-.motion-ready .svc-path.reveal-pending:not(.is-visible) .svc-path-step {
-  opacity: 0;
-  transform: translateY(14px);
+@media (prefers-reduced-motion: no-preference) {
+  .motion-ready .svc-path.reveal-pending:not(.is-visible) .svc-path-step {
+    opacity: 0;
+    transform: translateY(14px);
+  }
 }
 
 .motion-ready .svc-path.reveal.is-visible .svc-path-step {
@@ -2671,11 +2679,13 @@ h3,
   max-width: 36rem;
 }
 
-.motion-ready .about-gallery-wrap.reveal-pending:not(.is-visible) .about-gallery figure,
-.motion-ready .about-au.reveal-pending:not(.is-visible) > *,
-.motion-ready .about-team-reveal.reveal-pending:not(.is-visible) .about-team article {
-  opacity: 0;
-  transform: translateY(14px);
+@media (prefers-reduced-motion: no-preference) {
+  .motion-ready .about-gallery-wrap.reveal-pending:not(.is-visible) .about-gallery figure,
+  .motion-ready .about-au.reveal-pending:not(.is-visible) > *,
+  .motion-ready .about-team-reveal.reveal-pending:not(.is-visible) .about-team article {
+    opacity: 0;
+    transform: translateY(14px);
+  }
 }
 
 .motion-ready .about-gallery-wrap.reveal.is-visible .about-gallery figure,
@@ -2851,7 +2861,7 @@ h3,
   display: none;
 }
 
-.form-embed.is-waiting .form-skel {
+html.js .form-embed .form-skel {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -2863,11 +2873,25 @@ h3,
   pointer-events: none;
 }
 
-.form-embed.is-waiting .form-embed-status {
+html.js .form-embed:not(.is-ready) .form-embed-status {
   display: block;
 }
 
-.form-embed.is-waiting .form-embed-fallback {
+html.js .form-embed.is-ready .form-embed-status {
+  display: block;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  inset: auto;
+  top: 0;
+  left: 0;
+}
+
+html.js .form-embed:not(.is-ready) .form-embed-fallback {
   position: absolute;
   inset-inline: 0;
   bottom: 0;
@@ -2889,8 +2913,9 @@ h3,
   background: transparent;
 }
 
-.form-embed.is-waiting:not(.is-ready) .form-embed-frame {
+html.js .form-embed:not(.is-ready) .form-embed-frame {
   opacity: 0;
+  pointer-events: none;
 }
 
 .form-skel-label {
@@ -2945,8 +2970,7 @@ h3,
     animation: form-skel-pulse 2.2s ease-in-out infinite;
   }
 
-  .form-embed.is-ready .form-skel,
-  .form-embed.is-ready .form-embed-status {
+  .form-embed.is-ready .form-skel {
     transition:
       opacity 280ms ease,
       visibility 280ms ease;
@@ -2967,8 +2991,7 @@ h3,
   }
 }
 
-.form-embed.is-ready .form-skel,
-.form-embed.is-ready .form-embed-status {
+.form-embed.is-ready .form-skel {
   opacity: 0;
   visibility: hidden;
 }
@@ -3413,14 +3436,18 @@ h3,
   .hero-intro,
   .tms-mech-step,
   .ket-onset-step,
+  .ket-mech-grid > li,
   .svc-path-step,
   .about-gallery figure,
+  .about-au > *,
+  .about-team article,
   .form-embed-frame {
     opacity: 1 !important;
     visibility: visible !important;
     transform: none !important;
     animation: none !important;
     transition: none !important;
+    pointer-events: auto !important;
   }
 
   .form-skel,

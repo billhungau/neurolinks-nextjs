@@ -9,7 +9,7 @@ import { SITE } from "@/lib/site";
 const STATUS = "Loading secure referral form…";
 
 export function JotformReferralEmbed() {
-  const { iframeReady, slow, waiting, initHandler } = useJotformEmbed({
+  const { iframeReady, slow, initHandler } = useJotformEmbed({
     iframeId: JOTFORM_REFERRAL.iframeId,
     formId: JOTFORM_REFERRAL.formId,
     selector: JOTFORM_REFERRAL.selector,
@@ -18,8 +18,8 @@ export function JotformReferralEmbed() {
 
   return (
     <div
-      className={`form-embed ref-embed${waiting ? " is-waiting" : ""}${iframeReady ? " is-ready" : ""}`}
-      aria-busy={waiting && !iframeReady}
+      className={`form-embed ref-embed${iframeReady ? " is-ready" : ""}`}
+      aria-busy={!iframeReady}
     >
       <Script src={JOTFORM_REFERRAL.handlerSrc} strategy="afterInteractive" onLoad={initHandler} />
       <p className="form-embed-status" role="status" aria-live="polite">
@@ -34,6 +34,7 @@ export function JotformReferralEmbed() {
         scrolling="no"
         loading="eager"
         referrerPolicy="strict-origin-when-cross-origin"
+        aria-hidden={!iframeReady}
         className="form-embed-frame ref-embed-frame"
       />
       {slow && !iframeReady ? (
@@ -42,7 +43,7 @@ export function JotformReferralEmbed() {
           <a href={JOTFORM_REFERRAL.pdfUrl} rel="noopener noreferrer" target="_blank">
             download the PDF referral form
           </a>{" "}
-          and fax it to {SITE.fax}.
+          and fax it to <a href={SITE.faxHref}>{SITE.fax}</a>.
         </p>
       ) : null}
     </div>
