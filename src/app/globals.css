@@ -1188,6 +1188,7 @@ h3,
 }
 
 .ket-gold {
+  overflow: hidden;
   background: #f3eee2;
 }
 
@@ -1262,9 +1263,9 @@ h3,
 
 .ket-ripple {
   position: absolute;
-  right: -1.5rem;
+  right: 0;
   top: -1.25rem;
-  width: min(42%, 16rem);
+  width: min(38%, 14rem);
   height: 11rem;
   color: rgb(166 132 42 / 0.22);
   pointer-events: none;
