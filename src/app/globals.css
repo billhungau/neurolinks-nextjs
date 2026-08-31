@@ -1227,6 +1227,25 @@ h3,
   color: var(--nl-muted);
 }
 
+.evidence-link {
+  color: var(--nl-blue-bright);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.18em;
+  text-decoration-skip-ink: auto;
+}
+
+.evidence-link:hover {
+  color: var(--nl-navy);
+  text-decoration-color: var(--nl-yellow);
+}
+
+.evidence-link:focus-visible {
+  outline: 2px solid var(--nl-blue-bright);
+  outline-offset: 3px;
+}
+
 .tms-faq-item[open] .tms-faq-answer,
 .tms-disclosure[open] .tms-disclosure-body {
   animation: tms-faq-open 220ms ease;
