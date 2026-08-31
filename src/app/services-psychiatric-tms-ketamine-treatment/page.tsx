@@ -374,11 +374,15 @@ export default function ServicesPage() {
                   </Link>
                 </p>
               </div>
-              <ServicePhoto
-                src={MEDIA.homeHero}
-                alt="Ketamine vial on a clinic windowsill at NeuroLinks"
-                position="88% 40%"
-              />
+              <div className="svc-photo svc-photo-ket">
+                <Image
+                  src={MEDIA.homeHero}
+                  alt="Ketamine vial on a clinic windowsill at NeuroLinks"
+                  fill
+                  sizes={IMG_SIZES.half}
+                  className="object-cover object-right"
+                />
+              </div>
             </div>
             <dl className="svc-rows svc-rows-gold">
               {KETAMINE_GROUPS.slice(1).map((item) => (

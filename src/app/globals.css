@@ -1682,6 +1682,10 @@ h3,
   box-shadow: 0 0 0 1px rgb(196 164 74 / 0.28);
 }
 
+.svc-photo-ket {
+  aspect-ratio: 1 / 1;
+}
+
 .svc-rows {
   display: grid;
   gap: 0;
