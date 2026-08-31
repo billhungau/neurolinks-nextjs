@@ -133,7 +133,7 @@ export function SiteHeader() {
             className="h-8 w-auto md:h-9"
           />
         </Link>
-        <nav className="hidden min-w-0 flex-1 lg:block" aria-label="Primary">
+        <nav className="hidden min-w-0 flex-1 xl:block" aria-label="Primary">
           <ul className="flex flex-nowrap items-center justify-end gap-x-4 text-[13px] font-medium tracking-[0.01em] text-white xl:gap-x-6 xl:text-[14px]">
             {PRIMARY_NAV.map((item) => {
               const current = isActivePath(pathname, item.href);
@@ -153,7 +153,7 @@ export function SiteHeader() {
         </nav>
         <Link
           href={CONTACT_NAV.href}
-          className={`site-nav-contact hidden min-h-9 shrink-0 items-center rounded-[var(--nl-radius)] bg-[var(--nl-yellow)] px-4 text-sm font-semibold text-[var(--nl-navy)] lg:inline-flex ${
+          className={`site-nav-contact hidden min-h-9 shrink-0 items-center rounded-[var(--nl-radius)] bg-[var(--nl-yellow)] px-4 text-sm font-semibold text-[var(--nl-navy)] xl:inline-flex ${
             isActivePath(pathname, CONTACT_NAV.href) ? "is-current" : ""
           }`}
           aria-current={isActivePath(pathname, CONTACT_NAV.href) ? "page" : undefined}
@@ -163,7 +163,7 @@ export function SiteHeader() {
         <button
           ref={buttonRef}
           type="button"
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm border border-white/40 px-2.5 text-[13px] font-medium text-white lg:hidden"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm border border-white/40 px-2.5 text-[13px] font-medium text-white xl:hidden"
           aria-expanded={open}
           aria-controls={menuId}
           aria-label={open ? "Close menu" : "Open menu"}
@@ -177,14 +177,14 @@ export function SiteHeader() {
       {open ? (
         <>
           <div
-            className="site-header-backdrop lg:hidden"
+            className="site-header-backdrop xl:hidden"
             aria-hidden="true"
             onClick={() => closeMenu(setOpen, buttonRef.current)}
           />
           <nav
             ref={panelRef}
             id={menuId}
-            className="site-header-panel relative z-10 lg:hidden"
+            className="site-header-panel relative z-10 xl:hidden"
             aria-label="Mobile"
           >
             <ul className="nl-wrap flex flex-col gap-0.5 pt-3 pb-5">

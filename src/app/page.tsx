@@ -161,8 +161,8 @@ challenges`}
                   <p className="mt-4 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
                     TMS is a non-invasive neuromodulation treatment with established evidence for
                     depression and certain other psychiatric conditions. Suitability depends on the
-                    diagnosis, treatment history and protocol being considered. TMS is covered by
-                    Veterans Affair Canada and certain worker compensation programs.
+                    diagnosis, treatment history and protocol being considered.                     TMS is covered by
+                    Veterans Affairs Canada and certain workers&apos; compensation programs.
                   </p>
                   <TextLink href="/about-tms-treatment-on-psychiatric-illness/">
                     How TMS transforms mental illness

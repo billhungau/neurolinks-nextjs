@@ -24,7 +24,7 @@ const SVC_SECTIONS = [
   { id: "psychometric", label: "Psychometric assessment" },
   { id: "tms", label: "TMS" },
   { id: "ketamine", label: "Ketamine" },
-  { id: "coverage", label: "Fee and coverage" },
+  { id: "coverage", label: "Coverage" },
 ] as const;
 
 const PATHWAY = [
@@ -56,9 +56,10 @@ const TMS_DETAILS = [
     title: "Session length and protocol",
     body: (
       <>
-        Each session may last <strong>up to 30 minutes</strong>. The TMS machine in our center
-        is equipped with novel technology, <strong>theta burst stimulation</strong>, which
-        allows us to give the TMS in as few as <strong>3 minutes</strong>.
+        Each session may last <strong>up to 30 minutes</strong>. NeuroLinks offers{" "}
+        <strong>theta-burst stimulation</strong>, which can reduce the stimulation portion of
+        selected TMS sessions to as little as <strong>three minutes</strong>. The complete
+        appointment may take longer.
       </>
     ),
   },
@@ -66,8 +67,8 @@ const TMS_DETAILS = [
     title: "Psychiatrist oversight",
     body: (
       <>
-        Our psychiatrists will oversee your mental and physical wellbeing, as well as the whole
-        treatment course.
+        A NeuroLinks psychiatrist oversees treatment planning, clinical progress, tolerability
+        and safety throughout the course.
       </>
     ),
   },
@@ -84,9 +85,9 @@ const TMS_DETAILS = [
     title: "Treatment intensity and position",
     body: (
       <>
-        The <strong>optimal stimulation intensity</strong> (motor threshold assessment) and{" "}
-        <strong>position</strong> (brain mapping) will be determined, and they will be
-        evaluated regularly.
+        <strong>Stimulation intensity</strong> is established through motor-threshold
+        assessment, and the treatment <strong>position</strong> is determined through brain
+        mapping. These may be reassessed when clinically appropriate.
       </>
     ),
   },
@@ -94,9 +95,8 @@ const TMS_DETAILS = [
     title: "What treatment feels and sounds like",
     body: (
       <>
-        During the stimulation, a clicking sound is produced by the coil. This is usually mild
-        and well tolerated. But if you find the sound difficult, we will provide you with
-        earplugs.
+        The coil produces a repetitive clicking sound during stimulation. Hearing protection is
+        provided during treatment.
       </>
     ),
   },
@@ -104,8 +104,9 @@ const TMS_DETAILS = [
     title: "When improvement may begin",
     body: (
       <>
-        It usually takes <strong>at least 10-15 sessions</strong> of TMS for the therapeutic
-        effect to appear, and immediate relief after the first few sessions is not expected.
+        Improvement generally develops gradually across the treatment course. Some patients
+        notice changes after approximately <strong>10–15 sessions</strong>, although timing and
+        response vary.
       </>
     ),
   },
@@ -125,8 +126,9 @@ const KETAMINE_GROUPS = [
     title: "Rapid-acting potential",
     body: (
       <>
-        The antidepressant effects of ketamine can appear within weeks, hours or days after a
-        single infusion. Additional treatments are often necessary to sustain these benefits.
+        Some patients experience improvement within hours or days, although several treatments
+        may be required and not everyone responds. The timing, degree and duration of benefit
+        vary.
       </>
     ),
   },
@@ -134,8 +136,8 @@ const KETAMINE_GROUPS = [
     title: "Psychiatrist oversight and monitoring",
     body: (
       <>
-        Our psychiatrist will oversee your mental health and physical wellbeing, as well as the
-        whole treatment course.
+        Ketamine is administered by a registered nurse under psychiatrist supervision, with
+        appropriate monitoring before, during and after treatment.
       </>
     ),
   },
@@ -152,7 +154,7 @@ const COVERAGE = [
   },
   {
     title: "WorkSafeBC",
-    body: "If you are a work injury case with the WorkSafeBC, you may also be covered. Please contact your agent for your eligibility.",
+    body: "Coverage may be available in selected WorkSafeBC cases. Patients should contact their WorkSafeBC representative to confirm eligibility and authorization requirements.",
   },
   {
     title: "Financial support information",
@@ -271,10 +273,10 @@ export default function ServicesPage() {
               <Eyebrow>Initial Assessment</Eyebrow>
               <h2 className="tms-h2 mt-3">Comprehensive Assessment by Psychiatrists</h2>
               <p className="tms-lede mt-4">
-                Struggling with mental challenges illness can be isolating and discouraging.
-                You&apos;re not alone! Our experienced psychiatrist can help you gain clarity
-                and a path forward. At NeuroLinks, we&apos;ll review your diagnosis, treatment
-                history, and explore potential options like TMS and ketamine treatments.
+                Living with a mental health condition can feel isolating and discouraging. You
+                are not alone. A NeuroLinks psychiatrist can review your diagnosis and treatment
+                history and discuss appropriate options, which may include TMS or ketamine when
+                clinically suitable.
               </p>
               <ul className="tms-facts">
                 {ASSESSMENT_MARKERS.map((item) => (
@@ -282,7 +284,8 @@ export default function ServicesPage() {
                 ))}
               </ul>
               <p className="svc-msp">
-                *The assessment is completely covered by the Medical Service Plan (MSP).
+                For eligible British Columbia residents with an appropriate referral, the
+                psychiatric assessment is covered by the Medical Services Plan (MSP).
               </p>
             </div>
           </Reveal>
@@ -296,11 +299,10 @@ export default function ServicesPage() {
               <Eyebrow>Psychometric Assessment</Eyebrow>
               <h2 className="tms-h2 mt-3">Evaluate Severity</h2>
               <p className="tms-lede mt-4">
-                You will complete some psychometric assessments which will inform us about the
-                severity of the mental illness. Apart from the standardized psychometric
-                assessments, our psychiatrist may also implement some tailor-made evaluation
-                tools depending on your need. These assessments are important for monitoring the
-                treatment response.
+                Standardized questionnaires help evaluate symptom severity and establish a
+                baseline before treatment. Additional measures may be selected according to
+                individual clinical needs. Repeated assessments help monitor progress during
+                treatment and follow-up.
               </p>
               <ol className="svc-measure" aria-label="How psychometric assessments are used">
                 {MEASURE.map((item) => (
@@ -399,12 +401,12 @@ export default function ServicesPage() {
       <section id="coverage" className="tms-section bg-white">
         <div className="tms-wrap">
           <Reveal>
-            <Eyebrow>Fee and coverage</Eyebrow>
-            <h2 className="tms-h2 mt-3">Fee</h2>
+            <Eyebrow>Coverage</Eyebrow>
+            <h2 className="tms-h2 mt-3">Coverage and financial considerations</h2>
             <p className="tms-lede mt-4">
               Our mission is to improve the mental well-being and functioning of as many
               patients as possible by delivering safe and effective therapies. However, TMS and
-              Ketamine are unfortunately not covered by the Medical Service Plan (MSP).
+              Ketamine are unfortunately not covered by the Medical Services Plan (MSP).
               NeuroLinks would like to increase the coverage of these therapies in the following
               ways:
             </p>

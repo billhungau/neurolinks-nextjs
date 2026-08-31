@@ -13,7 +13,7 @@ export const PRIMARY_NAV = [
   },
   {
     href: "/services-psychiatric-tms-ketamine-treatment/",
-    label: "Services",
+    label: "Assessment & Treatment",
   },
   { href: "/psychiatrist-tms-nanaimo/", label: "About Us" },
   { href: "/physician-referral/", label: "Physician Referral" },
@@ -33,7 +33,7 @@ export const FOOTER_TREATMENTS = [
     href: "/ketamine-treatment-resistant-depression-nanaimo/",
     label: "About Ketamine",
   },
-  { href: "/services-psychiatric-tms-ketamine-treatment/", label: "Services" },
+  { href: "/services-psychiatric-tms-ketamine-treatment/", label: "Assessment & Treatment" },
 ] as const satisfies readonly NavItem[];
 
 export const FOOTER_QUICK_LINKS = [

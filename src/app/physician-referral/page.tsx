@@ -1,11 +1,11 @@
 import Image from "next/image";
-import Script from "next/script";
 import { SiteChrome } from "@/components/SiteChrome";
 import { JotformReferralEmbed } from "@/components/JotformReferralEmbed";
 import { JOTFORM_REFERRAL } from "@/lib/jotform-referral";
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { pageMetadata } from "@/lib/seo";
+import { SITE } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Physician Referral | NeuroLinks",
@@ -17,7 +17,6 @@ export const metadata = pageMetadata({
 export default function ReferralPage() {
   return (
     <SiteChrome>
-      <Script src={JOTFORM_REFERRAL.handlerSrc} strategy="afterInteractive" />
       <section id="referral-hero" className="ref-hero relative overflow-hidden bg-[var(--nl-navy)]">
         <div className="absolute inset-0">
           <Image
@@ -43,20 +42,42 @@ export default function ReferralPage() {
           <div className="hero-intro max-w-[40rem]">
             <p className="hero-enter eyebrow text-white/80">For referring clinicians</p>
             <h1 className="hero-enter mt-3 font-serif text-[clamp(2.4rem,8vw,2.75rem)] font-semibold leading-[1.05] text-white md:text-[clamp(3.25rem,5vw,3.75rem)]">
-              Physician Referral
+              Refer a patient
             </h1>
           </div>
         </div>
       </section>
 
       <section className="ref-body">
-        <p className="ref-instruction">
-          Please fill out the online referral form below. Alternatively, you may download the{" "}
-          <a href={JOTFORM_REFERRAL.pdfUrl} rel="noopener noreferrer" target="_blank">
-            PDF referral form
-          </a>{" "}
-          and fax it to 250-739-5530.
-        </p>
+        <dl className="ref-band">
+          <div>
+            <dt>Online referral</dt>
+            <dd>Complete the secure form below.</dd>
+          </div>
+          <div>
+            <dt>PDF alternative</dt>
+            <dd>
+              <a href={JOTFORM_REFERRAL.pdfUrl} rel="noopener noreferrer" target="_blank">
+                Download the referral form
+              </a>{" "}
+              and fax the completed document to <a href={SITE.faxHref}>{SITE.fax}</a>.
+            </dd>
+          </div>
+          <div>
+            <dt>Clinical information</dt>
+            <dd>
+              Include the reason for referral, relevant diagnoses, previous treatments and current
+              medications.
+            </dd>
+          </div>
+          <div>
+            <dt>Next step</dt>
+            <dd>
+              The clinic will review the referral and contact the patient or referring office as
+              appropriate.
+            </dd>
+          </div>
+        </dl>
         <div className="ref-form-frame">
           <JotformReferralEmbed />
         </div>

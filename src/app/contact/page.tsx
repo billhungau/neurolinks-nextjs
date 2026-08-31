@@ -61,7 +61,9 @@ export default function ContactPage() {
               </div>
               <div>
                 <dt>Fax number</dt>
-                <dd>{SITE.fax}</dd>
+                <dd>
+                  <a href={SITE.faxHref}>{SITE.fax}</a>
+                </dd>
               </div>
               <div>
                 <dt>Email</dt>

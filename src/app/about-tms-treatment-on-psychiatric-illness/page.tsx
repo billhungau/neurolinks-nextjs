@@ -120,7 +120,7 @@ export default function AboutTmsPage() {
                 variant="accent"
                 className="grow basis-36 whitespace-nowrap md:grow-0"
               >
-                Book an assessment
+                Request an assessment
               </ButtonLink>
               <ButtonLink
                 href="#how-tms-works"
@@ -148,10 +148,12 @@ export default function AboutTmsPage() {
                 specific brain networks involved in mood and other psychiatric symptoms. Treatment
                 is non-invasive, does not require anesthesia and is generally well tolerated.
               </p>
+              <Eyebrow className="glance-label">At a glance</Eyebrow>
               <ul className="tms-facts">
                 <li>Non-invasive treatment</li>
                 <li>No anesthesia required</li>
                 <li>Return to usual activities afterward</li>
+                <li>Psychiatric assessment required</li>
               </ul>
               <TmsDisclosure summary="Read more about the technology">
                 <p>
@@ -318,7 +320,7 @@ export default function AboutTmsPage() {
             </div>
             <p className="mt-8">
               <Link href="/contact/" className="tms-text-link">
-                Ask about coverage
+                Contact the clinic
               </Link>
             </p>
           </Reveal>
@@ -359,7 +361,7 @@ export default function AboutTmsPage() {
               </p>
               <p className="mt-6">
                 <Link href="/contact/" className="tms-text-link">
-                  Speak with the clinic
+                  Contact the clinic
                 </Link>
               </p>
             </div>
