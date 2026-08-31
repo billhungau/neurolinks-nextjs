@@ -70,7 +70,7 @@ function HeroPhoto() {
     props: { srcSet: desktopSrcSet },
   } = getImageProps({
     ...shared,
-    src: MEDIA.homeHero,
+    src: MEDIA.homeHeroIntegrated,
     width: HOME_HERO_ASSET.width,
     height: HOME_HERO_ASSET.height,
   });
@@ -86,7 +86,7 @@ function HeroPhoto() {
       <img
         {...mobile}
         alt={HERO_ALT}
-        className="hero-photo absolute inset-0 h-full w-full object-cover object-top md:object-center lg:object-[center_40%]"
+        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_top] md:object-[center_42%]"
       />
     </picture>
   );
@@ -96,48 +96,27 @@ export default function HomePage() {
   return (
     <SiteChrome>
       <section id="home-hero" className="relative overflow-hidden bg-[var(--nl-navy)]">
-        {/* Full bleed on phones; the banner-above-copy layout returns from md up. */}
-        <div className="absolute inset-0 md:relative md:aspect-[2/1] md:w-full lg:absolute lg:inset-0 lg:aspect-auto">
+        <div className="absolute inset-0">
           <HeroPhoto />
-          <div className="hero-scrim pointer-events-none absolute inset-0 md:hidden" aria-hidden="true" />
-          <div
-            className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[var(--nl-navy)]/78 via-[var(--nl-navy)]/42 to-transparent md:block md:max-lg:from-[var(--nl-navy)]/20 md:max-lg:via-transparent md:max-lg:to-[var(--nl-navy)]/15"
-            aria-hidden="true"
-          />
-          <div
-            className="hero-top-scrim pointer-events-none absolute inset-x-0 top-0 md:hidden"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 hidden h-24 bg-gradient-to-b from-[var(--nl-navy)]/55 to-transparent md:block"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-28 bg-gradient-to-t from-[var(--nl-navy)]/50 to-transparent lg:block"
-            aria-hidden="true"
-          />
+          <div className="home-hero-wash pointer-events-none absolute inset-0" aria-hidden="true" />
         </div>
-        <div className="nl-wrap relative z-10 flex min-h-[clamp(540px,72svh,610px)] flex-col justify-end pt-20 pb-8 md:min-h-0 md:justify-center md:py-10 lg:min-h-[clamp(520px,64vh,600px)] lg:py-16">
-          <div className="hero-intro max-w-[45rem]">
-            {/* The mobile floor is low enough to keep the three-line break at 320px. */}
-            <h1 className="hero-enter max-w-[16ch] font-serif text-[clamp(2.15rem,10.5vw,4rem)] font-semibold leading-[1.02] text-white md:leading-[1.04] lg:text-[clamp(3.5rem,5.3vw,5rem)] lg:leading-[1.02]">
-              Expert care for complex mental challenges
+        <div className="nl-wrap relative z-10 flex min-h-[clamp(32.5rem,78svh,38.5rem)] flex-col justify-end pt-[4.75rem] pb-8 md:min-h-[clamp(28rem,62vh,36rem)] md:justify-center md:py-16 lg:min-h-[clamp(32rem,64vh,38rem)] lg:py-16">
+          <div className="home-hero-copy">
+            <h1 className="hero-enter home-hero-heading whitespace-pre-line">
+              {`Expert care for
+complex mental
+challenges`}
             </h1>
-            <p className="hero-enter hero-enter-2 mt-4 max-w-[30ch] text-[0.9375rem] leading-[1.5] text-white/90 md:mt-5 md:max-w-xl md:text-lg md:leading-relaxed">
+            <p className="hero-enter hero-enter-2 home-hero-lede">
               No matter how hard the past, we can always begin again.
             </p>
-            <div className="hero-enter hero-enter-3 mt-8 flex flex-wrap gap-3 md:mt-8">
-              <ButtonLink
-                href="/about-tms-treatment-on-psychiatric-illness/"
-                variant="accent"
-                className="grow basis-34 whitespace-nowrap md:grow-0 md:basis-auto"
-              >
+            <div className="hero-enter hero-enter-3 home-hero-actions">
+              <ButtonLink href="/about-tms-treatment-on-psychiatric-illness/" variant="accent">
                 Explore TMS
               </ButtonLink>
               <ButtonLink
                 href="/ketamine-treatment-resistant-depression-nanaimo/"
                 variant="on-dark"
-                className="grow basis-34 whitespace-nowrap md:grow-0 md:basis-auto"
               >
                 Explore Ketamine
               </ButtonLink>

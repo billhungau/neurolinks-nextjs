@@ -1,13 +1,7 @@
 /**
- * Builds the mobile art direction of the homepage hero photograph.
- *
- * The WordPress original (media 5544) is a 2:1 diptych: TMS coil on the left,
- * ketamine vial on the right. Cropping that landscape frame to a portrait phone
- * viewport keeps only the seam in the middle, so both subjects disappear. This
- * script re-crops the same two photographs into a portrait diptych so the coil
- * stays upper-left and the vial upper-right, then smears and darkens the lower
- * third so the CSS navy gradient has something to dissolve into instead of a
- * hard image edge.
+ * Legacy mobile crop of the WordPress banner. The homepage now uses
+ * `scripts/build-home-hero-integrated.mjs`, which writes home-hero-mobile.webp
+ * without the navy smear. Keep this script only if you need the older crop.
  *
  * Usage: node scripts/build-home-hero-mobile.mjs [--src path-or-url] [--out path]
  */
