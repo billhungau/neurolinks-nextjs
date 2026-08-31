@@ -2512,19 +2512,75 @@ h3,
 }
 
 /**
- * Contact page. Compact reception hero, Jotform + clinic details.
+ * Contact page. Shallow reception banner, then Jotform + clinic details.
  * Iframe internals are cross-origin and are not styled from here.
  */
+.ct-hero {
+  height: clamp(165px, 12vw + 130px, 195px);
+}
+
+@media (min-width: 768px) {
+  .ct-hero {
+    height: clamp(190px, 8vw + 140px, 220px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ct-hero {
+    height: clamp(210px, 6vw + 140px, 240px);
+  }
+}
+
 .ct-hero-wash {
   background:
     linear-gradient(
-      100deg,
-      rgb(var(--nl-hero-navy) / 0.92) 0%,
-      rgb(var(--nl-hero-navy) / 0.78) 26%,
-      rgb(var(--nl-hero-navy) / 0.42) 46%,
-      rgb(var(--nl-hero-navy) / 0.1) 64%,
+      98deg,
+      rgb(var(--nl-hero-navy) / 0.86) 0%,
+      rgb(var(--nl-hero-navy) / 0.62) 34%,
+      rgb(var(--nl-hero-navy) / 0.22) 58%,
       transparent 80%
     );
+}
+
+.ct-hero-copy {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  max-width: 75rem;
+  margin-inline: auto;
+  padding: 3.65rem 0.75rem 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .ct-hero-copy {
+    padding: 4.15rem 1.5rem 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ct-hero-copy {
+    padding: 4.35rem 2rem 1rem;
+  }
+}
+
+.ct-hero-copy h1 {
+  margin: 0;
+  font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
+  font-size: clamp(2.05rem, 2vw + 1.5rem, 3.05rem);
+  font-weight: 600;
+  line-height: 1.05;
+  color: #fff;
+}
+
+.ct-hero-copy p {
+  margin: 0.4rem 0 0;
+  max-width: 48ch;
+  color: rgb(255 255 255 / 0.92);
+  font-size: clamp(0.9375rem, 0.2vw + 0.9rem, 1.0625rem);
+  line-height: 1.45;
 }
 
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
@@ -2540,39 +2596,35 @@ h3,
   .ct-hero .hero-enter-2 {
     animation-delay: 70ms;
   }
-
-  .ct-hero .hero-enter-3 {
-    animation-delay: 110ms;
-  }
 }
 
 .ct-body {
   max-width: 75rem;
   margin-inline: auto;
-  padding: 2.25rem 0.75rem 3.5rem;
+  padding: 1.4rem 0.75rem 3.5rem;
 }
 
 @media (min-width: 768px) {
   .ct-body {
-    padding: 2.75rem 1.5rem 4.5rem;
+    padding: 2rem 1.5rem 4.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .ct-body {
-    padding: 3rem 2rem 5rem;
+    padding: 2.15rem 2rem 5rem;
   }
 }
 
 .ct-layout {
   display: grid;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
 @media (min-width: 960px) {
   .ct-layout {
-    grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 1fr);
-    gap: 3.25rem;
+    grid-template-columns: minmax(0, 1.75fr) minmax(16.5rem, 1fr);
+    gap: 2.5rem;
     align-items: start;
   }
 }
@@ -2586,13 +2638,26 @@ h3,
 }
 
 .ct-privacy {
-  margin: 0.75rem 0 1.25rem;
-  padding: 0.85rem 1rem;
+  margin: 0.55rem 0 0.7rem;
+  padding: 0.65rem 0.85rem;
   border-radius: 10px;
   background: rgb(61 90 140 / 0.08);
   color: var(--nl-navy);
-  font-size: 0.975rem;
-  line-height: 1.55;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.ct-referral {
+  margin: 0 0 0.95rem;
+  color: var(--nl-navy);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.ct-referral a {
+  font-weight: 600;
+  color: var(--nl-navy);
+  text-underline-offset: 3px;
 }
 
 .ct-details a,
@@ -2689,8 +2754,18 @@ h3,
 }
 
 .ct-directions {
-  margin: 1.25rem 0 1.5rem;
+  margin: 1.25rem 0 0;
   font-size: 1rem;
+}
+
+.ct-map-block {
+  margin-top: 2.25rem;
+}
+
+@media (min-width: 768px) {
+  .ct-map-block {
+    margin-top: 2.75rem;
+  }
 }
 
 .ct-map {

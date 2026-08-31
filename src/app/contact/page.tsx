@@ -1,10 +1,7 @@
 import Image from "next/image";
-import Script from "next/script";
-import { ButtonLink } from "@/components/ButtonLink";
+import Link from "next/link";
 import { JotformContactEmbed } from "@/components/JotformContactEmbed";
-import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
-import { JOTFORM_CONTACT } from "@/lib/jotform-contact";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { MEDIA } from "@/lib/media";
 import { pageMetadata } from "@/lib/seo";
@@ -20,7 +17,6 @@ export const metadata = pageMetadata({
 export default function ContactPage() {
   return (
     <SiteChrome>
-      <Script src={JOTFORM_CONTACT.handlerSrc} strategy="afterInteractive" />
       <section id="contact-hero" className="ct-hero relative overflow-hidden bg-[var(--nl-navy)]">
         <div className="absolute inset-0">
           <Image
@@ -29,50 +25,21 @@ export default function ContactPage() {
             fill
             priority
             sizes={IMG_SIZES.fullBleed}
-            className="hero-photo object-cover object-[62%_38%] md:object-[68%_42%]"
+            className="hero-photo object-cover object-[58%_40%] md:object-[64%_38%]"
           />
-          <div className="hero-scrim pointer-events-none absolute inset-0 md:hidden" aria-hidden="true" />
-          <div className="ct-hero-wash pointer-events-none absolute inset-0 hidden md:block" aria-hidden="true" />
-          <div
-            className="hero-top-scrim pointer-events-none absolute inset-x-0 top-0 md:hidden"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 hidden h-16 bg-gradient-to-b from-[var(--nl-navy)]/45 to-transparent md:block"
-            aria-hidden="true"
-          />
+          <div className="ct-hero-wash pointer-events-none absolute inset-0" aria-hidden="true" />
         </div>
-        <div className="relative z-10 mx-auto flex min-h-[clamp(380px,48svh,440px)] max-w-6xl flex-col justify-end px-5 pt-20 pb-8 md:min-h-[clamp(400px,38svh,460px)] md:justify-center md:px-6 md:py-16 lg:px-8">
-          <div className="hero-intro max-w-[36rem]">
-            <h1 className="hero-enter font-serif text-[clamp(2.375rem,6vw,3.5rem)] font-semibold leading-[1.04] text-white">
-              Contact NeuroLinks
-            </h1>
-            <p className="hero-enter hero-enter-2 mt-4 max-w-[38ch] text-[0.975rem] leading-[1.55] text-white/90 md:mt-5 md:max-w-md md:text-[1.05rem] md:leading-[1.65]">
-              Don&apos;t hesitate to contact us – we&apos;re here to help you navigate your journey.
-            </p>
-            <div className="hero-enter hero-enter-3 mt-7 flex flex-wrap gap-3">
-              <ButtonLink
-                href={SITE.phoneHref}
-                variant="accent"
-                className="grow basis-36 whitespace-nowrap md:grow-0"
-              >
-                Call the clinic
-              </ButtonLink>
-              <ButtonLink
-                href={SITE.mapsUrl}
-                variant="on-dark"
-                className="grow basis-36 whitespace-nowrap md:grow-0"
-              >
-                Get directions
-              </ButtonLink>
-            </div>
-          </div>
+        <div className="ct-hero-copy">
+          <h1 className="hero-enter">Contact</h1>
+          <p className="hero-enter hero-enter-2">
+            Don&apos;t hesitate to contact us – we&apos;re here to help you navigate your journey.
+          </p>
         </div>
       </section>
 
       <section className="ct-body" aria-labelledby="contact-form-heading">
         <div className="ct-layout">
-          <Reveal className="ct-form-col">
+          <div className="ct-form-col">
             <h2 id="contact-form-heading" className="ct-section-title">
               Send a message
             </h2>
@@ -80,13 +47,19 @@ export default function ContactPage() {
               For general inquiries only. Please do not include personal health information, referral
               details or urgent medical concerns.
             </p>
+            <p className="ct-referral">
+              Healthcare professionals:{" "}
+              <Link href="/physician-referral/">Physician Referral Form</Link>
+            </p>
             <div className="ct-form-frame">
               <JotformContactEmbed />
             </div>
-          </Reveal>
+          </div>
 
-          <Reveal className="ct-aside" delayMs={40}>
-            <h2 className="ct-section-title">Our office</h2>
+          <aside className="ct-aside" aria-labelledby="contact-office-heading">
+            <h2 id="contact-office-heading" className="ct-section-title">
+              Our office
+            </h2>
             <dl className="ct-details">
               <div>
                 <dt>Phone number</dt>
@@ -114,25 +87,33 @@ export default function ContactPage() {
               </div>
             </dl>
             <p className="ct-directions">
-              <a href={SITE.mapsUrl} rel="noopener noreferrer" target="_blank">
+              <a
+                href={SITE.mapsUrl}
+                rel="noopener noreferrer"
+                target="_blank"
+                aria-label="Get directions to NeuroLinks (opens in Google Maps)"
+              >
                 Get directions
               </a>
             </p>
-            <div className="ct-map">
-              <iframe
-                title="NeuroLinks at 202-6010 Brickyard Road, Nanaimo, BC"
-                className="ct-map-frame"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                src="https://maps.google.com/maps?q=6010%20Brickyard%20Road%2C%20Nanaimo%2C%20BC&t=m&z=15&output=embed&iwloc=near"
-              />
-            </div>
-            <p className="ct-map-link">
-              <a href={SITE.mapsUrl} rel="noopener noreferrer" target="_blank">
-                Open in Google Maps
-              </a>
-            </p>
-          </Reveal>
+          </aside>
+        </div>
+
+        <div className="ct-map-block">
+          <div className="ct-map">
+            <iframe
+              title="NeuroLinks at 202-6010 Brickyard Road, Nanaimo, BC"
+              className="ct-map-frame"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              src="https://maps.google.com/maps?q=6010%20Brickyard%20Road%2C%20Nanaimo%2C%20BC&t=m&z=15&output=embed&iwloc=near"
+            />
+          </div>
+          <p className="ct-map-link">
+            <a href={SITE.mapsUrl} rel="noopener noreferrer" target="_blank">
+              Open in Google Maps
+            </a>
+          </p>
         </div>
       </section>
     </SiteChrome>
