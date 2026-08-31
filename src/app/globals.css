@@ -2250,7 +2250,7 @@ h3,
 .ref-body {
   max-width: 75rem;
   margin-inline: auto;
-  padding: 0 0.75rem 3rem;
+  padding: 0 0.625rem 3rem;
 }
 
 @media (min-width: 768px) {
@@ -2267,8 +2267,8 @@ h3,
 
 .ref-instruction {
   max-width: 52rem;
-  margin: 2.5rem 0 1.75rem;
-  font-size: 1.125rem;
+  margin: 2.25rem 0 1.5rem;
+  font-size: 1.0625rem;
   line-height: 1.65;
   color: var(--nl-ink);
 }
@@ -2276,6 +2276,7 @@ h3,
 @media (min-width: 768px) {
   .ref-instruction {
     margin: 2.75rem 0 1.75rem;
+    font-size: 1.125rem;
   }
 }
 

@@ -39,9 +39,12 @@ export default function ReferralPage() {
             aria-hidden="true"
           />
         </div>
-        <div className="relative z-10 mx-auto flex min-h-[clamp(260px,34svh,320px)] max-w-6xl flex-col justify-end px-4 pt-16 pb-6 md:min-h-[clamp(280px,30svh,340px)] md:justify-center md:px-6 md:py-10 lg:px-8">
-          <div className="hero-intro max-w-[36rem]">
-            <h1 className="hero-enter eyebrow text-white/80">Physician referral</h1>
+        <div className="relative z-10 mx-auto flex min-h-[clamp(250px,32svh,290px)] max-w-6xl flex-col justify-center px-4 pt-16 pb-8 md:min-h-[clamp(280px,28svh,320px)] md:px-6 md:pb-10 lg:px-8">
+          <div className="hero-intro max-w-[40rem]">
+            <p className="hero-enter eyebrow text-white/80">For referring clinicians</p>
+            <h1 className="hero-enter mt-3 font-serif text-[clamp(2.4rem,8vw,2.75rem)] font-semibold leading-[1.05] text-white md:text-[clamp(3.25rem,5vw,3.75rem)]">
+              Physician Referral
+            </h1>
           </div>
         </div>
       </section>
@@ -49,7 +52,7 @@ export default function ReferralPage() {
       <section className="ref-body">
         <p className="ref-instruction">
           Please fill out the online referral form below. Alternatively, you may download the{" "}
-          <a href={MEDIA.referralPdf} rel="noopener noreferrer" target="_blank">
+          <a href={JOTFORM_REFERRAL.pdfUrl} rel="noopener noreferrer" target="_blank">
             PDF referral form
           </a>{" "}
           and fax it to 250-739-5530.
