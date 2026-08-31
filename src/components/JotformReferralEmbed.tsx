@@ -37,6 +37,35 @@ export function JotformReferralEmbed() {
   }, [initHandler]);
 
   useEffect(() => {
+    const iframe = document.getElementById(JOTFORM_REFERRAL.iframeId);
+    if (!(iframe instanceof HTMLIFrameElement)) return undefined;
+
+    const markReady = () => setIframeReady(true);
+    iframe.addEventListener("load", markReady);
+
+    // React onLoad can miss if the iframe finishes before hydration.
+    const alreadyLoaded = performance
+      .getEntriesByType("resource")
+      .some((entry) => entry.name.includes(JOTFORM_REFERRAL.formId));
+    if (alreadyLoaded) markReady();
+
+    const reserved = window.matchMedia("(min-width: 768px)").matches
+      ? JOTFORM_REFERRAL.initialMinHeight
+      : 950;
+    const poll = window.setInterval(() => {
+      if (iframe.getBoundingClientRect().height > reserved + 80) {
+        markReady();
+        window.clearInterval(poll);
+      }
+    }, 200);
+
+    return () => {
+      iframe.removeEventListener("load", markReady);
+      window.clearInterval(poll);
+    };
+  }, []);
+
+  useEffect(() => {
     failTimer.current = window.setTimeout(() => {
       setSlow((current) => (iframeReady ? current : true));
     }, 12000);
