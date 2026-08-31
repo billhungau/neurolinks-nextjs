@@ -41,10 +41,7 @@ export default function ReferralPage() {
         </div>
         <div className="relative z-10 mx-auto flex min-h-[clamp(260px,34svh,320px)] max-w-6xl flex-col justify-end px-4 pt-16 pb-6 md:min-h-[clamp(280px,30svh,340px)] md:justify-center md:px-6 md:py-10 lg:px-8">
           <div className="hero-intro max-w-[36rem]">
-            <p className="hero-enter eyebrow text-white/80">Physician referral</p>
-            <h1 className="hero-enter mt-2 font-serif text-[clamp(2rem,4.2vw,3.15rem)] font-semibold leading-[1.06] text-white">
-              Refer a patient to NeuroLinks
-            </h1>
+            <h1 className="hero-enter eyebrow text-white/80">Physician referral</h1>
           </div>
         </div>
       </section>
