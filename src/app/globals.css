@@ -2443,21 +2443,8 @@ h3,
   color: var(--nl-navy);
 }
 
-.ct-lead {
-  margin: 0.75rem 0 1.15rem;
-  font-size: 1.0625rem;
-  line-height: 1.6;
-  color: var(--nl-ink);
-}
-
-@media (min-width: 768px) {
-  .ct-lead {
-    font-size: 1.125rem;
-  }
-}
-
 .ct-privacy {
-  margin: 0 0 0.85rem;
+  margin: 0.75rem 0 1.25rem;
   padding: 0.85rem 1rem;
   border-radius: 10px;
   background: rgb(61 90 140 / 0.08);
@@ -2466,12 +2453,6 @@ h3,
   line-height: 1.55;
 }
 
-.ct-referral {
-  margin: 0 0 1.25rem;
-  font-size: 0.975rem;
-}
-
-.ct-referral a,
 .ct-details a,
 .ct-directions a,
 .ct-map-link a,

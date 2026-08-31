@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import Script from "next/script";
 import { ButtonLink } from "@/components/ButtonLink";
 import { JotformContactEmbed } from "@/components/JotformContactEmbed";
@@ -77,15 +76,9 @@ export default function ContactPage() {
             <h2 id="contact-form-heading" className="ct-section-title">
               Send a message
             </h2>
-            <p className="ct-lead">Complete the form below for general inquiries.</p>
             <p className="ct-privacy">
               For general inquiries only. Please do not include personal health information, referral
               details or urgent medical concerns.
-            </p>
-            <p className="ct-referral">
-              <Link href="/physician-referral/">
-                Healthcare professionals can use the Physician Referral Form.
-              </Link>
             </p>
             <div className="ct-form-frame">
               <JotformContactEmbed />
