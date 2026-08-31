@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { ClinicMap } from "@/components/ClinicMap";
-import { JotformContactEmbed } from "@/components/JotformContactEmbed";
+import { ContactForm } from "@/components/forms/ContactForm";
 import { SiteChrome } from "@/components/SiteChrome";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { MEDIA } from "@/lib/media";
@@ -44,7 +44,7 @@ export default function ContactPage() {
               Send a message
             </h2>
             <div className="ct-form-frame">
-              <JotformContactEmbed />
+              <ContactForm />
             </div>
           </div>
 
