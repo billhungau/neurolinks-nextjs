@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { SiteChrome } from "@/components/SiteChrome";
-import { JotformReferralEmbed } from "@/components/JotformReferralEmbed";
-import { JOTFORM_REFERRAL } from "@/lib/jotform-referral";
+import { PhysicianReferralForm } from "@/components/forms/PhysicianReferralForm";
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
+import { REFERRAL_PDF_URL } from "@/lib/referral-form";
 import { pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
@@ -49,37 +49,15 @@ export default function ReferralPage() {
       </section>
 
       <section className="ref-body">
-        <dl className="ref-band">
-          <div>
-            <dt>Online referral</dt>
-            <dd>Complete the secure form below.</dd>
-          </div>
-          <div>
-            <dt>PDF alternative</dt>
-            <dd>
-              <a href={JOTFORM_REFERRAL.pdfUrl} rel="noopener noreferrer" target="_blank">
-                Download the referral form
-              </a>{" "}
-              and fax the completed document to <a href={SITE.faxHref}>{SITE.fax}</a>.
-            </dd>
-          </div>
-          <div>
-            <dt>Clinical information</dt>
-            <dd>
-              Include the reason for referral, relevant diagnoses, previous treatments and current
-              medications.
-            </dd>
-          </div>
-          <div>
-            <dt>Next step</dt>
-            <dd>
-              The clinic will review the referral and contact the patient or referring office as
-              appropriate.
-            </dd>
-          </div>
-        </dl>
+        <p className="ref-instruction">
+          Please fill out the online referral form below. Alternatively, you may download the{" "}
+          <a href={REFERRAL_PDF_URL} rel="noopener noreferrer" target="_blank">
+            PDF referral form
+          </a>{" "}
+          and fax it to <a href={SITE.faxHref}>{SITE.fax}</a>.
+        </p>
         <div className="ref-form-frame">
-          <JotformReferralEmbed />
+          <PhysicianReferralForm />
         </div>
       </section>
     </SiteChrome>
