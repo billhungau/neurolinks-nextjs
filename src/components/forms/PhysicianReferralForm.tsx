@@ -16,7 +16,8 @@ import {
   JOTFORM_PHONE_MASK_HINT,
   REFERRAL_LIMITS,
   REFERRAL_PDF_URL,
-  REFERRAL_SUCCESS_MESSAGE,
+  REFERRAL_SUCCESS_HEADING,
+  REFERRAL_SUCCESS_PARAGRAPHS,
   TMS_CONTRAINDICATIONS,
   TREATMENTS,
   otherDiagnosisSelected,
@@ -39,7 +40,7 @@ export function PhysicianReferralForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [honeypot, setHoneypot] = useState("");
   const lockRef = useRef(createSubmitLock());
-  const successRef = useRef<HTMLParagraphElement>(null);
+  const successRef = useRef<HTMLHeadingElement>(null);
   const patientFirstNameRef = useRef<HTMLInputElement>(null);
   const patientLastNameRef = useRef<HTMLInputElement>(null);
   const phnRef = useRef<HTMLInputElement>(null);
@@ -164,7 +165,6 @@ export function PhysicianReferralForm() {
         | { ok?: boolean; success?: boolean; message?: string; error?: string }
         | null;
       if (response.ok && (data?.ok === true || data?.success === true)) {
-        setValues(EMPTY_REFERRAL_FIELDS);
         setHoneypot("");
         setStatus("success");
         requestAnimationFrame(() => successRef.current?.focus());
@@ -182,20 +182,46 @@ export function PhysicianReferralForm() {
   const otherSelected = otherDiagnosisSelected(values.diagnoses);
   const clinicalRequired = otherSelected;
 
+  if (status === "success") {
+    return (
+      <div className="ref-confirm" role="status" aria-live="polite">
+        <div className="ref-confirm-card">
+          <span className="ref-confirm-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
+              <path
+                d="M5.5 12.5 10 17l8.5-9.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <h2 ref={successRef} className="ref-confirm-heading" tabIndex={-1}>
+            {REFERRAL_SUCCESS_HEADING}
+          </h2>
+          {REFERRAL_SUCCESS_PARAGRAPHS.map((paragraph) => (
+            <p key={paragraph} className="ref-confirm-copy">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="ref-native">
-      {status === "success" ? (
-        <p
-          ref={successRef}
-          className="ref-form-success"
-          tabIndex={-1}
-          role="status"
-          aria-live="polite"
-        >
-          {REFERRAL_SUCCESS_MESSAGE}
-        </p>
-      ) : null}
+      <p className="ref-instruction">
+        Please fill out the online referral form below. Alternatively, you may download the{" "}
+        <a href={REFERRAL_PDF_URL} rel="noopener noreferrer" target="_blank">
+          PDF referral form
+        </a>{" "}
+        and fax it to <a href={SITE.faxHref}>{SITE.fax}</a>.
+      </p>
 
+      <div className="ref-form-frame">
       {status === "error" ? (
         <p className="ref-form-error-banner" role="alert" aria-live="assertive">
           The referral could not be submitted. Please try again or use the{" "}
@@ -443,6 +469,7 @@ export function PhysicianReferralForm() {
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }
