@@ -6,6 +6,8 @@ export const MEDIA = {
   tmsClinic: "/media/images/0N4A2661-768x512.jpg",
   reception: "/media/images/Brickyard-Neurolink-Office-10-3-768x512.jpg",
   office: "/media/images/Brickyard-Neurolink-Office-4-768x512.jpg",
+  /** Full-resolution original of MEDIA.office (WP 2022/11, 1920×1281). */
+  aboutHero: "/media/images/Brickyard-Neurolink-Office-4.webp",
   tmsMachine: "/media/images/TMS-machine-768x512.jpg",
   team: "/media/images/0N4A2651-768x512.jpg",
   drAu: "/media/images/Neurolink-Portraits-Au-768x768.jpg",
