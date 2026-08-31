@@ -2,22 +2,28 @@
 
 import { useEffect, useState } from "react";
 
-export const TMS_SECTIONS = [
+export type SectionLink = { id: string; label: string };
+
+export const TMS_SECTIONS: SectionLink[] = [
   { id: "overview", label: "Overview" },
   { id: "how-tms-works", label: "How it works" },
   { id: "conditions", label: "Conditions" },
   { id: "eligibility", label: "Eligibility" },
   { id: "coverage", label: "Coverage" },
   { id: "faqs", label: "FAQs" },
-] as const;
+];
 
-export function TmsSectionNav() {
-  const [active, setActive] = useState<string>(TMS_SECTIONS[0].id);
+export function TmsSectionNav({
+  sections = TMS_SECTIONS,
+}: {
+  sections?: readonly SectionLink[];
+}) {
+  const [active, setActive] = useState<string>(sections[0]?.id ?? "");
 
   useEffect(() => {
-    const nodes = TMS_SECTIONS.map((section) => document.getElementById(section.id)).filter(
-      (node): node is HTMLElement => Boolean(node),
-    );
+    const nodes = sections
+      .map((section) => document.getElementById(section.id))
+      .filter((node): node is HTMLElement => Boolean(node));
     if (nodes.length === 0) return undefined;
 
     const observer = new IntersectionObserver(
@@ -37,12 +43,12 @@ export function TmsSectionNav() {
 
     nodes.forEach((node) => observer.observe(node));
     return () => observer.disconnect();
-  }, []);
+  }, [sections]);
 
   return (
     <nav className="tms-subnav" aria-label="On this page">
       <div className="tms-subnav-inner">
-        {TMS_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <a
             key={section.id}
             href={`#${section.id}`}
