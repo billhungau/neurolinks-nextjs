@@ -187,7 +187,7 @@ export function SiteHeader() {
             className="site-header-panel relative z-10 lg:hidden"
             aria-label="Mobile"
           >
-            <ul className="mx-auto flex max-w-6xl flex-col gap-0.5 px-4 py-3">
+            <ul className="mx-auto flex max-w-6xl flex-col gap-0.5 px-4 pt-3 pb-5">
               {PRIMARY_NAV.map((item) => {
                 const current = isActivePath(pathname, item.href);
                 return (
