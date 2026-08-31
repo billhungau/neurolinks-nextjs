@@ -103,7 +103,11 @@ export default function HomePage() {
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[var(--nl-navy)]/55 to-transparent"
+            className="hero-top-scrim pointer-events-none absolute inset-x-0 top-0 md:hidden"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 hidden h-24 bg-gradient-to-b from-[var(--nl-navy)]/55 to-transparent md:block"
             aria-hidden="true"
           />
           <div
@@ -114,13 +118,13 @@ export default function HomePage() {
         <div className="relative z-10 mx-auto flex min-h-[clamp(540px,72svh,610px)] max-w-6xl flex-col justify-end px-5 pt-20 pb-8 md:min-h-0 md:justify-center md:px-4 md:py-10 lg:min-h-[clamp(540px,72vh,640px)] lg:py-16">
           <div className="hero-intro max-w-[45rem]">
             {/* The mobile floor is low enough to keep the three-line break at 320px. */}
-            <h1 className="hero-enter max-w-[16ch] font-serif text-[clamp(2.05rem,11vw,4rem)] font-semibold leading-[1.02] text-white md:leading-[1.04] lg:text-[clamp(3.5rem,5.3vw,5rem)] lg:leading-[1.02]">
+            <h1 className="hero-enter max-w-[16ch] font-serif text-[clamp(2.15rem,10.5vw,4rem)] font-semibold leading-[1.02] text-white md:leading-[1.04] lg:text-[clamp(3.5rem,5.3vw,5rem)] lg:leading-[1.02]">
               Expert care for complex mental challenges
             </h1>
-            <p className="hero-enter hero-enter-2 mt-4 max-w-[32ch] text-[0.9375rem] leading-[1.55] text-white/90 md:mt-5 md:max-w-xl md:text-lg md:leading-relaxed">
-              No matter how hard the past. We can always begin again.
+            <p className="hero-enter hero-enter-2 mt-4 max-w-[30ch] text-[0.9375rem] leading-[1.5] text-white/90 md:mt-5 md:max-w-xl md:text-lg md:leading-relaxed">
+              No matter how hard the past, we can always begin again.
             </p>
-            <div className="hero-enter hero-enter-3 mt-6 flex flex-wrap gap-3 md:mt-8">
+            <div className="hero-enter hero-enter-3 mt-8 flex flex-wrap gap-3 md:mt-8">
               <ButtonLink
                 href="/about-tms-treatment-on-psychiatric-illness/"
                 variant="accent"

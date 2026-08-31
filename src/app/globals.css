@@ -162,6 +162,18 @@ h3,
  * dissolves into navy rather than meeting a panel edge, so the gradient — not a
  * boundary — is what makes the copy readable.
  */
+.hero-top-scrim {
+  height: 108px;
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--nl-hero-navy) / 0.84) 0%,
+    rgb(var(--nl-hero-navy) / 0.52) 38%,
+    rgb(var(--nl-hero-navy) / 0.16) 68%,
+    rgb(var(--nl-hero-navy) / 0.04) 86%,
+    transparent 100%
+  );
+}
+
 .hero-scrim {
   background: linear-gradient(
     to bottom,
@@ -212,7 +224,7 @@ h3,
   }
 
   .hero-enter-3 {
-    animation-delay: 280ms;
+    animation-delay: 220ms;
   }
 }
 
