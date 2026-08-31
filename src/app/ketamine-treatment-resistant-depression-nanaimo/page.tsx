@@ -198,10 +198,12 @@ export default function KetaminePage() {
                 begin within hours to days—considerably faster than with conventional
                 antidepressants.
               </p>
+              <Eyebrow className="glance-label">At a glance</Eyebrow>
               <ul className="tms-facts ket-facts">
-                <li>Rapid-acting potential</li>
-                <li>Medically supervised administration</li>
-                <li>Individualized psychiatric assessment</li>
+                <li>Medication-based treatment</li>
+                <li>Medically supervised clinical setting</li>
+                <li>Intramuscular or subcutaneous administration</li>
+                <li>Psychiatric assessment required</li>
               </ul>
               <TmsDisclosure summary="Read more about the evidence">
                 <p>
@@ -491,7 +493,7 @@ export default function KetaminePage() {
               </p>
               <p className="mt-6">
                 <Link href="/contact/" className="tms-text-link">
-                  Speak with the clinic
+                  Contact the clinic
                 </Link>
               </p>
             </div>

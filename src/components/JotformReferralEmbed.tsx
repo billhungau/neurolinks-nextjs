@@ -1,105 +1,31 @@
 "use client";
 
 import Script from "next/script";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { FormEmbedSkeleton } from "@/components/FormEmbedSkeleton";
+import { useJotformEmbed } from "@/components/useJotformEmbed";
 import { JOTFORM_REFERRAL } from "@/lib/jotform-referral";
+import { SITE } from "@/lib/site";
 
-const initializedIframes = new Set<string>();
-const readyIframes = new Set<string>();
+const STATUS = "Loading secure referral form…";
 
 export function JotformReferralEmbed() {
-  const [iframeReady, setIframeReady] = useState(() => readyIframes.has(JOTFORM_REFERRAL.iframeId));
-  const [slow, setSlow] = useState(false);
-  const failTimer = useRef<number>(0);
-
-  const markReady = useCallback(() => {
-    readyIframes.add(JOTFORM_REFERRAL.iframeId);
-    setIframeReady(true);
-  }, []);
-
-  const initHandler = useCallback(() => {
-    if (typeof window.jotformEmbedHandler !== "function") return;
-    const iframe = document.getElementById(JOTFORM_REFERRAL.iframeId);
-    if (!(iframe instanceof HTMLIFrameElement)) return;
-    if (initializedIframes.has(JOTFORM_REFERRAL.iframeId)) return;
-    initializedIframes.add(JOTFORM_REFERRAL.iframeId);
-    window.jotformEmbedHandler(JOTFORM_REFERRAL.selector, JOTFORM_REFERRAL.baseUrl);
-  }, []);
-
-  useEffect(() => {
-    initHandler();
-    if (typeof window.jotformEmbedHandler === "function") return undefined;
-    const id = window.setInterval(() => {
-      if (typeof window.jotformEmbedHandler === "function") {
-        window.clearInterval(id);
-        initHandler();
-      }
-    }, 50);
-    return () => {
-      window.clearInterval(id);
-      if (!document.getElementById(JOTFORM_REFERRAL.iframeId)) {
-        initializedIframes.delete(JOTFORM_REFERRAL.iframeId);
-      }
-    };
-  }, [initHandler]);
-
-  useEffect(() => {
-    const iframe = document.getElementById(JOTFORM_REFERRAL.iframeId);
-    if (!(iframe instanceof HTMLIFrameElement)) return undefined;
-
-    iframe.addEventListener("load", markReady);
-
-    // React onLoad can miss if the iframe finishes before hydration.
-    // A cross-origin document is already present when location.href throws.
-    let alreadyLoaded = performance
-      .getEntriesByType("resource")
-      .some((entry) => entry.name.includes(JOTFORM_REFERRAL.formId));
-    try {
-      const href = iframe.contentWindow?.location.href ?? "";
-      if (href && href !== "about:blank") alreadyLoaded = true;
-    } catch {
-      alreadyLoaded = true;
-    }
-    if (alreadyLoaded) queueMicrotask(markReady);
-
-    const reserved = window.matchMedia("(min-width: 768px)").matches
-      ? JOTFORM_REFERRAL.initialMinHeight
-      : 950;
-    const poll = window.setInterval(() => {
-      if (iframe.getBoundingClientRect().height > reserved + 80) {
-        markReady();
-        window.clearInterval(poll);
-      }
-    }, 200);
-
-    return () => {
-      iframe.removeEventListener("load", markReady);
-      window.clearInterval(poll);
-    };
-  }, [markReady]);
-
-  useEffect(() => {
-    failTimer.current = window.setTimeout(() => {
-      setSlow((current) => (iframeReady ? current : true));
-    }, 12000);
-    return () => window.clearTimeout(failTimer.current);
-  }, [iframeReady]);
+  const { iframeReady, slow, waiting, initHandler } = useJotformEmbed({
+    iframeId: JOTFORM_REFERRAL.iframeId,
+    formId: JOTFORM_REFERRAL.formId,
+    selector: JOTFORM_REFERRAL.selector,
+    baseUrl: JOTFORM_REFERRAL.baseUrl,
+  });
 
   return (
-    <div className={`ref-embed${iframeReady ? " is-ready" : ""}`} aria-busy={!iframeReady}>
-      <Script
-        src={JOTFORM_REFERRAL.handlerSrc}
-        strategy="afterInteractive"
-        onLoad={() => {
-          initHandler();
-          markReady();
-        }}
-      />
-      {!iframeReady ? (
-        <p className="ref-embed-status" role="status" aria-live="polite">
-          Loading referral form…
-        </p>
-      ) : null}
+    <div
+      className={`form-embed ref-embed${waiting ? " is-waiting" : ""}${iframeReady ? " is-ready" : ""}`}
+      aria-busy={waiting && !iframeReady}
+    >
+      <Script src={JOTFORM_REFERRAL.handlerSrc} strategy="afterInteractive" onLoad={initHandler} />
+      <p className="form-embed-status" role="status" aria-live="polite">
+        {iframeReady ? "Referral form loaded." : STATUS}
+      </p>
+      <FormEmbedSkeleton variant="referral" />
       <iframe
         id={JOTFORM_REFERRAL.iframeId}
         title={JOTFORM_REFERRAL.title}
@@ -108,14 +34,15 @@ export function JotformReferralEmbed() {
         scrolling="no"
         loading="eager"
         referrerPolicy="strict-origin-when-cross-origin"
-        onLoad={markReady}
-        className="ref-embed-frame"
+        className="form-embed-frame ref-embed-frame"
       />
       {slow && !iframeReady ? (
-        <p className="ref-embed-fallback">
-          <a href={JOTFORM_REFERRAL.src} rel="noopener noreferrer" target="_blank">
-            Open the referral form directly
-          </a>
+        <p className="form-embed-fallback" role="status">
+          The online referral form is taking longer than expected to load. You may{" "}
+          <a href={JOTFORM_REFERRAL.pdfUrl} rel="noopener noreferrer" target="_blank">
+            download the PDF referral form
+          </a>{" "}
+          and fax it to {SITE.fax}.
         </p>
       ) : null}
     </div>

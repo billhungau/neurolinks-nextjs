@@ -4,9 +4,9 @@ export const SITE = {
   tagline: "TMS & Ketamine Treatments in BC, Canada",
   phone: "250-739-5530",
   phoneHref: "tel:2507395530",
-  // Owner: voice and fax currently use the same number (fax is formatted
-  // "(250)-739-5530"). Confirm this is intentional before changing either value.
-  fax: "(250)-739-5530",
+  // Voice and fax use the same clinic number in every migrated source.
+  fax: "250-739-5530",
+  faxHref: "tel:2507395530",
   email: "contact@neurolinks.ca",
   addressLine: "202-6010 Brickyard Road (Brickyard Clinic), Nanaimo, BC V9V 1S5",
   mapsUrl: "https://maps.app.goo.gl/3JkQg4FfxhYx9Aaf6",
