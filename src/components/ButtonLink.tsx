@@ -20,9 +20,14 @@ export function ButtonLink({ href, children, variant = "primary", className: ext
           : "bg-[var(--nl-navy)] text-white hover:bg-[var(--nl-navy-deep)]";
   const className = `${base} ${styles} ${extra}`.trim();
   const newTab = href.startsWith("http") || href.endsWith(".pdf");
-  if (newTab) {
+  const native = newTab || href.startsWith("tel:") || href.startsWith("mailto:");
+  if (native) {
     return (
-      <a className={className} href={href} rel="noopener noreferrer" target="_blank">
+      <a
+        className={className}
+        href={href}
+        {...(newTab ? { rel: "noopener noreferrer", target: "_blank" } : {})}
+      >
         {children}
       </a>
     );
