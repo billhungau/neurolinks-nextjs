@@ -20,35 +20,26 @@ export const metadata = pageMetadata({
 });
 
 const TRUST = [
-  {
-    title: "Psychiatrist-led care",
-    body: "Assessment and treatment recommendations led by a psychiatrist.",
-  },
-  {
-    title: "Two treatment options",
-    body: "TMS and ketamine offered when clinically appropriate.",
-  },
-  {
-    title: "MSP-covered assessment",
-    body: "The comprehensive psychiatric assessment is covered by MSP.",
-  },
+  "Psychiatrist-led care",
+  "TMS and ketamine treatment options",
+  "MSP-covered assessment",
 ] as const;
 
 const WHY = [
   {
     index: "01",
-    title: "Psychiatrist-led assessment",
-    body: "Diagnosis, treatment history and relevant medical factors are reviewed before treatment is recommended.",
+    title: "Founded for a local gap in care",
+    body: "Dr. Au founded NeuroLinks in Nanaimo so people facing complex or treatment-resistant mental health conditions could access TMS and ketamine care on Vancouver Island.",
   },
   {
     index: "02",
-    title: "Individualized recommendations",
-    body: "TMS, ketamine or another option is considered according to each patient’s clinical circumstances.",
+    title: "Neuromodulation training and experience",
+    body: "Dr. Au completed formal TMS training at Harvard University and previously helped establish a TMS centre at Queen Mary Hospital. He is a Clinical Assistant Professor at the University of British Columbia.",
   },
   {
     index: "03",
-    title: "Careful monitoring",
-    body: "Treatment response, tolerability and safety are monitored throughout care.",
+    title: "Care beyond medication alone",
+    body: "NeuroLinks offers TMS and ketamine as options when medication has not been sufficient, with care tailored to each patient’s needs.",
   },
 ] as const;
 
@@ -56,22 +47,22 @@ const PATHWAY = [
   {
     index: "01",
     title: "Contact the clinic",
-    body: "Contact NeuroLinks to ask about the assessment process.",
+    body: "Phone, email, or the contact form on this site to ask about a psychiatric assessment.",
   },
   {
     index: "02",
-    title: "Psychiatric assessment",
-    body: "A psychiatrist reviews your symptoms, diagnosis, treatment history and relevant medical factors.",
+    title: "Physician referral",
+    body: "An appropriate physician referral is required for an MSP-covered assessment. The clinic can explain referral requirements when you enquire.",
   },
   {
     index: "03",
-    title: "Treatment recommendation",
-    body: "TMS, ketamine or another option may be recommended when clinically appropriate.",
+    title: "Psychiatric assessment",
+    body: "A psychiatrist reviews your diagnosis, treatment history, and relevant medical factors. Questionnaires may be used to understand symptom severity.",
   },
   {
     index: "04",
-    title: "Treatment and monitoring",
-    body: "Response, tolerability and safety are monitored, with recommendations adjusted according to clinical progress.",
+    title: "After the assessment",
+    body: "TMS, ketamine, or another option may be recommended when clinically appropriate. Treatment coverage is separate from the assessment.",
   },
 ] as const;
 
@@ -115,7 +106,8 @@ complex mental
 challenges`}
             </h1>
             <p className="hero-enter hero-enter-2 home-hero-lede">
-              No matter how hard the past. We can always begin again.
+              <span>Psychiatrist-led TMS and ketamine treatments.</span>
+              <span>Care tailored to your needs.</span>
             </p>
             <div className="hero-enter hero-enter-3 home-hero-actions">
               <ButtonLink href="/contact/" variant="accent" className="home-hero-primary">
@@ -133,9 +125,8 @@ challenges`}
         <div className="nl-wrap">
           <ul className="trust-grid">
             {TRUST.map((item) => (
-              <li key={item.title}>
-                <p className="trust-title">{item.title}</p>
-                <p className="trust-body">{item.body}</p>
+              <li key={item}>
+                <p className="trust-title">{item}</p>
               </li>
             ))}
           </ul>
@@ -226,8 +217,8 @@ challenges`}
               Why patients choose NeuroLinks
             </h2>
             <p className="mt-4 max-w-[34rem] leading-relaxed text-[var(--nl-muted)]">
-              Specialist psychiatric assessment, individualized recommendations and careful
-              monitoring throughout treatment.
+              A Nanaimo clinic offering TMS and ketamine for people whose conditions have not
+              responded adequately to conventional treatment.
             </p>
           </Reveal>
           <ol className="why-nl-list">
@@ -323,13 +314,12 @@ challenges`}
             </Reveal>
             <Reveal delayMs={70}>
               <h2 id="team-heading" className="home-h2 text-[var(--nl-navy)]">
-                Specialist oversight from assessment through treatment
+                The people providing care
               </h2>
               <p className="mt-4 leading-relaxed text-[var(--nl-muted)]">
                 NeuroLinks was founded by Nanaimo psychiatrist Dr. Chi Hung Au to provide carefully
                 assessed treatment options for people facing complex or treatment-resistant mental
-                health conditions. Treatment recommendations are based on diagnosis, treatment
-                history, medical factors and individual needs.
+                health conditions.
               </p>
               <dl className="team-id">
                 <dt>Dr. Chi Hung Au</dt>

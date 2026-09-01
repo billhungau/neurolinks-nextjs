@@ -3,7 +3,7 @@ import { Reveal } from "./Reveal";
 function FieldMotif() {
   return (
     <svg
-      className="benefit-motif pointer-events-none absolute -right-10 -bottom-16 h-[16rem] w-[16rem]"
+      className="benefit-motif"
       viewBox="0 0 200 200"
       aria-hidden="true"
       focusable="false"
@@ -22,7 +22,7 @@ function FieldMotif() {
 function RippleMotif() {
   return (
     <svg
-      className="benefit-motif pointer-events-none absolute -right-12 -bottom-14 h-[15.5rem] w-[15.5rem]"
+      className="benefit-motif"
       viewBox="0 0 200 200"
       aria-hidden="true"
       focusable="false"
@@ -53,8 +53,10 @@ export function TreatmentBenefits() {
         </div>
 
         <div className="mt-8 grid gap-5 md:mt-10 md:grid-cols-2 md:items-stretch md:gap-6">
-          <article className="benefit-card benefit-card-tms benefits-step step-b relative h-full overflow-hidden">
-            <FieldMotif />
+          <article className="benefit-card benefit-card-tms benefits-step step-b relative h-full">
+            <div className="benefit-motif-clip" aria-hidden="true">
+              <FieldMotif />
+            </div>
             <div className="benefit-copy">
               <h3 className="benefit-title text-[var(--nl-navy)]">
                 TMS: an effective, non-invasive option
@@ -66,8 +68,10 @@ export function TreatmentBenefits() {
               </p>
             </div>
           </article>
-          <article className="benefit-card benefit-card-ketamine benefits-step step-c relative h-full overflow-hidden">
-            <RippleMotif />
+          <article className="benefit-card benefit-card-ketamine benefits-step step-c relative h-full">
+            <div className="benefit-motif-clip" aria-hidden="true">
+              <RippleMotif />
+            </div>
             <div className="benefit-copy">
               <h3 className="benefit-title text-[var(--nl-navy)]">
                 Ketamine: improvement may begin within hours or days

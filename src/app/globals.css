@@ -617,12 +617,20 @@ h3,
 
 .home-hero-lede {
   margin-top: 0.95rem;
-  max-width: 28ch;
+  max-width: none;
   font-size: 1rem;
   line-height: 1.55;
   letter-spacing: 0.01em;
   color: rgb(255 255 255 / 0.94);
   text-shadow: 0 1px 8px rgb(7 29 52 / 0.3);
+}
+
+.home-hero-lede span {
+  display: block;
+}
+
+.home-hero-lede span + span {
+  margin-top: 0.2em;
 }
 
 .home-hero-actions {
@@ -747,7 +755,6 @@ h3,
 
   .home-hero-lede {
     margin-top: 1.15rem;
-    max-width: 34ch;
     font-size: 1.0625rem;
     line-height: 1.6;
     text-shadow: 0 1px 14px rgb(7 29 52 / 0.4);
@@ -796,7 +803,6 @@ h3,
   .home-hero-lede {
     font-size: 1.125rem;
     line-height: 1.62;
-    max-width: 44ch;
   }
 }
 
@@ -1270,6 +1276,7 @@ h3,
 .benefit-copy {
   position: relative;
   z-index: 1;
+  padding-right: 1.5rem;
 }
 
 /**
@@ -1314,7 +1321,7 @@ h3,
 
 .benefit-card {
   min-height: 100%;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid transparent;
   border-radius: var(--nl-radius-lg);
   padding: 1.25rem 1.25rem 1.4rem;
@@ -1374,19 +1381,39 @@ h3,
   line-height: 1.65;
 }
 
+.benefit-motif-clip {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
 .benefit-motif {
+  position: absolute;
+  right: -1.5rem;
+  bottom: -2rem;
+  z-index: 0;
+  width: 7.25rem;
+  height: 7.25rem;
+  opacity: 0.34;
+  pointer-events: none;
   transform: translate3d(0, 0, 0);
   transition: transform 220ms ease;
 }
 
-@media (max-width: 479px) {
-  .benefit-card-tms .benefit-motif,
-  .benefit-card-ketamine .benefit-motif {
-    right: -3.5rem;
-    bottom: -5rem;
-    width: 11rem;
-    height: 11rem;
-    opacity: 0.55;
+@media (min-width: 768px) {
+  .benefit-motif {
+    right: -1.75rem;
+    bottom: -2.25rem;
+    width: 8.5rem;
+    height: 8.5rem;
+    opacity: 0.3;
+  }
+
+  .benefit-copy {
+    padding-right: 2.75rem;
   }
 }
 
