@@ -526,6 +526,34 @@ h3,
  * dissolves into the image — not a rectangular panel, and not the shared
  * .hero-scrim used by other treatment pages.
  */
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--nl-navy);
+}
+
+.home-hero-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1960 / 802;
+}
+
+#home-hero .hero-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.home-hero-copy-wrap {
+  position: relative;
+  z-index: 10;
+  margin-top: -2.75rem;
+  padding-top: 0.35rem;
+  padding-bottom: 1.85rem;
+}
+
 .home-hero-copy {
   max-width: 22.5rem;
 }
@@ -551,61 +579,108 @@ h3,
 }
 
 .home-hero-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: stretch;
-  gap: 0.7rem;
-  margin-top: 1.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 1.5rem;
 }
 
-.home-hero-actions a {
-  width: 100%;
+#home-hero .home-hero-actions a {
+  display: inline-flex;
+  flex: 1 1 9.75rem;
+  align-items: center;
+  justify-content: center;
+  width: auto;
   min-height: 3rem;
-  padding-inline: 0.55rem;
-  font-size: 0.75rem;
+  height: 3rem;
+  padding: 0 0.85rem;
+  border-radius: 5px;
+  box-shadow: none;
+  font-size: 0.875rem;
+  font-weight: 600;
   line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-align: center;
   white-space: nowrap;
-}
-
-#home-hero .home-hero-actions a:last-child {
-  border-color: rgb(255 255 255 / 0.72);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
 }
 
 #home-hero .home-hero-primary {
-  box-shadow: 0 8px 22px rgb(7 29 52 / 0.22);
+  border: 1px solid var(--nl-yellow);
+  background: var(--nl-yellow);
+  color: var(--nl-navy);
+}
+
+#home-hero .home-hero-primary:hover,
+#home-hero .home-hero-primary:focus-visible {
+  border-color: var(--nl-yellow-hover);
+  background: var(--nl-yellow-hover);
 }
 
 #home-hero .home-hero-secondary {
+  border: 1px solid rgb(255 255 255 / 0.55);
+  background: rgb(var(--nl-hero-navy) / 0.32);
+  color: #fff;
   font-weight: 500;
-  background: transparent;
+}
+
+#home-hero .home-hero-secondary:hover,
+#home-hero .home-hero-secondary:focus-visible {
+  border-color: rgb(255 255 255 / 0.78);
+  background: rgb(var(--nl-hero-navy) / 0.48);
 }
 
 /**
- * Mobile-only art direction: a photographic bottom wash so white type sits
- * on navy, not chair reflections. Soft stops, no hard rectangle, no polygon.
- * Desktop overwrites this at 768px with a left-to-right wash.
+ * Soft join from the full-width photograph into navy copy. The retouched
+ * file already carries left/top shading, so this is a seam blend only.
  */
 .home-hero-wash {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 48%;
+  pointer-events: none;
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    transparent 28%,
-    rgb(var(--nl-hero-navy) / 0.22) 40%,
-    rgb(var(--nl-hero-navy) / 0.58) 52%,
-    rgb(var(--nl-hero-navy) / 0.82) 66%,
-    rgb(var(--nl-hero-navy) / 0.92) 82%,
+    rgb(var(--nl-hero-navy) / 0.18) 42%,
+    rgb(var(--nl-hero-navy) / 0.72) 78%,
     rgb(var(--nl-hero-navy) / 0.96) 100%
   );
 }
 
-@media (min-width: 360px) {
-  .home-hero-actions a {
-    padding-inline: 0.7rem;
-    font-size: 0.8125rem;
-  }
-}
-
 @media (min-width: 768px) {
+  .home-hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    aspect-ratio: auto;
+    height: auto;
+  }
+
+  #home-hero .hero-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 52%;
+  }
+
+  .home-hero-copy-wrap {
+    display: flex;
+    min-height: clamp(28rem, 62vh, 36rem);
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 0;
+    padding-top: 4.75rem;
+    padding-bottom: 4rem;
+  }
+
   .home-hero-copy {
     max-width: 34rem;
   }
@@ -627,33 +702,39 @@ h3,
   }
 
   .home-hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+    flex-wrap: nowrap;
+    gap: 14px;
     margin-top: 1.75rem;
   }
 
-  .home-hero-actions a {
-    width: auto;
-    min-height: 2.75rem;
-    padding-inline: 1.5rem;
-    font-size: 0.875rem;
+  #home-hero .home-hero-actions a {
+    flex: 0 0 13.25rem;
+    width: 13.25rem;
+    min-width: 13.25rem;
+    height: 3.125rem;
+    min-height: 3.125rem;
+    padding: 0 1rem;
   }
 
+  /* Photograph already includes left and top shading — keep the right side bright. */
   .home-hero-wash {
+    inset: 0;
+    height: auto;
     background: linear-gradient(
       90deg,
-      rgb(var(--nl-hero-navy) / 0.64) 0%,
-      rgb(var(--nl-hero-navy) / 0.44) 16%,
-      rgb(var(--nl-hero-navy) / 0.22) 34%,
-      rgb(var(--nl-hero-navy) / 0.08) 50%,
-      rgb(var(--nl-hero-navy) / 0.02) 62%,
-      transparent 76%
+      rgb(var(--nl-hero-navy) / 0.18) 0%,
+      rgb(var(--nl-hero-navy) / 0.08) 22%,
+      transparent 42%
     );
   }
 }
 
 @media (min-width: 1024px) {
+  .home-hero-copy-wrap {
+    min-height: clamp(32rem, 64vh, 38rem);
+    padding-bottom: 4rem;
+  }
+
   .home-hero-heading {
     font-size: clamp(3.05rem, 4vw, 4.15rem);
     line-height: 1.06;

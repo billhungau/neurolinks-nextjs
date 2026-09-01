@@ -26,6 +26,8 @@ export const MEDIA = {
   homeHero: "/media/images/home-hero-banner.jpg",
   homeHeroIntegrated: "/media/images/home-hero-desktop.webp",
   homeHeroMobile: "/media/images/home-hero-portrait.webp",
+  /** Supplied retouched homepage hero (1960×802). Used as-is. */
+  homeHeroRetouched: "/media/images/neurolinks-hero-retouched.webp",
   /** Ketamine treatment-room photograph (recliner, window, side table). */
   ketamineHero: "/media/images/ketamine-treatment-room-hero.webp",
   ketamineHeroMobile: "/media/images/ketamine-treatment-room-hero-mobile.webp",
@@ -40,27 +42,23 @@ export const MEDIA = {
 } as const;
 
 /**
- * Homepage hero. Desktop and mobile crops of the supplied TMS + ketamine
- * clinic composite (`home-hero-source.png`). Contrast for type is a CSS
- * gradient. Regenerate with `node scripts/build-home-hero-integrated.mjs`.
+ * Homepage hero. The retouched 1960×802 composite is used directly;
+ * additional contrast is only a light CSS blend on small screens.
  */
 export const HOME_HERO_ASSET = {
-  sourceLocal: "/media/images/home-hero-source.png",
-  local: "/media/images/home-hero-desktop.webp",
-  width: 1920,
-  height: 960,
+  local: "/media/images/neurolinks-hero-retouched.webp",
+  width: 1960,
+  height: 802,
   restAlt: "",
 } as const;
 
 /**
- * Portrait art direction from the same composite. A landscape object-cover
- * crop would keep only the centre blend. Regenerate with the integrated script.
+ * Legacy portrait crop from the previous composite. Homepage no longer uses it.
  */
 export const HOME_HERO_MOBILE_ASSET = {
   local: "/media/images/home-hero-portrait.webp",
   width: 1080,
   height: 1600,
-  source: HOME_HERO_ASSET.sourceLocal,
 } as const;
 
 /** WP media 5946. Live Elementor image widget (not a CSS background). */

@@ -7,7 +7,7 @@ import { TreatmentBenefits } from "@/components/TreatmentBenefits";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
 import { TextLink } from "@/components/TextLink";
-import { HOME_HERO_ASSET, HOME_HERO_MOBILE_ASSET, MEDIA } from "@/lib/media";
+import { HOME_HERO_ASSET, MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
@@ -78,47 +78,31 @@ const PATHWAY = [
 const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLinks";
 
 /**
- * The hero photograph is art-directed per viewport: the landscape diptych on
- * desktop, the portrait re-crop on phones. `<picture>` keeps the hero to a
- * single request instead of loading both crops.
+ * One landscape photograph for every viewport. Phones show it full-width at
+ * the top of the hero; desktop covers the current hero height without a
+ * separate crop file.
  */
 function HeroPhoto() {
-  const shared = { alt: HERO_ALT, sizes: IMG_SIZES.fullBleed, priority: true };
-  const { props: desktop } = getImageProps({
-    ...shared,
-    src: MEDIA.homeHeroIntegrated,
+  const { props } = getImageProps({
+    alt: HERO_ALT,
+    sizes: IMG_SIZES.fullBleed,
+    priority: true,
+    src: MEDIA.homeHeroRetouched,
     width: HOME_HERO_ASSET.width,
     height: HOME_HERO_ASSET.height,
   });
-  const {
-    props: { srcSet: mobileSrcSet },
-  } = getImageProps({
-    ...shared,
-    src: MEDIA.homeHeroMobile,
-    width: HOME_HERO_MOBILE_ASSET.width,
-    height: HOME_HERO_MOBILE_ASSET.height,
-  });
-  return (
-    <picture>
-      <source media="(max-width: 767px)" srcSet={mobileSrcSet} sizes={shared.sizes} />
-      <img
-        {...desktop}
-        alt={HERO_ALT}
-        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_32%] md:object-[center_50%]"
-      />
-    </picture>
-  );
+  return <img {...props} alt={HERO_ALT} className="hero-photo" />;
 }
 
 export default function HomePage() {
   return (
     <SiteChrome>
-      <section id="home-hero" className="relative overflow-hidden bg-[var(--nl-navy)]">
-        <div className="absolute inset-0">
+      <section id="home-hero" className="home-hero">
+        <div className="home-hero-media">
           <HeroPhoto />
-          <div className="home-hero-wash pointer-events-none absolute inset-0" aria-hidden="true" />
+          <div className="home-hero-wash" aria-hidden="true" />
         </div>
-        <div className="nl-wrap relative z-10 flex min-h-[clamp(32.5rem,78svh,38.5rem)] flex-col justify-end pt-[4.75rem] pb-8 md:min-h-[clamp(28rem,62vh,36rem)] md:justify-center md:py-16 lg:min-h-[clamp(32rem,64vh,38rem)] lg:py-16">
+        <div className="nl-wrap home-hero-copy-wrap">
           <div className="hero-intro home-hero-copy">
             <h1 className="hero-enter home-hero-heading whitespace-pre-line">
               {`Expert care for
