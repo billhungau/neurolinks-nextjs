@@ -3069,18 +3069,18 @@ h3,
  * Iframe internals are cross-origin and are not styled from here.
  */
 .ct-hero {
-  height: clamp(165px, 12vw + 130px, 195px);
+  height: clamp(220px, 16vw + 165px, 250px);
 }
 
 @media (min-width: 768px) {
   .ct-hero {
-    height: clamp(190px, 8vw + 140px, 220px);
+    height: clamp(240px, 10vw + 165px, 270px);
   }
 }
 
 @media (min-width: 1024px) {
   .ct-hero {
-    height: clamp(210px, 6vw + 140px, 240px);
+    height: clamp(260px, 5vw + 200px, 290px);
   }
 }
 
@@ -3154,7 +3154,7 @@ h3,
 .ct-body {
   max-width: var(--site-max);
   margin-inline: auto;
-  padding: 1.4rem var(--nl-gutter) 3.5rem;
+  padding: 1.35rem var(--nl-gutter) 3.5rem;
 }
 
 @media (min-width: 768px) {
@@ -3183,15 +3183,12 @@ h3,
 }
 
 .ct-section-title {
+  margin: 0 0 0.85rem;
   font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
   font-size: clamp(1.75rem, 3vw, 2.15rem);
   font-weight: 600;
   line-height: 1.15;
   color: var(--nl-navy);
-}
-
-.ct-form-col .ct-section-title {
-  margin-bottom: 0.9rem;
 }
 
 .ct-details a,
@@ -3205,7 +3202,7 @@ h3,
 .ct-form-frame {
   position: relative;
   width: 100%;
-  margin-top: 0.9rem;
+  margin-top: 0;
   padding: 1.15rem 1rem 1.25rem;
   border: 1px solid var(--nl-border);
   border-radius: var(--nl-radius-lg);
