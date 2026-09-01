@@ -91,7 +91,12 @@ function HeroPhoto() {
     width: HOME_HERO_ASSET.width,
     height: HOME_HERO_ASSET.height,
   });
-  return <img {...props} alt={HERO_ALT} className="hero-photo" />;
+  return (
+    // getImageProps supplies a next/image-optimized srcSet; the hero needs a
+    // plain img so one landscape file can sit in a CSS-sized frame.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img {...props} alt={HERO_ALT} className="hero-photo" />
+  );
 }
 
 export default function HomePage() {
@@ -116,7 +121,7 @@ challenges`}
               <ButtonLink href="/contact/" variant="accent" className="home-hero-primary">
                 Request assessment
               </ButtonLink>
-              <ButtonLink href="#treatment-options" variant="on-dark" className="home-hero-secondary">
+              <ButtonLink href="#treatment-options" variant="on-dark" className="home-hero-secondary !font-medium">
                 Explore treatments
               </ButtonLink>
             </div>
