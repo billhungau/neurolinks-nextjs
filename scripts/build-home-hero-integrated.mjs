@@ -129,9 +129,9 @@ async function buildMobile() {
   const band = await composeBand({
     width,
     height: photoHeight,
-    tmsWidth: Math.round(width * 0.56),
-    ketWidth: Math.round(width * 0.66),
-    fadePx: 400,
+    tmsWidth: Math.round(width * 0.54),
+    ketWidth: Math.round(width * 0.72),
+    fadePx: 480,
   });
 
   const atmosphere = await sharp(band)
