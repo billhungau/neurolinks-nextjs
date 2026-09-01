@@ -378,11 +378,11 @@ export default function ServicesPage() {
               </div>
               <div className="svc-photo svc-photo-ket">
                 <Image
-                  src={MEDIA.homeHero}
+                  src={MEDIA.ketamineVial}
                   alt="Ketamine vial on a clinic windowsill at NeuroLinks"
                   fill
                   sizes={IMG_SIZES.half}
-                  className="object-cover object-right"
+                  className="object-cover object-[68%_62%]"
                 />
               </div>
             </div>
