@@ -1276,7 +1276,7 @@ h3,
 .benefit-copy {
   position: relative;
   z-index: 1;
-  padding-right: 1.5rem;
+  padding-right: 3.25rem;
 }
 
 /**
@@ -1392,12 +1392,12 @@ h3,
 
 .benefit-motif {
   position: absolute;
-  right: -1.5rem;
-  bottom: -2rem;
+  right: -2rem;
+  bottom: -2.75rem;
   z-index: 0;
-  width: 7.25rem;
-  height: 7.25rem;
-  opacity: 0.34;
+  width: 6.25rem;
+  height: 6.25rem;
+  opacity: 0.28;
   pointer-events: none;
   transform: translate3d(0, 0, 0);
   transition: transform 220ms ease;
@@ -1405,15 +1405,15 @@ h3,
 
 @media (min-width: 768px) {
   .benefit-motif {
-    right: -1.75rem;
-    bottom: -2.25rem;
-    width: 8.5rem;
-    height: 8.5rem;
-    opacity: 0.3;
+    right: -2.25rem;
+    bottom: -3rem;
+    width: 7.25rem;
+    height: 7.25rem;
+    opacity: 0.26;
   }
 
   .benefit-copy {
-    padding-right: 2.75rem;
+    padding-right: 4.25rem;
   }
 }
 
