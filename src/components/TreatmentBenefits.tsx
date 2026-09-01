@@ -61,11 +61,11 @@ function RippleMotif() {
 
 export function TreatmentBenefits() {
   return (
-    <section className="benefits bg-[var(--nl-cream)] nl-section">
+    <section className="benefits bg-[var(--nl-cream)] home-section">
       <Reveal className="benefits-seq nl-wrap">
         <div className="benefits-step step-a">
           <Eyebrow>Treatment benefits</Eyebrow>
-          <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
+          <h2 className="home-h2 mt-3 max-w-3xl text-[var(--nl-navy)]">
             What these treatments can offer
           </h2>
           <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
@@ -78,6 +78,7 @@ export function TreatmentBenefits() {
           <article className="benefit-card benefit-card-shared benefits-step step-b relative overflow-hidden">
               <WaveMotif />
               <div className="benefit-copy">
+                <p className="benefit-kicker benefit-kicker-on-dark">Psychiatrist-led care</p>
                 <h3 className="benefit-title text-white">
                   Psychiatrist-led assessment and careful monitoring
                 </h3>
@@ -90,7 +91,7 @@ export function TreatmentBenefits() {
               </div>
             </article>
 
-          <div className="grid gap-5 md:grid-cols-2 md:gap-6">
+          <div className="grid gap-5 md:grid-cols-2 md:gap-5">
               <article className="benefit-card benefit-card-tms benefits-step step-c relative h-full overflow-hidden">
                 <FieldMotif />
                 <div className="benefit-copy">
@@ -120,30 +121,6 @@ export function TreatmentBenefits() {
                 </div>
               </article>
           </div>
-
-            <aside className="benefit-funding benefits-step step-e" aria-labelledby="funding-heading">
-              <h3 id="funding-heading" className="benefit-title max-w-none text-[var(--nl-navy)]">
-                Assessment and treatment funding
-              </h3>
-              <div className="benefit-funding-cols">
-                <div>
-                  <h4 className="benefit-label text-[var(--nl-blue)]">MSP-covered assessment</h4>
-                  <p className="benefit-body mt-3 text-[var(--nl-muted)]">
-                    Psychiatric assessment is covered by MSP for eligible BC residents when referral
-                    requirements are met.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="benefit-label text-[var(--nl-blue)]">Funding</h4>
-                  <p className="benefit-body mt-3 text-[var(--nl-muted)]">
-                    TMS funding may be available to eligible patients through Veterans Affairs
-                    Canada, WorkSafeBC and other third-party programs. Approval depends on the
-                    patient&apos;s eligibility and the requirements of the individual funding
-                    program.
-                  </p>
-                </div>
-              </div>
-            </aside>
         </div>
 
         <p className="benefit-note benefits-step step-e">
