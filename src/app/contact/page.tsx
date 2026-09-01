@@ -37,12 +37,9 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="ct-body" aria-labelledby="contact-form-heading">
+      <section className="ct-body">
         <div className="ct-layout">
           <div className="ct-form-col">
-            <h2 id="contact-form-heading" className="ct-section-title">
-              Send a message
-            </h2>
             <div className="ct-form-frame">
               <ContactForm />
             </div>

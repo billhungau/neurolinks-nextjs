@@ -158,7 +158,13 @@ export function ContactForm() {
         </p>
       ) : null}
 
-      <form className="ct-form" onSubmit={onSubmit} noValidate aria-busy={submitting}>
+      <form
+        className="ct-form"
+        onSubmit={onSubmit}
+        noValidate
+        aria-busy={submitting}
+        aria-label="Contact NeuroLinks"
+      >
         <div className="ct-hp" aria-hidden="true">
           <label htmlFor="contact-website">Website</label>
           <input
