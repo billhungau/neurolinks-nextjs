@@ -10,8 +10,10 @@ export const SITE = {
   email: "contact@neurolinks.ca",
   addressLine: "202-6010 Brickyard Road (Brickyard Clinic), Nanaimo, BC V9V 1S5",
   mapsUrl: "https://maps.app.goo.gl/3JkQg4FfxhYx9Aaf6",
-  /** Same Google Place listing used for maps; reviews are not a separate verified URL in the WP extract. */
+  /** Same Google Place listing used for maps. */
   googleListingUrl: "https://maps.app.goo.gl/3JkQg4FfxhYx9Aaf6",
+  /** Verified Google profile used for curated homepage review excerpts. */
+  googleReviewsUrl: "https://share.google/zhQv4Wd5lcK4LFLeJ",
   facebook: "https://facebook.com/neurolinks.tms",
   instagram: "https://www.instagram.com/neurolinks.tms/",
   logo: "/media/images/New-Logo.png",

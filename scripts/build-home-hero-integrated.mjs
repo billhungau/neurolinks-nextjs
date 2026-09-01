@@ -1,6 +1,12 @@
 /**
- * Homepage hero art direction from the existing dual-treatment photograph:
- * TMS coil left, ketamine vial right, without the WordPress banner's navy polygon.
+ * Homepage hero crops from the WordPress original (1920×960):
+ *
+ * Desktop — encode the original photograph. CSS `object-cover` handles the
+ * slightly shorter hero box so the vial stays at its native prominence.
+ *
+ * Mobile — a portrait canvas cannot show the full 2:1 scene via object-cover.
+ * Wide TMS + ketamine panels are taken from the original (not a tight vial
+ * product-shot) so both treatments remain visible without enlarging the vial.
  *
  * Usage: node scripts/build-home-hero-integrated.mjs [--src path]
  */
@@ -11,21 +17,25 @@ import sharp from "sharp";
 const SRC = arg("--src") ?? "public/media/images/home-hero-banner.jpg";
 
 const DESKTOP = {
-  out: "public/media/images/home-hero-integrated.webp",
+  out: "public/media/images/home-hero-desktop.webp",
   width: 1920,
-  height: 900,
+  height: 960,
 };
 
 const MOBILE = {
-  out: "public/media/images/home-hero-mobile.webp",
+  out: "public/media/images/home-hero-portrait.webp",
   width: 1080,
   height: 1600,
 };
 
-/** Crops as fractions of the source frame, avoiding the centre polygon. */
+/**
+ * Fractions of the original frame. Wide enough to keep window / chair context
+ * and skip the centre navy chevron so the mobile join is a soft fade, not a
+ * second V overlay.
+ */
 const PANELS = {
-  tms: { left: 0.012, top: 0.028, width: 0.272, height: 0.94 },
-  ketamine: { left: 0.698, top: 0.22, width: 0.228, height: 0.76 },
+  tms: { left: 0.0, top: 0.0, width: 0.4, height: 1.0 },
+  ketamine: { left: 0.6, top: 0.0, width: 0.4, height: 1.0 },
 };
 
 const NAVY = { r: 7, g: 29, b: 52 };
@@ -36,12 +46,11 @@ function arg(name) {
 }
 
 function region(frac, meta) {
-  return {
-    left: Math.max(0, Math.round(frac.left * meta.width)),
-    top: Math.max(0, Math.round(frac.top * meta.height)),
-    width: Math.round(frac.width * meta.width),
-    height: Math.round(frac.height * meta.height),
-  };
+  const left = Math.max(0, Math.round(frac.left * meta.width));
+  const top = Math.max(0, Math.round(frac.top * meta.height));
+  const width = Math.min(meta.width - left, Math.round(frac.width * meta.width));
+  const height = Math.min(meta.height - top, Math.round(frac.height * meta.height));
+  return { left, top, width, height };
 }
 
 async function extract(source, frac, meta, width, height, { brighten = false } = {}) {
@@ -49,12 +58,11 @@ async function extract(source, frac, meta, width, height, { brighten = false } =
     .extract(region(frac, meta))
     .resize(width, height, { fit: "cover", position: "centre" });
   if (brighten) {
-    img = img.modulate({ brightness: 1.08, saturation: 1.04 });
+    img = img.modulate({ brightness: 1.04, saturation: 1.02 });
   }
   return img.toBuffer();
 }
 
-/** Soft-edge fade on one side so two panels meet without a graphic seam. */
 function sideFadeMask(width, height, fadePx, from) {
   const x1 = from === "left" ? 0 : width;
   const x2 = from === "left" ? fadePx : width - fadePx;
@@ -95,57 +103,29 @@ function verticalFadeOut(width, height, fadePx) {
   );
 }
 
-async function buildDesktop(source, meta) {
+async function buildDesktop(source) {
   const { width, height } = DESKTOP;
-  const tmsWidth = Math.round(width * 0.62);
-  const ketWidth = Math.round(width * 0.48);
-  const overlap = tmsWidth + ketWidth - width;
-  const ketLeft = width - ketWidth;
-  const fadePx = Math.max(overlap + 40, 160);
-
-  const tms = await extract(source, PANELS.tms, meta, tmsWidth, height, { brighten: true });
-  const ket = await extract(source, PANELS.ketamine, meta, ketWidth, height);
-  const ketFaded = await withSideFade(ket, ketWidth, height, fadePx, "left");
-
-  const wash = Buffer.from(
-    `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="l" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="rgb(${NAVY.r},${NAVY.g},${NAVY.b})" stop-opacity="0.14" />
-      <stop offset="0.38" stop-color="rgb(${NAVY.r},${NAVY.g},${NAVY.b})" stop-opacity="0.05" />
-      <stop offset="0.56" stop-color="rgb(${NAVY.r},${NAVY.g},${NAVY.b})" stop-opacity="0" />
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#l)" />
-</svg>`,
-  );
-
-  const out = await sharp({
-    create: { width, height, channels: 3, background: NAVY },
-  })
-    .composite([
-      { input: tms, left: 0, top: 0 },
-      { input: ketFaded, left: ketLeft, top: 0 },
-      { input: wash, left: 0, top: 0 },
-    ])
+  const out = await sharp(source)
+    .resize(width, height, { fit: "inside", withoutEnlargement: true })
     .webp({ quality: 86 })
     .toBuffer();
 
   mkdirSync(dirname(DESKTOP.out), { recursive: true });
   writeFileSync(DESKTOP.out, out);
-  console.log(`wrote ${DESKTOP.out} ${width}x${height} overlap ${overlap} (${out.length} bytes)`);
+  console.log(`wrote ${DESKTOP.out} ${width}x${height} (${out.length} bytes)`);
 }
 
 async function buildMobile(source, meta) {
   const { width, height } = MOBILE;
-  const photoHeight = 1080;
+  const photoHeight = 1020;
   const tmsWidth = Math.round(width * 0.56);
   const ketWidth = Math.round(width * 0.56);
   const ketLeft = width - ketWidth;
+  const fadePx = 180;
 
   const tms = await extract(source, PANELS.tms, meta, tmsWidth, photoHeight, { brighten: true });
   const ket = await extract(source, PANELS.ketamine, meta, ketWidth, photoHeight);
-  const ketFaded = await withSideFade(ket, ketWidth, photoHeight, 200, "left");
+  const ketFaded = await withSideFade(ket, ketWidth, photoHeight, fadePx, "left");
 
   const band = await sharp({
     create: { width, height: photoHeight, channels: 3, background: NAVY },
@@ -159,13 +139,13 @@ async function buildMobile(source, meta) {
 
   const atmosphere = await sharp(band)
     .resize(width, height, { fit: "cover", position: "bottom" })
-    .blur(12)
-    .modulate({ brightness: 0.9, saturation: 0.96 })
+    .blur(14)
+    .modulate({ brightness: 0.88, saturation: 0.94 })
     .toBuffer();
 
   const bandFaded = await sharp(band)
     .ensureAlpha()
-    .composite([{ input: verticalFadeOut(width, photoHeight, 140), blend: "dest-in" }])
+    .composite([{ input: verticalFadeOut(width, photoHeight, 160), blend: "dest-in" }])
     .png()
     .toBuffer();
 
@@ -186,5 +166,10 @@ if (!meta.width || !meta.height) {
   throw new Error(`Could not read dimensions from ${SRC} (${meta.format})`);
 }
 console.log(`source ${meta.width}x${meta.height} ${meta.format}`);
-await buildDesktop(source, meta);
+if (meta.width < 1600) {
+  console.warn(
+    `warning: source is ${meta.width}px wide; expected the 1920×960 WordPress original`,
+  );
+}
+await buildDesktop(source);
 await buildMobile(source, meta);

@@ -2,7 +2,7 @@ import Image, { getImageProps } from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
 import { ClinicMap } from "@/components/ClinicMap";
 import { CtaBand } from "@/components/CtaBand";
-import { Eyebrow } from "@/components/Eyebrow";
+import { HomeReviews } from "@/components/HomeReviews";
 import { TreatmentBenefits } from "@/components/TreatmentBenefits";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
@@ -19,41 +19,59 @@ export const metadata = pageMetadata({
   path: "/",
 });
 
-const REVIEWS = [
+const TRUST = [
   {
-    name: "B. J.",
-    text: "Dr Au and his team took amazing care of me! He was very patient and thorough with diagnosis and my options- plus providing all the information on TMS treatment.",
+    title: "Psychiatrist-led care",
+    body: "Assessment and treatment recommendations led by a psychiatrist.",
   },
   {
-    name: "P. R.",
-    text: "I took my daughter to see Dr. Chi Hung for the first time today. We have struggled to find the right help for at least 5 years now and we are so grateful to Dr. Chi Hung and his staff for finally LISTENING.",
+    title: "Two treatment options",
+    body: "TMS and ketamine offered when clinically appropriate.",
   },
   {
-    name: "S. H.",
-    text: "TMS has been a integral treatment in healing myself from depression and anxiety. TMS potentially saved my life, for I was suicidal before treatment. Forever grateful to Dr. Au and his staff.",
+    title: "MSP-covered assessment",
+    body: "The comprehensive psychiatric assessment is covered by MSP.",
   },
-];
+] as const;
+
+const WHY = [
+  {
+    index: "01",
+    title: "Psychiatrist-led assessment",
+    body: "Diagnosis, treatment history and relevant medical factors are reviewed before treatment is recommended.",
+  },
+  {
+    index: "02",
+    title: "Individualized recommendations",
+    body: "TMS, ketamine or another option is considered according to each patient’s clinical circumstances.",
+  },
+  {
+    index: "03",
+    title: "Careful monitoring",
+    body: "Treatment response, tolerability and safety are monitored throughout care.",
+  },
+] as const;
 
 const PATHWAY = [
   {
     index: "01",
-    title: "Referral or inquiry",
-    body: "Patients and families may contact the clinic. Physicians can complete the online referral or fax the PDF form.",
+    title: "Contact the clinic",
+    body: "Contact NeuroLinks to ask about the assessment process.",
   },
   {
     index: "02",
     title: "Psychiatric assessment",
-    body: "A psychiatrist reviews your diagnosis, treatment history, medical factors and goals. The assessment is covered by MSP.",
+    body: "A psychiatrist reviews your symptoms, diagnosis, treatment history and relevant medical factors.",
   },
   {
     index: "03",
-    title: "Individualized treatment planning",
-    body: "If TMS is deemed suitable, standard or accelerated plans may be considered. Standard care is typically five sessions a week for at least six weeks; an accelerated five-day course is also available. Ketamine is tailored to your needs, typically two sessions a week for up to three weeks, with adjustments based on your response.",
+    title: "Treatment recommendation",
+    body: "TMS, ketamine or another option may be recommended when clinically appropriate.",
   },
   {
     index: "04",
-    title: "Treatment and outcome monitoring",
-    body: "Care is delivered in a medically supervised setting, with adjustments based on your response.",
+    title: "Treatment and monitoring",
+    body: "Response, tolerability and safety are monitored, with recommendations adjusted according to clinical progress.",
   },
 ] as const;
 
@@ -66,15 +84,15 @@ const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLi
  */
 function HeroPhoto() {
   const shared = { alt: HERO_ALT, sizes: IMG_SIZES.fullBleed, priority: true };
-  const {
-    props: { srcSet: desktopSrcSet },
-  } = getImageProps({
+  const { props: desktop } = getImageProps({
     ...shared,
     src: MEDIA.homeHeroIntegrated,
     width: HOME_HERO_ASSET.width,
     height: HOME_HERO_ASSET.height,
   });
-  const { props: mobile } = getImageProps({
+  const {
+    props: { srcSet: mobileSrcSet },
+  } = getImageProps({
     ...shared,
     src: MEDIA.homeHeroMobile,
     width: HOME_HERO_MOBILE_ASSET.width,
@@ -82,11 +100,11 @@ function HeroPhoto() {
   });
   return (
     <picture>
-      <source media="(min-width: 768px)" srcSet={desktopSrcSet} sizes={shared.sizes} />
+      <source media="(max-width: 767px)" srcSet={mobileSrcSet} sizes={shared.sizes} />
       <img
-        {...mobile}
+        {...desktop}
         alt={HERO_ALT}
-        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_top] md:object-[center_42%]"
+        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_32%] md:object-[center_50%]"
       />
     </picture>
   );
@@ -108,28 +126,37 @@ complex mental
 challenges`}
             </h1>
             <p className="hero-enter hero-enter-2 home-hero-lede">
-              No matter how hard the past, we can always begin again.
+              No matter how hard the past. We can always begin again.
             </p>
             <div className="hero-enter hero-enter-3 home-hero-actions">
-              <ButtonLink href="/about-tms-treatment-on-psychiatric-illness/" variant="accent">
-                Explore TMS
+              <ButtonLink href="/contact/" variant="accent" className="home-hero-primary">
+                Request assessment
               </ButtonLink>
-              <ButtonLink
-                href="/ketamine-treatment-resistant-depression-nanaimo/"
-                variant="on-dark"
-              >
-                Explore Ketamine
+              <ButtonLink href="#treatment-options" variant="on-dark" className="home-hero-secondary">
+                Explore treatments
               </ButtonLink>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="nl-section bg-[var(--nl-cream)]">
+      <section className="trust-strip" aria-label="Clinic facts">
+        <div className="nl-wrap">
+          <ul className="trust-grid">
+            {TRUST.map((item) => (
+              <li key={item.title}>
+                <p className="trust-title">{item.title}</p>
+                <p className="trust-body">{item.body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section id="treatment-options" className="home-section scroll-mt-24 bg-[var(--nl-cream)]">
         <div className="nl-wrap">
           <Reveal>
-            <Eyebrow>Treatment options</Eyebrow>
-            <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
+            <h2 className="home-h2 max-w-3xl text-[var(--nl-navy)]">
               Two distinct, psychiatrist-led therapies
             </h2>
             <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
@@ -141,7 +168,7 @@ challenges`}
               treatment is recommended only when clinically appropriate.
             </p>
           </Reveal>
-          <div className="mt-10 grid gap-8 lg:grid-cols-2">
+          <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
             <Reveal>
               <article className="tx-feature group">
                 <div className="img-frame relative aspect-[16/10]">
@@ -154,18 +181,17 @@ challenges`}
                   />
                 </div>
                 <div className="tx-feature-copy">
-                  <Eyebrow>01 · TMS</Eyebrow>
-                  <h3 className="mt-3 font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.85rem]">
+                  <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
                     Transcranial Magnetic Stimulation
                   </h3>
-                  <p className="mt-4 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
+                  <p className="mt-3 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
                     TMS is a non-invasive neuromodulation treatment with established evidence for
                     depression and certain other psychiatric conditions. Suitability depends on the
-                    diagnosis, treatment history and protocol being considered.                     TMS is covered by
+                    diagnosis, treatment history and protocol being considered. TMS is covered by
                     Veterans Affairs Canada and certain workers&apos; compensation programs.
                   </p>
                   <TextLink href="/about-tms-treatment-on-psychiatric-illness/">
-                    How TMS transforms mental illness
+                    Discover how TMS could help
                   </TextLink>
                 </div>
               </article>
@@ -182,24 +208,23 @@ challenges`}
                   />
                 </div>
                 <div className="tx-feature-copy">
-                  <Eyebrow>02 · Ketamine</Eyebrow>
-                  <h3 className="mt-3 font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.85rem]">
+                  <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
                     Ketamine therapy
                   </h3>
-                  <p className="mt-4 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
+                  <p className="mt-3 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
                     Ketamine is administered in controlled clinical settings through intramuscular and
                     subcutaneous injections. Its rapid onset of action distinguishes it from
                     traditional antidepressants, often alleviating symptoms within hours or days.
                   </p>
                   <TextLink href="/ketamine-treatment-resistant-depression-nanaimo/">
-                    How Ketamine uplifts mental wellbeing
+                    Explore how ketamine could help
                   </TextLink>
                 </div>
               </article>
             </Reveal>
           </div>
           <Reveal>
-            <div className="mt-10">
+            <div className="mt-7">
               <TextLink href="/services-psychiatric-tms-ketamine-treatment/">
                 More about our service
               </TextLink>
@@ -208,27 +233,49 @@ challenges`}
         </div>
       </section>
 
-      <section className="nl-section bg-[var(--nl-navy)] text-white">
-        <div className="nl-wrap">
+      <section className="home-section why-nl bg-white" aria-labelledby="why-nl-heading">
+        <div className="nl-wrap why-nl-grid">
           <Reveal>
-            <Eyebrow className="text-[var(--nl-yellow)]">Patient pathway</Eyebrow>
-            <h2 className="mt-3 max-w-3xl font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight">
-              How care typically proceeds
+            <h2 id="why-nl-heading" className="home-h2 text-[var(--nl-navy)]">
+              Why patients choose NeuroLinks
             </h2>
-            <p className="prose-measure mt-4 text-sm leading-relaxed text-white/75">
-              An inquiry or referral leads to assessment. Treatment is offered only when it is
-              clinically appropriate.
+            <p className="mt-4 max-w-[34rem] leading-relaxed text-[var(--nl-muted)]">
+              Specialist psychiatric assessment, individualized recommendations and careful
+              monitoring throughout treatment.
             </p>
           </Reveal>
-          <ol className="pathway mt-12 grid list-none gap-10 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+          <ol className="why-nl-list">
+            {WHY.map((item, index) => (
+              <Reveal key={item.index} delayMs={index * 70}>
+                <li>
+                  <p className="why-nl-index">{item.index}</p>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                  </div>
+                </li>
+              </Reveal>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="home-section bg-[var(--nl-navy)] text-white" aria-labelledby="pathway-heading">
+        <div className="nl-wrap">
+          <Reveal>
+            <h2 id="pathway-heading" className="home-h2 max-w-3xl">
+              How care typically proceeds
+            </h2>
+          </Reveal>
+          <ol className="pathway mt-8 grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
             {PATHWAY.map((step, index) => (
               <Reveal key={step.index} delayMs={index * 60}>
                 <li>
                   <p className="relative z-10 font-serif text-2xl text-[var(--nl-yellow)]">
                     {step.index}
                   </p>
-                  <h3 className="mt-4 font-serif text-xl font-semibold">{step.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/75">{step.body}</p>
+                  <h3 className="mt-3 font-serif text-xl font-semibold">{step.title}</h3>
+                  <p className="mt-2.5 text-sm leading-relaxed text-white/75">{step.body}</p>
                 </li>
               </Reveal>
             ))}
@@ -238,11 +285,47 @@ challenges`}
 
       <TreatmentBenefits />
 
-      <section className="nl-section bg-white">
+      <section className="home-section bg-white" aria-labelledby="funding-heading">
         <div className="nl-wrap">
-          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-16">
+          <Reveal>
+            <aside className="funding-panel" aria-labelledby="funding-heading">
+              <h2 id="funding-heading" className="home-h2 text-[var(--nl-navy)]">
+                Assessment and treatment funding
+              </h2>
+              <dl className="funding-grid">
+                <div>
+                  <dt>MSP-covered assessment</dt>
+                  <dd>
+                    The comprehensive psychiatric assessment is covered by MSP for eligible BC
+                    residents when referral requirements are met.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Treatment coverage</dt>
+                  <dd>
+                    TMS and ketamine treatment are not generally covered by MSP. Selected
+                    third-party programs, including Veterans Affairs Canada and WorkSafeBC, may
+                    provide coverage in eligible cases.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Your circumstances</dt>
+                  <dd>
+                    Approval depends on eligibility and the requirements of the individual funding
+                    program. Contact the clinic to ask about your circumstances.
+                  </dd>
+                </div>
+              </dl>
+            </aside>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="home-section bg-[var(--nl-cream)]" aria-labelledby="team-heading">
+        <div className="nl-wrap">
+          <div className="team-split">
             <Reveal>
-              <div className="img-frame relative aspect-[4/3] overflow-hidden rounded-[var(--nl-radius-lg)]">
+              <div className="img-frame team-photo relative">
                 <Image
                   src={MEDIA.team}
                   alt="Neurolinks team"
@@ -253,8 +336,7 @@ challenges`}
               </div>
             </Reveal>
             <Reveal delayMs={70}>
-              <Eyebrow>Psychiatrist-led care</Eyebrow>
-              <h2 className="mt-3 font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-tight text-[var(--nl-navy)]">
+              <h2 id="team-heading" className="home-h2 text-[var(--nl-navy)]">
                 Specialist oversight from assessment through treatment
               </h2>
               <p className="mt-4 leading-relaxed text-[var(--nl-muted)]">
@@ -267,52 +349,24 @@ challenges`}
                 <dt>Dr. Chi Hung Au</dt>
                 <dd>Psychiatrist · Clinical Assistant Professor, UBC</dd>
               </dl>
-              <div className="mt-6">
+              <div className="mt-5">
                 <TextLink href="/psychiatrist-tms-nanaimo/">Meet the team</TextLink>
               </div>
             </Reveal>
           </div>
-          <Reveal>
-            <div className="mt-16 border-t border-[var(--nl-navy)]/10 pt-12">
-              <Eyebrow>Google reviews</Eyebrow>
-              <h2 className="mt-3 font-serif text-[clamp(1.75rem,3.2vw,2.35rem)] font-semibold text-[var(--nl-navy)]">
-                What our patients say
-              </h2>
-              <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
-                Selected reviews from patients who shared their experiences on Google.
-              </p>
-              <p className="mt-3">
-                <TextLink href={SITE.googleListingUrl}>View all Google reviews</TextLink>
-              </p>
-              <div className="mt-8 grid gap-5 md:grid-cols-3 md:gap-6">
-                {REVIEWS.map((r) => (
-                  <blockquote key={r.name} className="review-card">
-                    <p className="review-mark" aria-hidden="true">
-                      “
-                    </p>
-                    <p className="text-sm leading-relaxed text-[var(--nl-ink)]">{r.text}</p>
-                    <footer className="mt-5 text-sm font-semibold text-[var(--nl-navy)]">
-                      {r.name}
-                    </footer>
-                  </blockquote>
-                ))}
-              </div>
-            </div>
-          </Reveal>
         </div>
       </section>
 
-      <section id="location" className="nl-section scroll-mt-24 bg-[var(--nl-cream)]">
+      <HomeReviews />
+
+      <section id="location" className="home-section scroll-mt-24 bg-white">
         <Reveal>
-          <div className="nl-wrap grid items-stretch gap-8 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)] lg:gap-12">
+          <div className="nl-wrap location-split">
             <div className="flex flex-col justify-center">
-              <Eyebrow>Visit</Eyebrow>
-              <h2 className="mt-3 font-serif text-[clamp(1.85rem,3.6vw,3rem)] font-semibold text-[var(--nl-navy)]">
-                Find the clinic
-              </h2>
+              <h2 className="home-h2 text-[var(--nl-navy)]">Find the clinic</h2>
               <p className="mt-4 max-w-md leading-relaxed">{SITE.addressLine}</p>
               <p className="mt-2 text-[var(--nl-muted)]">Free parking is available</p>
-              <p className="mt-6">
+              <p className="mt-5">
                 <a
                   className="inline-flex min-h-11 items-center font-semibold text-[var(--nl-blue-bright)] underline underline-offset-4"
                   href={SITE.phoneHref}
@@ -320,21 +374,20 @@ challenges`}
                   {SITE.phone}
                 </a>
               </p>
-              <div className="mt-4">
+              <div className="mt-2">
                 <TextLink href={SITE.mapsUrl}>Get directions</TextLink>
               </div>
             </div>
-            <ClinicMap />
+            <ClinicMap className="map-embed--home" />
           </div>
         </Reveal>
       </section>
 
       <CtaBand
-        eyebrow="Questions?"
-        title="Seeking support for your mental wellbeing or a loved one's?"
-        body="Don't hesitate to contact us – we're here to help you navigate your journey."
+        title="Not sure whether TMS or ketamine may be appropriate?"
+        body="Contact NeuroLinks to learn more about the assessment process."
         href="/contact/"
-        label="Contact us"
+        label="Request an assessment"
       />
     </SiteChrome>
   );
