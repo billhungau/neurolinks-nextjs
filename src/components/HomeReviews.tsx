@@ -1,14 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { HOME_REVIEWS } from "@/content/home-reviews";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { HOME_REVIEWS, reviewRange, reviewStatusText } from "@/content/home-reviews";
 import { SITE } from "@/lib/site";
 import { TextLink } from "./TextLink";
+
+const TOTAL = HOME_REVIEWS.length;
 
 function pageSizeFromWidth(width: number) {
   if (width >= 1024) return 3;
   if (width >= 768) return 2;
   return 1;
+}
+
+function navLabel(direction: "previous" | "next", pageSize: number) {
+  const noun = pageSize === 1 ? "review" : "reviews";
+  return direction === "previous" ? `Previous ${noun}` : `Next ${noun}`;
+}
+
+function slideStride(root: HTMLElement) {
+  const slide = root.querySelector<HTMLElement>(".reviews-slide");
+  if (!slide) return root.clientWidth;
+  const styles = getComputedStyle(root);
+  const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0;
+  return slide.getBoundingClientRect().width + gap;
 }
 
 function StarRow() {
@@ -28,9 +43,15 @@ function StarRow() {
 
 export function HomeReviews() {
   const scrollerRef = useRef<HTMLUListElement>(null);
+  const programmatic = useRef(false);
   const [pageSize, setPageSize] = useState(1);
   const [page, setPage] = useState(0);
-  const pageCount = Math.ceil(HOME_REVIEWS.length / pageSize);
+  const pageCount = Math.ceil(TOTAL / pageSize);
+  const safePage = Math.min(page, pageCount - 1);
+  const { start, end } = reviewRange(safePage, pageSize, TOTAL);
+  const status = reviewStatusText(safePage, pageSize, TOTAL);
+  const statusId = useId();
+  const trackId = useId();
 
   useEffect(() => {
     const update = () => setPageSize(pageSizeFromWidth(window.innerWidth));
@@ -39,25 +60,52 @@ export function HomeReviews() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const scrollToPage = useCallback((next: number, smooth: boolean) => {
-    const root = scrollerRef.current;
-    if (!root) return;
-    const bounded = Math.max(0, Math.min(next, pageCount - 1));
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    root.scrollTo({
-      left: bounded * root.clientWidth,
-      behavior: reduced || !smooth ? "auto" : "smooth",
-    });
-  }, [pageCount]);
+  const scrollToPage = useCallback(
+    (next: number, smooth: boolean) => {
+      const root = scrollerRef.current;
+      if (!root) return;
+      const bounded = Math.max(0, Math.min(next, pageCount - 1));
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      programmatic.current = true;
+      root.scrollTo({
+        left: bounded * pageSize * slideStride(root),
+        behavior: reduced || !smooth ? "auto" : "smooth",
+      });
+      setPage(bounded);
+      window.setTimeout(() => {
+        programmatic.current = false;
+      }, 450);
+    },
+    [pageCount, pageSize],
+  );
 
   useEffect(() => {
-    scrollToPage(Math.min(page, pageCount - 1), false);
-  }, [pageCount, page, scrollToPage]);
-
-  function onScroll() {
+    const bounded = Math.min(page, Math.ceil(TOTAL / pageSize) - 1);
+    if (bounded !== page) {
+      setPage(bounded);
+      return;
+    }
     const root = scrollerRef.current;
     if (!root) return;
-    const next = Math.round(root.scrollLeft / Math.max(root.clientWidth, 1));
+    programmatic.current = true;
+    root.scrollTo({
+      left: bounded * pageSize * slideStride(root),
+      behavior: "auto",
+    });
+    const timer = window.setTimeout(() => {
+      programmatic.current = false;
+    }, 80);
+    return () => clearTimeout(timer);
+    // Re-snap when the visible page size changes; button/swipe updates scroll themselves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- page is clamped above
+  }, [pageSize]);
+
+  function onScroll() {
+    if (programmatic.current) return;
+    const root = scrollerRef.current;
+    if (!root) return;
+    const stride = Math.max(slideStride(root) * pageSize, 1);
+    const next = Math.round(root.scrollLeft / stride);
     setPage(Math.max(0, Math.min(next, pageCount - 1)));
   }
 
@@ -76,61 +124,75 @@ export function HomeReviews() {
           <TextLink href={SITE.googleReviewsUrl}>View more Google reviews</TextLink>
         </p>
 
-        <div className="reviews-shell">
+        <div className="reviews-shell" role="region" aria-roledescription="carousel" aria-labelledby="home-reviews-heading">
           <ul
+            id={trackId}
             ref={scrollerRef}
             className="reviews-track"
             onScroll={onScroll}
             aria-label="Patient review excerpts"
           >
-            {HOME_REVIEWS.map((review) => (
-              <li key={review.initials} className="reviews-slide">
-                <blockquote className="review-card">
-                  <StarRow />
-                  <span className="sr-only">Five-star Google review. </span>
-                  <p className="review-quote">{review.text}</p>
-                  <footer className="review-meta">
-                    <cite>{review.initials}</cite>
-                    <span>
-                      {review.familyMember ? "Family member · Google review" : "Google review"}
-                    </span>
-                  </footer>
-                </blockquote>
-              </li>
-            ))}
+            {HOME_REVIEWS.map((review, index) => {
+              const visible = index >= start - 1 && index <= end - 1;
+              return (
+                <li
+                  key={review.initials}
+                  className="reviews-slide"
+                  aria-hidden={visible ? undefined : true}
+                >
+                  <blockquote className="review-card">
+                    <StarRow />
+                    <span className="sr-only">Five-star Google review. </span>
+                    <p className="review-quote">{review.text}</p>
+                    <footer className="review-meta">
+                      <cite>{review.initials}</cite>
+                      <span>
+                        {review.familyMember ? "Family member · Google review" : "Google review"}
+                      </span>
+                    </footer>
+                  </blockquote>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="reviews-controls">
             <button
               type="button"
               className="reviews-nav"
-              aria-label="Previous reviews"
-              disabled={page <= 0}
-              onClick={() => scrollToPage(page - 1, true)}
+              aria-label={navLabel("previous", pageSize)}
+              aria-controls={trackId}
+              disabled={safePage <= 0}
+              onClick={() => scrollToPage(safePage - 1, true)}
             >
               Previous
+            </button>
+            <p className="reviews-status" id={statusId} aria-live="polite" aria-atomic="true">
+              {status}
+            </p>
+            <button
+              type="button"
+              className="reviews-nav"
+              aria-label={navLabel("next", pageSize)}
+              aria-controls={trackId}
+              disabled={safePage >= pageCount - 1}
+              onClick={() => scrollToPage(safePage + 1, true)}
+            >
+              Next
             </button>
             <div className="reviews-dots" role="group" aria-label="Review pages">
               {Array.from({ length: pageCount }, (_, index) => (
                 <button
                   key={index}
                   type="button"
-                  aria-label={`Show reviews page ${index + 1}`}
-                  aria-current={page === index ? "true" : undefined}
-                  className={page === index ? "is-active" : undefined}
+                  aria-label={reviewStatusText(index, pageSize, TOTAL)}
+                  aria-current={safePage === index ? "true" : undefined}
+                  aria-controls={trackId}
+                  className={safePage === index ? "is-active" : undefined}
                   onClick={() => scrollToPage(index, true)}
                 />
               ))}
             </div>
-            <button
-              type="button"
-              className="reviews-nav"
-              aria-label="Next reviews"
-              disabled={page >= pageCount - 1}
-              onClick={() => scrollToPage(page + 1, true)}
-            >
-              Next
-            </button>
           </div>
         </div>
       </div>

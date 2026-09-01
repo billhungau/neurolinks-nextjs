@@ -17,6 +17,18 @@ export type HomeReview = {
   source: "wordpress-homepage";
 };
 
+export function reviewRange(page: number, pageSize: number, total: number) {
+  const start = page * pageSize + 1;
+  const end = Math.min(start + pageSize - 1, total);
+  return { start, end };
+}
+
+export function reviewStatusText(page: number, pageSize: number, total: number) {
+  const { start, end } = reviewRange(page, pageSize, total);
+  if (start === end) return `Review ${start} of ${total}`;
+  return `Reviews ${start}–${end} of ${total}`;
+}
+
 export const HOME_REVIEWS: HomeReview[] = [
   {
     initials: "E. H.",

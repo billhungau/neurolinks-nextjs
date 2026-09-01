@@ -109,7 +109,7 @@ function HeroPhoto() {
       <img
         {...mobile}
         alt={HERO_ALT}
-        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_top] md:object-[center_42%]"
+        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_24%] md:object-[center_42%]"
       />
     </picture>
   );
@@ -135,10 +135,10 @@ challenges`}
             </p>
             <div className="hero-enter hero-enter-3 home-hero-actions">
               <ButtonLink href="/contact/" variant="accent" className="home-hero-primary">
-                Request an assessment
+                Request assessment
               </ButtonLink>
               <ButtonLink href="#treatment-options" variant="on-dark" className="home-hero-secondary">
-                Explore treatment options
+                Explore treatments
               </ButtonLink>
             </div>
           </div>

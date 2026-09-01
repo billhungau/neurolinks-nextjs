@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { GOOGLE_REVIEWS_URL, HOME_REVIEWS } from "./home-reviews.ts";
+import { GOOGLE_REVIEWS_URL, HOME_REVIEWS, reviewStatusText } from "./home-reviews.ts";
 
 test("homepage reviews are five curated static excerpts", () => {
   assert.equal(HOME_REVIEWS.length, 5);
@@ -21,4 +21,13 @@ test("review excerpts match the approved published wording", () => {
   assert.match(byInitials["P. R."], /help and hope we have been so desperately searching for/);
   assert.match(byInitials["T. H."], /top notch/);
   assert.equal(GOOGLE_REVIEWS_URL, "https://share.google/zhQv4Wd5lcK4LFLeJ");
+});
+
+test("carousel status names the visible review range of five", () => {
+  assert.equal(reviewStatusText(0, 1, 5), "Review 1 of 5");
+  assert.equal(reviewStatusText(4, 1, 5), "Review 5 of 5");
+  assert.equal(reviewStatusText(0, 3, 5), "Reviews 1–3 of 5");
+  assert.equal(reviewStatusText(1, 3, 5), "Reviews 4–5 of 5");
+  assert.equal(reviewStatusText(0, 2, 5), "Reviews 1–2 of 5");
+  assert.equal(reviewStatusText(2, 2, 5), "Review 5 of 5");
 });
