@@ -60,10 +60,11 @@ async function buildDesktop() {
 
 async function buildMobile() {
   const { width, height, out } = MOBILE;
-  // Keep the full diptych (no side crop). 2:1 source → 1080×540 band.
-  const bandHeight = Math.round(width / 2);
+  // Taller than 2:1 so phones show more of the photograph; a mild side crop
+  // still keeps the coil and the vial.
+  const bandHeight = 720;
   const band = await sharp(SOURCE)
-    .resize(width, bandHeight, { fit: "fill" })
+    .resize(width, bandHeight, { fit: "cover", position: "centre" })
     .png()
     .toBuffer();
 
