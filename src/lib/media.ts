@@ -40,18 +40,12 @@ export const MEDIA = {
 } as const;
 
 /**
- * Homepage hero. Media 5544 embeds a navy chevron; desktop and mobile are
- * recomposed from the TMS side of that banner plus the clean windowsill still.
- * Contrast for type is a CSS gradient. Regenerate with
- * `node scripts/build-home-hero-integrated.mjs`.
+ * Homepage hero. Desktop and mobile crops of the supplied TMS + ketamine
+ * clinic composite (`home-hero-source.png`). Contrast for type is a CSS
+ * gradient. Regenerate with `node scripts/build-home-hero-integrated.mjs`.
  */
 export const HOME_HERO_ASSET = {
-  wpId: 5544,
-  wpUrl:
-    "https://neurolinks.ca/wp-content/uploads/2024/06/Orange-And-Blue-Modern-Professional-Construction-Banner-Design-2.jpg",
-  wpDerivativeUrl:
-    "https://neurolinks.ca/wp-content/uploads/2024/06/Orange-And-Blue-Modern-Professional-Construction-Banner-Design-2-1536x768.jpg",
-  sourceLocal: "/media/images/home-hero-banner.jpg",
+  sourceLocal: "/media/images/home-hero-source.png",
   local: "/media/images/home-hero-desktop.webp",
   width: 1920,
   height: 960,
@@ -59,14 +53,14 @@ export const HOME_HERO_ASSET = {
 } as const;
 
 /**
- * Portrait art direction from the same original. A landscape object-cover crop
- * would keep only ~31% of the width. Regenerate with the integrated script.
+ * Portrait art direction from the same composite. A landscape object-cover
+ * crop would keep only the centre blend. Regenerate with the integrated script.
  */
 export const HOME_HERO_MOBILE_ASSET = {
   local: "/media/images/home-hero-portrait.webp",
   width: 1080,
   height: 1600,
-  source: HOME_HERO_ASSET.wpUrl,
+  source: HOME_HERO_ASSET.sourceLocal,
 } as const;
 
 /** WP media 5946. Live Elementor image widget (not a CSS background). */

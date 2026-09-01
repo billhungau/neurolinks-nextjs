@@ -1,7 +1,8 @@
 /**
  * Legacy mobile crop of the WordPress banner. The homepage now uses
- * `scripts/build-home-hero-integrated.mjs`, which writes home-hero-mobile.webp
- * without the navy smear. Keep this script only if you need the older crop.
+ * `scripts/build-home-hero-integrated.mjs`, which writes the current
+ * homepage crops from `home-hero-source.png`. Keep this script only if
+ * you need the older WordPress-banner crop.
  *
  * Usage: node scripts/build-home-hero-mobile.mjs [--src path-or-url] [--out path]
  */
