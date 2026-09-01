@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 export function MotionReady() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.classList.add("motion-ready");
   }, []);
 

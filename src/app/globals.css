@@ -70,6 +70,25 @@ html {
   isolation: isolate;
 }
 
+.site-header-logo {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.site-header-logo-img {
+  display: block;
+  width: auto;
+  height: 2rem;
+  max-width: none;
+}
+
+@media (min-width: 768px) {
+  .site-header-logo-img {
+    height: 2.25rem;
+  }
+}
+
 .site-header-wash {
   position: absolute;
   inset-inline: 0;
@@ -216,16 +235,15 @@ html {
   --font-serif: var(--font-display);
 }
 
-html {
-  overflow-x: hidden;
-}
-
 body {
   background: var(--nl-white);
   color: var(--nl-ink);
   font-family: var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif;
   font-synthesis: none;
-  overflow-x: hidden;
+}
+
+#main-content {
+  overflow-x: clip;
 }
 
 h1,

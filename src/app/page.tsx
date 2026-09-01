@@ -119,7 +119,7 @@ export default function HomePage() {
           <div className="home-hero-wash pointer-events-none absolute inset-0" aria-hidden="true" />
         </div>
         <div className="nl-wrap relative z-10 flex min-h-[clamp(32.5rem,78svh,38.5rem)] flex-col justify-end pt-[4.75rem] pb-8 md:min-h-[clamp(28rem,62vh,36rem)] md:justify-center md:py-16 lg:min-h-[clamp(32rem,64vh,38rem)] lg:py-16">
-          <div className="home-hero-copy">
+          <div className="hero-intro home-hero-copy">
             <h1 className="hero-enter home-hero-heading whitespace-pre-line">
               {`Expert care for
 complex mental

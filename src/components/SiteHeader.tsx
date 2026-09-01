@@ -119,7 +119,7 @@ export function SiteHeader() {
       <div className="nl-wrap relative z-10 flex h-14 items-center justify-between gap-3 md:h-16">
         <Link
           href="/"
-          className="shrink-0"
+          className="site-header-logo shrink-0"
           aria-label="NeuroLinks home"
           onClick={() => setOpen(false)}
         >
@@ -130,7 +130,7 @@ export function SiteHeader() {
             height={50}
             priority
             sizes={IMG_SIZES.logo}
-            className="h-8 w-auto md:h-9"
+            className="site-header-logo-img"
           />
         </Link>
         <nav className="hidden min-w-0 flex-1 xl:block" aria-label="Primary">

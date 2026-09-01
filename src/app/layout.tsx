@@ -51,7 +51,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-CA" className={`${display.variable} ${body.variable} h-full`} suppressHydrationWarning>
-      <body className="flex min-h-full flex-col overflow-x-hidden font-sans antialiased text-[#111111]">
+      <body className="flex min-h-full flex-col font-sans antialiased text-[#111111]">
         <Script
           id="nl-js"
           strategy="beforeInteractive"
