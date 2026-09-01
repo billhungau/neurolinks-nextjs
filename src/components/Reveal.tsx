@@ -17,23 +17,16 @@ export function Reveal({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-  const [pending, setPending] = useState(false);
 
   useLayoutEffect(() => {
     const node = ref.current;
     if (!node) return undefined;
 
-    const reveal = () => {
-      setPending(false);
-      setVisible(true);
-    };
-
     if (prefersReducedMotion()) {
-      reveal();
       return undefined;
     }
 
-    setPending(true);
+    const reveal = () => setVisible(true);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -77,7 +70,7 @@ export function Reveal({
   return (
     <div
       ref={ref}
-      className={`reveal${pending ? " reveal-pending" : ""}${visible ? " is-visible" : ""} ${className}`.trim()}
+      className={`reveal${visible ? " is-visible" : ""} ${className}`.trim()}
       style={delayMs ? { transitionDelay: `${delayMs}ms` } : undefined}
     >
       {children}

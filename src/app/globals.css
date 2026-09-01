@@ -432,7 +432,7 @@ h3,
     }
   }
 
-  .motion-ready .reveal.reveal-pending:not(.is-visible) {
+  .motion-ready .reveal:not(.is-visible) {
     opacity: 0;
     transform: translateY(0.7rem);
   }
@@ -1145,7 +1145,7 @@ h3,
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .motion-ready .benefits-seq.reveal-pending:not(.is-visible) .benefits-step {
+  .motion-ready .benefits-seq.reveal:not(.is-visible) .benefits-step {
     opacity: 0;
     transform: translateY(12px);
   }
@@ -1986,7 +1986,7 @@ h3,
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .motion-ready .tms-mech.reveal-pending:not(.is-visible) .tms-mech-step {
+  .motion-ready .tms-mech.reveal:not(.is-visible) .tms-mech-step {
     opacity: 0;
     transform: translateY(14px);
   }
@@ -2312,8 +2312,8 @@ h3,
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .motion-ready .ket-onset.reveal-pending:not(.is-visible) .ket-onset-step,
-  .motion-ready .ket-mech.reveal-pending:not(.is-visible) .ket-mech-grid > li {
+  .motion-ready .ket-onset.reveal:not(.is-visible) .ket-onset-step,
+  .motion-ready .ket-mech.reveal:not(.is-visible) .ket-mech-grid > li {
     opacity: 0;
     transform: translateY(14px);
   }
@@ -2693,7 +2693,7 @@ h3,
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .motion-ready .svc-path.reveal-pending:not(.is-visible) .svc-path-step {
+  .motion-ready .svc-path.reveal:not(.is-visible) .svc-path-step {
     opacity: 0;
     transform: translateY(14px);
   }
@@ -3061,9 +3061,9 @@ h3,
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .motion-ready .about-gallery-wrap.reveal-pending:not(.is-visible) .about-gallery figure,
-  .motion-ready .about-au.reveal-pending:not(.is-visible) > *,
-  .motion-ready .about-team-reveal.reveal-pending:not(.is-visible) .about-team article {
+  .motion-ready .about-gallery-wrap.reveal:not(.is-visible) .about-gallery figure,
+  .motion-ready .about-au.reveal:not(.is-visible) > *,
+  .motion-ready .about-team-reveal.reveal:not(.is-visible) .about-team article {
     opacity: 0;
     transform: translateY(14px);
   }
@@ -3999,7 +3999,6 @@ h3,
 
 @media print {
   .reveal,
-  .reveal-pending,
   .benefits-step,
   .hero-enter,
   .hero-photo,
