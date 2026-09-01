@@ -46,6 +46,7 @@
 
 html {
   scroll-padding-top: 4.75rem;
+  overflow-x: clip;
 }
 
 :focus-visible {
