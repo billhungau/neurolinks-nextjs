@@ -33,10 +33,6 @@ const TRUST = [
     title: "MSP-covered assessment",
     body: "The comprehensive psychiatric assessment is covered by MSP.",
   },
-  {
-    title: "Located in Nanaimo",
-    body: "Specialist care on Central Vancouver Island.",
-  },
 ] as const;
 
 const WHY = [

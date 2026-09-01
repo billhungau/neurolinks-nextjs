@@ -746,12 +746,12 @@ h3,
 }
 
 /**
- * Four-column desktop/tablet treatment. Stacked rows remain below this
+ * Three-column desktop/tablet treatment. Stacked rows remain below this
  * component-specific 900px rule so columns never compress into a 2×2.
  */
 @media (min-width: 900px) {
   .trust-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     padding: 1.05rem 0;
   }
 
