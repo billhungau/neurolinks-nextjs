@@ -9,11 +9,11 @@ function FieldMotif() {
       focusable="false"
     >
       <g fill="none" stroke="currentColor" strokeWidth="1.1">
-        <circle cx="132" cy="132" r="22" />
-        <circle cx="132" cy="132" r="40" />
-        <circle cx="132" cy="132" r="58" />
-        <circle cx="132" cy="132" r="76" />
-        <circle cx="132" cy="132" r="94" />
+        <circle cx="168" cy="168" r="16" />
+        <circle cx="168" cy="168" r="30" />
+        <circle cx="168" cy="168" r="46" />
+        <circle cx="168" cy="168" r="62" />
+        <circle cx="168" cy="168" r="78" />
       </g>
     </svg>
   );
@@ -28,11 +28,11 @@ function RippleMotif() {
       focusable="false"
     >
       <g fill="none" stroke="currentColor" strokeWidth="1.1">
-        <ellipse cx="128" cy="128" rx="24" ry="18" />
-        <ellipse cx="128" cy="128" rx="44" ry="34" />
-        <ellipse cx="128" cy="128" rx="66" ry="50" />
-        <ellipse cx="128" cy="128" rx="88" ry="66" />
-        <path d="M40 128h176" />
+        <ellipse cx="166" cy="166" rx="16" ry="12" />
+        <ellipse cx="166" cy="166" rx="30" ry="22" />
+        <ellipse cx="166" cy="166" rx="46" ry="34" />
+        <ellipse cx="166" cy="166" rx="62" ry="46" />
+        <path d="M88 166h176" />
       </g>
     </svg>
   );
