@@ -26,6 +26,10 @@ function slideStride(root: HTMLElement) {
   return slide.getBoundingClientRect().width + gap;
 }
 
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 function StarRow() {
   return (
     <p className="review-stars" aria-hidden="true">
@@ -43,7 +47,6 @@ function StarRow() {
 
 export function HomeReviews() {
   const scrollerRef = useRef<HTMLUListElement>(null);
-  const programmatic = useRef(false);
   const [pageSize, setPageSize] = useState(1);
   const [page, setPage] = useState(0);
   const pageCount = Math.ceil(TOTAL / pageSize);
@@ -60,54 +63,49 @@ export function HomeReviews() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const scrollToPage = useCallback(
+  const goTo = useCallback(
     (next: number, smooth: boolean) => {
       const root = scrollerRef.current;
       if (!root) return;
-      const bounded = Math.max(0, Math.min(next, pageCount - 1));
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      programmatic.current = true;
-      root.scrollTo({
-        left: bounded * pageSize * slideStride(root),
-        behavior: reduced || !smooth ? "auto" : "smooth",
-      });
+      const bounded = Math.max(0, Math.min(next, Math.ceil(TOTAL / pageSize) - 1));
+      const slides = root.querySelectorAll<HTMLElement>(".reviews-slide");
+      const target = slides[bounded * pageSize];
+      const left = target
+        ? target.getBoundingClientRect().left - root.getBoundingClientRect().left + root.scrollLeft
+        : bounded * pageSize * slideStride(root);
+      const useSmooth = smooth && pageSize === 1 && !prefersReducedMotion();
+      if (!useSmooth) {
+        root.scrollLeft = left;
+      } else {
+        root.scrollTo({ left, behavior: "smooth" });
+      }
       setPage(bounded);
-      window.setTimeout(() => {
-        programmatic.current = false;
-      }, 450);
     },
-    [pageCount, pageSize],
+    [pageSize],
   );
 
   useEffect(() => {
-    const bounded = Math.min(page, Math.ceil(TOTAL / pageSize) - 1);
-    if (bounded !== page) {
-      setPage(bounded);
-      return;
-    }
     const root = scrollerRef.current;
     if (!root) return;
-    programmatic.current = true;
-    root.scrollTo({
-      left: bounded * pageSize * slideStride(root),
-      behavior: "auto",
-    });
-    const timer = window.setTimeout(() => {
-      programmatic.current = false;
-    }, 80);
-    return () => clearTimeout(timer);
-    // Re-snap when the visible page size changes; button/swipe updates scroll themselves.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- page is clamped above
+
+    const syncFromScroll = () => {
+      const stride = Math.max(slideStride(root) * pageSize, 1);
+      const next = Math.round(root.scrollLeft / stride);
+      const bounded = Math.max(0, Math.min(next, Math.ceil(TOTAL / pageSize) - 1));
+      setPage((current) => (current === bounded ? current : bounded));
+    };
+
+    root.addEventListener("scroll", syncFromScroll, { passive: true });
+    return () => root.removeEventListener("scroll", syncFromScroll);
   }, [pageSize]);
 
-  function onScroll() {
-    if (programmatic.current) return;
+  useEffect(() => {
     const root = scrollerRef.current;
     if (!root) return;
-    const stride = Math.max(slideStride(root) * pageSize, 1);
-    const next = Math.round(root.scrollLeft / stride);
-    setPage(Math.max(0, Math.min(next, pageCount - 1)));
-  }
+    root.scrollLeft = Math.min(page, Math.ceil(TOTAL / pageSize) - 1) * pageSize * slideStride(root);
+    // Align only when the visible page size changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- navigation already moves the track
+  }, [pageSize]);
 
   return (
     <section className="home-reviews home-section" aria-labelledby="home-reviews-heading">
@@ -125,13 +123,7 @@ export function HomeReviews() {
         </p>
 
         <div className="reviews-shell" role="region" aria-roledescription="carousel" aria-labelledby="home-reviews-heading">
-          <ul
-            id={trackId}
-            ref={scrollerRef}
-            className="reviews-track"
-            onScroll={onScroll}
-            aria-label="Patient review excerpts"
-          >
+          <ul id={trackId} ref={scrollerRef} className="reviews-track" aria-label="Patient review excerpts">
             {HOME_REVIEWS.map((review, index) => {
               const visible = index >= start - 1 && index <= end - 1;
               return (
@@ -154,6 +146,9 @@ export function HomeReviews() {
                 </li>
               );
             })}
+            {Array.from({ length: (pageSize - (TOTAL % pageSize)) % pageSize }, (_, index) => (
+              <li key={`spacer-${index}`} className="reviews-slide reviews-spacer" aria-hidden="true" />
+            ))}
           </ul>
 
           <div className="reviews-controls">
@@ -162,8 +157,9 @@ export function HomeReviews() {
               className="reviews-nav"
               aria-label={navLabel("previous", pageSize)}
               aria-controls={trackId}
+              aria-describedby={statusId}
               disabled={safePage <= 0}
-              onClick={() => scrollToPage(safePage - 1, true)}
+              onClick={() => goTo(safePage - 1, true)}
             >
               Previous
             </button>
@@ -175,8 +171,9 @@ export function HomeReviews() {
               className="reviews-nav"
               aria-label={navLabel("next", pageSize)}
               aria-controls={trackId}
+              aria-describedby={statusId}
               disabled={safePage >= pageCount - 1}
-              onClick={() => scrollToPage(safePage + 1, true)}
+              onClick={() => goTo(safePage + 1, true)}
             >
               Next
             </button>
@@ -189,7 +186,7 @@ export function HomeReviews() {
                   aria-current={safePage === index ? "true" : undefined}
                   aria-controls={trackId}
                   className={safePage === index ? "is-active" : undefined}
-                  onClick={() => scrollToPage(index, true)}
+                  onClick={() => goTo(index, true)}
                 />
               ))}
             </div>

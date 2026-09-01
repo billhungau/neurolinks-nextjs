@@ -565,12 +565,12 @@ h3,
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    transparent 38%,
-    rgb(var(--nl-hero-navy) / 0.14) 48%,
-    rgb(var(--nl-hero-navy) / 0.46) 64%,
-    rgb(var(--nl-hero-navy) / 0.78) 80%,
-    rgb(var(--nl-hero-navy) / 0.9) 90%,
-    rgb(var(--nl-hero-navy) / 0.94) 100%
+    transparent 32%,
+    rgb(var(--nl-hero-navy) / 0.28) 40%,
+    rgb(var(--nl-hero-navy) / 0.72) 50%,
+    rgb(var(--nl-hero-navy) / 0.86) 64%,
+    rgb(var(--nl-hero-navy) / 0.93) 84%,
+    rgb(var(--nl-hero-navy) / 0.96) 100%
   );
 }
 
@@ -578,12 +578,6 @@ h3,
   .home-hero-actions a {
     padding-inline: 0.7rem;
     font-size: 0.8125rem;
-  }
-}
-
-@media (max-width: 329px) {
-  .home-hero-actions {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -951,7 +945,6 @@ h3,
   flex: 0 0 92%;
   min-width: 0;
   scroll-snap-align: start;
-  scroll-snap-stop: always;
 }
 
 @media (min-width: 768px) {
@@ -964,6 +957,11 @@ h3,
   .reviews-slide {
     flex-basis: calc(33.333% - 0.55rem);
   }
+}
+
+.reviews-spacer {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .review-card {

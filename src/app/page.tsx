@@ -109,7 +109,7 @@ function HeroPhoto() {
       <img
         {...mobile}
         alt={HERO_ALT}
-        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_24%] md:object-[center_42%]"
+        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_36%] md:object-[center_42%]"
       />
     </picture>
   );
