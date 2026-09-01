@@ -40,9 +40,10 @@ export const MEDIA = {
 } as const;
 
 /**
- * Homepage hero: the same TMS + ketamine photographs as WP media 5544, recomposed
- * without the banner's navy polygon. Source JPEG remains at home-hero-banner.jpg.
- * Regenerate both crops with `node scripts/build-home-hero-integrated.mjs`.
+ * Homepage hero: WordPress media 5544, the 1920×960 original banner photograph
+ * (TMS left, ketamine vial right). Desktop uses that frame; mobile is a
+ * separate wide-panel crop so both subjects stay visible in portrait.
+ * Regenerate with `node scripts/build-home-hero-integrated.mjs`.
  */
 export const HOME_HERO_ASSET = {
   wpId: 5544,
@@ -53,13 +54,13 @@ export const HOME_HERO_ASSET = {
   sourceLocal: "/media/images/home-hero-banner.jpg",
   local: "/media/images/home-hero-integrated.webp",
   width: 1920,
-  height: 900,
+  height: 960,
   restAlt: "",
 } as const;
 
 /**
- * Portrait art direction of the same two photographs. A landscape crop of the
- * diptych would keep only the centre seam. Regenerate with the integrated script.
+ * Portrait art direction from the same original. A landscape object-cover crop
+ * would keep only ~31% of the width. Regenerate with the integrated script.
  */
 export const HOME_HERO_MOBILE_ASSET = {
   local: "/media/images/home-hero-mobile.webp",

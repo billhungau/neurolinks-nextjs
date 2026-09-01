@@ -2,7 +2,6 @@ import Image, { getImageProps } from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
 import { ClinicMap } from "@/components/ClinicMap";
 import { CtaBand } from "@/components/CtaBand";
-import { Eyebrow } from "@/components/Eyebrow";
 import { HomeReviews } from "@/components/HomeReviews";
 import { TreatmentBenefits } from "@/components/TreatmentBenefits";
 import { Reveal } from "@/components/Reveal";
@@ -105,7 +104,7 @@ function HeroPhoto() {
       <img
         {...mobile}
         alt={HERO_ALT}
-        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_36%] md:object-[center_42%]"
+        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_32%] md:object-[center_62%]"
       />
     </picture>
   );
@@ -157,8 +156,7 @@ challenges`}
       <section id="treatment-options" className="home-section scroll-mt-24 bg-[var(--nl-cream)]">
         <div className="nl-wrap">
           <Reveal>
-            <Eyebrow>Treatment options</Eyebrow>
-            <h2 className="home-h2 mt-3 max-w-3xl text-[var(--nl-navy)]">
+            <h2 className="home-h2 max-w-3xl text-[var(--nl-navy)]">
               Two distinct, psychiatrist-led therapies
             </h2>
             <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
@@ -183,8 +181,7 @@ challenges`}
                   />
                 </div>
                 <div className="tx-feature-copy">
-                  <Eyebrow>TMS</Eyebrow>
-                  <h3 className="mt-2 font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
+                  <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
                     Transcranial Magnetic Stimulation
                   </h3>
                   <p className="mt-3 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
@@ -194,7 +191,7 @@ challenges`}
                     Veterans Affairs Canada and certain workers&apos; compensation programs.
                   </p>
                   <TextLink href="/about-tms-treatment-on-psychiatric-illness/">
-                    Learn about TMS
+                    Discover how TMS could help
                   </TextLink>
                 </div>
               </article>
@@ -211,8 +208,7 @@ challenges`}
                   />
                 </div>
                 <div className="tx-feature-copy">
-                  <Eyebrow>Ketamine</Eyebrow>
-                  <h3 className="mt-2 font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
+                  <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
                     Ketamine therapy
                   </h3>
                   <p className="mt-3 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
@@ -221,7 +217,7 @@ challenges`}
                     traditional antidepressants, often alleviating symptoms within hours or days.
                   </p>
                   <TextLink href="/ketamine-treatment-resistant-depression-nanaimo/">
-                    Learn about ketamine
+                    Explore how ketamine could help
                   </TextLink>
                 </div>
               </article>
@@ -240,8 +236,7 @@ challenges`}
       <section className="home-section why-nl bg-white" aria-labelledby="why-nl-heading">
         <div className="nl-wrap why-nl-grid">
           <Reveal>
-            <Eyebrow>Why NeuroLinks</Eyebrow>
-            <h2 id="why-nl-heading" className="home-h2 mt-3 text-[var(--nl-navy)]">
+            <h2 id="why-nl-heading" className="home-h2 text-[var(--nl-navy)]">
               Why patients choose NeuroLinks
             </h2>
             <p className="mt-4 max-w-[34rem] leading-relaxed text-[var(--nl-muted)]">
@@ -268,12 +263,11 @@ challenges`}
       <section className="home-section bg-[var(--nl-navy)] text-white" aria-labelledby="pathway-heading">
         <div className="nl-wrap">
           <Reveal>
-            <Eyebrow className="text-[var(--nl-yellow)]">Patient pathway</Eyebrow>
-            <h2 id="pathway-heading" className="home-h2 mt-3 max-w-3xl">
+            <h2 id="pathway-heading" className="home-h2 max-w-3xl">
               How care typically proceeds
             </h2>
           </Reveal>
-          <ol className="pathway mt-10 grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
+          <ol className="pathway mt-8 grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
             {PATHWAY.map((step, index) => (
               <Reveal key={step.index} delayMs={index * 60}>
                 <li>
@@ -295,8 +289,7 @@ challenges`}
         <div className="nl-wrap">
           <Reveal>
             <aside className="funding-panel" aria-labelledby="funding-heading">
-              <Eyebrow>Funding and coverage</Eyebrow>
-              <h2 id="funding-heading" className="home-h2 mt-3 text-[var(--nl-navy)]">
+              <h2 id="funding-heading" className="home-h2 text-[var(--nl-navy)]">
                 Assessment and treatment funding
               </h2>
               <dl className="funding-grid">
@@ -343,8 +336,7 @@ challenges`}
               </div>
             </Reveal>
             <Reveal delayMs={70}>
-              <Eyebrow>Psychiatrist-led care</Eyebrow>
-              <h2 id="team-heading" className="home-h2 mt-3 text-[var(--nl-navy)]">
+              <h2 id="team-heading" className="home-h2 text-[var(--nl-navy)]">
                 Specialist oversight from assessment through treatment
               </h2>
               <p className="mt-4 leading-relaxed text-[var(--nl-muted)]">
@@ -371,8 +363,7 @@ challenges`}
         <Reveal>
           <div className="nl-wrap location-split">
             <div className="flex flex-col justify-center">
-              <Eyebrow>Visit</Eyebrow>
-              <h2 className="home-h2 mt-3 text-[var(--nl-navy)]">Find the clinic</h2>
+              <h2 className="home-h2 text-[var(--nl-navy)]">Find the clinic</h2>
               <p className="mt-4 max-w-md leading-relaxed">{SITE.addressLine}</p>
               <p className="mt-2 text-[var(--nl-muted)]">Free parking is available</p>
               <p className="mt-5">

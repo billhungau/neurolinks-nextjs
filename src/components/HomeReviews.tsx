@@ -110,8 +110,7 @@ export function HomeReviews() {
   return (
     <section className="home-reviews home-section" aria-labelledby="home-reviews-heading">
       <div className="nl-wrap">
-        <p className="eyebrow">Patient reviews</p>
-        <h2 id="home-reviews-heading" className="home-h2 mt-3 text-[var(--nl-navy)]">
+        <h2 id="home-reviews-heading" className="home-h2 text-[var(--nl-navy)]">
           What our patients say
         </h2>
         <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">

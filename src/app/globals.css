@@ -1112,17 +1112,9 @@ h3,
   }
 }
 
-.benefit-kicker {
-  margin: 0 0 0.45rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--nl-blue);
-}
-
-.benefit-kicker-on-dark {
-  color: rgb(255 255 255 / 0.72);
+.benefit-copy {
+  position: relative;
+  z-index: 1;
 }
 
 /**
@@ -1158,49 +1150,28 @@ h3,
 }
 
 .motion-ready .benefits-seq.is-visible .step-c {
-  transition-delay: 180ms;
+  transition-delay: 140ms;
 }
 
 .motion-ready .benefits-seq.is-visible .step-d {
-  transition-delay: 240ms;
-}
-
-.motion-ready .benefits-seq.is-visible .step-e {
-  transition-delay: 300ms;
-}
-
-.benefit-card {
-  border-radius: var(--nl-radius-lg);
-  padding: 1.15rem 1.2rem 1.3rem;
-}
-
-@media (min-width: 768px) {
-  .benefit-card-shared {
-    padding: 1.75rem 1.9rem;
-  }
-
-  .benefit-card-tms,
-  .benefit-card-ketamine {
-    padding: 1.55rem 1.65rem 1.7rem;
-  }
+  transition-delay: 200ms;
 }
 
 .benefit-card {
   min-height: 100%;
   border: 1px solid transparent;
+  border-radius: var(--nl-radius-lg);
+  padding: 1.25rem 1.25rem 1.4rem;
   transition:
     transform 220ms ease,
     border-color 220ms ease;
 }
 
-.benefit-card-shared {
-  background:
-    linear-gradient(118deg, #121a2e 0%, #1a2744 58%, #16233c 100%);
-  color: white;
-}
-
-.benefit-card-shared .benefit-motif {
-  color: rgb(255 255 255 / 0.14);
+@media (min-width: 768px) {
+  .benefit-card-tms,
+  .benefit-card-ketamine {
+    padding: 1.65rem 1.7rem 1.8rem;
+  }
 }
 
 .benefit-card-tms {
@@ -1221,21 +1192,15 @@ h3,
   color: #c4a44a;
 }
 
-.benefit-copy {
-  position: relative;
-  z-index: 1;
-}
-
-.benefit-name {
-  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
-  font-size: clamp(1.7rem, 3vw, 2rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.benefit-copy > .benefit-title:first-child {
+.benefit-title {
   margin-top: 0;
+  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
+  font-size: clamp(1.4rem, 2.3vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.28;
+  font-feature-settings: normal;
+  font-variant-ligatures: normal;
 }
 
 .benefit-label {
@@ -1244,28 +1209,6 @@ h3,
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-}
-
-.benefit-title {
-  margin-top: 0.7rem;
-  max-width: 24ch;
-  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
-  font-size: clamp(1.4rem, 2.3vw, 1.75rem);
-  font-weight: 600;
-  letter-spacing: -0.018em;
-  line-height: 1.22;
-  font-feature-settings: normal;
-  font-variant-ligatures: normal;
-}
-
-.benefit-card-shared .benefit-title,
-.benefit-card-shared .benefit-copy {
-  max-width: 38rem;
-}
-
-.benefit-card-tms .benefit-title,
-.benefit-card-ketamine .benefit-title {
-  max-width: 18rem;
 }
 
 .benefit-body {
@@ -1288,11 +1231,6 @@ h3,
     width: 11rem;
     height: 11rem;
     opacity: 0.55;
-  }
-
-  .benefit-card-shared .benefit-motif {
-    width: min(36%, 9rem);
-    opacity: 0.7;
   }
 }
 
