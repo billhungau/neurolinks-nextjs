@@ -26,7 +26,7 @@ export const MEDIA = {
   homeHero: "/media/images/home-hero-banner.jpg",
   homeHeroIntegrated: "/media/images/home-hero-desktop.webp",
   homeHeroMobile: "/media/images/home-hero-portrait.webp",
-  /** Ketamine page hero. Treatment-room photograph; homepage keeps homeHero. */
+  /** Ketamine treatment-room photograph (recliner, window, side table). */
   ketamineHero: "/media/images/ketamine-treatment-room-hero.webp",
   ketamineHeroMobile: "/media/images/ketamine-treatment-room-hero-mobile.webp",
   tmsBanner: "/media/images/tms-banner.jpg",
@@ -40,10 +40,10 @@ export const MEDIA = {
 } as const;
 
 /**
- * Homepage hero: WordPress media 5544, the 1920×960 original banner photograph
- * (TMS left, ketamine vial right). Desktop uses that frame; mobile is a
- * separate wide-panel crop so both subjects stay visible in portrait.
- * Regenerate with `node scripts/build-home-hero-integrated.mjs`.
+ * Homepage hero. Media 5544 embeds a navy chevron; desktop and mobile are
+ * recomposed from the TMS side of that banner plus the clean windowsill still.
+ * Contrast for type is a CSS gradient. Regenerate with
+ * `node scripts/build-home-hero-integrated.mjs`.
  */
 export const HOME_HERO_ASSET = {
   wpId: 5544,

@@ -563,18 +563,18 @@ h3,
 
 /**
  * Mobile-only art direction: a photographic bottom wash so white type sits
- * on navy, not chair reflections. Starts softly ~40% down and reaches
- * ~94% opacity at the lower edge. Desktop overwrites this at 768px.
+ * on navy, not chair reflections. Soft stops, no hard rectangle, no polygon.
+ * Desktop overwrites this at 768px with a left-to-right wash.
  */
 .home-hero-wash {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    transparent 32%,
-    rgb(var(--nl-hero-navy) / 0.28) 40%,
-    rgb(var(--nl-hero-navy) / 0.72) 50%,
-    rgb(var(--nl-hero-navy) / 0.86) 64%,
-    rgb(var(--nl-hero-navy) / 0.93) 84%,
+    transparent 28%,
+    rgb(var(--nl-hero-navy) / 0.22) 40%,
+    rgb(var(--nl-hero-navy) / 0.58) 52%,
+    rgb(var(--nl-hero-navy) / 0.82) 66%,
+    rgb(var(--nl-hero-navy) / 0.92) 82%,
     rgb(var(--nl-hero-navy) / 0.96) 100%
   );
 }
@@ -622,21 +622,15 @@ h3,
   }
 
   .home-hero-wash {
-    background:
-      radial-gradient(
-        ellipse 68% 86% at 14% 56%,
-        rgb(var(--nl-hero-navy) / 0.44) 0%,
-        rgb(var(--nl-hero-navy) / 0.2) 44%,
-        rgb(var(--nl-hero-navy) / 0.05) 66%,
-        transparent 80%
-      ),
-      linear-gradient(
-        90deg,
-        rgb(var(--nl-hero-navy) / 0.32) 0%,
-        rgb(var(--nl-hero-navy) / 0.14) 26%,
-        rgb(var(--nl-hero-navy) / 0.04) 44%,
-        transparent 58%
-      );
+    background: linear-gradient(
+      90deg,
+      rgb(var(--nl-hero-navy) / 0.64) 0%,
+      rgb(var(--nl-hero-navy) / 0.44) 16%,
+      rgb(var(--nl-hero-navy) / 0.22) 34%,
+      rgb(var(--nl-hero-navy) / 0.08) 50%,
+      rgb(var(--nl-hero-navy) / 0.02) 62%,
+      transparent 76%
+    );
   }
 }
 

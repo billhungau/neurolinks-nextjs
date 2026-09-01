@@ -160,12 +160,8 @@ challenges`}
               Two distinct, psychiatrist-led therapies
             </h2>
             <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
-              TMS and ketamine work through different mechanisms. Suitability is determined through
-              psychiatric assessment, not a one-size-fits-all protocol.
-            </p>
-            <p className="prose-measure mt-3 leading-relaxed text-[var(--nl-muted)]">
-              Not every condition listed on this site is an automatic indication for TMS or ketamine;
-              treatment is recommended only when clinically appropriate.
+              TMS and ketamine work differently. Psychiatric assessment helps determine whether
+              either treatment may be appropriate for your needs.
             </p>
           </Reveal>
           <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
@@ -200,11 +196,12 @@ challenges`}
               <article className="tx-feature group">
                 <div className="img-frame relative aspect-[16/10]">
                   <Image
-                    src={MEDIA.reception}
-                    alt="Reception area"
+                    src={MEDIA.ketamineHero}
+                    alt="Ketamine treatment room with a recliner, window and side table at NeuroLinks"
                     fill
                     sizes={IMG_SIZES.half}
-                    className="object-cover"
+                    loading="lazy"
+                    className="object-cover object-[58%_center]"
                   />
                 </div>
                 <div className="tx-feature-copy">
@@ -385,7 +382,7 @@ challenges`}
 
       <CtaBand
         title="Not sure whether TMS or ketamine may be appropriate?"
-        body="Contact NeuroLinks to learn more about the assessment process."
+        body="Our team can explain the assessment process and referral requirements."
         href="/contact/"
         label="Request an assessment"
       />
