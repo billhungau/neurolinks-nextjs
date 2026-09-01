@@ -69,11 +69,42 @@ html {
 
 .site-header {
   isolation: isolate;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Pin fixed overlay headers to the visual viewport. `width: 100%` follows
+   the layout viewport, which can be wider than the screen when page content
+   overflows and `overflow-x: clip` only conceals that overflow. */
+.site-header.fixed {
+  inset-inline: 0;
+  width: auto;
+}
+
+.site-header.sticky {
+  width: 100%;
+}
+
+.site-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  height: 3.5rem;
+}
+
+@media (min-width: 768px) {
+  .site-header-bar {
+    height: 4rem;
+  }
 }
 
 .site-header-logo {
   display: flex;
   align-items: center;
+  min-width: 0;
+  flex: 0 1 auto;
   line-height: 0;
 }
 
@@ -81,13 +112,19 @@ html {
   display: block;
   width: auto;
   height: 2rem;
-  max-width: none;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
 }
 
 @media (min-width: 768px) {
   .site-header-logo-img {
     height: 2.25rem;
   }
+}
+
+.site-header-menu {
+  flex: none;
 }
 
 .site-header-wash {
@@ -124,6 +161,15 @@ html {
   background: var(--nl-navy-deep);
   color: #fff;
   box-shadow: 0 16px 28px rgb(0 0 0 / 0.28);
+  max-height: calc(100dvh - 3.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 768px) {
+  .site-header-panel {
+    max-height: calc(100dvh - 4rem);
+  }
 }
 
 .site-nav-link {

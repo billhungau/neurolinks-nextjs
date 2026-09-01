@@ -55,6 +55,15 @@ export function SiteHeader() {
   }, []);
 
   useEffect(() => {
+    const mq = window.matchMedia("(min-width: 80rem)");
+    const onViewport = () => {
+      if (mq.matches) setOpen(false);
+    };
+    mq.addEventListener("change", onViewport);
+    return () => mq.removeEventListener("change", onViewport);
+  }, []);
+
+  useEffect(() => {
     if (!open) return undefined;
 
     const firstLink = panelRef.current?.querySelector("a");
@@ -63,12 +72,20 @@ export function SiteHeader() {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    const isShown = (el: HTMLElement) => {
+      if (el.hasAttribute("disabled") || el.getAttribute("aria-hidden") === "true") {
+        return false;
+      }
+      return el.getClientRects().length > 0;
+    };
+
     const focusables = () => {
-      const root = barRef.current;
-      if (!root) return [];
-      return [...root.querySelectorAll<HTMLElement>("a[href], button")].filter(
-        (el) => !el.hasAttribute("disabled") && el.getAttribute("aria-hidden") !== "true",
-      );
+      const nodes: HTMLElement[] = [];
+      if (buttonRef.current) nodes.push(buttonRef.current);
+      if (panelRef.current) {
+        nodes.push(...panelRef.current.querySelectorAll<HTMLElement>("a[href], button"));
+      }
+      return nodes.filter(isShown);
     };
 
     const onKey = (event: KeyboardEvent) => {
@@ -113,13 +130,13 @@ export function SiteHeader() {
   return (
     <header
       ref={barRef}
-      className={`site-header ${overlay ? "fixed" : "sticky"} top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow,color] duration-200 ease-out ${headerTone}`}
+      className={`site-header ${overlay ? "fixed" : "sticky"} top-0 z-50 border-b transition-[background-color,border-color,box-shadow,color] duration-200 ease-out ${headerTone}`}
     >
       {overHero ? <div className="site-header-wash" aria-hidden="true" /> : null}
-      <div className="nl-wrap relative z-10 flex h-14 items-center justify-between gap-3 md:h-16">
+      <div className="nl-wrap site-header-bar relative z-10">
         <Link
           href="/"
-          className="site-header-logo shrink-0"
+          className="site-header-logo"
           aria-label="NeuroLinks home"
           onClick={() => setOpen(false)}
         >
@@ -163,7 +180,7 @@ export function SiteHeader() {
         <button
           ref={buttonRef}
           type="button"
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm border border-white/40 px-2.5 text-[13px] font-medium text-white xl:hidden"
+          className="site-header-menu inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm border border-white/40 px-2.5 text-[13px] font-medium text-white xl:hidden"
           aria-expanded={open}
           aria-controls={menuId}
           aria-label={open ? "Close menu" : "Open menu"}
