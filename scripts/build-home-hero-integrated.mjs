@@ -17,13 +17,13 @@ import sharp from "sharp";
 const SRC = arg("--src") ?? "public/media/images/home-hero-banner.jpg";
 
 const DESKTOP = {
-  out: "public/media/images/home-hero-integrated.webp",
+  out: "public/media/images/home-hero-desktop.webp",
   width: 1920,
   height: 960,
 };
 
 const MOBILE = {
-  out: "public/media/images/home-hero-mobile.webp",
+  out: "public/media/images/home-hero-portrait.webp",
   width: 1080,
   height: 1600,
 };

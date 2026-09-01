@@ -216,11 +216,16 @@ html {
   --font-serif: var(--font-display);
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: var(--nl-white);
   color: var(--nl-ink);
   font-family: var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif;
   font-synthesis: none;
+  overflow-x: hidden;
 }
 
 h1,
@@ -922,6 +927,7 @@ h3,
 
 .home-reviews {
   background: var(--nl-cream);
+  overflow-x: clip;
 }
 
 .reviews-shell {
@@ -1159,6 +1165,7 @@ h3,
 
 .benefit-card {
   min-height: 100%;
+  overflow: hidden;
   border: 1px solid transparent;
   border-radius: var(--nl-radius-lg);
   padding: 1.25rem 1.25rem 1.4rem;

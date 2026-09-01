@@ -84,15 +84,15 @@ const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLi
  */
 function HeroPhoto() {
   const shared = { alt: HERO_ALT, sizes: IMG_SIZES.fullBleed, priority: true };
-  const {
-    props: { srcSet: desktopSrcSet },
-  } = getImageProps({
+  const { props: desktop } = getImageProps({
     ...shared,
     src: MEDIA.homeHeroIntegrated,
     width: HOME_HERO_ASSET.width,
     height: HOME_HERO_ASSET.height,
   });
-  const { props: mobile } = getImageProps({
+  const {
+    props: { srcSet: mobileSrcSet },
+  } = getImageProps({
     ...shared,
     src: MEDIA.homeHeroMobile,
     width: HOME_HERO_MOBILE_ASSET.width,
@@ -100,11 +100,11 @@ function HeroPhoto() {
   });
   return (
     <picture>
-      <source media="(min-width: 768px)" srcSet={desktopSrcSet} sizes={shared.sizes} />
+      <source media="(max-width: 767px)" srcSet={mobileSrcSet} sizes={shared.sizes} />
       <img
-        {...mobile}
+        {...desktop}
         alt={HERO_ALT}
-        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_32%] md:object-[center_62%]"
+        className="hero-photo absolute inset-0 h-full w-full object-cover object-[center_32%] md:object-[center_50%]"
       />
     </picture>
   );

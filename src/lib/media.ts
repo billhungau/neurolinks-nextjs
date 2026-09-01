@@ -24,8 +24,8 @@ export const MEDIA = {
   referralPdf: "/media/pdfs/physician_referral_form-2.pdf",
   landingHero: "/media/images/hero-treatment-modalities-CnTkU5m8.webp",
   homeHero: "/media/images/home-hero-banner.jpg",
-  homeHeroIntegrated: "/media/images/home-hero-integrated.webp",
-  homeHeroMobile: "/media/images/home-hero-mobile.webp",
+  homeHeroIntegrated: "/media/images/home-hero-desktop.webp",
+  homeHeroMobile: "/media/images/home-hero-portrait.webp",
   /** Ketamine page hero. Treatment-room photograph; homepage keeps homeHero. */
   ketamineHero: "/media/images/ketamine-treatment-room-hero.webp",
   ketamineHeroMobile: "/media/images/ketamine-treatment-room-hero-mobile.webp",
@@ -52,7 +52,7 @@ export const HOME_HERO_ASSET = {
   wpDerivativeUrl:
     "https://neurolinks.ca/wp-content/uploads/2024/06/Orange-And-Blue-Modern-Professional-Construction-Banner-Design-2-1536x768.jpg",
   sourceLocal: "/media/images/home-hero-banner.jpg",
-  local: "/media/images/home-hero-integrated.webp",
+  local: "/media/images/home-hero-desktop.webp",
   width: 1920,
   height: 960,
   restAlt: "",
@@ -63,7 +63,7 @@ export const HOME_HERO_ASSET = {
  * would keep only ~31% of the width. Regenerate with the integrated script.
  */
 export const HOME_HERO_MOBILE_ASSET = {
-  local: "/media/images/home-hero-mobile.webp",
+  local: "/media/images/home-hero-portrait.webp",
   width: 1080,
   height: 1600,
   source: HOME_HERO_ASSET.wpUrl,
