@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import { AnchorOffset } from "@/components/AnchorOffset";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
 import { SkipLink } from "@/components/SkipLink";
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AnchorOffset />
         <ClinicJsonLd />
         {children}
+        <Analytics />
       </body>
     </html>
   );
