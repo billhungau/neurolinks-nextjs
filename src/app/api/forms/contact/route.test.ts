@@ -89,6 +89,29 @@ test("valid submission posts URL-encoded Jotform fields with APIKEY header", asy
   assert.equal(params.get("submission[5]"), "Please contact me about an assessment.");
 });
 
+test("advertising landing submissions tag the Jotform message without sending PII to a second endpoint", async () => {
+  setEnv();
+  const calls: Array<{ url: string; init: RequestInit }> = [];
+  globalThis.fetch = async (input, init = {}) => {
+    calls.push({ url: String(input), init });
+    return jotformOk();
+  };
+
+  const response = await handleContactPost(
+    request({ ...VALID_BODY, source: "advertising-landing" }),
+  );
+  assert.equal(response.status, 200);
+  assert.equal(calls.length, 1);
+  const params = new URLSearchParams(String(calls[0].init.body));
+  assert.equal(params.get("submission[2_first]"), "Jane");
+  assert.equal(
+    params.get("submission[5]"),
+    "[Advertising landing page]\n\nPlease contact me about an assessment.",
+  );
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url.startsWith("https://api.jotform.com/"), true);
+});
+
 test("missing required fields return 400", async () => {
   setEnv();
   globalThis.fetch = async () => {

@@ -20,6 +20,7 @@ import {
   type ContactFieldErrors,
   type ContactFieldName,
   type ContactFields,
+  type ContactSource,
 } from "@/lib/contact-form";
 import { SITE } from "@/lib/site";
 
@@ -40,7 +41,7 @@ const AUTOCOMPLETE: Record<Exclude<ContactFieldName, "message">, string> = {
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-export function ContactForm() {
+export function ContactForm({ source = "contact" }: { source?: ContactSource }) {
   const [values, setValues] = useState<ContactFields>(EMPTY_FIELDS);
   const [errors, setErrors] = useState<ContactFieldErrors>({});
   const [status, setStatus] = useState<Status>("idle");
@@ -106,7 +107,7 @@ export function ContactForm() {
       const response = await fetch("/api/forms/contact/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...trimmed, [HONEYPOT_FIELD]: honeypot }),
+        body: JSON.stringify({ ...trimmed, source, [HONEYPOT_FIELD]: honeypot }),
       });
       const data = (await response.json().catch(() => null)) as
         | { success?: boolean; message?: string }
@@ -164,6 +165,7 @@ export function ContactForm() {
         noValidate
         aria-busy={submitting}
         aria-label="Contact NeuroLinks"
+        data-nl-form-source={source}
       >
         <div className="ct-hp" aria-hidden="true">
           <label htmlFor="contact-website">Website</label>

@@ -7,6 +7,7 @@ import {
   jotformTimeoutMs,
   originIsAllowed,
   parseContactPayload,
+  parseContactSource,
 } from "./contact-form.ts";
 
 type JsonResult = {
@@ -79,6 +80,12 @@ export async function handleContactPost(request: Request, fetcher?: typeof fetch
     return json({ success: false, message: CONTACT_ERROR_MESSAGE }, 400);
   }
 
+  const source = parseContactSource(
+    payload && typeof payload === "object" && !Array.isArray(payload)
+      ? (payload as Record<string, unknown>).source
+      : undefined,
+  );
+
   if (parsed.honeypot) {
     return json({ success: true, message: CONTACT_SUCCESS_MESSAGE }, 200);
   }
@@ -93,7 +100,7 @@ export async function handleContactPost(request: Request, fetcher?: typeof fetch
         APIKEY: apiKey,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: jotformSubmissionBody(parsed.fields),
+      body: jotformSubmissionBody(parsed.fields, source),
       signal: controller.signal,
       cache: "no-store",
     });

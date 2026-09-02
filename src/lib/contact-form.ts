@@ -22,6 +22,12 @@ export const HONEYPOT_FIELD = "website";
 export const MAX_CONTACT_BODY_BYTES = 32 * 1024;
 export const JOTFORM_SUBMIT_TIMEOUT_MS = 12_000;
 
+/** Non-sensitive origin of the shared contact form. Never include PHI. */
+export const CONTACT_SOURCES = ["contact", "advertising-landing"] as const;
+export type ContactSource = (typeof CONTACT_SOURCES)[number];
+export const ADVERTISING_LANDING_SOURCE = "advertising-landing" as const;
+export const ADVERTISING_LANDING_MESSAGE_PREFIX = "[Advertising landing page]";
+
 export function jotformTimeoutMs() {
   const raw = Number(process.env.CONTACT_UPSTREAM_TIMEOUT_MS);
   if (Number.isFinite(raw) && raw >= 1) return raw;
@@ -117,13 +123,25 @@ export function parseContactPayload(raw: unknown): ValidatedContact {
   return { ok: true, fields, honeypot };
 }
 
-export function jotformSubmissionBody(fields: ContactFields): URLSearchParams {
+export function parseContactSource(raw: unknown): ContactSource {
+  return raw === ADVERTISING_LANDING_SOURCE ? ADVERTISING_LANDING_SOURCE : "contact";
+}
+
+export function jotformMessageForSource(message: string, source: ContactSource): string {
+  if (source !== ADVERTISING_LANDING_SOURCE) return message;
+  return `${ADVERTISING_LANDING_MESSAGE_PREFIX}\n\n${message}`;
+}
+
+export function jotformSubmissionBody(
+  fields: ContactFields,
+  source: ContactSource = "contact",
+): URLSearchParams {
   const submission = new URLSearchParams();
   submission.set("submission[2_first]", fields.firstName);
   submission.set("submission[2_last]", fields.lastName);
   submission.set("submission[3]", fields.email);
   submission.set("submission[4_full]", fields.phone);
-  submission.set("submission[5]", fields.message);
+  submission.set("submission[5]", jotformMessageForSource(fields.message, source));
   return submission;
 }
 

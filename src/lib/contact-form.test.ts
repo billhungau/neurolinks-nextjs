@@ -4,14 +4,18 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import {
+  ADVERTISING_LANDING_MESSAGE_PREFIX,
+  ADVERTISING_LANDING_SOURCE,
   CONTACT_LIMITS,
   HONEYPOT_FIELD,
   JOTFORM_FIELD_KEYS,
   createSubmitLock,
   isJotformSuccessPayload,
+  jotformMessageForSource,
   jotformSubmissionBody,
   originIsAllowed,
   parseContactPayload,
+  parseContactSource,
   trimContactFields,
   validateContactFields,
 } from "./contact-form.ts";
@@ -131,6 +135,25 @@ test("submit lock prevents parallel acquires", () => {
   assert.equal(lock.tryAcquire(), false);
   lock.release();
   assert.equal(lock.tryAcquire(), true);
+});
+
+test("advertising landing source prefixes the Jotform message without changing fields", () => {
+  assert.equal(parseContactSource("advertising-landing"), ADVERTISING_LANDING_SOURCE);
+  assert.equal(parseContactSource("contact"), "contact");
+  assert.equal(parseContactSource("unknown"), "contact");
+  const parsed = parseContactPayload(valid);
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+  const contactBody = jotformSubmissionBody(parsed.fields, "contact");
+  const adsBody = jotformSubmissionBody(parsed.fields, ADVERTISING_LANDING_SOURCE);
+  assert.equal(contactBody.get("submission[5]"), valid.message);
+  assert.equal(
+    adsBody.get("submission[5]"),
+    jotformMessageForSource(valid.message, ADVERTISING_LANDING_SOURCE),
+  );
+  assert.equal(adsBody.get("submission[5]")?.startsWith(ADVERTISING_LANDING_MESSAGE_PREFIX), true);
+  assert.equal(adsBody.get("submission[2_first]"), valid.firstName);
+  assert.equal(adsBody.get("submission[3]"), valid.email);
 });
 
 test("client form source never references the Jotform API key", () => {
