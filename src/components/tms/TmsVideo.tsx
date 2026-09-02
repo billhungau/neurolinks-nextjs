@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState, useSyncExternalStore } from "react";
-import { MEDIA, WP_VIDEOS } from "@/lib/media";
+import { MEDIA } from "@/lib/media";
 
 const subscribe = () => () => {};
 
 export function TmsVideo({
-  src = WP_VIDEOS.tms.src,
+  src = "/media/videos/tms-introduction.mp4",
   poster = MEDIA.tmsPoster,
   label = "TMS introduction video",
 }: {

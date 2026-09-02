@@ -10,15 +10,17 @@ import { TmsSectionNav } from "@/components/tms/TmsSectionNav";
 import { TmsVideo } from "@/components/tms/TmsVideo";
 import { TmsDisclosure } from "@/components/tms/TmsDisclosure";
 import { KETAMINE_FAQS } from "@/content/faqs";
-import { MEDIA, WP_VIDEOS } from "@/lib/media";
+import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { pageMetadata } from "@/lib/seo";
+import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
+import { treatmentVideoSrc } from "@/lib/videos";
 
 export const metadata = pageMetadata({
-  title: "Ketamine Treatment for Depression, OCD &Anxiety – NeuroLinks",
+  title: "Ketamine Therapy in Nanaimo, BC | NeuroLinks",
   description:
-    "Discover ketamine treatment at NeuroLinks, Nanaimo. Effective for depression, OCD, PTSD & anxiety when other treatments haven’t worked.",
+    "Discover ketamine treatment at NeuroLinks, Nanaimo. Effective for depression, OCD, PTSD and anxiety when other treatments haven’t worked.",
   path: "/ketamine-treatment-resistant-depression-nanaimo/",
+  image: PAGE_OG_IMAGES.ketamine,
 });
 
 const HERO_ALT = "Ketamine vial in a supervised treatment room at NeuroLinks";
@@ -226,7 +228,7 @@ export default function KetaminePage() {
               </TmsDisclosure>
             </div>
             <TmsVideo
-              src={WP_VIDEOS.ketamine.src}
+              src={treatmentVideoSrc("ketamine")}
               poster={MEDIA.ketPoster}
               label="Ketamine introduction video"
             />

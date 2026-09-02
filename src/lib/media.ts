@@ -21,7 +21,7 @@ export const MEDIA = {
   serotonin: "/media/images/serotonin-300x145.jpg",
   tmsPoster: "/media/posters/tms-cover.jpg",
   ketPoster: "/media/posters/ketamine-cover.jpg",
-  referralPdf: "/media/pdfs/physician_referral_form-2.pdf",
+  referralPdf: "/documents/physician-referral-form.pdf",
   landingHero: "/media/images/hero-treatment-modalities-CnTkU5m8.webp",
   homeHero: "/media/images/home-hero-banner.jpg",
   homeHeroIntegrated: "/media/images/home-hero-desktop.webp",
@@ -72,16 +72,16 @@ export const LANDING_HERO_ASSET = {
   restAlt: "",
 } as const;
 
-/** Hosted on WordPress pending a video CDN (too large for the git repo). */
-export const WP_VIDEOS = {
-  tms: {
-    src: "https://neurolinks.ca/wp-content/uploads/2025/05/TMS-FINAL-COPYYYY-JULIE-USE.mp4",
-    bytes: 236243496,
-  },
-  ketamine: {
-    src: "https://neurolinks.ca/wp-content/uploads/2025/05/KETAMINE-VIDEO-JULIE-USE.mp4",
-    bytes: 205260350,
-  },
+export const OG = {
+  default: "/media/og/default.jpg",
+  home: "/media/og/home.jpg",
+  tms: "/media/og/tms.jpg",
+  ketamine: "/media/og/ketamine.jpg",
+  services: "/media/og/services.jpg",
+  about: "/media/og/about.jpg",
+  contact: "/media/og/contact.jpg",
+  referral: "/media/og/referral.jpg",
+  landing: "/media/og/landing.jpg",
 } as const;
 
 export const LANDING_YOUTUBE = {

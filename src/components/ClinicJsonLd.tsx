@@ -1,4 +1,4 @@
-import { SITE, siteOrigin } from "@/lib/site";
+import { PRODUCTION_ORIGIN, productionUrl, SITE } from "@/lib/site";
 
 export function ClinicJsonLd() {
   const data = {
@@ -7,7 +7,9 @@ export function ClinicJsonLd() {
     name: SITE.shortName,
     telephone: SITE.phone,
     email: SITE.email,
-    url: `${siteOrigin()}/`,
+    url: productionUrl("/"),
+    image: productionUrl("/media/og/default.jpg"),
+    logo: `${PRODUCTION_ORIGIN}${SITE.logo}`,
     address: {
       "@type": "PostalAddress",
       streetAddress: "202-6010 Brickyard Road",

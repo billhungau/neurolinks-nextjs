@@ -7,13 +7,14 @@ import { Reveal } from "@/components/Reveal";
 import { TmsSectionNav } from "@/components/tms/TmsSectionNav";
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { pageMetadata } from "@/lib/seo";
+import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
-  title: "Safe and effective TMS & Ketamine Therapy in Nanaimo, BC",
+  title: "Psychiatric Assessment & Treatment in Nanaimo | NeuroLinks",
   description:
-    "NeuroLinks Clinic in Nanaimo, BC specializes in TMS and ketamine therapy for depression, OCD & PTSD. Safe, effective, and evidence-based care.",
+    "NeuroLinks Clinic in Nanaimo, BC specializes in TMS and ketamine therapy for depression, OCD and PTSD. Safe, effective, and evidence-based care.",
   path: "/services-psychiatric-tms-ketamine-treatment/",
+  image: PAGE_OG_IMAGES.services,
 });
 
 const HERO_ALT = "NeuroLinks clinic at Brickyard Road, Nanaimo";

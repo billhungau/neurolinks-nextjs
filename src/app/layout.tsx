@@ -4,7 +4,13 @@ import Script from "next/script";
 import { AnchorOffset } from "@/components/AnchorOffset";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
 import { SkipLink } from "@/components/SkipLink";
-import { isSearchIndexable, SITE, siteOrigin } from "@/lib/site";
+import { DEFAULT_OG_IMAGE, pageRobots } from "@/lib/seo";
+import {
+  googleSiteVerification,
+  PRODUCTION_ORIGIN,
+  productionUrl,
+  SITE,
+} from "@/lib/site";
 import "./globals.css";
 
 const display = Source_Serif_4({
@@ -27,26 +33,35 @@ const body = Inter({
   preload: true,
 });
 
+const defaultImage = {
+  url: productionUrl(DEFAULT_OG_IMAGE.path),
+  width: DEFAULT_OG_IMAGE.width,
+  height: DEFAULT_OG_IMAGE.height,
+  alt: DEFAULT_OG_IMAGE.alt,
+  type: "image/jpeg",
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL(PRODUCTION_ORIGIN),
   title: {
     default: `${SITE.name} – ${SITE.tagline}`,
     template: `%s | ${SITE.shortName}`,
   },
   description: SITE.tagline,
-  metadataBase: new URL(siteOrigin()),
-  robots: isSearchIndexable()
-    ? { index: true, follow: true }
-    : {
-        index: false,
-        follow: false,
-        nocache: true,
-        googleBot: {
-          index: false,
-          follow: false,
-          noarchive: true,
-          nosnippet: true,
-        },
-      },
+  robots: pageRobots(),
+  openGraph: {
+    siteName: SITE.name,
+    locale: "en_CA",
+    type: "website",
+    images: [defaultImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [defaultImage.url],
+  },
+  verification: googleSiteVerification()
+    ? { google: googleSiteVerification() }
+    : undefined,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

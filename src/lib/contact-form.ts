@@ -163,6 +163,8 @@ export function originIsAllowed(request: Request): boolean {
     }
   };
 
+  add("https://neurolinks.ca");
+  add("https://www.neurolinks.ca");
   add(process.env.NEXT_PUBLIC_SITE_URL);
   if (process.env.VERCEL_URL) add(`https://${process.env.VERCEL_URL.replace(/\/$/, "")}`);
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {

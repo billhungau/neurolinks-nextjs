@@ -4,14 +4,15 @@ import { PhysicianReferralForm } from "@/components/forms/PhysicianReferralForm"
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { REFERRAL_PDF_URL } from "@/lib/referral-form";
-import { pageMetadata } from "@/lib/seo";
+import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
 export const metadata = pageMetadata({
-  title: "Physician Referral | NeuroLinks",
+  title: "Refer a Patient for TMS or Ketamine | NeuroLinks",
   description:
     "Refer a patient to NeuroLinks for TMS or ketamine treatment in Nanaimo, BC. Complete the online form or fax the PDF referral.",
   path: "/physician-referral/",
+  image: PAGE_OG_IMAGES.referral,
 });
 
 export default function ReferralPage() {

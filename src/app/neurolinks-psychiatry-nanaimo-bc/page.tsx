@@ -10,14 +10,16 @@ import { Section } from "@/components/ui";
 import { LANDING_FAQS } from "@/content/faqs";
 import { LANDING_YOUTUBE, MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { pageMetadata } from "@/lib/seo";
+import { adsLandingRobots, PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
 export const metadata = pageMetadata({
-  title: "Psychiatry Clinic in Nanaimo, BC |TMS & Ketamine| NeuroLinks",
+  title: "Psychiatry Clinic in Nanaimo, BC | TMS & Ketamine | NeuroLinks",
   description:
     "NeuroLinks is a psychiatrist-led psychiatry clinic in Nanaimo offering evidence-based care, including TMS and ketamine therapy, for treatment-resistant depression and related conditions.",
   path: "/neurolinks-psychiatry-nanaimo-bc/",
+  image: PAGE_OG_IMAGES.landing,
+  robots: adsLandingRobots,
 });
 
 const REVIEWS = [

@@ -13,13 +13,14 @@ import {
 } from "@/content/about-bios";
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { pageMetadata } from "@/lib/seo";
+import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
-  title: "Psychiatrist in BC | TMS & ketamine treatment – NeuroLinks",
+  title: "Dr. Chi Hung Au & Our Team | NeuroLinks Nanaimo",
   description:
-    "NeuroLinks in Nanaimo offers expert psychiatric care, TMS therapy, and ketamine treatment for depression & OCD. Book a consultation today.",
+    "NeuroLinks in Nanaimo offers expert psychiatric care, TMS therapy, and ketamine treatment for depression and OCD. Book a consultation today.",
   path: "/psychiatrist-tms-nanaimo/",
+  image: PAGE_OG_IMAGES.about,
 });
 
 const ABOUT_SECTIONS = [

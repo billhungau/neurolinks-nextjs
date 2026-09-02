@@ -4,14 +4,15 @@ import { ContactForm } from "@/components/forms/ContactForm";
 import { SiteChrome } from "@/components/SiteChrome";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { MEDIA } from "@/lib/media";
-import { pageMetadata } from "@/lib/seo";
+import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
 export const metadata = pageMetadata({
-  title: "Contact NeuroLinks | Nanaimo TMS and Ketamine Clinic",
+  title: "Contact NeuroLinks | Nanaimo TMS & Ketamine Clinic",
   description:
     "Contact NeuroLinks at 202-6010 Brickyard Road, Nanaimo. Phone 250-739-5530 or email contact@neurolinks.ca.",
   path: "/contact/",
+  image: PAGE_OG_IMAGES.contact,
 });
 
 export default function ContactPage() {

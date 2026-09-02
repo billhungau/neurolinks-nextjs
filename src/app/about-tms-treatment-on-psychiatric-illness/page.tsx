@@ -11,13 +11,15 @@ import { TmsDisclosure } from "@/components/tms/TmsDisclosure";
 import { TMS_FAQS } from "@/content/faqs";
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { pageMetadata } from "@/lib/seo";
+import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
+import { treatmentVideoSrc } from "@/lib/videos";
 
 export const metadata = pageMetadata({
-  title: "TMS – Transcranial Magnetic Stimulation therapy | NeuroLinks",
+  title: "TMS Therapy in Nanaimo, Vancouver Island | NeuroLinks",
   description:
-    "NeuroLinks psychiatry in Nanaimo provides TMS therapy for depression, OCD, and PTSD. A safe, effective, and non-invasive treatment. Book a consultation today!",
+    "NeuroLinks psychiatry in Nanaimo provides TMS therapy for depression, OCD, and PTSD. A safe, effective, and non-invasive treatment. Book a consultation today.",
   path: "/about-tms-treatment-on-psychiatric-illness/",
+  image: PAGE_OG_IMAGES.tms,
 });
 
 const HERO_ALT =
@@ -176,7 +178,7 @@ export default function AboutTmsPage() {
       <section id="overview" className="tms-section bg-[var(--nl-cream)]">
         <div className="tms-wrap">
           <Reveal className="tms-overview-grid">
-            <TmsVideo />
+            <TmsVideo src={treatmentVideoSrc("tms")} />
             <div>
               <h2 className="tms-h2">What is TMS?</h2>
               <p className="tms-lede mt-4">

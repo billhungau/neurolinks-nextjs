@@ -1,7 +1,6 @@
 import { JOTFORM_SUBMIT_TIMEOUT_MS } from "./contact-form.ts";
 
-export const REFERRAL_PDF_URL =
-  "https://neurolinks.ca/wp-content/uploads/2024/04/physician_referral_form-2.pdf";
+export const REFERRAL_PDF_URL = "/documents/physician-referral-form.pdf";
 
 export const REFERRAL_SUCCESS_MESSAGE =
   "Thank you. The referral has been submitted to NeuroLinks.";

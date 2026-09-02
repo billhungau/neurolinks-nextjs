@@ -1,8 +1,11 @@
 import type { MetadataRoute } from "next";
-import { isSearchIndexable, siteOrigin } from "@/lib/site";
+import { headers } from "next/headers";
+import { isPublicProductionIndexing, PRODUCTION_HOST, productionUrl } from "@/lib/site";
 
-export default function robots(): MetadataRoute.Robots {
-  if (!isSearchIndexable()) {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const headerList = await headers();
+  const host = headerList.get("host");
+  if (!isPublicProductionIndexing(host)) {
     return {
       rules: {
         userAgent: "*",
@@ -10,8 +13,13 @@ export default function robots(): MetadataRoute.Robots {
       },
     };
   }
+
   return {
-    rules: { userAgent: "*", allow: "/" },
-    sitemap: `${siteOrigin()}/sitemap.xml`,
+    rules: {
+      userAgent: "*",
+      allow: "/",
+    },
+    sitemap: productionUrl("/sitemap.xml"),
+    host: PRODUCTION_HOST,
   };
 }
