@@ -28,18 +28,18 @@ const TRUST = [
 const WHY = [
   {
     index: "01",
-    title: "Founded for a local gap in care",
-    body: "Dr. Au founded NeuroLinks in Nanaimo so people facing complex or treatment-resistant mental health conditions could access TMS and ketamine care on Vancouver Island.",
+    title: "More options, care tailored to you",
+    body: "With both TMS and ketamine available, NeuroLinks offers options beyond medication alone. We consider your treatment history, current symptoms, needs and preferences to recommend an individualized approach.",
   },
   {
     index: "02",
-    title: "Neuromodulation training and experience",
-    body: "Dr. Au completed formal TMS training at Harvard University and previously helped establish a TMS centre at Queen Mary Hospital. He is a Clinical Assistant Professor at the University of British Columbia.",
+    title: "Clear guidance, informed choices",
+    body: "We take time to explain your options, potential benefits, side effects and what treatment involves. Your questions and preferences matter, and we work with you to make decisions you understand and feel comfortable with.",
   },
   {
     index: "03",
-    title: "Care beyond medication alone",
-    body: "NeuroLinks offers TMS and ketamine as options when medication has not been sufficient, with care tailored to each patient’s needs.",
+    title: "Support that continues beyond treatment",
+    body: "We follow up after treatment to understand how you are doing, recognizing that symptoms can fluctuate and improvement is not always straightforward. If treatment has not helped enough, we review factors that may affect your response and explore appropriate next steps with you.",
   },
 ] as const;
 
@@ -216,10 +216,6 @@ challenges`}
             <h2 id="why-nl-heading" className="home-h2 text-[var(--nl-navy)]">
               Why patients choose NeuroLinks
             </h2>
-            <p className="mt-4 max-w-[34rem] leading-relaxed text-[var(--nl-muted)]">
-              A Nanaimo clinic offering TMS and ketamine for people whose conditions have not
-              responded adequately to conventional treatment.
-            </p>
           </Reveal>
           <ol className="why-nl-list">
             {WHY.map((item, index) => (
@@ -317,14 +313,9 @@ challenges`}
                 The people providing care
               </h2>
               <p className="mt-4 leading-relaxed text-[var(--nl-muted)]">
-                NeuroLinks was founded by Nanaimo psychiatrist Dr. Chi Hung Au to provide carefully
-                assessed treatment options for people facing complex or treatment-resistant mental
-                health conditions.
+                At NeuroLinks, our psychiatrist and treatment team work together to provide TMS and
+                ketamine care, with attention to your comfort, progress and individual needs.
               </p>
-              <dl className="team-id">
-                <dt>Dr. Chi Hung Au</dt>
-                <dd>Psychiatrist · Clinical Assistant Professor, UBC</dd>
-              </dl>
               <div className="mt-5">
                 <TextLink href="/psychiatrist-tms-nanaimo/">Meet the team</TextLink>
               </div>
