@@ -21,6 +21,9 @@ test("anchor offset uses one measured strategy without doubled CSS offsets", () 
   assert.equal(css.includes("scroll-margin-top: 8.5rem"), false);
   assert.match(css, /scroll-margin-top:\s*calc\(var\(--nl-anchor-offset\) - var\(--nl-target-pad-top\)\)/);
   assert.match(css, /\.tms-subnav \{[\s\S]*?top:\s*var\(--nl-header-height\)/);
+  assert.match(css, /html:has\(\.tms-subnav\)/);
+  assert.match(css, /\.tms-subnav-inner \{[\s\S]*?min-width:\s*0/);
+  assert.equal(/html\s*\{[^}]*scroll-padding-top/.test(css), false);
 });
 
 test("hash buttons keep native fragment links", () => {
@@ -36,4 +39,7 @@ test("anchor offset observer is cleaned up and ignores open menus", () => {
   assert.match(source, /visualViewport/);
   assert.match(source, /menuOpen/);
   assert.match(source, /usePathname/);
+  assert.match(source, /scrollIntoView/);
+  assert.match(source, /hashchange/);
+  assert.match(source, /requestAnimationFrame/);
 });

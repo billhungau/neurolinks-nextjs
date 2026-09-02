@@ -34,6 +34,7 @@
   --nl-header-height: 3.5rem;
   --nl-subnav-height: 0px;
   --nl-anchor-gap: 1rem;
+  --nl-target-pad-top: 0px;
   --nl-anchor-offset: calc(
     var(--nl-header-height) + var(--nl-subnav-height) + var(--nl-anchor-gap)
   );
@@ -45,7 +46,8 @@
   }
 }
 
-html.has-tms-subnav {
+html.has-tms-subnav,
+html:has(.tms-subnav) {
   --nl-subnav-height: 2.75rem;
 }
 
@@ -1333,6 +1335,8 @@ h3,
   position: sticky;
   top: var(--nl-header-height);
   z-index: 40;
+  max-width: 100%;
+  overflow-x: clip;
   border-bottom: 1px solid rgb(26 39 68 / 0.1);
   background: rgb(255 255 255 / 0.96);
 }
@@ -1341,6 +1345,7 @@ h3,
   display: flex;
   gap: 0.25rem 1.25rem;
   max-width: 72rem;
+  min-width: 0;
   margin: 0 auto;
   padding: 0 1.25rem;
   overflow-x: auto;

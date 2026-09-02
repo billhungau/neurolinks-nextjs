@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 
 const GAP_PX = 16;
 
@@ -42,10 +42,33 @@ function subnavHeight(): number {
 function applyAnchorOffset() {
   const root = document.documentElement;
   const header = headerChromeHeight();
-  const subnav = subnavHeight();
+  const nav = document.querySelector(".tms-subnav");
   root.style.setProperty("--nl-header-height", `${header}px`);
-  root.style.setProperty("--nl-subnav-height", `${subnav}px`);
   root.style.setProperty("--nl-anchor-gap", `${GAP_PX}px`);
+  if (!nav) {
+    root.style.setProperty("--nl-subnav-height", "0px");
+    return;
+  }
+  if (isShown(nav)) {
+    root.style.setProperty("--nl-subnav-height", `${subnavHeight()}px`);
+  }
+}
+
+function scrollToCurrentHash() {
+  const raw = window.location.hash;
+  if (!raw || raw === "#") return;
+  let id = raw.slice(1);
+  try {
+    id = decodeURIComponent(id);
+  } catch {
+    return;
+  }
+  document.getElementById(id)?.scrollIntoView({ block: "start", inline: "nearest" });
+}
+
+function restoreHashPosition() {
+  applyAnchorOffset();
+  scrollToCurrentHash();
 }
 
 export function AnchorOffset() {
@@ -76,6 +99,29 @@ export function AnchorOffset() {
       observer.disconnect();
       window.removeEventListener("resize", onViewport);
       window.visualViewport?.removeEventListener("resize", onViewport);
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    restoreHashPosition();
+
+    const onHash = () => restoreHashPosition();
+    window.addEventListener("hashchange", onHash);
+    window.addEventListener("pageshow", onHash);
+
+    // Next.js hydrates with hashFragment: null, then may focus/scroll the
+    // target without CSS scroll-margin. One follow-up frame after paint is
+    // enough to re-apply native scrollIntoView; do not keep re-scrolling.
+    let frame2 = 0;
+    const frame1 = window.requestAnimationFrame(() => {
+      frame2 = window.requestAnimationFrame(restoreHashPosition);
+    });
+
+    return () => {
+      window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("pageshow", onHash);
+      window.cancelAnimationFrame(frame1);
+      window.cancelAnimationFrame(frame2);
     };
   }, [pathname]);
 
