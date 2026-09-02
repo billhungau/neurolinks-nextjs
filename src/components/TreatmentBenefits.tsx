@@ -84,11 +84,6 @@ export function TreatmentBenefits() {
             </div>
           </article>
         </div>
-
-        <p className="benefit-note benefits-step step-d">
-          Individual outcomes vary. Treatment is recommended only when clinically appropriate.
-          Medication should not be changed without medical guidance.
-        </p>
       </Reveal>
     </section>
   );

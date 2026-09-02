@@ -240,19 +240,22 @@ challenges`}
               How care typically proceeds
             </h2>
           </Reveal>
-          <ol className="pathway mt-8 grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
-            {PATHWAY.map((step, index) => (
-              <Reveal key={step.index} delayMs={index * 60}>
-                <li>
-                  <p className="relative z-10 font-serif text-2xl text-[var(--nl-yellow)]">
-                    {step.index}
-                  </p>
-                  <h3 className="mt-3 font-serif text-xl font-semibold">{step.title}</h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-white/75">{step.body}</p>
-                </li>
-              </Reveal>
-            ))}
-          </ol>
+          <div className="pathway-block mt-8">
+            <div className="pathway-rule" aria-hidden="true" />
+            <ol className="pathway grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
+              {PATHWAY.map((step, index) => (
+                <Reveal key={step.index} delayMs={index * 60}>
+                  <li>
+                    <p className="relative z-10 font-serif text-2xl text-[var(--nl-yellow)]">
+                      {step.index}
+                    </p>
+                    <h3 className="mt-3 font-serif text-xl font-semibold">{step.title}</h3>
+                    <p className="mt-2.5 text-sm leading-relaxed text-white/75">{step.body}</p>
+                  </li>
+                </Reveal>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 

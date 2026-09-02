@@ -505,33 +505,32 @@ h3,
   }
 }
 
-.pathway {
+.pathway-block {
   position: relative;
+}
+
+.pathway-rule {
+  display: none;
+  pointer-events: none;
 }
 
 @media (max-width: 639px) {
   .pathway {
     padding-left: 1.15rem;
   }
-
-  .pathway::before {
-    content: "";
-    position: absolute;
-    top: 0.45rem;
-    bottom: 0.45rem;
-    left: 0.28rem;
-    width: 1px;
-    background: color-mix(in srgb, var(--nl-yellow) 40%, transparent);
-  }
 }
 
-@media (min-width: 1024px) {
-  .pathway::before {
-    content: "";
+@media (min-width: 768px) {
+  .pathway-block {
+    padding-top: 0.9375rem;
+  }
+
+  .pathway-rule {
+    display: block;
     position: absolute;
-    top: 0.55rem;
-    left: 0.7rem;
+    top: 0;
     right: 0.7rem;
+    left: 0.7rem;
     height: 1px;
     background: color-mix(in srgb, var(--nl-yellow) 35%, transparent);
   }
@@ -1316,10 +1315,6 @@ h3,
   transition-delay: 140ms;
 }
 
-.motion-ready .benefits-seq.is-visible .step-d {
-  transition-delay: 200ms;
-}
-
 .benefit-card {
   min-height: 100%;
   overflow: visible;
@@ -1447,26 +1442,6 @@ h3,
     border-top: 1px solid rgb(26 39 68 / 0.12);
     padding-top: 1.25rem;
   }
-}
-
-.benefit-note {
-  position: relative;
-  margin-top: 1.5rem;
-  max-width: 40rem;
-  padding-left: 0.85rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--nl-muted);
-}
-
-.benefit-note::before {
-  content: "";
-  position: absolute;
-  top: 0.35rem;
-  left: 0;
-  width: 2px;
-  height: 1.15rem;
-  background: var(--nl-yellow);
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
