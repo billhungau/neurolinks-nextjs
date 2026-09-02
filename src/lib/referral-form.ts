@@ -5,6 +5,12 @@ export const REFERRAL_PDF_URL =
 
 export const REFERRAL_SUCCESS_MESSAGE =
   "Thank you. The referral has been submitted to NeuroLinks.";
+export const REFERRAL_SUCCESS_HEADING = "Thank you for your referral";
+export const REFERRAL_SUCCESS_PARAGRAPHS = [
+  "We sincerely appreciate your trust in NeuroLinks. Your referral has been received, and we will review it with the care and attention every patient deserves.",
+  "If you have any questions or would like to share additional information, please contact NeuroLinks through your usual office channels. We’re here to support you and help make the referral process as smooth as possible.",
+  "Thank you for partnering with us in caring for your patient.",
+] as const;
 export const REFERRAL_ERROR_MESSAGE =
   "We could not submit the referral. Please try again or use the PDF and fax option.";
 export const REFERRAL_UPSTREAM_LOG = "referral_upstream_event";

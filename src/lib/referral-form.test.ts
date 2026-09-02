@@ -10,6 +10,8 @@ import {
   KETAMINE_CONTRAINDICATIONS,
   OTHER_DIAGNOSIS,
   REFERRAL_LIMITS,
+  REFERRAL_SUCCESS_HEADING,
+  REFERRAL_SUCCESS_PARAGRAPHS,
   TMS_CONTRAINDICATIONS,
   TREATMENTS,
   formatJotformMaskedPhone,
@@ -328,9 +330,26 @@ test("success copy never includes PHN or clinical details", () => {
     "../components/forms/PhysicianReferralForm.tsx",
   );
   const src = readFileSync(root, "utf8");
-  assert.match(src, /REFERRAL_SUCCESS_MESSAGE/);
+  assert.match(src, /REFERRAL_SUCCESS_HEADING/);
+  assert.match(src, /REFERRAL_SUCCESS_PARAGRAPHS/);
   assert.equal(src.includes("values.phn"), true);
-  assert.equal(src.includes("REFERRAL_SUCCESS_MESSAGE}\n          {values"), false);
+  assert.equal(src.includes("REFERRAL_SUCCESS_HEADING}\n          {values"), false);
+  assert.equal(src.includes("localStorage"), false);
+});
+
+test("success confirmation uses the approved wording only", () => {
+  assert.equal(REFERRAL_SUCCESS_HEADING, "Thank you for your referral");
+  assert.deepEqual([...REFERRAL_SUCCESS_PARAGRAPHS], [
+    "We sincerely appreciate your trust in NeuroLinks. Your referral has been received, and we will review it with the care and attention every patient deserves.",
+    "If you have any questions or would like to share additional information, please contact NeuroLinks through your usual office channels. We’re here to support you and help make the referral process as smooth as possible.",
+    "Thank you for partnering with us in caring for your patient.",
+  ]);
+  const page = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "../app/physician-referral/page.tsx"),
+    "utf8",
+  );
+  assert.equal(page.includes("For referring clinicians"), false);
+  assert.match(page, /Refer a patient/);
 });
 
 test("built client bundles do not contain the Jotform API key env name", () => {

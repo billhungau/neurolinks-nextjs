@@ -3270,8 +3270,7 @@ h3,
 }
 
 /**
- * Physician referral page. Compact hero, one instruction sentence, wide embed.
- * The iframe internals are cross-origin and are not styled from here.
+ * Physician referral page. Compact hero, one instruction sentence, native form.
  */
 .ref-hero-wash {
   background:
@@ -3336,6 +3335,8 @@ h3,
 }
 
 .ref-form-frame {
+  display: grid;
+  gap: 1rem;
   width: 100%;
   min-width: 0;
   padding: 1.15rem 1rem 1.3rem;
@@ -3448,7 +3449,7 @@ h3,
 .ref-field textarea:focus-visible,
 .ref-check input:focus-visible,
 .ref-submit:focus-visible,
-.ref-form-success:focus-visible {
+.ref-confirm-heading:focus-visible {
   outline: 2px solid var(--nl-yellow);
   outline-offset: 2px;
 }
@@ -3570,7 +3571,6 @@ h3,
   opacity: 0.72;
 }
 
-.ref-form-success,
 .ref-form-error-banner {
   margin: 0;
   padding: 0.8rem 0.9rem;
@@ -3579,10 +3579,86 @@ h3,
   line-height: 1.5;
 }
 
-.ref-form-success {
-  border: 1px solid color-mix(in srgb, var(--nl-success) 28%, var(--nl-border));
-  background: color-mix(in srgb, var(--nl-success) 8%, var(--nl-white));
+.ref-confirm {
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  margin: 1.5rem 0 0;
+}
+
+@media (min-width: 768px) {
+  .ref-confirm {
+    margin-top: 2.15rem;
+  }
+}
+
+.ref-confirm-card {
+  width: 100%;
+  max-width: 50rem;
+  padding: 1.5rem 1.15rem 1.7rem;
+  border: 1px solid var(--nl-border);
+  border-radius: 1.125rem;
+  background: var(--nl-white);
+  box-shadow: 0 8px 20px rgb(26 39 68 / 0.045);
+}
+
+@media (min-width: 768px) {
+  .ref-confirm-card {
+    padding: 2.15rem 2.35rem 2.25rem;
+  }
+}
+
+.ref-confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--nl-success) 12%, var(--nl-cream));
+  color: var(--nl-success);
+}
+
+.ref-confirm-heading {
+  margin: 0 auto 1.15rem;
+  max-width: 22ch;
+  font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
+  font-size: clamp(1.7rem, 5.5vw, 2.15rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-align: center;
   color: var(--nl-navy);
+}
+
+.ref-confirm-copy {
+  margin: 0 auto;
+  max-width: 66ch;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--nl-ink);
+}
+
+.ref-confirm-copy + .ref-confirm-copy {
+  margin-top: 1rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ref-confirm-card {
+    animation: ref-confirm-enter 300ms ease-out both;
+  }
+}
+
+@keyframes ref-confirm-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .ref-form-error-banner {
