@@ -12,8 +12,8 @@ export function LandingHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#E7E2DA] bg-white">
-      <div className="nl-wrap flex items-center justify-between gap-4 py-3">
+    <header className="landing-header sticky top-0 z-50 border-b border-[#E7E2DA] bg-white">
+      <div className="landing-header-bar nl-wrap flex items-center justify-between gap-4 py-3">
         <Link
           href="/neurolinks-psychiatry-nanaimo-bc/"
           className="flex items-center gap-2 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3260eb]"
@@ -32,12 +32,12 @@ export function LandingHeader() {
           <ul className="flex flex-wrap items-center gap-6 text-sm font-medium text-[#1a2744]">
             {LANDING_NAV.map((item) => (
               <li key={item.href}>
-                <Link
+                <a
                   className="hover:text-[#3260eb] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3260eb]"
                   href={item.href}
                 >
                   {item.label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -68,9 +68,9 @@ export function LandingHeader() {
           <ul className="flex flex-col gap-2 text-sm font-medium">
             {LANDING_NAV.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} onClick={() => setOpen(false)}>
+                <a href={item.href} onClick={() => setOpen(false)}>
                   {item.label}
-                </Link>
+                </a>
               </li>
             ))}
             <li>

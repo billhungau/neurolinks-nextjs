@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import Script from "next/script";
+import { AnchorOffset } from "@/components/AnchorOffset";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
 import { SkipLink } from "@/components/SkipLink";
 import { isSearchIndexable, SITE, siteOrigin } from "@/lib/site";
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add("js");` }}
         />
         <SkipLink />
+        <AnchorOffset />
         <ClinicJsonLd />
         {children}
       </body>

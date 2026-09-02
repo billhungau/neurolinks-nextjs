@@ -31,6 +31,22 @@
   --navy: var(--nl-navy);
   --accent: var(--nl-yellow);
   --site-max: 76rem;
+  --nl-header-height: 3.5rem;
+  --nl-subnav-height: 0px;
+  --nl-anchor-gap: 1rem;
+  --nl-anchor-offset: calc(
+    var(--nl-header-height) + var(--nl-subnav-height) + var(--nl-anchor-gap)
+  );
+}
+
+@media (min-width: 768px) {
+  :root {
+    --nl-header-height: 4rem;
+  }
+}
+
+html.has-tms-subnav {
+  --nl-subnav-height: 2.75rem;
 }
 
 .nl-wrap {
@@ -45,7 +61,6 @@
 }
 
 html {
-  scroll-padding-top: 4.75rem;
   overflow-x: clip;
 }
 
@@ -499,6 +514,11 @@ h3,
     transform: translateY(0.7rem);
   }
 
+  .motion-ready :target .reveal:not(.is-visible) {
+    opacity: 1;
+    transform: none;
+  }
+
   .motion-ready .reveal.is-visible {
     opacity: 1;
     transform: none;
@@ -867,7 +887,14 @@ h3,
 }
 
 .home-section {
+  --nl-target-pad-top: clamp(2.85rem, 5vw, 4.25rem);
   padding-block: clamp(2.85rem, 5vw, 4.25rem);
+  scroll-margin-top: calc(var(--nl-anchor-offset) - var(--nl-target-pad-top));
+}
+
+.nl-anchor-section {
+  --nl-target-pad-top: 3rem;
+  scroll-margin-top: calc(var(--nl-anchor-offset) - var(--nl-target-pad-top));
 }
 
 .home-h2 {
@@ -1304,16 +1331,10 @@ h3,
 
 .tms-subnav {
   position: sticky;
-  top: 3.5rem;
+  top: var(--nl-header-height);
   z-index: 40;
   border-bottom: 1px solid rgb(26 39 68 / 0.1);
   background: rgb(255 255 255 / 0.96);
-}
-
-@media (min-width: 768px) {
-  .tms-subnav {
-    top: 4rem;
-  }
 }
 
 .tms-subnav-inner {
@@ -1363,25 +1384,28 @@ h3,
 }
 
 .tms-section {
+  --nl-target-pad-top: 4.5rem;
   padding: 4.5rem 1.25rem;
-  scroll-margin-top: 7.75rem;
+  scroll-margin-top: calc(var(--nl-anchor-offset) - var(--nl-target-pad-top));
 }
 
 @media (min-width: 768px) {
   .tms-section {
+    --nl-target-pad-top: 6.5rem;
     padding: 6.5rem 1.5rem;
-    scroll-margin-top: 8.5rem;
   }
 }
 
 .tms-mech-section,
 .tms-experience {
+  --nl-target-pad-top: 3.25rem;
   padding-block: 3.25rem;
 }
 
 @media (min-width: 768px) {
   .tms-mech-section,
   .tms-experience {
+    --nl-target-pad-top: 4.25rem;
     padding-block: 4.25rem;
   }
 }

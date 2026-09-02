@@ -20,7 +20,12 @@ export function ButtonLink({ href, children, variant = "primary", className: ext
           : "bg-[var(--nl-navy)] text-white hover:bg-[var(--nl-navy-deep)]";
   const className = `${base} ${styles} ${extra}`.trim();
   const newTab = href.startsWith("http") || href.endsWith(".pdf");
-  const native = newTab || href.startsWith("tel:") || href.startsWith("mailto:");
+  const native =
+    newTab ||
+    href.startsWith("tel:") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("#") ||
+    href.includes("#");
   if (native) {
     return (
       <a

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 export type SectionLink = { id: string; label: string };
 
@@ -19,6 +19,13 @@ export function TmsSectionNav({
   sections?: readonly SectionLink[];
 }) {
   const [active, setActive] = useState<string>(sections[0]?.id ?? "");
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.add("has-tms-subnav");
+    return () => {
+      document.documentElement.classList.remove("has-tms-subnav");
+    };
+  }, []);
 
   useEffect(() => {
     const nodes = sections
@@ -52,6 +59,11 @@ export function TmsSectionNav({
           <a
             key={section.id}
             href={`#${section.id}`}
+            onClick={(event) => {
+              if (window.location.hash !== `#${section.id}`) return;
+              event.preventDefault();
+              document.getElementById(section.id)?.scrollIntoView();
+            }}
             className={active === section.id ? "is-active" : undefined}
             aria-current={active === section.id ? "location" : undefined}
           >
