@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         has: [{ type: "host", value: "www.neurolinks.ca" }],
         destination: "https://neurolinks.ca/:path*",
-        permanent: true,
+        statusCode: 301,
       },
       ...allAppRedirects(),
     ];

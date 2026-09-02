@@ -60,7 +60,7 @@ test("WordPress referral PDF and treatment videos have replacements", () => {
 
 test("redirect table destinations are English site paths", () => {
   for (const rule of pageRedirects()) {
-    assert.equal(rule.permanent, true);
+    assert.equal(rule.statusCode, 301);
     assert.match(rule.destination, /^\/([a-z0-9-]+\/)*$/);
   }
 });

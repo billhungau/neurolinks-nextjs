@@ -4,7 +4,7 @@ import { isPublicProductionIndexing, PRODUCTION_HOST, productionUrl } from "@/li
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const headerList = await headers();
-  const host = headerList.get("x-forwarded-host") ?? headerList.get("host");
+  const host = headerList.get("host");
   if (!isPublicProductionIndexing(host)) {
     return {
       rules: {

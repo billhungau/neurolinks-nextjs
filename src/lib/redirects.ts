@@ -1,7 +1,7 @@
 export type AppRedirect = {
   source: string;
   destination: string;
-  permanent: boolean;
+  statusCode: 301;
 };
 
 const ENGLISH_LEGACY_PAGES: Array<[string, string]> = [
@@ -85,7 +85,7 @@ export function pageRedirects(): AppRedirect[] {
     for (const variant of expandRedirectSources(source)) {
       if (seen.has(variant)) continue;
       seen.add(variant);
-      out.push({ source: variant, destination, permanent: true });
+      out.push({ source: variant, destination, statusCode: 301 });
     }
   }
   return out;
@@ -95,7 +95,7 @@ export function assetRedirects(): AppRedirect[] {
   return ASSET_REDIRECTS.map(([source, destination]) => ({
     source,
     destination,
-    permanent: true,
+    statusCode: 301 as const,
   }));
 }
 

@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { lookupRedirect } from "@/lib/redirects";
 import {
   hostnameFromHostHeader,
-  PRODUCTION_HOST,
   PRODUCTION_ORIGIN,
   robotsTagForRequest,
   withTrailingSlash,
