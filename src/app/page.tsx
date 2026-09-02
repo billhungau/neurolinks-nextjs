@@ -3,7 +3,6 @@ import { ButtonLink } from "@/components/ButtonLink";
 import { ClinicMap } from "@/components/ClinicMap";
 import { CtaBand } from "@/components/CtaBand";
 import { HomeReviews } from "@/components/HomeReviews";
-import { TreatmentBenefits } from "@/components/TreatmentBenefits";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
 import { TextLink } from "@/components/TextLink";
@@ -137,11 +136,11 @@ challenges`}
         <div className="nl-wrap">
           <Reveal>
             <h2 className="home-h2 max-w-3xl text-[var(--nl-navy)]">
-              Two distinct, psychiatrist-led therapies
+              Treatment options
             </h2>
             <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
-              TMS and ketamine work differently. Psychiatric assessment helps determine whether
-              either treatment may be appropriate for your needs.
+              We tailor care to your needs, drawing on options including medication, bright light
+              therapy, TMS and ketamine.
             </p>
           </Reveal>
           <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
@@ -160,11 +159,15 @@ challenges`}
                   <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
                     Transcranial Magnetic Stimulation
                   </h3>
-                  <p className="mt-3 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
+                  <p className="tx-feature-benefit">
+                    Can be more effective than another conventional medication when antidepressants
+                    have not helped enough.
+                  </p>
+                  <p className="tx-feature-support">
                     TMS is a non-invasive neuromodulation treatment with established evidence for
-                    depression and certain other psychiatric conditions. Suitability depends on the
-                    diagnosis, treatment history and protocol being considered. TMS is covered by
-                    Veterans Affairs Canada and certain workers&apos; compensation programs.
+                    depression and certain other psychiatric conditions. It is generally well
+                    tolerated. Suitability depends on the diagnosis, treatment history and protocol
+                    being considered.
                   </p>
                   <TextLink href="/about-tms-treatment-on-psychiatric-illness/">
                     Discover how TMS could help
@@ -188,10 +191,13 @@ challenges`}
                   <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
                     Ketamine therapy
                   </h3>
-                  <p className="mt-3 text-[0.95rem] leading-relaxed text-[var(--nl-muted)]">
-                    Ketamine is administered in controlled clinical settings through intramuscular and
-                    subcutaneous injections. Its rapid onset of action distinguishes it from
-                    traditional antidepressants, often alleviating symptoms within hours or days.
+                  <p className="tx-feature-benefit">
+                    Improvement may begin within hours or days.
+                  </p>
+                  <p className="tx-feature-support">
+                    Ketamine can reduce depressive symptoms considerably faster than conventional
+                    antidepressants. It is administered through intramuscular and subcutaneous
+                    injections in a controlled clinical setting with medical supervision.
                   </p>
                   <TextLink href="/ketamine-treatment-resistant-depression-nanaimo/">
                     Explore how ketamine could help
@@ -259,8 +265,6 @@ challenges`}
         </div>
       </section>
 
-      <TreatmentBenefits />
-
       <section className="home-section bg-white" aria-labelledby="funding-heading">
         <div className="nl-wrap">
           <Reveal>
@@ -280,8 +284,9 @@ challenges`}
                   <dt>Treatment coverage</dt>
                   <dd>
                     TMS and ketamine treatment are not generally covered by MSP. Selected
-                    third-party programs, including Veterans Affairs Canada and WorkSafeBC, may
-                    provide coverage in eligible cases.
+                    third-party programs, including Veterans Affairs Canada and workers&apos;
+                    compensation programs such as WorkSafeBC, may provide coverage in eligible
+                    cases.
                   </dd>
                 </div>
                 <div>
