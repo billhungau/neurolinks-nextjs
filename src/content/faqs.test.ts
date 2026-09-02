@@ -9,6 +9,7 @@ import {
   collectFaqEvidenceLinks,
   faqAnswerText,
   faqEvidenceLinks,
+  isStructuredFaqAnswer,
 } from "./faqs.ts";
 
 const TMS_EXPECTED = [
@@ -283,6 +284,19 @@ test("FAQ plain text is available for JSON-LD and never stringifies as objects",
   );
   assert.ok(ect.includes("30 sessions"));
   assert.equal(ect.includes("usually 20-30 sessions"), false);
+});
+
+test("ECT comparison states that ECT needs anesthesia", () => {
+  const item = TMS_FAQS.find((faq) => faq.q.includes("electroconvulsive therapy"));
+  assert.ok(item);
+  assert.ok(isStructuredFaqAnswer(item.a));
+  const compare = item.a.find((block) => block.type === "compare");
+  assert.equal(compare?.type, "compare");
+  const row = compare && compare.type === "compare"
+    ? compare.rows.find((entry) => entry.feature === "Anesthesia")
+    : undefined;
+  assert.equal(row?.tms, "non-invasive; does not need anesthesia");
+  assert.equal(row?.ect, "needs anesthesia");
 });
 
 test("evidence-link markup uses a safe new-tab rel", () => {

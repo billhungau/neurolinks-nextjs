@@ -190,7 +190,7 @@ export const TMS_FAQS: FaqItem[] = [
       {
         type: "compare",
         rows: [
-          { feature: "Anesthesia", tms: "non-invasive; does not need anesthesia", ect: "" },
+          { feature: "Anesthesia", tms: "non-invasive; does not need anesthesia", ect: "needs anesthesia" },
           {
             feature: "Recovery after treatment",
             tms: "can return to work straight after",
