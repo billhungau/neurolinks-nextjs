@@ -1561,6 +1561,18 @@ h3,
   }
 }
 
+.tms-mech-section,
+.tms-experience {
+  padding-block: 3.25rem;
+}
+
+@media (min-width: 768px) {
+  .tms-mech-section,
+  .tms-experience {
+    padding-block: 4.25rem;
+  }
+}
+
 @media (min-width: 1024px) {
   .tms-section {
     padding-inline: 2rem;
@@ -1694,6 +1706,90 @@ h3,
   border-bottom: 1px solid rgb(26 39 68 / 0.12);
 }
 
+.tms-why-heading {
+  margin: 1.5rem 0 0;
+  color: var(--nl-navy);
+  font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.tms-why {
+  display: grid;
+  gap: 0;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgb(26 39 68 / 0.12);
+}
+
+.tms-why li {
+  padding: 0.85rem 0 0.9rem;
+  border-bottom: 1px solid rgb(26 39 68 / 0.12);
+}
+
+.tms-why h4 {
+  margin: 0;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--nl-yellow);
+  color: var(--nl-navy);
+  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
+  font-size: 0.975rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.tms-why p {
+  margin: 0.35rem 0 0;
+  color: var(--nl-muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+@media (min-width: 640px) {
+  .tms-why {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 1.5rem;
+  }
+
+  .tms-why li:nth-child(-n + 2) {
+    border-bottom: 1px solid rgb(26 39 68 / 0.12);
+  }
+}
+
+.tms-experience-grid {
+  display: grid;
+  gap: 1.25rem;
+  margin: 1.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .tms-experience-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem 2rem;
+  }
+}
+
+.tms-experience-grid h3 {
+  margin: 0;
+  color: var(--nl-navy);
+  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.tms-experience-grid p {
+  margin: 0.4rem 0 0;
+  max-width: 38rem;
+  color: var(--nl-muted);
+  font-size: 0.975rem;
+  line-height: 1.6;
+}
+
 .tms-disclosure {
   margin-top: 1.75rem;
 }
@@ -1802,10 +1898,14 @@ h3,
   color: var(--nl-yellow);
 }
 
+.tms-mech-heading {
+  max-width: 22ch;
+}
+
 .tms-mech-track {
   position: relative;
   height: 1px;
-  margin: 2.25rem 0 1.5rem;
+  margin: 1.5rem 0 0;
   background: rgb(255 255 255 / 0.12);
 }
 
@@ -1827,7 +1927,7 @@ h3,
   display: grid;
   gap: 1.75rem;
   margin: 0;
-  padding: 0;
+  padding: 0.9375rem 0 0;
   list-style: none;
 }
 
@@ -1863,8 +1963,8 @@ h3,
 
 .tms-condition-grid {
   display: grid;
-  gap: 2.5rem;
-  margin-top: 2.25rem;
+  gap: 2rem;
+  margin-top: 1.75rem;
 }
 
 @media (min-width: 768px) {
@@ -1968,6 +2068,19 @@ h3,
   font-size: 0.8125rem;
   line-height: 1.65;
   color: var(--nl-muted);
+}
+
+.tms-screen .tms-disclosure {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgb(26 39 68 / 0.1);
+}
+
+.tms-screen .tms-disclosure-body p {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  font-size: 0.9rem;
 }
 
 .tms-funding {

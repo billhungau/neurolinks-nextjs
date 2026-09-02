@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { SiteChrome } from "@/components/SiteChrome";
 import { ButtonLink } from "@/components/ButtonLink";
-import { Eyebrow } from "@/components/Eyebrow";
 import { Reveal } from "@/components/Reveal";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { FaqJsonLd } from "@/components/FaqJsonLd";
@@ -80,6 +79,44 @@ const FUNDING = [
   },
 ] as const;
 
+const WHY_TMS = [
+  {
+    title: "Another option when medication hasn’t helped",
+    body: "TMS can improve certain mental conditions when conventional medications have not provided enough relief.",
+  },
+  {
+    title: "Non-invasive, targeted treatment",
+    body: "Magnetic pulses stimulate brain areas involved in mood regulation, cognition, and behaviors.",
+  },
+  {
+    title: "Well tolerated",
+    body: "Common side effects, such as scalp discomfort or headache, are usually temporary.",
+  },
+  {
+    title: "Get back to your day",
+    body: "Most patients can return to their usual activities after each session.",
+  },
+] as const;
+
+const DURING_TREATMENT = [
+  {
+    title: "When you arrive",
+    body: "When you arrive, our technician will check in with you to see if you have any special concerns. Stimulation intensity is established through motor-threshold assessment, and the treatment position is determined through brain mapping.",
+  },
+  {
+    title: "What it feels and sounds like",
+    body: "The coil produces a repetitive clicking sound during stimulation. Hearing protection is provided during treatment.",
+  },
+  {
+    title: "Session length and course",
+    body: "Each session may last up to 30 minutes. NeuroLinks offers theta-burst stimulation, which can reduce the stimulation portion of selected TMS sessions to as little as three minutes. The complete appointment may take longer. Treatment is typically given five days a week over 4 to 6 weeks. An accelerated course given over 5 days is available on request.",
+  },
+  {
+    title: "Comfort and progress",
+    body: "A NeuroLinks psychiatrist oversees treatment planning, clinical progress, tolerability and safety throughout the course.",
+  },
+] as const;
+
 export default function AboutTmsPage() {
   return (
     <SiteChrome>
@@ -110,9 +147,9 @@ export default function AboutTmsPage() {
             <h1 className="hero-enter mt-3 font-serif text-[clamp(2.5rem,7vw,4.25rem)] font-semibold leading-[1.02] text-white">
               TMS treatment
             </h1>
-            <p className="hero-enter hero-enter-2 mt-4 max-w-[34ch] text-[0.975rem] leading-[1.55] text-white/90 md:mt-5 md:max-w-md md:text-[1.05rem] md:leading-[1.65]">
-              A non-invasive treatment option for selected patients whose symptoms have not
-              improved sufficiently with conventional treatment.
+            <p className="hero-enter hero-enter-2 mt-4 max-w-md text-[0.975rem] leading-[1.55] text-white/90 md:mt-5 md:text-[1.05rem] md:leading-[1.65]">
+              A non-invasive approach to treatment when conventional care has not provided enough
+              relief.
             </p>
             <div className="hero-enter hero-enter-3 mt-7 flex flex-wrap gap-3">
               <ButtonLink
@@ -141,19 +178,20 @@ export default function AboutTmsPage() {
           <Reveal className="tms-overview-grid">
             <TmsVideo />
             <div>
-              <Eyebrow>Overview</Eyebrow>
-              <h2 className="tms-h2 mt-3">What is TMS?</h2>
+              <h2 className="tms-h2">What is TMS?</h2>
               <p className="tms-lede mt-4">
                 Transcranial magnetic stimulation uses focused magnetic pulses to stimulate
                 specific brain networks involved in mood and other psychiatric symptoms. Treatment
                 is non-invasive, does not require anesthesia and is generally well tolerated.
               </p>
-              <Eyebrow className="glance-label">At a glance</Eyebrow>
-              <ul className="tms-facts">
-                <li>Non-invasive treatment</li>
-                <li>No anesthesia required</li>
-                <li>Return to usual activities afterward</li>
-                <li>Psychiatric assessment required</li>
+              <h3 className="tms-why-heading">Why consider TMS?</h3>
+              <ul className="tms-why">
+                {WHY_TMS.map((item) => (
+                  <li key={item.title}>
+                    <h4>{item.title}</h4>
+                    <p>{item.body}</p>
+                  </li>
+                ))}
               </ul>
               <TmsDisclosure summary="Read more about the technology">
                 <p>
@@ -173,11 +211,26 @@ export default function AboutTmsPage() {
         </div>
       </section>
 
-      <section id="how-tms-works" className="tms-section tms-navy">
+      <section id="during-treatment" className="tms-section tms-experience bg-white">
+        <div className="tms-wrap">
+          <Reveal>
+            <h2 className="tms-h2">What happens during treatment?</h2>
+            <ul className="tms-experience-grid">
+              {DURING_TREATMENT.map((item) => (
+                <li key={item.title}>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
+      </section>
+
+      <section id="how-tms-works" className="tms-section tms-navy tms-mech-section">
         <div className="tms-wrap">
           <Reveal className="tms-mech">
-            <Eyebrow className="text-[var(--nl-yellow)]">How TMS works</Eyebrow>
-            <h2 className="tms-h2 mt-3 text-white">How TMS may influence brain function</h2>
+            <h2 className="tms-h2 tms-mech-heading text-white">How TMS works</h2>
             <p className="tms-lede tms-lede-on-dark mt-4">
               The clinical effectiveness of TMS is established for selected conditions, although
               its underlying mechanisms remain an active area of research. Proposed mechanisms
@@ -238,8 +291,7 @@ export default function AboutTmsPage() {
       <section id="conditions" className="tms-section bg-white">
         <div className="tms-wrap">
           <Reveal>
-            <Eyebrow>Conditions</Eyebrow>
-            <h2 className="tms-h2 mt-3">Conditions considered for TMS</h2>
+            <h2 className="tms-h2">Conditions considered for TMS</h2>
             <p className="tms-lede mt-4">
               The evidence, regulatory status and suitability of TMS differ by condition. A
               diagnosis listed here does not mean that TMS will automatically be recommended.
@@ -274,13 +326,10 @@ export default function AboutTmsPage() {
         <div className="tms-wrap">
           <Reveal className="tms-eligibility">
             <div>
-              <Eyebrow>Eligibility</Eyebrow>
-              <h2 className="tms-h2 mt-3">Who may be eligible?</h2>
+              <h2 className="tms-h2">Who may be eligible?</h2>
               <p className="tms-lede mt-4">
-                Suitability is determined through psychiatric assessment. It depends on diagnosis
-                and current symptoms, previous treatment history, relevant medical and neurological
-                factors, implanted metal or electronic devices, pregnancy considerations where
-                relevant, age and the specific treatment indication.
+                We assess your suitability for TMS by reviewing your symptoms, treatment history
+                and relevant medical factors.
               </p>
             </div>
             <aside className="tms-screen">
@@ -290,12 +339,14 @@ export default function AboutTmsPage() {
                   <li key={item}>{item}</li>
                 ))}
               </ul>
-              <p>
-                The U.S. Food and Drug Administration has approved TMS for some indications in
-                patients aged 15 and older. Approval, age range and device labelling vary by
-                indication, device and jurisdiction. NeuroLinks is a Canadian clinic; suitability
-                is determined individually and is not based on a single minimum age.
-              </p>
+              <TmsDisclosure summary="Age and treatment eligibility">
+                <p>
+                  The U.S. Food and Drug Administration has approved TMS for some indications in
+                  patients aged 15 and older. Approval, age range and device labelling vary by
+                  indication, device and jurisdiction. NeuroLinks is a Canadian clinic; suitability
+                  is determined individually and is not based on a single minimum age.
+                </p>
+              </TmsDisclosure>
             </aside>
           </Reveal>
         </div>
@@ -304,8 +355,7 @@ export default function AboutTmsPage() {
       <section id="coverage" className="tms-section bg-[var(--nl-cream)]">
         <div className="tms-wrap">
           <Reveal>
-            <Eyebrow>Coverage</Eyebrow>
-            <h2 className="tms-h2 mt-3">Treatment funding and coverage</h2>
+            <h2 className="tms-h2">Treatment funding and coverage</h2>
             <p className="tms-lede mt-4">
               Coverage is not automatic. Authorization depends on the program, the clinical
               indication and individual eligibility.
@@ -340,9 +390,6 @@ export default function AboutTmsPage() {
               <ButtonLink href="/contact/" variant="accent">
                 Request an assessment
               </ButtonLink>
-              <ButtonLink href="/physician-referral/" variant="on-dark">
-                Information for physicians
-              </ButtonLink>
             </div>
           </Reveal>
         </div>
@@ -353,8 +400,7 @@ export default function AboutTmsPage() {
           <FaqJsonLd items={TMS_FAQS} />
           <div className="tms-faq-layout">
             <div className="tms-faq-intro">
-              <Eyebrow>FAQs</Eyebrow>
-              <h2 className="tms-h2 mt-3">Frequently asked questions</h2>
+              <h2 className="tms-h2">Frequently asked questions</h2>
               <p className="tms-lede mt-4">
                 Answers to common questions about TMS, including suitability, side effects and how
                 it compares with other treatments.

@@ -32,6 +32,39 @@ function answer(...parts: Array<string | [phrase: string, href: string]>): FaqSe
 
 export const TMS_FAQS: FaqItem[] = [
   {
+    q: "How likely will depression improve with TMS?",
+    a: answer(
+      "In ",
+      [
+        "non treatment resistant depression",
+        "https://bmcpsychiatry.biomedcentral.com/articles/10.1186/s12888-018-1989-z",
+      ],
+      ", most patients show significant improvement and two thirds of them can see absence of depressive symptoms. In ",
+      [
+        "treatment-resistant depression",
+        "https://www.psychiatrist.com/jcp/depression/repetitive-transcranial-magnetic-stimulation-treatment-2/",
+      ],
+      ", about one in three patients show significant improvement. Compared to patients without TMS, TMS is more than 5 times as likely to achieve a clearance of depressive symptoms: remission rate of treatment-resistant depression with TMS 30%, without TMS 6%.",
+    ),
+  },
+  {
+    q: "Are there any side effects from TMS?",
+    a: answer(
+      "Most side effects are mild and self-limiting. The most common one would be headache and discomfort at the site of stimulation. Rarely, there is a ",
+      ["<0.1%", "https://www.sciencedirect.com/science/article/pii/S1935861X21001182"],
+      " risk that seizure could occur. Notably, this is NOT higher than the ",
+      ["lifetime prevalence", "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5272794/"],
+      " of seizure in the general population.",
+    ),
+  },
+  {
+    q: "Is the effect of TMS durable?",
+    a: answer(
+      "Yes, the effect of TMS is durable. After the successful initial treatment, half of patients see sustained responses up to 1 year. Receiving a maintenance course of TMS can sustain the therapeutic effect of TMS. We also recommend patients to continue their oral antidepressants to maximize the durability of the treatment effect of TMS. ",
+      ["Read more about the study", "https://pubmed.ncbi.nlm.nih.gov/30344109/"],
+    ),
+  },
+  {
     q: "I have been taking medications. Why do I need TMS?",
     a: answer(
       "Most patients are only treated with medications. However, ",
@@ -57,16 +90,6 @@ export const TMS_FAQS: FaqItem[] = [
     a: "While both are effective for the treatment of several mental illness, they work differently. In contrast to ECT, TMS is non-invasive and it does not need anesthesia. TMS: can return to work straight after; neutral/procognitive effect on memory; rarely induces seizure (<1/10000); usually 20-30 sessions (4-6 weeks); not covered by MSP (enquire private insurance). ECT: requires recovery time (could be up to a few hours); mild short-term memory loss and confusion; requires a seizure every time; 6-12 sessions (3-6 weeks); covered by MSP.",
   },
   {
-    q: "Are there any side effects from TMS?",
-    a: answer(
-      "Most side effects are mild and self-limiting. The most common one would be headache and discomfort at the site of stimulation. Rarely, there is a ",
-      ["<0.1%", "https://www.sciencedirect.com/science/article/pii/S1935861X21001182"],
-      " risk that seizure could occur. Notably, this is NOT higher than the ",
-      ["lifetime prevalence", "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5272794/"],
-      " of seizure in the general population.",
-    ),
-  },
-  {
     q: "I am pregnant. Can I receive TMS?",
     a: answer(
       "TMS is considered safe for ",
@@ -89,22 +112,6 @@ export const TMS_FAQS: FaqItem[] = [
     ),
   },
   {
-    q: "How likely will depression improve with TMS?",
-    a: answer(
-      "In ",
-      [
-        "non treatment resistant depression",
-        "https://bmcpsychiatry.biomedcentral.com/articles/10.1186/s12888-018-1989-z",
-      ],
-      ", most patients show significant improvement and two thirds of them can see absence of depressive symptoms. In ",
-      [
-        "treatment-resistant depression",
-        "https://www.psychiatrist.com/jcp/depression/repetitive-transcranial-magnetic-stimulation-treatment-2/",
-      ],
-      ", about one in three patients show significant improvement. Compared to patients without TMS, TMS is more than 5 times as likely to achieve a clearance of depressive symptoms: remission rate of treatment-resistant depression with TMS 30%, without TMS 6%.",
-    ),
-  },
-  {
     q: "How good is the treatment effect in obsessive-compulsive disorder (OCD)?",
     a: answer(
       "The data with TMS has been encouraging. About 40-60% of patients with OCD are resistant to at least one medication. With TMS, ",
@@ -112,13 +119,6 @@ export const TMS_FAQS: FaqItem[] = [
       " with treatment resistant OCD can improve their symptoms significantly. TMS also ",
       ["improves depressive symptoms", "https://www.sciencedirect.com/science/article/pii/S0165032722000544"],
       " in addition to the obsessive-compulsive symptoms.",
-    ),
-  },
-  {
-    q: "Is the effect of TMS durable?",
-    a: answer(
-      "Yes, the effect of TMS is durable. After the successful initial treatment, half of patients see sustained responses up to 1 year. Receiving a maintenance course of TMS can sustain the therapeutic effect of TMS. We also recommend patients to continue their oral antidepressants to maximize the durability of the treatment effect of TMS. ",
-      ["Read more about the study", "https://pubmed.ncbi.nlm.nih.gov/30344109/"],
     ),
   },
   {

@@ -13,6 +13,31 @@ import {
 
 const TMS_EXPECTED = [
   {
+    q: "How likely will depression improve with TMS?",
+    value: "non treatment resistant depression",
+    href: "https://bmcpsychiatry.biomedcentral.com/articles/10.1186/s12888-018-1989-z",
+  },
+  {
+    q: "How likely will depression improve with TMS?",
+    value: "treatment-resistant depression",
+    href: "https://www.psychiatrist.com/jcp/depression/repetitive-transcranial-magnetic-stimulation-treatment-2/",
+  },
+  {
+    q: "Are there any side effects from TMS?",
+    value: "<0.1%",
+    href: "https://www.sciencedirect.com/science/article/pii/S1935861X21001182",
+  },
+  {
+    q: "Are there any side effects from TMS?",
+    value: "lifetime prevalence",
+    href: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5272794/",
+  },
+  {
+    q: "Is the effect of TMS durable?",
+    value: "Read more about the study",
+    href: "https://pubmed.ncbi.nlm.nih.gov/30344109/",
+  },
+  {
     q: "I have been taking medications. Why do I need TMS?",
     value: "up to 30%",
     href: "https://www.psychiatrist.com/jcp/depression/prevalence-national-burden-treatment-resistant-depression-major-depressive-disorder-in-us/",
@@ -31,16 +56,6 @@ const TMS_EXPECTED = [
     q: "I have been taking medications. Why do I need TMS?",
     value: "obsessive-compulsive disorder",
     href: "https://www.nature.com/articles/s41398-021-01453-0",
-  },
-  {
-    q: "Are there any side effects from TMS?",
-    value: "<0.1%",
-    href: "https://www.sciencedirect.com/science/article/pii/S1935861X21001182",
-  },
-  {
-    q: "Are there any side effects from TMS?",
-    value: "lifetime prevalence",
-    href: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5272794/",
   },
   {
     q: "I am pregnant. Can I receive TMS?",
@@ -64,16 +79,6 @@ const TMS_EXPECTED = [
     href: "https://pubmed.ncbi.nlm.nih.gov/30690937/",
   },
   {
-    q: "How likely will depression improve with TMS?",
-    value: "non treatment resistant depression",
-    href: "https://bmcpsychiatry.biomedcentral.com/articles/10.1186/s12888-018-1989-z",
-  },
-  {
-    q: "How likely will depression improve with TMS?",
-    value: "treatment-resistant depression",
-    href: "https://www.psychiatrist.com/jcp/depression/repetitive-transcranial-magnetic-stimulation-treatment-2/",
-  },
-  {
     q: "How good is the treatment effect in obsessive-compulsive disorder (OCD)?",
     value: "near half of patients",
     href: "https://pubmed.ncbi.nlm.nih.gov/31109199/",
@@ -82,11 +87,6 @@ const TMS_EXPECTED = [
     q: "How good is the treatment effect in obsessive-compulsive disorder (OCD)?",
     value: "improves depressive symptoms",
     href: "https://www.sciencedirect.com/science/article/pii/S0165032722000544",
-  },
-  {
-    q: "Is the effect of TMS durable?",
-    value: "Read more about the study",
-    href: "https://pubmed.ncbi.nlm.nih.gov/30344109/",
   },
   {
     q: "Is a shorter but more intensive course of TMS available?",
@@ -172,15 +172,15 @@ test("TMS FAQ questions remain the published set", () => {
   assert.deepEqual(
     TMS_FAQS.map((item) => item.q),
     [
+      "How likely will depression improve with TMS?",
+      "Are there any side effects from TMS?",
+      "Is the effect of TMS durable?",
       "I have been taking medications. Why do I need TMS?",
       "Who cannot receive TMS?",
       "What is the difference between TMS and electroconvulsive therapy (ECT)?",
-      "Are there any side effects from TMS?",
       "I am pregnant. Can I receive TMS?",
       "What factors affect the treatment outcome?",
-      "How likely will depression improve with TMS?",
       "How good is the treatment effect in obsessive-compulsive disorder (OCD)?",
-      "Is the effect of TMS durable?",
       "Is a shorter but more intensive course of TMS available?",
     ],
   );
@@ -236,7 +236,9 @@ test("FAQ plain text is available for JSON-LD and never stringifies as objects",
     assert.equal(text.includes("[object Object]"), false);
     assert.equal(JSON.stringify({ text }).includes("[object Object]"), false);
   }
-  const seizure = faqAnswerText(TMS_FAQS[3].a);
+  const seizure = faqAnswerText(
+    TMS_FAQS.find((item) => item.q === "Are there any side effects from TMS?")!.a,
+  );
   assert.ok(seizure.includes("<0.1%"));
   assert.equal(seizure.includes("&lt;0.1%"), false);
 });
