@@ -12,7 +12,7 @@ export const LANDING_SUPPORTING_TEXT =
 export const LANDING_INQUIRY_HEADING = "Ask about treatment options";
 
 export const LANDING_INQUIRY_SUPPORTING_TEXT =
-  "Contact our team with questions about the assessment process or treatment options. This is an initial inquiry, not a commitment to treatment.";
+  "Contact our team with questions about the assessment process or treatment options.";
 
 export const LANDING_OUTCOME_NOTE =
   "Information provided is educational and does not replace a psychiatric assessment. Treatment outcomes vary by individual. Please consult with a qualified healthcare provider for personalized medical guidance.";

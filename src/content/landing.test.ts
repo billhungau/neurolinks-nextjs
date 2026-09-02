@@ -119,7 +119,10 @@ test("landing keeps the approved headline, excerpt and three verbatim reviews", 
     "An appropriate physician referral is required for an MSP-covered assessment. The clinic can explain referral requirements when you enquire.",
   );
   assert.equal(LANDING_INQUIRY_HEADING, "Ask about treatment options");
-  assert.match(LANDING_INQUIRY_SUPPORTING_TEXT, /not a commitment to treatment/);
+  assert.match(LANDING_INQUIRY_SUPPORTING_TEXT, /assessment process or treatment options/);
+  assert.equal(LANDING_INQUIRY_SUPPORTING_TEXT.includes("not a commitment to treatment"), false);
+  assert.equal(contactForm.includes("For general inquiries only"), false);
+  assert.equal(contactForm.includes("personal health information"), false);
 });
 
 test("landing does not load YouTube or a disconnected-form placeholder", () => {
