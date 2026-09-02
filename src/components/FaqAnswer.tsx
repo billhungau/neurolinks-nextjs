@@ -52,13 +52,13 @@ function FaqCompareTable({ rows }: { rows: FaqCompareRow[] }) {
               <span className="tms-faq-compare-key" aria-hidden="true">
                 TMS
               </span>
-              {row.tms}
+              <span className="tms-faq-compare-value">{row.tms}</span>
             </td>
             <td>
               <span className="tms-faq-compare-key" aria-hidden="true">
                 ECT
               </span>
-              {row.ect || "—"}
+              <span className="tms-faq-compare-value">{row.ect || "—"}</span>
             </td>
           </tr>
         ))}

@@ -2106,8 +2106,13 @@ h3,
   }
 
   .tms-faq-compare tr {
-    padding: 0.75rem 0 0.85rem;
+    padding: 0.85rem 0;
     border-bottom: 1px solid rgb(26 39 68 / 0.12);
+  }
+
+  .tms-faq-compare tr:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
   }
 
   .tms-faq-compare th,
@@ -2117,21 +2122,33 @@ h3,
     background: transparent;
   }
 
+  .tms-faq-compare tbody th {
+    width: auto;
+    padding: 0 0.55rem 0.45rem;
+  }
+
+  .tms-faq-compare td {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    column-gap: 0.55rem;
+    align-items: start;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .tms-faq-compare td + td {
+    margin-top: 0.28rem;
+  }
+
   .tms-faq-compare thead th:nth-child(2),
   .tms-faq-compare td:nth-child(2) {
     background: #eef3f8;
-    padding-inline: 0.55rem;
-    margin-top: 0.2rem;
-  }
-
-  .tms-faq-compare tbody th {
-    width: auto;
-    padding-bottom: 0.45rem;
   }
 
   .tms-faq-compare-key {
-    display: inline;
-    margin-right: 0.4rem;
+    display: block;
+    margin: 0;
     color: var(--nl-navy);
     font-weight: 600;
   }
