@@ -41,9 +41,6 @@ export function LandingHeader() {
     const firstLink = panelRef.current?.querySelector("a");
     firstLink?.focus();
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
     const isShown = (el: HTMLElement) => {
       if (el.hasAttribute("disabled") || el.getAttribute("aria-hidden") === "true") {
         return false;
@@ -89,7 +86,6 @@ export function LandingHeader() {
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onPointerDown);
     return () => {
-      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onPointerDown);
     };
