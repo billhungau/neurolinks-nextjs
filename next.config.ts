@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
-
-function searchClosed() {
-  return process.env.ALLOW_SEARCH_INDEXING !== "true";
-}
+import { allAppRedirects } from "./src/lib/redirects";
+import { ADS_LANDING_PATH, CLOSED_ROBOTS_HEADER, isSearchIndexable } from "./src/lib/site";
 
 const nextConfig: NextConfig = {
   trailingSlash: true,
@@ -12,56 +10,35 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   async headers() {
-    if (!searchClosed()) return [];
+    const adsSources = [ADS_LANDING_PATH, ADS_LANDING_PATH.replace(/\/$/, "")];
+    const adsHeaders = adsSources.map((source) => ({
+      source,
+      headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
+    }));
+
+    if (isSearchIndexable()) {
+      // Production HTML is indexable. Host-based noindex for vercel.app is
+      // applied at request time in src/proxy.ts so the production alias cannot
+      // inherit public indexing before neurolinks.ca DNS cutover.
+      return adsHeaders;
+    }
+
     return [
       {
         source: "/:path*",
-        headers: [
-          {
-            key: "X-Robots-Tag",
-            value: "noindex, nofollow, noarchive",
-          },
-        ],
+        headers: [{ key: "X-Robots-Tag", value: CLOSED_ROBOTS_HEADER }],
       },
     ];
   },
   async redirects() {
     return [
       {
-        source: "/about-ketamine/",
-        destination: "/ketamine-treatment-resistant-depression-nanaimo/",
+        source: "/:path*",
+        has: [{ type: "host", value: "www.neurolinks.ca" }],
+        destination: "https://neurolinks.ca/:path*",
         permanent: true,
       },
-      {
-        source: "/about-ketamine-for-drug-resistant-mental-illness/",
-        destination: "/ketamine-treatment-resistant-depression-nanaimo/",
-        permanent: true,
-      },
-      {
-        source: "/ketamine-treatment-depression-nanaimo/",
-        destination: "/ketamine-treatment-resistant-depression-nanaimo/",
-        permanent: true,
-      },
-      {
-        source: "/about-psychiatrist-transcranial-magnetic-stimulation/",
-        destination: "/psychiatrist-tms-nanaimo/",
-        permanent: true,
-      },
-      {
-        source: "/psychiatrist-tms-treatment-nanaimo/",
-        destination: "/psychiatrist-tms-nanaimo/",
-        permanent: true,
-      },
-      {
-        source: "/services-psychiatric-consultation-tms-treatment/",
-        destination: "/services-psychiatric-tms-ketamine-treatment/",
-        permanent: true,
-      },
-      {
-        source: "/neurolinks-psychiatry/",
-        destination: "/neurolinks-psychiatry-nanaimo-bc/",
-        permanent: true,
-      },
+      ...allAppRedirects(),
     ];
   },
 };

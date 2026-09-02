@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
-import { PAGE_MANIFEST } from "@/content/manifest";
-import { absoluteUrl, isSearchIndexable } from "@/lib/site";
+import { SITEMAP_ROUTES } from "@/content/manifest";
+import { isSearchIndexable, productionUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   if (!isSearchIndexable()) return [];
-  return PAGE_MANIFEST.map((page) => ({
-    url: absoluteUrl(page.route),
-    changeFrequency: "monthly",
-    priority: page.route === "/" ? 1 : 0.7,
+  return SITEMAP_ROUTES.map((route) => ({
+    url: productionUrl(route),
+    changeFrequency: "monthly" as const,
+    priority: route === "/" ? 1 : 0.7,
   }));
 }
