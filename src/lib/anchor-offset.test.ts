@@ -27,6 +27,28 @@ test("anchor offset uses one measured strategy without doubled CSS offsets", () 
   assert.equal(/html\s*\{[^}]*scroll-padding-top/.test(css), false);
 });
 
+test("smooth scrolling is CSS-gated and skipped for reduced motion", () => {
+  const css = read("app/globals.css");
+  assert.match(css, /html\[data-nl-smooth-scroll\]:not\(\.nl-instant-scroll\)\s*\{[^}]*scroll-behavior:\s*smooth/);
+  assert.equal(/html\s*\{[^}]*scroll-behavior:\s*smooth/.test(css), false);
+  assert.match(
+    css,
+    /prefers-reduced-motion:\s*reduce[\s\S]*html\[data-nl-smooth-scroll\]:not\(\.nl-instant-scroll\)[\s\S]*scroll-behavior:\s*auto/,
+  );
+});
+
+test("hash restore stays instant and clicks do not set JS smooth behavior", () => {
+  const source = read("components/AnchorOffset.tsx");
+  const layout = read("app/layout.tsx");
+  assert.match(source, /data-nl-smooth-scroll/);
+  assert.match(source, /nl-instant-scroll/);
+  assert.match(source, /data-scroll-behavior/);
+  assert.match(layout, /nl-instant-scroll/);
+  assert.equal(source.includes('behavior: "smooth"'), false);
+  assert.equal(source.includes("behavior: 'smooth'"), false);
+  assert.match(source, /id === "main-content"/);
+});
+
 test("hash buttons keep native fragment links", () => {
   const source = read("components/ButtonLink.tsx");
   assert.match(source, /href\.startsWith\("#"\)/);

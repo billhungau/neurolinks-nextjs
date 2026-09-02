@@ -66,13 +66,25 @@ html {
   overflow-x: clip;
 }
 
+/*
+ * Same-page hash clicks use native CSS smooth scrolling. The attribute is
+ * applied after hash restore so direct #fragment loads and cross-page
+ * arrivals do not animate from the top. .nl-instant-scroll covers
+ * back/forward and hydration restore. Offsets stay on heading scroll-margin.
+ */
+html[data-nl-smooth-scroll]:not(.nl-instant-scroll) {
+  scroll-behavior: smooth;
+}
+
 :focus-visible {
   outline: 2px solid var(--nl-blue-bright);
   outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
+  html,
+  html[data-nl-smooth-scroll],
+  html[data-nl-smooth-scroll]:not(.nl-instant-scroll) {
     scroll-behavior: auto;
   }
   *,

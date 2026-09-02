@@ -5,6 +5,35 @@ import { useEffect, useLayoutEffect } from "react";
 import { anchorScrollTarget, samePageHashId } from "@/lib/anchor-target";
 
 const GAP_PX = 16;
+const INSTANT_SCROLL_CLASS = "nl-instant-scroll";
+
+function withInstantScroll(fn: () => void) {
+  const root = document.documentElement;
+  root.classList.add(INSTANT_SCROLL_CLASS);
+  // Match Next.js: Chrome will not pick up scroll-behavior: auto without a layout.
+  void root.getClientRects();
+  fn();
+}
+
+function enableSamePageSmoothScroll() {
+  const root = document.documentElement;
+  root.setAttribute("data-nl-smooth-scroll", "");
+  root.setAttribute("data-scroll-behavior", "smooth");
+  // Unlock on the following frame so this restore's scrollIntoView stays instant.
+  requestAnimationFrame(() => {
+    root.classList.remove(INSTANT_SCROLL_CLASS);
+  });
+}
+
+function currentHashId() {
+  const raw = window.location.hash;
+  if (!raw || raw === "#") return "";
+  try {
+    return decodeURIComponent(raw.slice(1));
+  } catch {
+    return "";
+  }
+}
 
 function isShown(el: Element | null): el is HTMLElement {
   if (!(el instanceof HTMLElement)) return false;
@@ -71,14 +100,8 @@ function scrollToHashId(id: string) {
 }
 
 function scrollToCurrentHash() {
-  const raw = window.location.hash;
-  if (!raw || raw === "#") return;
-  let id = raw.slice(1);
-  try {
-    id = decodeURIComponent(id);
-  } catch {
-    return;
-  }
+  const id = currentHashId();
+  if (!id) return;
   scrollToHashId(id);
 }
 
@@ -87,14 +110,17 @@ function isModifiedClick(event: MouseEvent) {
 }
 
 function restoreHashPosition() {
-  applyAnchorOffset();
-  scrollToCurrentHash();
+  withInstantScroll(() => {
+    applyAnchorOffset();
+    scrollToCurrentHash();
+  });
 }
 
 export function AnchorOffset() {
   const pathname = usePathname();
 
   useLayoutEffect(() => {
+    document.documentElement.classList.add(INSTANT_SCROLL_CLASS);
     applyAnchorOffset();
     scrollToCurrentHash();
 
@@ -117,6 +143,7 @@ export function AnchorOffset() {
     document.fonts?.ready.then(applyAnchorOffset).catch(() => undefined);
 
     return () => {
+      document.documentElement.classList.add(INSTANT_SCROLL_CLASS);
       observer.disconnect();
       window.removeEventListener("resize", onViewport);
       window.visualViewport?.removeEventListener("resize", onViewport);
@@ -126,10 +153,23 @@ export function AnchorOffset() {
   useEffect(() => {
     restoreHashPosition();
 
-    const onHash = () => restoreHashPosition();
-    window.addEventListener("hashchange", onHash);
-    window.addEventListener("popstate", onHash);
-    window.addEventListener("pageshow", onHash);
+    const onHashChange = () => {
+      const id = currentHashId();
+      if (!id || id === "main-content") return;
+      restoreHashPosition();
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove(INSTANT_SCROLL_CLASS);
+      });
+    };
+    const onHistoryRestore = () => {
+      restoreHashPosition();
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove(INSTANT_SCROLL_CLASS);
+      });
+    };
+    window.addEventListener("hashchange", onHashChange);
+    window.addEventListener("popstate", onHistoryRestore);
+    window.addEventListener("pageshow", onHistoryRestore);
 
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || isModifiedClick(event)) return;
@@ -148,6 +188,7 @@ export function AnchorOffset() {
       // :target skips reveal translateY; force a layout so scroll-margin
       // uses the untransformed heading position.
       void target.getBoundingClientRect();
+      // Native CSS scroll-behavior: smooth applies; do not also pass behavior.
       scrollToHashId(id);
     };
     document.addEventListener("click", onClick, true);
@@ -157,13 +198,17 @@ export function AnchorOffset() {
     // enough to re-apply native scrollIntoView; do not keep re-scrolling.
     let frame2 = 0;
     const frame1 = window.requestAnimationFrame(() => {
-      frame2 = window.requestAnimationFrame(restoreHashPosition);
+      frame2 = window.requestAnimationFrame(() => {
+        restoreHashPosition();
+        enableSamePageSmoothScroll();
+      });
     });
 
     return () => {
-      window.removeEventListener("hashchange", onHash);
-      window.removeEventListener("popstate", onHash);
-      window.removeEventListener("pageshow", onHash);
+      document.documentElement.classList.add(INSTANT_SCROLL_CLASS);
+      window.removeEventListener("hashchange", onHashChange);
+      window.removeEventListener("popstate", onHistoryRestore);
+      window.removeEventListener("pageshow", onHistoryRestore);
       document.removeEventListener("click", onClick, true);
       window.cancelAnimationFrame(frame1);
       window.cancelAnimationFrame(frame2);

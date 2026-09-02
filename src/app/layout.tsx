@@ -56,7 +56,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Script
           id="nl-js"
           strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add("js");` }}
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add("js","nl-instant-scroll");`,
+          }}
         />
         <SkipLink />
         <AnchorOffset />
