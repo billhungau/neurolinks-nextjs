@@ -1,84 +1,41 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { LANDING_NAV } from "@/lib/nav";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { MEDIA } from "@/lib/media";
 import { SITE } from "@/lib/site";
 
-export function LandingHeader() {
-  const [open, setOpen] = useState(false);
+const INQUIRY_HREF = "#inquiry";
 
+export function LandingHeader() {
   return (
-    <header className="landing-header sticky top-0 z-50 border-b border-[#E7E2DA] bg-white">
-      <div className="landing-header-bar nl-wrap flex items-center justify-between gap-4 py-3">
+    <header className="landing-header site-header site-header--solid sticky top-0 z-50 border-b border-white/10 bg-[var(--nl-navy)]/90 text-white shadow-[0_1px_0_rgba(0,0,0,0.16)] backdrop-blur-md">
+      <div className="nl-wrap site-header-bar landing-header-bar relative z-10">
         <Link
           href="/neurolinks-psychiatry-nanaimo-bc/"
-          className="flex items-center gap-2 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3260eb]"
+          className="site-header-logo"
+          aria-label="NeuroLinks"
         >
           <Image
-            src={MEDIA.landingLogo}
-            alt=""
-            width={48}
-            height={48}
+            src={SITE.logoWhite}
+            alt="NeuroLinks"
+            width={250}
+            height={50}
             priority
-            sizes={IMG_SIZES.landingLogo}
+            sizes={IMG_SIZES.logo}
+            className="site-header-logo-img"
           />
-          <span className="font-serif text-lg font-bold text-[#1a2744]">NeuroLinks</span>
         </Link>
-        <nav className="hidden md:block" aria-label="Landing">
-          <ul className="flex flex-wrap items-center gap-6 text-sm font-medium text-[#1a2744]">
-            {LANDING_NAV.map((item) => (
-              <li key={item.href}>
-                <a
-                  className="hover:text-[#3260eb] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3260eb]"
-                  href={item.href}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <a
-          className="hidden text-sm font-semibold text-[#3260eb] sm:inline"
-          href={SITE.phoneHref}
-        >
-          {SITE.phone}
-        </a>
-        <button
-          type="button"
-          className="inline-flex items-center rounded border border-slate-300 px-3 py-2 text-sm md:hidden"
-          aria-expanded={open}
-          aria-controls="landing-mobile-nav"
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          Menu
-        </button>
+        <div className="landing-header-actions">
+          <Link className="landing-header-about" href="/psychiatrist-tms-nanaimo/">
+            About Us
+          </Link>
+          <a className="landing-header-phone" href={SITE.phoneHref}>
+            {SITE.phone}
+          </a>
+          <a className="landing-header-cta" href={INQUIRY_HREF}>
+            Ask about treatment options
+          </a>
+        </div>
       </div>
-      {open ? (
-        <nav
-          id="landing-mobile-nav"
-          className="border-t border-slate-200 px-4 py-3 md:hidden"
-          aria-label="Landing mobile"
-        >
-          <ul className="flex flex-col gap-2 text-sm font-medium">
-            {LANDING_NAV.map((item) => (
-              <li key={item.href}>
-                <a href={item.href} onClick={() => setOpen(false)}>
-                  {item.label}
-                </a>
-              </li>
-            ))}
-            <li>
-              <a href={SITE.phoneHref}>{SITE.phone}</a>
-            </li>
-          </ul>
-        </nav>
-      ) : null}
     </header>
   );
 }

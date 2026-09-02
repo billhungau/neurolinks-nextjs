@@ -1,15 +1,29 @@
 import Image from "next/image";
-import Link from "next/link";
 import { ButtonLink } from "@/components/ButtonLink";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { FaqJsonLd } from "@/components/FaqJsonLd";
+import { ContactForm } from "@/components/forms/ContactForm";
 import { LandingHeader } from "@/components/LandingHeader";
+import { MotionReady } from "@/components/MotionReady";
+import { Reveal } from "@/components/Reveal";
 import { SiteFooter } from "@/components/SiteFooter";
-import { YouTubeEmbed } from "@/components/YouTubeEmbed";
-import { Section } from "@/components/ui";
+import { TextLink } from "@/components/TextLink";
+import { DR_AU_PARAS } from "@/content/about-bios";
 import { LANDING_FAQS } from "@/content/faqs";
-import { LANDING_YOUTUBE, MEDIA } from "@/lib/media";
+import {
+  LANDING_HEADLINE,
+  LANDING_INQUIRY_HEADING,
+  LANDING_INQUIRY_SUPPORTING_TEXT,
+  LANDING_NEXT_STEPS,
+  LANDING_OUTCOME_NOTE,
+  LANDING_REVIEWS,
+  LANDING_SUPPORTING_TEXT,
+  LANDING_TREATMENTS,
+  LANDING_WHY,
+} from "@/content/landing";
+import { ADVERTISING_LANDING_SOURCE } from "@/lib/contact-form";
 import { IMG_SIZES } from "@/lib/image-sizes";
+import { MEDIA } from "@/lib/media";
 import { adsLandingRobots, PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
@@ -22,77 +36,34 @@ export const metadata = pageMetadata({
   robots: adsLandingRobots,
 });
 
-const REVIEWS = [
-  {
-    who: "T. H.",
-    text: "Dr Au and his staff are top notch. If you suffer from PTSD, depression or anxiety give TMS a try. Dr. Au is very knowledgeable and it’s all about patient care and not the money. I had a really good outcome treating my PTSD, depression and anxiety symptoms.",
-  },
-  {
-    who: "E. H.",
-    text: "I felt hopeless and stuck in life. I spent years trying everything I could to make a change, then one day my doctor talked to me about TMS and I thought why not try. TMS has been a life changing treatment for me. I would highly recommend this to anyone suffering with depression. Doctor Au and his team have been so knowledgeable and supportive throughout this process.",
-  },
-  {
-    who: "B. J.",
-    text: "Dr Au and his team took amazing care of me! He was very patient and thorough with diagnosis and my options. I couldn’t imagine going through the rest of my life with how severe my depression was despite all the medications and therapy. TMS has helped me immensely. I have experienced a drastic reduction in my symptoms and I feel like it’s given me the fortitude to withstand and move forward through so many lows.",
-  },
-  {
-    who: "P. R.",
-    text: "I took my daughter to see Dr. Chi Hung for the first time today. We have struggled to find the right help for at least 5 years now and we are so grateful to Dr. Chi Hung and his staff for finally LISTENING and giving us the help and hope we have been so desperately searching for. I’m giving a 10 star review!",
-  },
-  {
-    who: "S. H.",
-    text: "TMS has been an integral treatment in healing myself from depression and anxiety. Mental illness caused by past traumas. TMS potentially saved my life, for I was suicidal before treatment. Forever grateful to Dr. Au and his staff.",
-  },
-  {
-    who: "J. A.",
-    text: "The Transcranial Magnetic Stimulation took longer than usual to work for me, but I have had depression for 45 years. The treatment and the guidance in adjusting my medication has really made a positive change. I feel much more myself and can feel hopeful again. Thanks to Dr. Au and the incredible staff, you all have been wonderful.",
-  },
-  {
-    who: "Z. G.",
-    text: "I experienced early childhood trauma which caused complex PTSD, Major Depression, and intense anxiety that I suffered with for over 30 years. I tried everything with no results. Five days of intensive TMS treatment had me feeling the best I’ve ever felt in my life! Dr. Au and his team are very kind and helped me feel safe and cared for.",
-  },
-  {
-    who: "S. K.",
-    text: "Dr Au and his wonderful team have brought me back from the brink. I feel like a happy version of myself and it is wonderful. He is so kind and caring and his team is just as lovely. I can’t recommend this TMS treatment enough for those who are suffering mentally.",
-  },
-  {
-    who: "S. W.",
-    text: "Has been miraculous for me. I feel happier than I have felt since I was a child. I would highly recommend these treatments to anyone suffering from depression.",
-  },
-];
+const TREATMENT_MEDIA = {
+  tmsMachine: MEDIA.tmsMachine,
+  ketamineHero: MEDIA.ketamineHero,
+} as const;
 
 export default function LandingPage() {
   return (
     <>
+      <MotionReady />
       <LandingHeader />
       <main id="main-content" className="flex-1" tabIndex={-1}>
         <FaqJsonLd items={LANDING_FAQS} />
-        <section className="bg-[#F1EEEA]">
-          <div className="mx-auto grid max-w-6xl items-stretch md:grid-cols-2">
-            <div className="flex flex-col justify-center px-4 py-10 md:px-8 md:py-16">
-              <h1 className="font-serif text-3xl font-bold leading-tight text-[#1a2744] md:text-4xl">
-                When Medications Fall Short, Thoughtful Psychiatric Care Can Offer New Options.
-              </h1>
-              <p className="mt-6 max-w-xl text-base leading-relaxed text-[#1a2744] md:text-lg">
-                Psychiatrist-led Transcranial Magnetic Stimulation (TMS) and ketamine therapy for
-                treatment-resistant depression, anxiety, OCD, and PTSD in British Columbia.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <ButtonLink href="/contact/" variant="accent">
-                  Contact the clinic
+
+        <section className="landing-hero" aria-labelledby="landing-hero-heading">
+          <div className="landing-hero-grid">
+            <div className="landing-hero-copy">
+              <h1 id="landing-hero-heading">{LANDING_HEADLINE}</h1>
+              <p>{LANDING_SUPPORTING_TEXT}</p>
+              <div className="landing-hero-actions">
+                <ButtonLink href="#inquiry" variant="accent">
+                  Ask about treatment options
                 </ButtonLink>
-                <ButtonLink href="#treatment" variant="ghost">
-                  Explore treatment options
+                <ButtonLink href={SITE.phoneHref} variant="ghost">
+                  Call {SITE.phone}
                 </ButtonLink>
               </div>
-              <p className="mt-4 text-sm">
-                Prefer to speak with someone?{" "}
-                <a className="font-semibold text-[#3260eb] underline" href={SITE.phoneHref}>
-                  Call {SITE.phone}
-                </a>
-              </p>
             </div>
-            <div className="relative aspect-[1920/960] min-h-[16rem] w-full md:aspect-auto md:min-h-[28rem]">
+            <div className="landing-hero-media">
               <Image
                 src={MEDIA.landingHero}
                 alt="Clinician preparing TMS treatment equipment in a NeuroLinks clinic room"
@@ -101,217 +72,187 @@ export default function LandingPage() {
                 sizes={IMG_SIZES.half}
                 className="object-cover object-[center_18%] md:object-[center_center]"
               />
-              <div className="absolute inset-x-0 bottom-0 flex flex-wrap gap-2 bg-gradient-to-t from-black/55 to-transparent p-4">
-                <Link
-                  href="#treatment"
-                  className="rounded bg-white/95 px-3 py-2 text-sm font-semibold text-[#1a2744]"
-                >
-                  TMS Therapy
-                </Link>
-                <Link
-                  href="/ketamine-treatment-resistant-depression-nanaimo/"
-                  className="rounded bg-white/95 px-3 py-2 text-sm font-semibold text-[#1a2744]"
-                >
-                  Ketamine Therapy
-                </Link>
-              </div>
             </div>
           </div>
         </section>
 
-        <Section>
-          <h2 className="font-serif text-3xl font-bold">A Thoughtful, Psychiatrist-Led Approach</h2>
-          <p className="mt-4 max-w-3xl leading-relaxed">
-            At NeuroLinks, we recognize that seeking care after multiple treatments haven&apos;t
-            helped can feel discouraging. Our approach begins with careful listening and a
-            thorough understanding of your history, concerns, and goals.
-          </p>
-          <p className="mt-3 max-w-3xl leading-relaxed">
-            TMS and ketamine therapy are considered thoughtfully, within a psychiatrist-led plan
-            tailored to your needs, with close monitoring and follow-up throughout treatment.
-          </p>
-          <p className="mt-3 max-w-3xl leading-relaxed">
-            When standard treatments haven&apos;t been enough, our clinic offers carefully
-            evaluated alternatives guided by psychiatric expertise.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              "Psychiatrist-Led",
-              "Evidence-Based",
-              "Non-Invasive",
-              "More Effective Than Meds",
-              "Personalized Treatment Plans",
-            ].map((label) => (
-              <p key={label} className="rounded border border-slate-200 bg-white p-4 font-serif text-lg text-[#1a2744]">
-                {label}
-              </p>
-            ))}
+        <section className="home-section why-nl bg-white" aria-labelledby="landing-why-heading">
+          <div className="nl-wrap why-nl-grid">
+            <Reveal>
+              <h2 id="landing-why-heading" className="home-h2 text-[var(--nl-navy)]">
+                Why NeuroLinks
+              </h2>
+            </Reveal>
+            <ol className="why-nl-list">
+              {LANDING_WHY.map((item, index) => (
+                <Reveal key={item.index} delayMs={index * 70}>
+                  <li>
+                    <p className="why-nl-index">{item.index}</p>
+                    <div>
+                      <h3>{item.title}</h3>
+                      <p>{item.body}</p>
+                    </div>
+                  </li>
+                </Reveal>
+              ))}
+            </ol>
           </div>
-        </Section>
+        </section>
 
-        <Section>
-          <h2 className="font-serif text-3xl font-bold">For Individuals Seeking Relief</h2>
-          <p className="mt-3">You may recognize yourself in one or more of the following situations.</p>
-          <ul className="mt-4 list-disc pl-6 leading-relaxed">
-            <li>Long-standing or recurrent depression</li>
-            <li>Partial or no response to antidepressants</li>
-            <li>Complex conditions</li>
-            <li>Preference for psychiatrist-led care</li>
-          </ul>
-        </Section>
-
-        <Section id="treatment">
-          <h2 className="font-serif text-3xl font-bold">Advanced Treatment Options</h2>
-          <p className="mt-3 max-w-3xl">
-            Evidence-based therapies that offer alternatives when standard approaches haven&apos;t
-            provided adequate relief.
-          </p>
-          <div className="mt-8 grid gap-8 md:grid-cols-2">
-            <article>
-              <h3 className="font-serif text-2xl">Transcranial Magnetic Stimulation (TMS)</h3>
-              <p className="mt-3 leading-relaxed">
-                TMS Therapy — Non-invasive brain stimulation
-              </p>
-              <p className="mt-3">
-                <Link
-                  className="text-[#3260eb] underline"
-                  href="/about-tms-treatment-on-psychiatric-illness/"
-                >
-                  Learn more about TMS
-                </Link>
-              </p>
-            </article>
-            <article>
-              <h3 className="font-serif text-2xl">Ketamine Therapy</h3>
-              <p className="mt-3 leading-relaxed">
-                Rapid-acting, medically supervised
-              </p>
-              <p className="mt-3">
-                <Link
-                  className="text-[#3260eb] underline"
-                  href="/ketamine-treatment-resistant-depression-nanaimo/"
-                >
-                  Learn more about ketamine
-                </Link>
-              </p>
-            </article>
-          </div>
-          <p className="mt-6">See if one of these options may be right for you</p>
-        </Section>
-
-        <Section>
-          <h2 className="font-serif text-3xl font-bold">Understanding These Treatments More Fully</h2>
-          <p className="mt-3 max-w-3xl">
-            Short, psychiatrist-led explanations to help you understand how these treatments work
-            and whether they may be appropriate for your situation.
-          </p>
-          <div className="mt-8 grid gap-8 md:grid-cols-2">
-            <div>
-              <h3 className="font-serif text-2xl">
-                Understanding TMS for Treatment-Resistant Depression
-              </h3>
-              <p className="mt-2 text-sm">
-                A psychiatrist explains how TMS works, who it may help, and what to realistically
-                expect from treatment.
-              </p>
-              <YouTubeEmbed
-                videoId={LANDING_YOUTUBE.tms}
-                title="Understanding TMS for Treatment-Resistant Depression"
-              />
-            </div>
-            <div>
-              <h3 className="font-serif text-2xl">Understanding Ketamine Therapy in Psychiatry</h3>
-              <p className="mt-2 text-sm">
-                A careful overview of ketamine therapy, including safety considerations,
-                monitoring, and how candidacy is determined.
-              </p>
-              <YouTubeEmbed
-                videoId={LANDING_YOUTUBE.ketamine}
-                title="Understanding Ketamine Therapy in Psychiatry"
-              />
+        <section
+          id="treatment"
+          className="home-section bg-[var(--nl-cream)]"
+          aria-labelledby="landing-treatment-heading"
+        >
+          <div className="nl-wrap">
+            <Reveal>
+              <h2 id="landing-treatment-heading" className="home-h2 max-w-3xl text-[var(--nl-navy)]">
+                TMS and ketamine
+              </h2>
+            </Reveal>
+            <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
+              {LANDING_TREATMENTS.map((item) => (
+                <Reveal key={item.href}>
+                  <article className="tx-feature group">
+                    <div className="img-frame relative aspect-[16/10]">
+                      <Image
+                        src={TREATMENT_MEDIA[item.image]}
+                        alt={item.alt}
+                        fill
+                        sizes={IMG_SIZES.half}
+                        className={`object-cover ${"objectPosition" in item ? item.objectPosition : ""}`.trim()}
+                      />
+                    </div>
+                    <div className="tx-feature-copy">
+                      <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
+                        {item.title}
+                      </h3>
+                      <p className="tx-feature-support">{item.body}</p>
+                      <TextLink href={item.href}>{item.linkLabel}</TextLink>
+                    </div>
+                  </article>
+                </Reveal>
+              ))}
             </div>
           </div>
-        </Section>
+        </section>
 
-        <Section>
-          <h2 className="font-serif text-3xl font-bold">Why Patients Choose NeuroLinks</h2>
-          <p className="mt-3 max-w-3xl">
-            A thoughtful approach to advanced psychiatric care, focused on assessment, safety,
-            and individualized treatment.
-          </p>
-          <ul className="mt-4 list-disc pl-6">
-            <li>Psychiatrist-Led Expertise</li>
-            <li>Measured, Real-World Outcomes</li>
-            <li>Respect for Clinical Complexity</li>
-          </ul>
-        </Section>
-
-        <Section>
-          <h2 className="font-serif text-3xl font-bold">Considering Advanced Treatment Options?</h2>
-          <p className="mt-3 max-w-3xl">
-            A confidential psychiatric assessment can help determine whether TMS or ketamine
-            therapy may be appropriate for your situation.
-          </p>
-          <div className="mt-6">
-            <ButtonLink href="/contact/">Contact the clinic</ButtonLink>
+        <section className="home-section bg-white" aria-labelledby="landing-psychiatrist-heading">
+          <div className="nl-wrap">
+            <Reveal className="about-au landing-psychiatrist">
+              <div className="about-au-portrait">
+                <Image
+                  src={MEDIA.drAu}
+                  alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 32vw"
+                  className="object-cover object-[center_18%]"
+                />
+              </div>
+              <div className="about-au-identity">
+                <h2 id="landing-psychiatrist-heading" className="about-au-name">
+                  Meet your psychiatrist
+                </h2>
+                <p className="about-role">Dr Chi Hung Au</p>
+              </div>
+              <div className="about-bio">
+                <p>{DR_AU_PARAS[0]}</p>
+                <TextLink href="/psychiatrist-tms-nanaimo/">Read the complete biography</TextLink>
+              </div>
+            </Reveal>
           </div>
-        </Section>
+        </section>
 
-        <Section>
-          <h2 className="font-serif text-3xl font-bold">What Patients Say</h2>
-          <p className="mt-2 text-sm text-slate-600">on Google Reviews</p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {REVIEWS.map((r) => (
-              <blockquote key={r.who + r.text.slice(0, 24)} className="border p-4 text-sm">
-                <p>{r.text}</p>
-                <footer className="mt-3 font-semibold">— {r.who}</footer>
-              </blockquote>
-            ))}
+        <section
+          className="home-section bg-[var(--nl-navy)] text-white"
+          aria-labelledby="landing-next-heading"
+        >
+          <div className="nl-wrap">
+            <Reveal>
+              <h2 id="landing-next-heading" className="home-h2 max-w-3xl">
+                What happens next
+              </h2>
+            </Reveal>
+            <div className="pathway-block mt-8">
+              <div className="pathway-rule" aria-hidden="true" />
+              <ol className="pathway grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
+                {LANDING_NEXT_STEPS.map((step, index) => (
+                  <Reveal key={step.index} delayMs={index * 60}>
+                    <li>
+                      <p className="relative z-10 font-serif text-2xl text-[var(--nl-yellow)]">
+                        {step.index}
+                      </p>
+                      <h3 className="mt-3 font-serif text-xl font-semibold">{step.title}</h3>
+                      <p className="mt-2.5 text-sm leading-relaxed text-white/75">{step.body}</p>
+                    </li>
+                  </Reveal>
+                ))}
+              </ol>
+            </div>
           </div>
-        </Section>
+        </section>
 
-        <Section id="faq">
-          <h2 className="font-serif text-3xl font-bold">Frequently Asked Questions</h2>
-          <p className="mt-3">Common questions about our treatments and approach to care.</p>
-          <div className="mt-6">
-            <FaqAccordion items={LANDING_FAQS} />
+        <section className="home-section bg-white" aria-labelledby="landing-reviews-heading">
+          <div className="nl-wrap">
+            <Reveal>
+              <h2 id="landing-reviews-heading" className="home-h2 text-[var(--nl-navy)]">
+                Patient experiences
+              </h2>
+              <p className="mt-2 text-sm text-[var(--nl-muted)]">on Google Reviews</p>
+            </Reveal>
+            <div className="landing-reviews">
+              {LANDING_REVIEWS.map((review) => (
+                <blockquote key={review.who}>
+                  <p>{review.text}</p>
+                  <footer>— {review.who}</footer>
+                </blockquote>
+              ))}
+            </div>
+            <p className="landing-outcome-note">{LANDING_OUTCOME_NOTE}</p>
           </div>
-        </Section>
+        </section>
 
-        <Section>
-          <h2 className="font-serif text-3xl font-bold">Check If You&apos;re a Candidate</h2>
-          <p className="mt-3 max-w-3xl">
-            Share a few details, and our clinical team will reach out to discuss whether TMS or
-            ketamine therapy may be appropriate for your situation.
-          </p>
-          <p className="mt-2 text-sm text-slate-600">
-            Please telephone the clinic or use the contact page. Forms on this preview are not
-            connected.
-          </p>
-          <div className="mt-6">
-            <ButtonLink href="/contact/" variant="accent">
-              Contact NeuroLinks
-            </ButtonLink>
+        <section id="faq" className="home-section bg-[var(--nl-cream)]" aria-labelledby="landing-faq-heading">
+          <div className="nl-wrap">
+            <Reveal>
+              <h2 id="landing-faq-heading" className="home-h2 text-[var(--nl-navy)]">
+                Frequently Asked Questions
+              </h2>
+              <p className="prose-measure mt-3 text-[var(--nl-muted)]">
+                Common questions about our treatments and approach to care.
+              </p>
+            </Reveal>
+            <div className="mt-6">
+              <FaqAccordion items={LANDING_FAQS} />
+            </div>
           </div>
-        </Section>
+        </section>
 
-        <Section>
-          <h2 className="font-serif text-3xl font-bold">Ready to Take the Next Step?</h2>
-          <p className="mt-3">
-            A confidential assessment is the first step toward understanding your options.
-          </p>
-          <p className="mt-2">
-            Questions about eligibility or next steps?{" "}
-            <a className="text-[#3260eb] underline" href={SITE.phoneHref}>
-              {SITE.phone}
-            </a>
-          </p>
-          <p className="mt-8 text-sm text-slate-600">
-            Information provided is educational and does not replace a psychiatric assessment.
-            Treatment outcomes vary by individual. Please consult with a qualified healthcare
-            provider for personalized medical guidance.
-          </p>
-        </Section>
+        <section
+          id="inquiry"
+          className="home-section nl-anchor-section bg-white"
+          aria-labelledby="inquiry-heading"
+        >
+          <div className="nl-wrap landing-inquiry">
+            <Reveal>
+              <h2 id="inquiry-heading" className="home-h2 text-[var(--nl-navy)]">
+                {LANDING_INQUIRY_HEADING}
+              </h2>
+              <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
+                {LANDING_INQUIRY_SUPPORTING_TEXT}
+              </p>
+            </Reveal>
+            <div className="ct-form-frame landing-inquiry-form">
+              <ContactForm source={ADVERTISING_LANDING_SOURCE} />
+            </div>
+            <p className="mt-6 text-sm text-[var(--nl-muted)]">
+              Prefer to speak with someone?{" "}
+              <a className="font-semibold text-[var(--nl-navy)] underline" href={SITE.phoneHref}>
+                Call {SITE.phone}
+              </a>
+            </p>
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </>

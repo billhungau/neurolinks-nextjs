@@ -42,12 +42,6 @@ export const FOOTER_QUICK_LINKS = [
   { href: "/physician-referral/", label: "Physician Referral" },
 ] as const satisfies readonly NavItem[];
 
-export const LANDING_NAV = [
-  { href: "/neurolinks-psychiatry-nanaimo-bc/#treatment", label: "Treatments" },
-  { href: "/psychiatrist-tms-nanaimo/", label: "About NeuroLinks" },
-  { href: "/neurolinks-psychiatry-nanaimo-bc/#faq", label: "FAQ" },
-] as const;
-
 export function normalizePath(path: string) {
   if (!path || path === "/") return "/";
   return path.endsWith("/") ? path.slice(0, -1) : path;

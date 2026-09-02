@@ -205,6 +205,18 @@ async function main() {
   if (og(ads.text, "og:url") !== `https://neurolinks.ca${ADS}`) {
     fail(`ads og:url ${og(ads.text, "og:url")}`);
   }
+  if (!ads.text.includes('id="inquiry"')) fail("ads landing missing #inquiry");
+  else pass("ads landing has #inquiry");
+  if (!ads.text.includes("Ask about treatment options")) fail("ads landing missing inquiry heading");
+  if (!ads.text.includes('name="firstName"') || !ads.text.includes('name="message"')) {
+    fail("ads landing missing shared contact form fields");
+  } else pass("ads landing embeds the shared contact form");
+  if (ads.text.includes("not connected")) fail("ads landing still has disconnected-form notice");
+
+  const contact = await request("/contact/");
+  if (!contact.text.includes('name="firstName"') || !contact.text.includes('name="message"')) {
+    fail("contact page missing shared contact form fields");
+  } else pass("contact page still embeds the shared contact form");
 
   const home = await request("/");
   if (home.text.includes("/neurolinks-psychiatry-nanaimo-bc/")) {

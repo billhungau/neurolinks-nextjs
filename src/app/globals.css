@@ -4245,5 +4245,206 @@ h3,
   }
 }
 
+.landing-header {
+  overflow-x: clip;
+}
+
+.landing-header-actions {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem 0.85rem;
+}
+
+.landing-header .landing-header-bar {
+  height: auto;
+  min-height: 3.5rem;
+  padding-block: 0.45rem;
+}
+
+.landing-header-about,
+.landing-header-phone {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  color: rgb(255 255 255 / 0.92);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.landing-header-about:hover,
+.landing-header-phone:hover,
+.landing-header-about:focus-visible,
+.landing-header-phone:focus-visible {
+  color: var(--nl-yellow);
+}
+
+.landing-header-cta {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--nl-radius);
+  background: var(--nl-yellow);
+  color: var(--nl-navy);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+
+.landing-header-cta:hover,
+.landing-header-cta:focus-visible {
+  background: var(--nl-yellow-hover);
+}
+
+@media (max-width: 639px) {
+  .landing-header .site-header-logo-img {
+    height: 1.7rem;
+  }
+
+  .landing-header-actions {
+    gap: 0.25rem 0.6rem;
+  }
+
+  .landing-header-cta {
+    flex: 1 1 11rem;
+  }
+}
+
+.landing-hero {
+  background: var(--nl-cream);
+}
+
+.landing-hero-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-hero-copy {
+  order: 1;
+  padding: 1.15rem var(--nl-gutter) 1.1rem;
+}
+
+.landing-hero-copy h1 {
+  max-width: 38rem;
+  color: var(--nl-navy);
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.45rem, 5.4vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.18;
+}
+
+.landing-hero-copy p {
+  max-width: 34rem;
+  margin-top: 0.85rem;
+  color: var(--nl-navy);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.landing-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.1rem;
+}
+
+.landing-hero-media {
+  position: relative;
+  order: 2;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 12.5rem;
+}
+
+@media (min-width: 768px) {
+  .landing-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: stretch;
+    max-width: var(--site-max);
+    margin-inline: auto;
+  }
+
+  .landing-hero-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2.75rem var(--nl-gutter) 2.75rem;
+  }
+
+  .landing-hero-media {
+    max-height: none;
+    min-height: 22rem;
+    aspect-ratio: auto;
+  }
+}
+
+.landing-reviews {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .landing-reviews {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .landing-reviews blockquote:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.landing-reviews blockquote {
+  margin: 0;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid var(--nl-border);
+  border-radius: var(--nl-radius-lg);
+  background: var(--nl-white);
+}
+
+.landing-reviews blockquote p {
+  margin: 0;
+  color: var(--nl-ink);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.landing-reviews footer {
+  margin-top: 0.85rem;
+  color: var(--nl-navy);
+  font-weight: 600;
+}
+
+.landing-outcome-note {
+  max-width: 46rem;
+  margin: 1.25rem 0 0;
+  color: var(--nl-muted);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.landing-inquiry {
+  max-width: 46rem;
+}
+
+.landing-inquiry-form {
+  margin-top: 1.35rem;
+}
+
+.landing-psychiatrist .text-link {
+  margin-top: 0.35rem;
+}
+
+
 
 
