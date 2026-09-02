@@ -85,14 +85,12 @@ export default function LandingPage() {
             </Reveal>
             <ol className="why-nl-list">
               {LANDING_WHY.map((item, index) => (
-                <Reveal key={item.index} delayMs={index * 70}>
-                  <li>
-                    <p className="why-nl-index">{item.index}</p>
-                    <div>
-                      <h3>{item.title}</h3>
-                      <p>{item.body}</p>
-                    </div>
-                  </li>
+                <Reveal key={item.index} as="li" delayMs={index * 70}>
+                  <p className="why-nl-index">{item.index}</p>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                  </div>
                 </Reveal>
               ))}
             </ol>
@@ -177,14 +175,12 @@ export default function LandingPage() {
               <div className="pathway-rule" aria-hidden="true" />
               <ol className="pathway grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
                 {LANDING_NEXT_STEPS.map((step, index) => (
-                  <Reveal key={step.index} delayMs={index * 60}>
-                    <li>
-                      <p className="relative z-10 font-serif text-2xl text-[var(--nl-yellow)]">
-                        {step.index}
-                      </p>
-                      <h3 className="mt-3 font-serif text-xl font-semibold">{step.title}</h3>
-                      <p className="mt-2.5 text-sm leading-relaxed text-white/75">{step.body}</p>
-                    </li>
+                  <Reveal key={step.index} as="li" delayMs={index * 60}>
+                    <p className="relative z-10 font-serif text-2xl text-[var(--nl-yellow)]">
+                      {step.index}
+                    </p>
+                    <h3 className="mt-3 font-serif text-xl font-semibold">{step.title}</h3>
+                    <p className="mt-2.5 text-sm leading-relaxed text-white/75">{step.body}</p>
                   </Reveal>
                 ))}
               </ol>

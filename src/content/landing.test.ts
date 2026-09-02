@@ -72,6 +72,7 @@ test("landing keeps the approved headline, excerpt and three verbatim reviews", 
 });
 
 test("landing does not load YouTube or a disconnected-form placeholder", () => {
+  assert.match(landingPage, /as="li"/);
   assert.equal(landingPage.includes("YouTubeEmbed"), false);
   assert.equal(landingPage.includes("LANDING_YOUTUBE"), false);
   assert.equal(contactForm.includes("gtag"), false);

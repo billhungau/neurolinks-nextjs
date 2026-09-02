@@ -10,12 +10,14 @@ export function Reveal({
   children,
   className = "",
   delayMs = 0,
+  as: Comp = "div",
 }: {
   children: React.ReactNode;
   className?: string;
   delayMs?: number;
+  as?: "div" | "li";
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement | HTMLLIElement>(null);
   const [visible, setVisible] = useState(false);
 
   useLayoutEffect(() => {
@@ -68,12 +70,12 @@ export function Reveal({
   }, []);
 
   return (
-    <div
-      ref={ref}
+    <Comp
+      ref={ref as never}
       className={`reveal${visible ? " is-visible" : ""} ${className}`.trim()}
       style={delayMs ? { transitionDelay: `${delayMs}ms` } : undefined}
     >
       {children}
-    </div>
+    </Comp>
   );
 }
