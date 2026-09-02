@@ -31,7 +31,7 @@ Canonical URLs, Open Graph URLs, MedicalClinic JSON-LD, and the sitemap always u
 ### Required Vercel domain settings (at cutover, not before)
 
 - Add `neurolinks.ca` as the production domain (apex).
-- Add `www.neurolinks.ca` and redirect it to the apex. The app also 301s `www` → `https://neurolinks.ca/:path*` and keeps query strings.
+- Add `www.neurolinks.ca` and redirect it to the apex. The app 301s `www` → `https://neurolinks.ca` with trailing slashes on HTML routes and keeps query strings in one hop. Do not add a Vercel `/:path*` redirect that strips the trailing slash.
 - HTTPS is terminated by Vercel; do not point DNS here until cutover.
 - Do **not** redirect `*.vercel.app` preview or production aliases to `neurolinks.ca` before launch.
 - Keep Deployment Protection on Preview. Production must be publicly crawlable after launch (no Vercel Authentication wall for Googlebot).

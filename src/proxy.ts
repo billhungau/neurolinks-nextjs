@@ -65,6 +65,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|_next/data|favicon.ico|.*\\..*).*)",
+    // Include extensioned files so www → apex also covers PDFs and media.
+    "/((?!_next/static|_next/image|_next/data).*)",
   ],
 };

@@ -327,6 +327,23 @@ async function main() {
     fail(`TMS video redirect ${tmsVideoRedirect.response.status} ${tmsVideoLoc}`);
   } else pass(`TMS video legacy redirect ${tmsVideoRedirect.response.status} → ${tmsVideoLoc}`);
 
+  const wwwHome = await rawRequest("/contact/?utm_source=google&gclid=wwwtest", {
+    host: "www.neurolinks.ca",
+  });
+  const wwwLoc = headerValue(wwwHome.headers, "location");
+  if (wwwHome.status !== 301) fail(`www redirect status ${wwwHome.status}`);
+  else if (wwwLoc !== "https://neurolinks.ca/contact/?utm_source=google&gclid=wwwtest") {
+    fail(`www redirect location ${wwwLoc}`);
+  } else pass(`www → apex kept slash and tracking ${wwwLoc}`);
+
+  const wwwPdf = await rawRequest("/documents/physician-referral-form.pdf", {
+    host: "www.neurolinks.ca",
+  });
+  const wwwPdfLoc = headerValue(wwwPdf.headers, "location");
+  if (wwwPdf.status !== 301 || wwwPdfLoc !== "https://neurolinks.ca/documents/physician-referral-form.pdf") {
+    fail(`www PDF redirect ${wwwPdf.status} ${wwwPdfLoc}`);
+  } else pass(`www PDF → apex ${wwwPdfLoc}`);
+
   if (htmlIndexable) {
     const prodHome = await rawRequest("/", { host: productionHost });
     const prodAds = await rawRequest(ADS, { host: productionHost });

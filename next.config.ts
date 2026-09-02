@@ -31,15 +31,10 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    return [
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.neurolinks.ca" }],
-        destination: "https://neurolinks.ca/:path*",
-        statusCode: 301,
-      },
-      ...allAppRedirects(),
-    ];
+    // www → apex is handled in src/proxy.ts so trailing slashes and query
+    // strings are preserved in a single 301. A next.config `/:path*` rule
+    // strips the trailing slash and forces a second hop.
+    return allAppRedirects();
   },
 };
 
