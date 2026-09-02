@@ -302,10 +302,17 @@ async function main() {
     fail(`Chinese TMS location is double-encoded ${chineseLoc}`);
   } else pass(`encoded Chinese TMS 301 → ${chineseLoc}`);
 
-  const utm = await request("/neurolinks-psychiatry-nanaimo-bc?utm_source=google&gclid=test123");
+  const utm = await request(
+    "/neurolinks-psychiatry-nanaimo-bc?utm_source=google&gclid=test123&gbraid=gbtest&wbraid=wbtest",
+  );
   const utmLoc = header(utm.response, "location") || "";
   if (utm.response.status !== 308) fail(`ads trailing-slash status ${utm.response.status}`);
-  else if (!utmLoc.includes("utm_source=google") || !utmLoc.includes("gclid=test123")) {
+  else if (
+    !utmLoc.includes("utm_source=google") ||
+    !utmLoc.includes("gclid=test123") ||
+    !utmLoc.includes("gbraid=gbtest") ||
+    !utmLoc.includes("wbraid=wbtest")
+  ) {
     fail(`ads trailing-slash dropped tracking ${utmLoc}`);
   } else pass(`ads trailing-slash kept tracking ${utmLoc}`);
 
