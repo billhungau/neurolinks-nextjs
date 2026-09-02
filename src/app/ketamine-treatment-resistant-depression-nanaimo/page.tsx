@@ -2,10 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { SiteChrome } from "@/components/SiteChrome";
 import { ButtonLink } from "@/components/ButtonLink";
-import { Eyebrow } from "@/components/Eyebrow";
 import { Reveal } from "@/components/Reveal";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { FaqJsonLd } from "@/components/FaqJsonLd";
+import { TextLink } from "@/components/TextLink";
 import { TmsSectionNav } from "@/components/tms/TmsSectionNav";
 import { TmsVideo } from "@/components/tms/TmsVideo";
 import { TmsDisclosure } from "@/components/tms/TmsDisclosure";
@@ -25,58 +25,46 @@ const HERO_ALT = "Ketamine vial in a supervised treatment room at NeuroLinks";
 
 const KET_SECTIONS = [
   { id: "overview", label: "Overview" },
-  { id: "how-ketamine-works", label: "How it works" },
   { id: "what-to-expect", label: "What to expect" },
+  { id: "how-ketamine-works", label: "How it works" },
   { id: "conditions", label: "Conditions" },
   { id: "safety", label: "Safety" },
   { id: "faqs", label: "FAQs" },
 ] as const;
 
-const ONSET = [
-  { index: "01", title: "Psychiatric assessment" },
-  { index: "02", title: "Supervised treatment" },
-  { index: "03", title: "Post-treatment observation" },
-  { index: "04", title: "Response monitoring" },
-] as const;
-
-const MECHANISMS = [
+const WHY_KETAMINE = [
   {
-    index: "01",
-    title: "NMDA receptor modulation",
-    body: "Ketamine temporarily alters signalling through NMDA receptors, which are involved in communication between brain cells.",
+    title: "Potential for rapid relief",
+    body: "For some people, improvement may begin within hours or days—considerably faster than with conventional antidepressants.",
   },
   {
-    index: "02",
-    title: "Glutamate signalling",
-    body: "These effects influence glutamate-related pathways involved in neural communication and adaptation.",
+    title: "An option when previous treatments haven’t helped",
+    body: "Ketamine may help people with depression who have not found sufficient relief from previous treatments.",
   },
   {
-    index: "03",
-    title: "Neuroplasticity",
-    body: "Ketamine may promote processes associated with synaptic change and neuroplasticity, which could contribute to its therapeutic effects.",
+    title: "Supported throughout treatment",
+    body: "An experienced registered nurse provides preparation, support and post-session reflection, with vital-sign monitoring and psychiatrist oversight.",
   },
 ] as const;
 
-const JOURNEY = [
+const SUPPORT = [
   {
     index: "01",
-    title: "Psychiatric assessment",
-    body: "Your diagnosis, previous treatments, medical history, medications and relevant safety considerations are reviewed.",
+    stage: "Before treatment",
+    title: "Feel prepared",
+    body: "Before every session, your nurse explains what to expect, discusses any concerns and helps you approach treatment with realistic expectations.",
   },
   {
     index: "02",
-    title: "Individualized treatment planning",
-    body: "The psychiatrist determines whether ketamine may be appropriate and recommends a treatment plan based on your clinical needs.",
+    stage: "During treatment",
+    title: "Feel supported",
+    body: "Your nurse provides reassurance and support as the experience unfolds, while monitoring your vital signs and how you are feeling.",
   },
   {
     index: "03",
-    title: "Supervised administration",
-    body: "Ketamine is administered in a controlled clinical setting with appropriate monitoring.",
-  },
-  {
-    index: "04",
-    title: "Recovery and follow-up",
-    body: "Response, tolerability and safety are reviewed throughout care, and recommendations are adjusted according to clinical progress.",
+    stage: "After treatment",
+    title: "Make sense of the experience",
+    body: "After the session, your nurse helps you reflect on the experience, discuss any difficult feelings and consider what may be helpful in your daily life.",
   },
 ] as const;
 
@@ -156,8 +144,7 @@ export default function KetaminePage() {
         </div>
         <div className="nl-wrap relative z-10 flex min-h-[clamp(500px,64svh,570px)] flex-col justify-end pt-20 pb-8 md:justify-center md:py-16">
           <div className="hero-intro max-w-[36rem]">
-            <p className="hero-enter eyebrow text-white/80">Medically supervised ketamine treatment</p>
-            <h1 className="hero-enter mt-3 font-serif text-[clamp(2.5rem,7vw,4.25rem)] font-semibold leading-[1.02] text-white">
+            <h1 className="hero-enter font-serif text-[clamp(2.5rem,7vw,4.25rem)] font-semibold leading-[1.02] text-white">
               Ketamine therapy
             </h1>
             <p className="hero-enter hero-enter-2 mt-4 max-w-[36ch] text-[0.975rem] leading-[1.55] text-white/90 md:mt-5 md:max-w-md md:text-[1.05rem] md:leading-[1.65]">
@@ -190,21 +177,24 @@ export default function KetaminePage() {
         <div className="tms-wrap">
           <Reveal className="ket-overview-grid">
             <div>
-              <Eyebrow>Overview</Eyebrow>
-              <h2 className="tms-h2 mt-3">What is ketamine treatment?</h2>
+              <h2 className="tms-h2">What is ketamine treatment?</h2>
               <p className="tms-lede mt-4">
                 Ketamine was originally developed as an anesthetic and was later found to have
-                rapid antidepressant effects at much lower doses. For some people, improvement may
-                begin within hours to days—considerably faster than with conventional
-                antidepressants.
+                rapid antidepressant effects at much lower doses.
               </p>
-              <Eyebrow className="glance-label">At a glance</Eyebrow>
-              <ul className="tms-facts ket-facts">
-                <li>Medication-based treatment</li>
-                <li>Medically supervised clinical setting</li>
-                <li>Intramuscular or subcutaneous administration</li>
-                <li>Psychiatric assessment required</li>
+              <h3 className="ket-why-heading">Why consider ketamine?</h3>
+              <ul className="ket-why">
+                {WHY_KETAMINE.map((item) => (
+                  <li key={item.title}>
+                    <h4>{item.title}</h4>
+                    <p>{item.body}</p>
+                  </li>
+                ))}
               </ul>
+              <p className="ket-why-note">
+                The timing, degree and duration of benefit vary; some patients need several
+                treatments, and some do not respond.
+              </p>
               <TmsDisclosure summary="Read more about the evidence">
                 <p>
                   Published research has reported that{" "}
@@ -244,27 +234,32 @@ export default function KetaminePage() {
         </div>
       </section>
 
-      <section className="tms-section tms-navy">
+      <section id="what-to-expect" className="tms-section bg-white">
         <div className="tms-wrap">
-          <Reveal className="ket-onset">
-            <Eyebrow className="text-[var(--nl-yellow)]">Rapid-acting potential</Eyebrow>
-            <h2 className="tms-h2 mt-3">Improvement may begin within hours or days</h2>
-            <p className="tms-lede tms-lede-on-dark mt-4">
-              Some patients experience improvement within hours or days, while others may require
-              several treatments or may not respond. The timing, degree and duration of benefit
-              vary.
+          <Reveal>
+            <h2 className="tms-h2">Support before, during and after every session</h2>
+            <p className="tms-lede mt-4">
+              An experienced registered nurse helps you prepare for each treatment, supports you
+              throughout the experience and helps you reflect afterward. Your vital signs are
+              monitored alongside your comfort and wellbeing.
             </p>
-            <div className="ket-onset-track" aria-hidden="true">
-              <span className="ket-onset-line" />
+            <p className="ket-admin">
+              Ketamine is administered intramuscularly or subcutaneously by a registered nurse
+              under the supervision of a psychiatrist.
+            </p>
+            <div className="ket-support-block">
+              <div className="ket-support-rule" aria-hidden="true" />
+              <ol className="ket-support-grid">
+                {SUPPORT.map((item) => (
+                  <li key={item.index}>
+                    <p className="ket-support-index">{item.index}</p>
+                    <p className="ket-support-stage">{item.stage}</p>
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                  </li>
+                ))}
+              </ol>
             </div>
-            <ol className="ket-onset-grid">
-              {ONSET.map((item) => (
-                <li key={item.index} className="ket-onset-step">
-                  <p>{item.index}</p>
-                  <h3>{item.title}</h3>
-                </li>
-              ))}
-            </ol>
           </Reveal>
         </div>
       </section>
@@ -274,23 +269,13 @@ export default function KetaminePage() {
           <Reveal className="ket-mech">
             <div className="relative">
               <RippleMotif />
-              <Eyebrow>How ketamine may work</Eyebrow>
-              <h2 className="tms-h2 mt-3">How ketamine may influence brain function</h2>
+              <h2 className="tms-h2">How ketamine works</h2>
               <p className="tms-lede mt-4">
                 Ketamine’s therapeutic effects are thought to involve changes in glutamate
                 signalling and neuroplasticity. Its precise antidepressant mechanisms remain an
                 active area of research.
               </p>
             </div>
-            <ol className="ket-mech-grid">
-              {MECHANISMS.map((item) => (
-                <li key={item.index}>
-                  <p className="ket-mech-index">{item.index}</p>
-                  <h3>{item.title}</h3>
-                  <p>{item.body}</p>
-                </li>
-              ))}
-            </ol>
             <TmsDisclosure summary="Read more about proposed mechanisms">
               <ul>
                 <li>
@@ -321,33 +306,12 @@ export default function KetaminePage() {
         </div>
       </section>
 
-      <section id="what-to-expect" className="tms-section bg-white">
-        <div className="tms-wrap">
-          <Reveal>
-            <Eyebrow>What to expect</Eyebrow>
-            <h2 className="tms-h2 mt-3">Your treatment journey</h2>
-            <ol className="ket-journey">
-              {JOURNEY.map((item) => (
-                <li key={item.index}>
-                  <p className="ket-mech-index">{item.index}</p>
-                  <h3>{item.title}</h3>
-                  <p>{item.body}</p>
-                </li>
-              ))}
-            </ol>
-          </Reveal>
-        </div>
-      </section>
-
       <section id="conditions" className="tms-section tms-mist">
         <div className="tms-wrap">
           <Reveal>
-            <Eyebrow>Conditions</Eyebrow>
-            <h2 className="tms-h2 mt-3">Conditions considered for ketamine treatment</h2>
+            <h2 className="tms-h2">Conditions considered for ketamine treatment</h2>
             <p className="tms-lede mt-4">
-              The evidence, regulatory status and suitability of ketamine differ by condition. A
-              condition listed here does not mean that treatment will automatically be
-              recommended.
+              The evidence, regulatory status and suitability of ketamine differ by condition.
             </p>
             <div className="tms-condition-grid">
               <div>
@@ -367,10 +331,6 @@ export default function KetaminePage() {
                 </ul>
               </div>
             </div>
-            <p className="tms-note">
-              This grouping is for orientation only. It is not a regulatory classification and
-              does not rank conditions by strength of evidence.
-            </p>
           </Reveal>
         </div>
       </section>
@@ -378,16 +338,15 @@ export default function KetaminePage() {
       <section id="safety" className="tms-section bg-white">
         <div className="tms-wrap">
           <Reveal>
-            <Eyebrow>Safety and suitability</Eyebrow>
-            <h2 className="tms-h2 mt-3">Careful selection and monitored treatment</h2>
+            <h2 className="tms-h2">Careful selection and monitored treatment</h2>
             <div className="ket-safety">
               <div>
                 <h3>Careful patient selection</h3>
                 <p>
-                  Suitability depends on diagnosis and previous treatment, relevant medical and
-                  cardiovascular factors, current medications, substance-use considerations,
-                  pregnancy considerations where relevant, previous adverse reactions, and the
-                  ability to participate safely in treatment and follow-up.
+                  Suitability is assessed individually before treatment is recommended. A
+                  psychiatrist reviews your diagnosis, previous treatments, medical history and
+                  relevant safety considerations, then determines whether ketamine may be
+                  appropriate.
                 </p>
                 <ul>
                   {SELECTION.map((item) => (
@@ -402,60 +361,17 @@ export default function KetaminePage() {
                   are monitored. Temporary psychological and physical effects can occur, and the
                   treatment plan may be adjusted according to clinical response.
                 </p>
-                <p>
-                  At NeuroLinks, ketamine is administered intramuscularly or subcutaneously by a
-                  registered nurse under the supervision of a psychiatrist, with observation
-                  before, during and after treatment.
-                </p>
               </div>
             </div>
           </Reveal>
         </div>
       </section>
 
-      <section className="tms-section ket-ivory">
+      <section className="ket-tms-link-band ket-ivory">
         <div className="tms-wrap">
-          <Reveal>
-            <Eyebrow>Treatment options</Eyebrow>
-            <h2 className="tms-h2 mt-3">TMS or ketamine?</h2>
-            <p className="tms-lede mt-4">
-              TMS and ketamine work differently and may suit different patients. Recommendations
-              depend on diagnosis, previous treatment, medical history, preferences and practical
-              considerations.
-            </p>
-            <div className="ket-compare">
-              <article className="ket-compare-tms">
-                <h3>TMS</h3>
-                <ul>
-                  <li>Non-invasive</li>
-                  <li>No anesthesia required</li>
-                  <li>Treatment delivered across repeated sessions</li>
-                  <li>Response generally develops over time</li>
-                </ul>
-              </article>
-              <article className="ket-compare-ket">
-                <h3>Ketamine</h3>
-                <ul>
-                  <li>Medication-based treatment</li>
-                  <li>Medically supervised administration</li>
-                  <li>Treatment schedule individualized</li>
-                  <li>Improvement may begin within hours or days</li>
-                </ul>
-              </article>
-            </div>
-            <p className="tms-lede mt-8">
-              A psychiatric assessment helps determine whether either treatment may be
-              appropriate.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <ButtonLink href="/about-tms-treatment-on-psychiatric-illness/" variant="ghost">
-                Learn about TMS
-              </ButtonLink>
-              <ButtonLink href="/contact/" variant="accent">
-                Request an assessment
-              </ButtonLink>
-            </div>
-          </Reveal>
+          <TextLink href="/about-tms-treatment-on-psychiatric-illness/">
+            Also considering TMS? Learn about TMS
+          </TextLink>
         </div>
       </section>
 
@@ -472,9 +388,6 @@ export default function KetaminePage() {
               <ButtonLink href="/contact/" variant="accent">
                 Request an assessment
               </ButtonLink>
-              <ButtonLink href="/physician-referral/" variant="on-dark">
-                Information for physicians
-              </ButtonLink>
             </div>
           </Reveal>
         </div>
@@ -485,8 +398,7 @@ export default function KetaminePage() {
           <FaqJsonLd items={KETAMINE_FAQS} />
           <div className="tms-faq-layout">
             <div className="tms-faq-intro">
-              <Eyebrow>FAQs</Eyebrow>
-              <h2 className="tms-h2 mt-3">Frequently asked questions</h2>
+              <h2 className="tms-h2">Frequently asked questions</h2>
               <p className="tms-lede mt-4">
                 Answers to common questions about ketamine treatment, including onset, safety,
                 administration and how it compares with TMS.

@@ -162,15 +162,6 @@ export const KETAMINE_FAQS: FaqItem[] = [
     ),
   },
   {
-    q: "What factors affect the treatment outcome?",
-    a: answer(
-      ["Positive predictors", "https://www.liebertpub.com/doi/abs/10.1089/cap.2023.0047"],
-      " of ketamine treatment outcome include: a shorter duration of depression; taking a concomitant antidepressant; being less treatment-resistant. ",
-      ["Negative outcome predictors", "https://onlinelibrary.wiley.com/doi/abs/10.1002/hup.2836"],
-      " include: a higher number of treatment failures; more severe depressive illness.",
-    ),
-  },
-  {
     q: "How is ketamine administered?",
     a: answer(
       "While ketamine can be administered in multiple routes, our centre uses ",
@@ -184,14 +175,6 @@ export const KETAMINE_FAQS: FaqItem[] = [
     ),
   },
   {
-    q: "Is maintenance treatment necessary?",
-    a: "A maintenance treatment plan spanning six months is recommended. Nevertheless, given that many patients undergoing ketamine treatment have shown resistance to medications, experiencing mild relapse upon discontinuation of treatment is not uncommon. In such instances, resuming ketamine treatment often proves effective in alleviating symptoms.",
-  },
-  {
-    q: "Who cannot receive ketamine treatment?",
-    a: "Ketamine administration is contraindicated in patients with a heightened cardiovascular risk, including those with unstable angina and poorly controlled hypertension. Individuals with elevated intracranial and intraocular pressure should also refrain from ketamine treatment. Furthermore, patients with uncontrolled hyperthyroidism, severe liver disease, or a history of psychosis are advised to avoid ketamine therapy. Additionally, due to potential interactions with other substances, the use of substances and alcohol is discouraged during ketamine treatment. Pregnant patients are cautioned against undergoing ketamine therapy due to uncertainties regarding fetal risks.",
-  },
-  {
     q: "Is ketamine treatment safe?",
     a: answer(
       "Ketamine is highly accepted by most patients. In ",
@@ -200,6 +183,23 @@ export const KETAMINE_FAQS: FaqItem[] = [
       ["side effects", "https://www.clinicalkey.com/#!/content/playContent/1-s2.0-S2215036617302729"],
       ". Neurological: headaches and dizziness; less commonly sedation, faintness, poor coordination, or tremors; typically short-term. Psychotomimetic: dissociation, perceptual disturbances, and feelings of unreality; no long-term psychotomimetic effects have been reported in studies. Acute psychiatric: anxiety, agitation, or mood elevation; less frequently detachment, emotional blunting, or psychosis. Cognitive: memory loss, poor concentration, or confusion, typically short-lived. The clinic also remains vigilant regarding less common risks like long-term cognitive impairments, urinary tract symptoms and the development of tolerance.",
     ),
+  },
+  {
+    q: "Is maintenance treatment necessary?",
+    a: "A maintenance treatment plan spanning six months is recommended. Nevertheless, given that many patients undergoing ketamine treatment have shown resistance to medications, experiencing mild relapse upon discontinuation of treatment is not uncommon. In such instances, resuming ketamine treatment often proves effective in alleviating symptoms.",
+  },
+  {
+    q: "What factors affect the treatment outcome?",
+    a: answer(
+      ["Positive predictors", "https://www.liebertpub.com/doi/abs/10.1089/cap.2023.0047"],
+      " of ketamine treatment outcome include: a shorter duration of depression; taking a concomitant antidepressant; being less treatment-resistant. ",
+      ["Negative outcome predictors", "https://onlinelibrary.wiley.com/doi/abs/10.1002/hup.2836"],
+      " include: a higher number of treatment failures; more severe depressive illness.",
+    ),
+  },
+  {
+    q: "Who cannot receive ketamine treatment?",
+    a: "Ketamine administration is contraindicated in patients with a heightened cardiovascular risk, including those with unstable angina and poorly controlled hypertension. Individuals with elevated intracranial and intraocular pressure should also refrain from ketamine treatment. Furthermore, patients with uncontrolled hyperthyroidism, severe liver disease, or a history of psychosis are advised to avoid ketamine therapy. Additionally, due to potential interactions with other substances, the use of substances and alcohol is discouraged during ketamine treatment. Pregnant patients are cautioned against undergoing ketamine therapy due to uncertainties regarding fetal risks.",
   },
   {
     q: "What is a ketamine bad trip?",
