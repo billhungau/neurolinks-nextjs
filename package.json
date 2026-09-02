@@ -11,6 +11,7 @@
     "test": "node --experimental-strip-types --experimental-default-type=module --test src/content/faqs.test.ts src/content/home-reviews.test.ts src/lib/contact-form.test.ts src/lib/referral-form.test.ts src/lib/anchor-offset.test.ts src/lib/anchor-target.test.ts src/app/api/forms/contact/route.test.ts src/app/api/forms/referral/route.test.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8"
