@@ -39,7 +39,7 @@ test("anchor offset observer is cleaned up and ignores open menus", () => {
   assert.match(source, /visualViewport/);
   assert.match(source, /menuOpen/);
   assert.match(source, /usePathname/);
-  assert.match(source, /scrollIntoView/);
-  assert.match(source, /hashchange/);
-  assert.match(source, /requestAnimationFrame/);
+  assert.match(source, /anchorScrollTarget/);
+  assert.match(source, /samePageHashId/);
+  assert.match(source, /pushState/);
 });

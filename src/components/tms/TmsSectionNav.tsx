@@ -59,14 +59,6 @@ export function TmsSectionNav({
           <a
             key={section.id}
             href={`#${section.id}`}
-            onClick={(event) => {
-              if (window.location.hash !== `#${section.id}`) return;
-              event.preventDefault();
-              document.getElementById(section.id)?.scrollIntoView({
-                block: "start",
-                inline: "nearest",
-              });
-            }}
             className={active === section.id ? "is-active" : undefined}
             aria-current={active === section.id ? "location" : undefined}
           >

@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect } from "react";
+import { anchorScrollTarget, samePageHashId } from "@/lib/anchor-target";
 
 const GAP_PX = 16;
 
@@ -54,6 +55,11 @@ function applyAnchorOffset() {
   }
 }
 
+function scrollToHashId(id: string) {
+  const target = anchorScrollTarget(document.getElementById(id));
+  target?.scrollIntoView({ block: "start", inline: "nearest" });
+}
+
 function scrollToCurrentHash() {
   const raw = window.location.hash;
   if (!raw || raw === "#") return;
@@ -63,7 +69,11 @@ function scrollToCurrentHash() {
   } catch {
     return;
   }
-  document.getElementById(id)?.scrollIntoView({ block: "start", inline: "nearest" });
+  scrollToHashId(id);
+}
+
+function isModifiedClick(event: MouseEvent) {
+  return event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
 }
 
 function restoreHashPosition() {
@@ -76,6 +86,7 @@ export function AnchorOffset() {
 
   useLayoutEffect(() => {
     applyAnchorOffset();
+    scrollToCurrentHash();
 
     const observed = [
       document.querySelector("header.site-header"),
@@ -107,7 +118,26 @@ export function AnchorOffset() {
 
     const onHash = () => restoreHashPosition();
     window.addEventListener("hashchange", onHash);
+    window.addEventListener("popstate", onHash);
     window.addEventListener("pageshow", onHash);
+
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || isModifiedClick(event)) return;
+      const link = (event.target as Element | null)?.closest?.("a[href]");
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if (link.target && link.target !== "_self") return;
+      const id = samePageHashId(link.getAttribute("href") ?? "", pathname, window.location.search);
+      if (!id || id === "main-content") return;
+      const target = document.getElementById(id);
+      if (!target) return;
+      event.preventDefault();
+      applyAnchorOffset();
+      scrollToHashId(id);
+      if (window.location.hash !== `#${id}`) {
+        history.pushState(null, "", `#${id}`);
+      }
+    };
+    document.addEventListener("click", onClick, true);
 
     // Next.js hydrates with hashFragment: null, then may focus/scroll the
     // target without CSS scroll-margin. One follow-up frame after paint is
@@ -119,7 +149,9 @@ export function AnchorOffset() {
 
     return () => {
       window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("popstate", onHash);
       window.removeEventListener("pageshow", onHash);
+      document.removeEventListener("click", onClick, true);
       window.cancelAnimationFrame(frame1);
       window.cancelAnimationFrame(frame2);
     };
