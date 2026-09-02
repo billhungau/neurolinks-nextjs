@@ -314,10 +314,6 @@ export default function AboutTmsPage() {
                 </ul>
               </div>
             </div>
-            <p className="tms-note">
-              This grouping is for orientation only. It is not a regulatory classification and does
-              not rank conditions by strength of evidence.
-            </p>
           </Reveal>
         </div>
       </section>
