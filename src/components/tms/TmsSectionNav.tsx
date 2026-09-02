@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 export type SectionLink = { id: string; label: string };
 
@@ -19,6 +19,13 @@ export function TmsSectionNav({
   sections?: readonly SectionLink[];
 }) {
   const [active, setActive] = useState<string>(sections[0]?.id ?? "");
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.add("has-tms-subnav");
+    return () => {
+      document.documentElement.classList.remove("has-tms-subnav");
+    };
+  }, []);
 
   useEffect(() => {
     const nodes = sections

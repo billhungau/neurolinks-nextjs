@@ -10,7 +10,7 @@ export function Section({
   return (
     <section
       id={id}
-      className={`mx-auto max-w-[var(--site-max)] scroll-mt-24 px-[var(--nl-gutter)] py-12 ${className}`}
+      className={`mx-auto max-w-[var(--site-max)] nl-anchor-section px-[var(--nl-gutter)] py-12 ${className}`}
     >
       {children}
     </section>

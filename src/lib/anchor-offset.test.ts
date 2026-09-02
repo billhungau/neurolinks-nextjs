@@ -1,0 +1,68 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import test from "node:test";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+function read(relative: string) {
+  return readFileSync(join(root, relative), "utf8");
+}
+
+test("anchor offset uses one measured strategy without doubled CSS offsets", () => {
+  const css = read("app/globals.css");
+  assert.match(css, /--nl-anchor-offset:/);
+  assert.match(css, /--nl-header-height:/);
+  assert.match(css, /--nl-subnav-height:/);
+  assert.match(css, /--nl-anchor-gap:\s*1rem/);
+  assert.equal(css.includes("scroll-padding-top: 4.75rem"), false);
+  assert.equal(css.includes("scroll-margin-top: 7.75rem"), false);
+  assert.equal(css.includes("scroll-margin-top: 8.5rem"), false);
+  assert.match(css, /scroll-margin-top:\s*calc\(var\(--nl-anchor-offset\) - var\(--nl-target-pad-top\)\)/);
+  assert.match(css, /\.tms-subnav \{[\s\S]*?top:\s*var\(--nl-header-height\)/);
+  assert.match(css, /html:has\(\.tms-subnav\)/);
+  assert.match(css, /\.nl-hash-target/);
+  assert.match(css, /\.tms-subnav-inner \{[\s\S]*?min-width:\s*0/);
+  assert.equal(/html\s*\{[^}]*scroll-padding-top/.test(css), false);
+});
+
+test("smooth scrolling is CSS-gated and skipped for reduced motion", () => {
+  const css = read("app/globals.css");
+  assert.match(css, /html\[data-nl-smooth-scroll\]:not\(\.nl-instant-scroll\)\s*\{[^}]*scroll-behavior:\s*smooth/);
+  assert.equal(/html\s*\{[^}]*scroll-behavior:\s*smooth/.test(css), false);
+  assert.match(
+    css,
+    /prefers-reduced-motion:\s*reduce[\s\S]*html\[data-nl-smooth-scroll\]:not\(\.nl-instant-scroll\)[\s\S]*scroll-behavior:\s*auto/,
+  );
+});
+
+test("hash restore stays instant and clicks do not set JS smooth behavior", () => {
+  const source = read("components/AnchorOffset.tsx");
+  const layout = read("app/layout.tsx");
+  assert.match(source, /data-nl-smooth-scroll/);
+  assert.match(source, /nl-instant-scroll/);
+  assert.match(source, /data-scroll-behavior/);
+  assert.match(layout, /nl-instant-scroll/);
+  assert.equal(source.includes('behavior: "smooth"'), false);
+  assert.equal(source.includes("behavior: 'smooth'"), false);
+  assert.match(source, /id === "main-content"/);
+});
+
+test("hash buttons keep native fragment links", () => {
+  const source = read("components/ButtonLink.tsx");
+  assert.match(source, /href\.startsWith\("#"\)/);
+  assert.match(source, /href\.includes\("#"\)/);
+});
+
+test("anchor offset observer is cleaned up and ignores open menus", () => {
+  const source = read("components/AnchorOffset.tsx");
+  assert.match(source, /ResizeObserver/);
+  assert.match(source, /observer\.disconnect\(\)/);
+  assert.match(source, /visualViewport/);
+  assert.match(source, /menuOpen/);
+  assert.match(source, /usePathname/);
+  assert.match(source, /anchorScrollTarget/);
+  assert.match(source, /samePageHashId/);
+  assert.match(source, /nl-hash-target/);
+});

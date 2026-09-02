@@ -133,7 +133,7 @@ challenges`}
         </div>
       </section>
 
-      <section id="treatment-options" className="home-section scroll-mt-24 bg-[var(--nl-cream)]">
+      <section id="treatment-options" className="home-section bg-[var(--nl-cream)]">
         <div className="nl-wrap">
           <Reveal>
             <h2 className="home-h2 max-w-3xl text-[var(--nl-navy)]">
@@ -335,7 +335,7 @@ challenges`}
 
       <HomeReviews />
 
-      <section id="location" className="home-section scroll-mt-24 bg-white">
+      <section id="location" className="home-section bg-white">
         <Reveal>
           <div className="nl-wrap location-split">
             <div className="flex flex-col justify-center">

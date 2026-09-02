@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import Script from "next/script";
+import { AnchorOffset } from "@/components/AnchorOffset";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
 import { SkipLink } from "@/components/SkipLink";
 import { DEFAULT_OG_IMAGE, pageRobots } from "@/lib/seo";
@@ -70,9 +71,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Script
           id="nl-js"
           strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add("js");` }}
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add("js","nl-instant-scroll");`,
+          }}
         />
         <SkipLink />
+        <AnchorOffset />
         <ClinicJsonLd />
         {children}
       </body>
