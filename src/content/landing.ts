@@ -60,9 +60,9 @@ export const LANDING_TREATMENTS = [
     title: "Ketamine Therapy",
     body: "Rapid-acting, medically supervised",
     points: [
-      "An experienced registered nurse provides preparation, support and post-session reflection, with vital-sign monitoring and psychiatrist oversight.",
-      "Your nurse provides reassurance and support as the experience unfolds, while monitoring your vital signs and how you are feeling.",
-      "Before every session, your nurse explains what to expect, discusses any concerns and helps you approach treatment with realistic expectations.",
+      "Before every session, your nurse explains what to expect and discusses any concerns.",
+      "Your nurse monitors your vital signs and how you are feeling as the experience unfolds.",
+      "After the session, your nurse helps you reflect on the experience.",
     ],
     linkLabel: "Learn more about ketamine",
     image: "ketamineHero",

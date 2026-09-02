@@ -67,7 +67,9 @@ test("landing keeps the approved headline, excerpt and three verbatim reviews", 
   assert.equal(LANDING_TREATMENTS[0].points.length, 3);
   assert.equal(LANDING_TREATMENTS[1].points.length, 3);
   assert.match(LANDING_TREATMENTS[0].points[0], /non-invasive/);
-  assert.match(LANDING_TREATMENTS[1].points[0], /registered nurse/);
+  assert.match(LANDING_TREATMENTS[1].points[0], /Before every session/);
+  assert.match(LANDING_TREATMENTS[1].points[1], /vital signs/);
+  assert.match(LANDING_TREATMENTS[1].points[2], /After the session/);
   assert.equal(
     LANDING_TREATMENTS.some((item) =>
       item.points.some((point) => /intramuscular|subcutaneous/i.test(point)),
@@ -113,4 +115,18 @@ test("landing psychiatrist copy is one block beside the portrait", () => {
   assert.match(globalsCss, /\.landing-hero-media \{[\s\S]*?aspect-ratio:\s*2\s*\/\s*1/);
   assert.equal(globalsCss.includes(".landing-hero-media {\n    max-height: none;\n    min-height: 22rem;"), false);
   assert.match(globalsCss, /#inquiry\.home-section \{[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/);
+});
+
+test("landing treatment cards stretch on desktop and keep distinct ketamine points", () => {
+  assert.match(landingPage, /landing-tx-grid/);
+  assert.match(landingPage, /className="h-full"/);
+  assert.match(globalsCss, /\.landing-tx-grid \{[\s\S]*?align-items:\s*stretch/);
+  assert.match(globalsCss, /\.landing-tx \.tx-feature-copy \.text-link \{[\s\S]*?margin-top:\s*auto/);
+  assert.match(LANDING_TREATMENTS[1].points[0], /explains what to expect/);
+  assert.match(LANDING_TREATMENTS[1].points[1], /experience unfolds/);
+  assert.match(LANDING_TREATMENTS[1].points[2], /reflect on the experience/);
+  assert.equal(
+    LANDING_TREATMENTS[1].points.filter((point) => /post-session reflection/i.test(point)).length,
+    0,
+  );
 });

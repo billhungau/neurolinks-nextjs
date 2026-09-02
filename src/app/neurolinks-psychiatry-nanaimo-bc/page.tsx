@@ -108,9 +108,9 @@ export default function LandingPage() {
                 TMS and ketamine
               </h2>
             </Reveal>
-            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <div className="landing-tx-grid">
               {LANDING_TREATMENTS.map((item) => (
-                <Reveal key={item.href}>
+                <Reveal key={item.href} className="h-full">
                   <article className="tx-feature landing-tx">
                     <div className="img-frame relative aspect-[16/10]">
                       <Image
