@@ -24,6 +24,7 @@ const landingPage = readFileSync(
 const contactPage = readFileSync(join(root, "../app/contact/page.tsx"), "utf8");
 const landingHeader = readFileSync(join(root, "../components/LandingHeader.tsx"), "utf8");
 const contactForm = readFileSync(join(root, "../components/forms/ContactForm.tsx"), "utf8");
+const revealSource = readFileSync(join(root, "../components/Reveal.tsx"), "utf8");
 const globalsCss = readFileSync(join(root, "../app/globals.css"), "utf8");
 
 test("landing and contact pages share the same ContactForm module", () => {
@@ -40,6 +41,20 @@ test("landing inquiry CTAs target #inquiry and keep compact navigation", () => {
   assert.match(landingHeader, /About Us/);
   assert.equal(landingHeader.includes("PRIMARY_NAV"), false);
   assert.equal(landingHeader.includes("Open menu"), false);
+});
+
+test("landing logo uses a same-page #top hash so advertising parameters are kept", () => {
+  assert.match(landingHeader, /id="top"/);
+  assert.match(landingHeader, /href="#top"/);
+  assert.equal(landingHeader.includes('href="/neurolinks-psychiatry-nanaimo-bc/"'), false);
+});
+
+test("Reveal fails open when the observer cannot run", () => {
+  assert.match(revealSource, /REVEAL_FALLBACK_MS = 1200/);
+  assert.match(revealSource, /prefersReducedMotion\(\)[\s\S]*reveal\(\)/);
+  assert.match(revealSource, /typeof IntersectionObserver === "undefined"/);
+  assert.match(revealSource, /isInOrPastView\(node\)/);
+  assert.equal(revealSource.includes("setTimeout(reveal, 12000)"), false);
 });
 
 test("landing keeps the approved headline, excerpt and three verbatim reviews", () => {
@@ -115,6 +130,18 @@ test("landing psychiatrist copy is one block beside the portrait", () => {
   assert.match(globalsCss, /\.landing-hero-media \{[\s\S]*?aspect-ratio:\s*2\s*\/\s*1/);
   assert.equal(globalsCss.includes(".landing-hero-media {\n    max-height: none;\n    min-height: 22rem;"), false);
   assert.match(globalsCss, /#inquiry\.home-section \{[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/);
+});
+
+test("contact form controls stay visible below the sticky header when focused", () => {
+  assert.match(
+    globalsCss,
+    /\.ct-field input,\s*\.ct-field textarea \{[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/,
+  );
+  assert.match(globalsCss, /\.ct-submit \{[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/);
+  assert.match(
+    globalsCss,
+    /\.ct-form-success,\s*\.ct-form-error-banner \{[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/,
+  );
 });
 
 test("landing treatment cards stretch on desktop and keep distinct ketamine points", () => {

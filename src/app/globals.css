@@ -3889,6 +3889,7 @@ h3,
   font-size: 1rem;
   line-height: 1.4;
   font-family: inherit;
+  scroll-margin-top: var(--nl-anchor-offset);
 }
 
 .ct-field textarea {
@@ -3942,6 +3943,7 @@ h3,
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
+  scroll-margin-top: var(--nl-anchor-offset);
 }
 
 .ct-submit:hover:not(:disabled) {
@@ -3965,6 +3967,7 @@ h3,
   border-radius: var(--nl-radius);
   font-size: 0.975rem;
   line-height: 1.5;
+  scroll-margin-top: var(--nl-anchor-offset);
 }
 
 .ct-form-success {

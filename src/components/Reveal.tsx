@@ -2,8 +2,16 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 
+/** Fail-open if the observer never fires so essential copy is not left hidden. */
+export const REVEAL_FALLBACK_MS = 1200;
+
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function isInOrPastView(node: Element) {
+  const rect = node.getBoundingClientRect();
+  return rect.top < window.innerHeight + 80 && rect.bottom > 0;
 }
 
 export function Reveal({
@@ -24,11 +32,17 @@ export function Reveal({
     const node = ref.current;
     if (!node) return undefined;
 
+    const reveal = () => setVisible(true);
+
     if (prefersReducedMotion()) {
+      reveal();
       return undefined;
     }
 
-    const reveal = () => setVisible(true);
+    if (typeof IntersectionObserver === "undefined" || isInOrPastView(node)) {
+      reveal();
+      return undefined;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -58,7 +72,7 @@ export function Reveal({
     window.addEventListener("scroll", revealIfPast, { passive: true });
     window.addEventListener("pageshow", revealIfPast);
 
-    const fallback = window.setTimeout(reveal, 12000);
+    const fallback = window.setTimeout(reveal, REVEAL_FALLBACK_MS);
 
     return () => {
       observer.disconnect();
