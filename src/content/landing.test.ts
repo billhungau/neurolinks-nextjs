@@ -15,6 +15,7 @@ import {
   LANDING_TREATMENTS,
   LANDING_WHY,
 } from "./landing.ts";
+import { SITE } from "../lib/site.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const landingPage = readFileSync(
@@ -37,10 +38,28 @@ test("landing and contact pages share the same ContactForm module", () => {
 test("landing inquiry CTAs target #inquiry and keep compact navigation", () => {
   assert.match(landingPage, /#inquiry/);
   assert.match(landingHeader, /#inquiry/);
-  assert.match(landingHeader, /Ask about treatment options/);
-  assert.match(landingHeader, /About Us/);
+  assert.match(landingHeader, /Enquire/);
+  assert.equal(landingHeader.includes("Ask about treatment options"), false);
+  assert.match(landingPage, /Ask about treatment options/);
+  assert.equal(landingHeader.includes("About Us"), false);
+  assert.match(landingHeader, /#treatment/);
+  assert.match(landingHeader, /#psychiatrist/);
+  assert.match(landingHeader, /#faq/);
+  assert.match(landingHeader, /SITE\.phoneHref/);
+  assert.equal(SITE.phoneHref, "tel:2507395530");
+  assert.match(landingHeader, /Open menu/);
+  assert.match(landingHeader, /aria-controls/);
+  assert.match(landingHeader, /landing-mobile-nav/);
   assert.equal(landingHeader.includes("PRIMARY_NAV"), false);
-  assert.equal(landingHeader.includes("Open menu"), false);
+  assert.match(landingPage, /id="psychiatrist"/);
+  assert.match(landingPage, /psychiatrist-tms-nanaimo/);
+});
+
+test("landing header uses a centred three-zone desktop layout", () => {
+  assert.match(globalsCss, /\.landing-header \.landing-header-bar \{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s*auto\s*minmax\(0,\s*1fr\)/);
+  assert.match(globalsCss, /html:has\(\.landing-header\) \{[\s\S]*?--nl-header-height:\s*4\.5rem/);
+  assert.match(globalsCss, /@media \(max-width: 63\.99rem\) \{[\s\S]*?--nl-header-height:\s*3\.75rem/);
+  assert.equal(globalsCss.includes("--nl-header-height: 6.75rem"), false);
 });
 
 test("landing logo uses a same-page #top hash so advertising parameters are kept", () => {

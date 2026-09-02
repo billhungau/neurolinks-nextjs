@@ -52,7 +52,9 @@ function headerChromeHeight(): number {
     header.querySelector<HTMLElement>(".site-header-bar") ??
     header.querySelector<HTMLElement>(".landing-header-bar");
   const expandedControl = header.querySelector<HTMLElement>("[aria-expanded='true']");
-  const openPanel = header.querySelector<HTMLElement>(".site-header-panel, #landing-mobile-nav");
+  const openPanel = header.querySelector<HTMLElement>(
+    ".site-header-panel, .landing-header-panel, #landing-mobile-nav",
+  );
   const menuOpen = Boolean(expandedControl) && isShown(openPanel);
 
   if (menuOpen && bar && isShown(bar)) {

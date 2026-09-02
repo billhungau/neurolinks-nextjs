@@ -4258,39 +4258,86 @@ h3,
   overflow-x: clip;
 }
 
-.landing-header-actions {
-  display: flex;
-  min-width: 0;
-  flex: 1 1 auto;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.5rem 0.85rem;
-}
-
 .landing-header .landing-header-bar {
-  height: auto;
-  min-height: 3.5rem;
-  padding-block: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  height: 3.75rem;
+  min-height: 3.75rem;
+  padding-block: 0;
 }
 
-.landing-header-about,
+.landing-header-brand {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 auto;
+}
+
+.landing-header .site-header-logo-img {
+  width: 10.25rem;
+  height: auto;
+  max-height: 2.05rem;
+}
+
+.landing-header-nav {
+  display: none;
+}
+
+.landing-header-nav ul {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  gap: 0;
+}
+
+.landing-header-nav li {
+  display: flex;
+  align-items: center;
+}
+
+.landing-header-nav li + li::before {
+  content: "·";
+  margin-inline: 0.85rem;
+  color: rgb(255 255 255 / 0.42);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.landing-header-nav a,
 .landing-header-phone {
   display: inline-flex;
   min-height: 2.75rem;
   align-items: center;
   color: rgb(255 255 255 / 0.92);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
   text-underline-offset: 3px;
   white-space: nowrap;
 }
 
-.landing-header-about:hover,
+.landing-header-nav a:hover,
 .landing-header-phone:hover,
-.landing-header-about:focus-visible,
+.landing-header-nav a:focus-visible,
 .landing-header-phone:focus-visible {
   color: var(--nl-yellow);
+}
+
+.landing-header-actions {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.landing-header-phone {
+  display: none;
 }
 
 .landing-header-cta {
@@ -4298,12 +4345,13 @@ h3,
   min-height: 2.75rem;
   align-items: center;
   justify-content: center;
-  padding: 0.45rem 0.9rem;
+  padding: 0.45rem 1rem;
   border-radius: var(--nl-radius);
   background: var(--nl-yellow);
   color: var(--nl-navy);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
+  line-height: 1;
   text-align: center;
   text-decoration: none;
 }
@@ -4313,17 +4361,94 @@ h3,
   background: var(--nl-yellow-hover);
 }
 
-@media (max-width: 639px) {
+.landing-header-menu {
+  display: inline-flex;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgb(255 255 255 / 0.4);
+  border-radius: var(--nl-radius);
+  background: transparent;
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.landing-header-menu:hover,
+.landing-header-menu:focus-visible {
+  border-color: var(--nl-yellow);
+  color: var(--nl-yellow);
+}
+
+.landing-header-panel {
+  border-top: 1px solid rgb(255 255 255 / 0.1);
+  background: var(--nl-navy-deep);
+  color: #fff;
+}
+
+.landing-header-panel ul {
+  display: grid;
+  gap: 0.15rem;
+  max-width: var(--site-max);
+  margin: 0 auto;
+  padding: 0.65rem var(--nl-gutter) 0.85rem;
+  list-style: none;
+}
+
+.landing-header-panel a {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  color: rgb(255 255 255 / 0.94);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.landing-header-panel a:hover,
+.landing-header-panel a:focus-visible {
+  color: var(--nl-yellow);
+}
+
+@media (min-width: 64rem) {
+  .landing-header .landing-header-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    justify-content: stretch;
+    gap: 1.25rem;
+    height: 4.5rem;
+    min-height: 4.5rem;
+  }
+
+  .landing-header-brand {
+    justify-self: start;
+  }
+
   .landing-header .site-header-logo-img {
-    height: 1.7rem;
+    width: 10.75rem;
+    max-height: none;
+  }
+
+  .landing-header-nav {
+    display: block;
+    justify-self: center;
   }
 
   .landing-header-actions {
-    gap: 0.25rem 0.6rem;
+    justify-self: end;
+    gap: 1rem;
   }
 
-  .landing-header-cta {
-    flex: 1 1 11rem;
+  .landing-header-phone {
+    display: inline-flex;
+  }
+
+  .landing-header-menu,
+  .landing-header-panel {
+    display: none;
   }
 }
 
@@ -4450,12 +4575,12 @@ h3,
 }
 
 html:has(.landing-header) {
-  --nl-header-height: 4rem;
+  --nl-header-height: 4.5rem;
 }
 
-@media (max-width: 639px) {
+@media (max-width: 63.99rem) {
   html:has(.landing-header) {
-    --nl-header-height: 6.75rem;
+    --nl-header-height: 3.75rem;
   }
 }
 

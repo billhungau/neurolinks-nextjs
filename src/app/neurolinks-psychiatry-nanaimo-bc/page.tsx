@@ -141,7 +141,11 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="home-section bg-white" aria-labelledby="landing-psychiatrist-heading">
+        <section
+          id="psychiatrist"
+          className="home-section bg-white"
+          aria-labelledby="landing-psychiatrist-heading"
+        >
           <div className="nl-wrap">
             <Reveal className="landing-psychiatrist">
               <div className="about-au-portrait landing-psychiatrist-portrait">
