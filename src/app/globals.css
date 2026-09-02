@@ -4459,10 +4459,15 @@ html:has(.landing-header) {
   gap: 1.5rem;
 }
 
+.landing-psychiatrist-portrait {
+  order: 1;
+}
+
 .landing-psychiatrist-copy {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  order: 2;
 }
 
 .landing-psychiatrist-copy > p {
@@ -4485,7 +4490,12 @@ html:has(.landing-header) {
   .landing-psychiatrist {
     grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
     gap: 1.25rem 2.5rem;
-    align-items: center;
+    align-items: start;
+  }
+
+  .landing-psychiatrist-portrait,
+  .landing-psychiatrist-copy {
+    order: unset;
   }
 }
 

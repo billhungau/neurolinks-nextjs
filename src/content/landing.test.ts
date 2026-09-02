@@ -109,7 +109,7 @@ test("landing psychiatrist copy is one block beside the portrait", () => {
   assert.match(landingPage, /landing-tx-points/);
   assert.match(landingPage, /TMS coil on the left and ketamine vial on the right/);
   assert.match(globalsCss, /\.landing-psychiatrist \{[\s\S]*?display:\s*grid/);
-  assert.match(globalsCss, /\.landing-psychiatrist \{[\s\S]*?align-items:\s*center/);
+  assert.match(globalsCss, /\.landing-psychiatrist \{[\s\S]*?align-items:\s*start/);
   assert.match(globalsCss, /\.landing-hero-media \{[\s\S]*?aspect-ratio:\s*2\s*\/\s*1/);
   assert.equal(globalsCss.includes(".landing-hero-media {\n    max-height: none;\n    min-height: 22rem;"), false);
   assert.match(globalsCss, /#inquiry\.home-section \{[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/);
