@@ -4361,15 +4361,14 @@ h3,
   order: 2;
   overflow: hidden;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 12.5rem;
+  aspect-ratio: 2 / 1;
 }
 
 @media (min-width: 768px) {
   .landing-hero-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    align-items: stretch;
+    align-items: center;
     max-width: var(--site-max);
     margin-inline: auto;
   }
@@ -4383,8 +4382,8 @@ h3,
 
   .landing-hero-media {
     max-height: none;
-    min-height: 22rem;
-    aspect-ratio: auto;
+    min-height: 0;
+    aspect-ratio: 2 / 1;
   }
 }
 
@@ -4441,8 +4440,89 @@ h3,
   margin-top: 1.35rem;
 }
 
-.landing-psychiatrist .text-link {
+html:has(.landing-header) {
+  --nl-header-height: 4rem;
+}
+
+@media (max-width: 639px) {
+  html:has(.landing-header) {
+    --nl-header-height: 6.75rem;
+  }
+}
+
+#inquiry.home-section {
+  scroll-margin-top: var(--nl-anchor-offset);
+}
+
+.landing-psychiatrist {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.landing-psychiatrist-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.landing-psychiatrist-copy > p {
+  margin-top: 1rem;
+}
+
+.landing-psychiatrist-copy .about-role {
   margin-top: 0.35rem;
+}
+
+.landing-psychiatrist-link {
+  margin-top: 1rem;
+}
+
+.landing-psychiatrist-link .text-link {
+  margin-top: 0;
+}
+
+@media (min-width: 768px) {
+  .landing-psychiatrist {
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    gap: 1.25rem 2.5rem;
+    align-items: center;
+  }
+}
+
+.landing-tx {
+  height: auto;
+}
+
+.landing-tx .tx-feature-copy .text-link {
+  margin-top: 1rem;
+  padding-top: 0;
+}
+
+.landing-tx-points {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-tx-points li {
+  position: relative;
+  padding-left: 1.05rem;
+  color: var(--nl-ink);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.landing-tx-points li::before {
+  content: "";
+  position: absolute;
+  top: 0.55em;
+  left: 0;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--nl-yellow);
 }
 
 

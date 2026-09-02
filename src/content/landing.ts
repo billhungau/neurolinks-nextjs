@@ -20,26 +20,37 @@ export const LANDING_OUTCOME_NOTE =
 export const LANDING_WHY = [
   {
     index: "01",
-    title: "Psychiatrist-Led Expertise",
-    body: "At NeuroLinks, we recognize that seeking care after multiple treatments haven't helped can feel discouraging. Our approach begins with careful listening and a thorough understanding of your history, concerns, and goals.",
+    title: "Psychiatrist-led expertise and assessment",
+    body: "Our approach begins with careful listening and a thorough understanding of your history, concerns, and goals. A psychiatrist reviews your diagnosis, treatment history, and relevant medical factors.",
   },
   {
     index: "02",
-    title: "Personalized Treatment Plans",
-    body: "TMS and ketamine therapy are considered thoughtfully, within a psychiatrist-led plan tailored to your needs, with close monitoring and follow-up throughout treatment.",
+    title: "Individualized options and informed choices",
+    body: "With both TMS and ketamine available, NeuroLinks offers options beyond medication alone. We take time to explain your options so you can make decisions you understand and feel comfortable with.",
   },
   {
     index: "03",
-    title: "Respect for Clinical Complexity",
-    body: "A thoughtful approach to advanced psychiatric care, focused on assessment, safety, and individualized treatment.",
+    title: "Monitoring and support throughout treatment",
+    body: "We follow up after treatment to understand how you are doing, recognizing that symptoms can fluctuate and improvement is not always straightforward. If treatment has not helped enough, we review factors that may affect your response and explore appropriate next steps with you.",
   },
 ] as const;
 
+/**
+ * Card points reuse approved TMS, ketamine, and homepage copy.
+ * Injection route is omitted: the homepage says intramuscular and
+ * subcutaneous, the ketamine page says intramuscularly or subcutaneously,
+ * and the landing FAQ says intramuscular only.
+ */
 export const LANDING_TREATMENTS = [
   {
     href: "/about-tms-treatment-on-psychiatric-illness/",
     title: "Transcranial Magnetic Stimulation (TMS)",
     body: "TMS Therapy — Non-invasive brain stimulation",
+    points: [
+      "Treatment is non-invasive, does not require anesthesia and is generally well tolerated.",
+      "Most patients can return to their usual activities after each session.",
+      "Suitability depends on the diagnosis, treatment history and protocol being considered.",
+    ],
     linkLabel: "Learn more about TMS",
     image: "tmsMachine",
     alt: "TMS treatment",
@@ -48,6 +59,11 @@ export const LANDING_TREATMENTS = [
     href: "/ketamine-treatment-resistant-depression-nanaimo/",
     title: "Ketamine Therapy",
     body: "Rapid-acting, medically supervised",
+    points: [
+      "An experienced registered nurse provides preparation, support and post-session reflection, with vital-sign monitoring and psychiatrist oversight.",
+      "Your nurse provides reassurance and support as the experience unfolds, while monitoring your vital signs and how you are feeling.",
+      "Before every session, your nurse explains what to expect, discusses any concerns and helps you approach treatment with realistic expectations.",
+    ],
     linkLabel: "Learn more about ketamine",
     image: "ketamineHero",
     alt: "Ketamine treatment room with a recliner, window and side table at NeuroLinks",

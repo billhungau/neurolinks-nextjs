@@ -66,11 +66,11 @@ export default function LandingPage() {
             <div className="landing-hero-media">
               <Image
                 src={MEDIA.landingHero}
-                alt="Clinician preparing TMS treatment equipment in a NeuroLinks clinic room"
+                alt="TMS coil on the left and ketamine vial on the right at NeuroLinks"
                 fill
                 priority
                 sizes={IMG_SIZES.half}
-                className="object-cover object-[center_18%] md:object-[center_center]"
+                className="object-cover object-center"
               />
             </div>
           </div>
@@ -108,10 +108,10 @@ export default function LandingPage() {
                 TMS and ketamine
               </h2>
             </Reveal>
-            <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
+            <div className="mt-8 grid gap-6 lg:grid-cols-2">
               {LANDING_TREATMENTS.map((item) => (
                 <Reveal key={item.href}>
-                  <article className="tx-feature group">
+                  <article className="tx-feature landing-tx">
                     <div className="img-frame relative aspect-[16/10]">
                       <Image
                         src={TREATMENT_MEDIA[item.image]}
@@ -126,6 +126,11 @@ export default function LandingPage() {
                         {item.title}
                       </h3>
                       <p className="tx-feature-support">{item.body}</p>
+                      <ul className="landing-tx-points">
+                        {item.points.map((point) => (
+                          <li key={point}>{point}</li>
+                        ))}
+                      </ul>
                       <TextLink href={item.href}>{item.linkLabel}</TextLink>
                     </div>
                   </article>
@@ -137,8 +142,8 @@ export default function LandingPage() {
 
         <section className="home-section bg-white" aria-labelledby="landing-psychiatrist-heading">
           <div className="nl-wrap">
-            <Reveal className="about-au landing-psychiatrist">
-              <div className="about-au-portrait">
+            <Reveal className="landing-psychiatrist">
+              <div className="about-au-portrait landing-psychiatrist-portrait">
                 <Image
                   src={MEDIA.drAu}
                   alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks"
@@ -147,15 +152,15 @@ export default function LandingPage() {
                   className="object-cover object-[center_18%]"
                 />
               </div>
-              <div className="about-au-identity">
-                <h2 id="landing-psychiatrist-heading" className="about-au-name">
+              <div className="landing-psychiatrist-copy">
+                <h2 id="landing-psychiatrist-heading" className="home-h2 text-[var(--nl-navy)]">
                   Meet your psychiatrist
                 </h2>
                 <p className="about-role">Dr Chi Hung Au</p>
-              </div>
-              <div className="about-bio">
                 <p>{DR_AU_PARAS[0]}</p>
-                <TextLink href="/psychiatrist-tms-nanaimo/">Read the complete biography</TextLink>
+                <p className="landing-psychiatrist-link">
+                  <TextLink href="/psychiatrist-tms-nanaimo/">Read the complete biography</TextLink>
+                </p>
               </div>
             </Reveal>
           </div>
