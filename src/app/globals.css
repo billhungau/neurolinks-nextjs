@@ -2030,7 +2030,13 @@ h3,
 }
 
 .tms-faq-list {
-  padding-left: 1.2rem;
+  list-style: disc;
+  list-style-position: outside;
+  padding-left: 1.25rem;
+}
+
+.tms-faq-list li {
+  display: list-item;
 }
 
 .tms-faq-list li + li {
@@ -2113,7 +2119,9 @@ h3,
 
   .tms-faq-compare thead th:nth-child(2),
   .tms-faq-compare td:nth-child(2) {
-    background: transparent;
+    background: #eef3f8;
+    padding-inline: 0.55rem;
+    margin-top: 0.2rem;
   }
 
   .tms-faq-compare tbody th {

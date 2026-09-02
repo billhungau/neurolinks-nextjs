@@ -289,3 +289,13 @@ test("evidence-link markup uses a safe new-tab rel", () => {
   assert.equal(source.includes("nofollow"), false);
   assert.equal(source.includes("dangerouslySetInnerHTML"), false);
 });
+
+test("TMS FAQ lists restore disc markers against the global list reset", () => {
+  const css = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "../app/globals.css"),
+    "utf8",
+  );
+  const listRule = css.match(/\.tms-faq-list \{[\s\S]*?\}/);
+  assert.ok(listRule, "missing .tms-faq-list rule");
+  assert.match(listRule[0], /list-style:\s*disc/);
+});
