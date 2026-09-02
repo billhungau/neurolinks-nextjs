@@ -132,10 +132,13 @@ export function AnchorOffset() {
       if (!target) return;
       event.preventDefault();
       applyAnchorOffset();
-      scrollToHashId(id);
       if (window.location.hash !== `#${id}`) {
         history.pushState(null, "", `#${id}`);
       }
+      // :target skips reveal translateY; force a layout so scroll-margin
+      // uses the untransformed heading position.
+      void target.getBoundingClientRect();
+      scrollToHashId(id);
     };
     document.addEventListener("click", onClick, true);
 

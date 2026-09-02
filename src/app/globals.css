@@ -516,7 +516,8 @@ h3,
     transform: translateY(0.7rem);
   }
 
-  .motion-ready :target .reveal:not(.is-visible) {
+  .motion-ready :target .reveal:not(.is-visible),
+  .motion-ready :target .reveal:not(.is-visible) * {
     opacity: 1;
     transform: none;
   }
