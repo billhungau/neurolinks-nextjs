@@ -44,9 +44,12 @@ test("landing inquiry CTAs target #inquiry and keep compact navigation", () => {
 });
 
 test("landing logo uses a same-page #top hash so advertising parameters are kept", () => {
-  assert.match(landingHeader, /id="top"/);
+  assert.match(landingPage, /id="top"/);
+  assert.match(landingPage, /landing-top-anchor/);
   assert.match(landingHeader, /href="#top"/);
+  assert.equal(landingHeader.includes('id="top"'), false);
   assert.equal(landingHeader.includes('href="/neurolinks-psychiatry-nanaimo-bc/"'), false);
+  assert.match(globalsCss, /\.landing-top-anchor \{[\s\S]*?height:\s*0/);
 });
 
 test("Reveal fails open when the observer cannot run", () => {

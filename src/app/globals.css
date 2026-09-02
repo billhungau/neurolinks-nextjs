@@ -4248,6 +4248,12 @@ h3,
   }
 }
 
+.landing-top-anchor {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+}
+
 .landing-header {
   overflow-x: clip;
 }

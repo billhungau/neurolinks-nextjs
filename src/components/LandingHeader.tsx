@@ -7,10 +7,7 @@ const INQUIRY_HREF = "#inquiry";
 
 export function LandingHeader() {
   return (
-    <header
-      id="top"
-      className="landing-header site-header site-header--solid sticky top-0 z-50 border-b border-white/10 bg-[var(--nl-navy)]/90 text-white shadow-[0_1px_0_rgba(0,0,0,0.16)] backdrop-blur-md"
-    >
+    <header className="landing-header site-header site-header--solid sticky top-0 z-50 border-b border-white/10 bg-[var(--nl-navy)]/90 text-white shadow-[0_1px_0_rgba(0,0,0,0.16)] backdrop-blur-md">
       <div className="nl-wrap site-header-bar landing-header-bar relative z-10">
         <a className="site-header-logo" href="#top" aria-label="NeuroLinks">
           <Image

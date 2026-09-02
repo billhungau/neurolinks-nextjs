@@ -45,6 +45,7 @@ export default function LandingPage() {
   return (
     <>
       <MotionReady />
+      <div id="top" className="landing-top-anchor" />
       <LandingHeader />
       <main id="main-content" className="flex-1" tabIndex={-1}>
         <FaqJsonLd items={LANDING_FAQS} />
