@@ -246,6 +246,7 @@ const TMS_SOURCE_PHRASES = [
   "In contrast to ECT, TMS is non-invasive and it does not need anesthesia",
   "can return to work straight after",
   "rarely induces seizure (<1/10000)",
+  "30 sessions",
   "not covered by MSP (enquire private insurance)",
   "requires a seizure every time",
   "babies have more difficulties developing a secure attachment",
@@ -277,6 +278,11 @@ test("FAQ plain text is available for JSON-LD and never stringifies as objects",
   );
   assert.ok(seizure.includes("<0.1%"));
   assert.equal(seizure.includes("&lt;0.1%"), false);
+  const ect = faqAnswerText(
+    TMS_FAQS.find((item) => item.q.includes("electroconvulsive therapy"))!.a,
+  );
+  assert.ok(ect.includes("30 sessions"));
+  assert.equal(ect.includes("usually 20-30 sessions"), false);
 });
 
 test("evidence-link markup uses a safe new-tab rel", () => {

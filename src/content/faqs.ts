@@ -208,7 +208,7 @@ export const TMS_FAQS: FaqItem[] = [
           },
           {
             feature: "Typical treatment course",
-            tms: "usually 20-30 sessions (4-6 weeks)",
+            tms: "30 sessions",
             ect: "6-12 sessions (3-6 weeks)",
           },
           {
