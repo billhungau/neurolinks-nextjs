@@ -117,16 +117,6 @@ const KETAMINE_EXPECTED = [
     href: "https://ajp.psychiatryonline.org/doi/full/10.1176/appi.ajp.2016.16010037",
   },
   {
-    q: "What factors affect the treatment outcome?",
-    value: "Positive predictors",
-    href: "https://www.liebertpub.com/doi/abs/10.1089/cap.2023.0047",
-  },
-  {
-    q: "What factors affect the treatment outcome?",
-    value: "Negative outcome predictors",
-    href: "https://onlinelibrary.wiley.com/doi/abs/10.1002/hup.2836",
-  },
-  {
     q: "How is ketamine administered?",
     value: "intramuscular",
     href: "https://link.springer.com/article/10.1186/s12888-022-04268-5",
@@ -145,6 +135,16 @@ const KETAMINE_EXPECTED = [
     q: "Is ketamine treatment safe?",
     value: "side effects",
     href: "https://www.clinicalkey.com/#!/content/playContent/1-s2.0-S2215036617302729",
+  },
+  {
+    q: "What factors affect the treatment outcome?",
+    value: "Positive predictors",
+    href: "https://www.liebertpub.com/doi/abs/10.1089/cap.2023.0047",
+  },
+  {
+    q: "What factors affect the treatment outcome?",
+    value: "Negative outcome predictors",
+    href: "https://onlinelibrary.wiley.com/doi/abs/10.1002/hup.2836",
   },
   {
     q: "Is ketamine treatment FDA-approved?",
