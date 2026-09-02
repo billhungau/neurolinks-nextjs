@@ -55,9 +55,19 @@ function applyAnchorOffset() {
   }
 }
 
+function markHashTarget(id: string) {
+  document.querySelectorAll(".nl-hash-target").forEach((node) => {
+    node.classList.remove("nl-hash-target");
+  });
+  document.getElementById(id)?.classList.add("nl-hash-target");
+}
+
 function scrollToHashId(id: string) {
+  markHashTarget(id);
   const target = anchorScrollTarget(document.getElementById(id));
-  target?.scrollIntoView({ block: "start", inline: "nearest" });
+  if (!target) return;
+  void target.getBoundingClientRect();
+  target.scrollIntoView({ block: "start", inline: "nearest" });
 }
 
 function scrollToCurrentHash() {

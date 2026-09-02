@@ -516,14 +516,16 @@ h3,
     transform: translateY(0.7rem);
   }
 
-  .motion-ready :target .reveal:not(.is-visible) {
+  .motion-ready :target .reveal:not(.is-visible),
+  .motion-ready .nl-hash-target .reveal:not(.is-visible),
+  .motion-ready .nl-hash-target.reveal:not(.is-visible) {
     opacity: 1;
     transform: none;
   }
 
-  .motion-ready :target .about-au.reveal:not(.is-visible) > *,
-  .motion-ready :target .about-gallery-wrap.reveal:not(.is-visible) .about-gallery figure,
-  .motion-ready :target .about-team-reveal.reveal:not(.is-visible) .about-team article {
+  .motion-ready .nl-hash-target .about-au.reveal:not(.is-visible) > *,
+  .motion-ready .nl-hash-target .about-gallery-wrap.reveal:not(.is-visible) .about-gallery figure,
+  .motion-ready .nl-hash-target .about-team-reveal.reveal:not(.is-visible) .about-team article {
     opacity: 1;
     transform: none;
   }
