@@ -228,6 +228,42 @@ test("each expected phrase appears in the matching FAQ answer", () => {
   }
 });
 
+const TMS_SOURCE_PHRASES = [
+  "most patients show significant improvement and two thirds of them can see absence of depressive symptoms",
+  "about one in three patients show significant improvement",
+  "remission rate of treatment-resistant depression with TMS 30%, without TMS 6%",
+  "Most side effects are mild and self-limiting",
+  "headache and discomfort at the site of stimulation",
+  "this is NOT higher than the lifetime prevalence of seizure in the general population",
+  "half of patients see sustained responses up to 1 year",
+  "continue their oral antidepressants to maximize the durability of the treatment effect of TMS",
+  "do not adequately respond to at least 2 antidepressants",
+  "impaired social functioning, both occupational and interpersonal",
+  "any patients with non-removable metal in their head (except braces or dental fillings)",
+  "facial tattoos with metallic or magnetic-sensitive ink",
+  "a recent (<30 days) hemorrhagic stroke or head injury",
+  "While both are effective for the treatment of several mental illness, they work differently",
+  "In contrast to ECT, TMS is non-invasive and it does not need anesthesia",
+  "can return to work straight after",
+  "rarely induces seizure (<1/10000)",
+  "not covered by MSP (enquire private insurance)",
+  "requires a seizure every time",
+  "babies have more difficulties developing a secure attachment",
+  "followed for more than 20 years",
+  "shorter duration of depression",
+  "short duration of TMS therapy (<15 sessions)",
+  "About 40-60% of patients with OCD are resistant to at least one medication",
+  "The treatment course of TMS can be given several times a day over 5 days",
+  "conducted by Stanford University",
+] as const;
+
+test("structured TMS answers keep the published wording for JSON-LD", () => {
+  for (const phrase of TMS_SOURCE_PHRASES) {
+    const found = TMS_FAQS.some((item) => faqAnswerText(item.a).includes(phrase));
+    assert.ok(found, `missing published phrase: ${phrase}`);
+  }
+});
+
 test("FAQ plain text is available for JSON-LD and never stringifies as objects", () => {
   for (const item of [...TMS_FAQS, ...KETAMINE_FAQS]) {
     const text = faqAnswerText(item.a);

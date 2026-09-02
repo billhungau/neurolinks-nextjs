@@ -2001,11 +2001,132 @@ h3,
 }
 
 .tms-faq-answer {
-  padding: 0 0 1.15rem;
+  padding: 0 0 1.35rem;
   max-width: 46rem;
-  font-size: 0.975rem;
+  font-size: 1rem;
   line-height: 1.7;
   color: var(--nl-muted);
+}
+
+.tms-faq-answer > * {
+  margin: 0;
+}
+
+.tms-faq-answer > * + * {
+  margin-top: 0.85rem;
+}
+
+.tms-faq-label {
+  color: var(--nl-navy);
+  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+
+.tms-faq-answer > .tms-faq-label + * {
+  margin-top: 0.4rem;
+}
+
+.tms-faq-list {
+  padding-left: 1.2rem;
+}
+
+.tms-faq-list li + li {
+  margin-top: 0.35rem;
+}
+
+.tms-faq-compare {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.tms-faq-compare caption {
+  caption-side: top;
+}
+
+.tms-faq-compare th,
+.tms-faq-compare td {
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid rgb(26 39 68 / 0.12);
+  text-align: left;
+  vertical-align: top;
+  font-weight: 400;
+}
+
+.tms-faq-compare thead th {
+  font-weight: 600;
+  color: var(--nl-navy);
+}
+
+.tms-faq-compare tbody th {
+  width: 28%;
+  color: var(--nl-navy);
+  font-weight: 600;
+}
+
+.tms-faq-compare thead th:nth-child(2),
+.tms-faq-compare td:nth-child(2) {
+  background: #eef3f8;
+}
+
+.tms-faq-compare-key {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .tms-faq-compare thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .tms-faq-compare,
+  .tms-faq-compare tbody,
+  .tms-faq-compare tr,
+  .tms-faq-compare th,
+  .tms-faq-compare td {
+    display: block;
+    width: 100%;
+  }
+
+  .tms-faq-compare tr {
+    padding: 0.75rem 0 0.85rem;
+    border-bottom: 1px solid rgb(26 39 68 / 0.12);
+  }
+
+  .tms-faq-compare th,
+  .tms-faq-compare td {
+    padding: 0.25rem 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .tms-faq-compare thead th:nth-child(2),
+  .tms-faq-compare td:nth-child(2) {
+    background: transparent;
+  }
+
+  .tms-faq-compare tbody th {
+    width: auto;
+    padding-bottom: 0.45rem;
+  }
+
+  .tms-faq-compare-key {
+    display: inline;
+    margin-right: 0.4rem;
+    color: var(--nl-navy);
+    font-weight: 600;
+  }
 }
 
 .evidence-link {

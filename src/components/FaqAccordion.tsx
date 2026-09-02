@@ -53,11 +53,7 @@ export function FaqAccordion({
               hidden={!expanded}
               className="pb-4 text-sm leading-relaxed text-slate-800"
             >
-              {expanded ? (
-                <p>
-                  <FaqAnswerText answer={item.a} />
-                </p>
-              ) : null}
+              {expanded ? <FaqAnswerText answer={item.a} /> : null}
             </div>
           </div>
         );
@@ -79,9 +75,9 @@ function EditorialFaqItem({ item }: { item: FaqItem }) {
         <h3>{item.q}</h3>
         <span className="tms-faq-mark" aria-hidden="true" />
       </summary>
-      <p className="tms-faq-answer" id={panelId} inert={!open || undefined}>
+      <div className="tms-faq-answer" id={panelId} inert={!open || undefined}>
         <FaqAnswerText answer={item.a} />
-      </p>
+      </div>
     </details>
   );
 }

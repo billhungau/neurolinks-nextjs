@@ -2,132 +2,294 @@ export type FaqSegment =
   | { type: "text"; value: string }
   | { type: "link"; value: string; href: string };
 
-export type FaqAnswer = string | FaqSegment[];
+export type FaqRich = FaqSegment[];
+
+export type FaqCompareRow = {
+  feature: string;
+  tms: string;
+  ect: string;
+};
+
+export type FaqBlock =
+  | { type: "p"; content: FaqRich }
+  | { type: "label"; value: string }
+  | { type: "ul"; items: FaqRich[] }
+  | { type: "compare"; rows: FaqCompareRow[] };
+
+export type FaqAnswer = string | FaqRich | FaqBlock[];
 
 export type FaqItem = { q: string; a: FaqAnswer };
 
 export type FaqEvidenceLink = { value: string; href: string };
 
+function segmentsText(segments: FaqRich): string {
+  return segments.map((segment) => segment.value).join("");
+}
+
+function segmentsLinks(segments: FaqRich): FaqEvidenceLink[] {
+  return segments
+    .filter((segment): segment is Extract<FaqSegment, { type: "link" }> => segment.type === "link")
+    .map(({ value, href }) => ({ value, href }));
+}
+
+export function isStructuredFaqAnswer(answer: FaqAnswer): answer is FaqBlock[] {
+  return Array.isArray(answer) && answer[0]?.type !== "text" && answer[0]?.type !== "link";
+}
+
 export function faqAnswerText(answer: FaqAnswer): string {
   if (typeof answer === "string") return answer;
-  return answer.map((segment) => segment.value).join("");
+  if (!isStructuredFaqAnswer(answer)) return segmentsText(answer);
+  return answer
+    .map((block) => {
+      if (block.type === "p") return segmentsText(block.content);
+      if (block.type === "label") return block.value;
+      if (block.type === "ul") return block.items.map(segmentsText).join(" ");
+      return block.rows
+        .map((row) => `${row.feature} TMS ${row.tms} ECT ${row.ect}`.replace(/\s+/g, " ").trim())
+        .join(" ");
+    })
+    .filter(Boolean)
+    .join(" ");
 }
 
 export function faqEvidenceLinks(answer: FaqAnswer): FaqEvidenceLink[] {
   if (typeof answer === "string") return [];
-  return answer
-    .filter((segment): segment is Extract<FaqSegment, { type: "link" }> => segment.type === "link")
-    .map(({ value, href }) => ({ value, href }));
+  if (!isStructuredFaqAnswer(answer)) return segmentsLinks(answer);
+  return answer.flatMap((block) => {
+    if (block.type === "p") return segmentsLinks(block.content);
+    if (block.type === "ul") return block.items.flatMap(segmentsLinks);
+    return [];
+  });
 }
 
 export function collectFaqEvidenceLinks(items: FaqItem[]): FaqEvidenceLink[] {
   return items.flatMap((item) => faqEvidenceLinks(item.a));
 }
 
-function answer(...parts: Array<string | [phrase: string, href: string]>): FaqSegment[] {
+function answer(...parts: Array<string | [phrase: string, href: string]>): FaqRich {
   return parts.map((part) =>
     typeof part === "string" ? { type: "text", value: part } : { type: "link", value: part[0], href: part[1] },
   );
 }
 
+function para(...parts: Array<string | [phrase: string, href: string]>): FaqBlock {
+  return { type: "p", content: answer(...parts) };
+}
+
+function label(value: string): FaqBlock {
+  return { type: "label", value };
+}
+
+function bullets(...items: string[]): FaqBlock {
+  return { type: "ul", items: items.map((item) => answer(item)) };
+}
+
 export const TMS_FAQS: FaqItem[] = [
   {
     q: "How likely will depression improve with TMS?",
-    a: answer(
-      "In ",
-      [
-        "non treatment resistant depression",
-        "https://bmcpsychiatry.biomedcentral.com/articles/10.1186/s12888-018-1989-z",
-      ],
-      ", most patients show significant improvement and two thirds of them can see absence of depressive symptoms. In ",
-      [
-        "treatment-resistant depression",
-        "https://www.psychiatrist.com/jcp/depression/repetitive-transcranial-magnetic-stimulation-treatment-2/",
-      ],
-      ", about one in three patients show significant improvement. Compared to patients without TMS, TMS is more than 5 times as likely to achieve a clearance of depressive symptoms: remission rate of treatment-resistant depression with TMS 30%, without TMS 6%.",
-    ),
+    a: [
+      label("Depression without treatment resistance"),
+      para(
+        "In ",
+        [
+          "non treatment resistant depression",
+          "https://bmcpsychiatry.biomedcentral.com/articles/10.1186/s12888-018-1989-z",
+        ],
+        ", most patients show significant improvement and two thirds of them can see absence of depressive symptoms.",
+      ),
+      label("Treatment-resistant depression"),
+      para(
+        "In ",
+        [
+          "treatment-resistant depression",
+          "https://www.psychiatrist.com/jcp/depression/repetitive-transcranial-magnetic-stimulation-treatment-2/",
+        ],
+        ", about one in three patients show significant improvement. Compared to patients without TMS, TMS is more than 5 times as likely to achieve a clearance of depressive symptoms: remission rate of treatment-resistant depression with TMS 30%, without TMS 6%.",
+      ),
+    ],
   },
   {
     q: "Are there any side effects from TMS?",
-    a: answer(
-      "Most side effects are mild and self-limiting. The most common one would be headache and discomfort at the site of stimulation. Rarely, there is a ",
-      ["<0.1%", "https://www.sciencedirect.com/science/article/pii/S1935861X21001182"],
-      " risk that seizure could occur. Notably, this is NOT higher than the ",
-      ["lifetime prevalence", "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5272794/"],
-      " of seizure in the general population.",
-    ),
+    a: [
+      para("Most side effects are mild and self-limiting."),
+      label("Common effects"),
+      para("The most common one would be headache and discomfort at the site of stimulation."),
+      label("Rare risks"),
+      para(
+        "Rarely, there is a ",
+        ["<0.1%", "https://www.sciencedirect.com/science/article/pii/S1935861X21001182"],
+        " risk that seizure could occur. Notably, this is NOT higher than the ",
+        ["lifetime prevalence", "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5272794/"],
+        " of seizure in the general population.",
+      ),
+    ],
   },
   {
     q: "Is the effect of TMS durable?",
-    a: answer(
-      "Yes, the effect of TMS is durable. After the successful initial treatment, half of patients see sustained responses up to 1 year. Receiving a maintenance course of TMS can sustain the therapeutic effect of TMS. We also recommend patients to continue their oral antidepressants to maximize the durability of the treatment effect of TMS. ",
-      ["Read more about the study", "https://pubmed.ncbi.nlm.nih.gov/30344109/"],
-    ),
+    a: [
+      para(
+        "Yes, the effect of TMS is durable. After the successful initial treatment, half of patients see sustained responses up to 1 year.",
+      ),
+      para(["Read more about the study", "https://pubmed.ncbi.nlm.nih.gov/30344109/"]),
+      para(
+        "Receiving a maintenance course of TMS can sustain the therapeutic effect of TMS. We also recommend patients to continue their oral antidepressants to maximize the durability of the treatment effect of TMS.",
+      ),
+    ],
   },
   {
     q: "I have been taking medications. Why do I need TMS?",
-    a: answer(
-      "Most patients are only treated with medications. However, ",
-      [
-        "up to 30%",
-        "https://www.psychiatrist.com/jcp/depression/prevalence-national-burden-treatment-resistant-depression-major-depressive-disorder-in-us/",
-      ],
-      " of patients with depression are medication resistant (i.e. do not adequately respond to at least 2 antidepressants). This is even worse in obsessive-compulsive disorder, for which ",
-      ["up to 60%", "https://www.sciencedirect.com/science/article/abs/pii/S0278584605003520?via%3Dihub"],
-      " are treatment resistant. Therefore, when you have significant symptoms even with medications, you should consider TMS. We often see residual symptoms in depression and obsessive-compulsive disorder, which can result in poor mental wellbeing; impaired social functioning, both occupational and interpersonal; and poor physical health. TMS is a neuromodulation therapy, which has different mechanisms from medications. TMS is effective in reducing symptoms in treatment-resistant ",
-      ["depression", "https://www.sciencedirect.com/science/article/abs/pii/S0165032720328573"],
-      " and ",
-      ["obsessive-compulsive disorder", "https://www.nature.com/articles/s41398-021-01453-0"],
-      ".",
-    ),
+    a: [
+      para(
+        "Most patients are only treated with medications. However, ",
+        [
+          "up to 30%",
+          "https://www.psychiatrist.com/jcp/depression/prevalence-national-burden-treatment-resistant-depression-major-depressive-disorder-in-us/",
+        ],
+        " of patients with depression are medication resistant (i.e. do not adequately respond to at least 2 antidepressants). This is even worse in obsessive-compulsive disorder, for which ",
+        ["up to 60%", "https://www.sciencedirect.com/science/article/abs/pii/S0278584605003520?via%3Dihub"],
+        " are treatment resistant.",
+      ),
+      para(
+        "We often see residual symptoms in depression and obsessive-compulsive disorder, which can result in poor mental wellbeing; impaired social functioning, both occupational and interpersonal; and poor physical health.",
+      ),
+      para(
+        "Therefore, when you have significant symptoms even with medications, you should consider TMS. TMS is a neuromodulation therapy, which has different mechanisms from medications. TMS is effective in reducing symptoms in treatment-resistant ",
+        ["depression", "https://www.sciencedirect.com/science/article/abs/pii/S0165032720328573"],
+        " and ",
+        ["obsessive-compulsive disorder", "https://www.nature.com/articles/s41398-021-01453-0"],
+        ".",
+      ),
+    ],
   },
   {
     q: "Who cannot receive TMS?",
-    a: "Most patients can receive TMS, but there are some contraindications. Since TMS involves magnetic induction, any patients with non-removable metal in their head (except braces or dental fillings) should not receive TMS. Metal implants that can prevent TMS include: brain stent; aneurysm clip/coils; deep brain stimulator; metallic implants in your ears and eyes; facial tattoos with metallic or magnetic-sensitive ink; other metal devices or objects implanted in or near the head. There are also some relative contraindications, mostly related to an increased risk of seizure. For example, a recent (<30 days) hemorrhagic stroke or head injury. Please discuss with our psychiatrist to evaluate the benefits and risks before the TMS treatment.",
+    a: [
+      para(
+        "Most patients can receive TMS, but there are some contraindications. Since TMS involves magnetic induction, any patients with non-removable metal in their head (except braces or dental fillings) should not receive TMS.",
+      ),
+      para("Metal implants that can prevent TMS include:"),
+      bullets(
+        "brain stent",
+        "aneurysm clip/coils",
+        "deep brain stimulator",
+        "metallic implants in your ears and eyes",
+        "facial tattoos with metallic or magnetic-sensitive ink",
+        "other metal devices or objects implanted in or near the head",
+      ),
+      para(
+        "There are also some relative contraindications, mostly related to an increased risk of seizure. For example, a recent (<30 days) hemorrhagic stroke or head injury. Please discuss with our psychiatrist to evaluate the benefits and risks before the TMS treatment.",
+      ),
+    ],
   },
   {
     q: "What is the difference between TMS and electroconvulsive therapy (ECT)?",
-    a: "While both are effective for the treatment of several mental illness, they work differently. In contrast to ECT, TMS is non-invasive and it does not need anesthesia. TMS: can return to work straight after; neutral/procognitive effect on memory; rarely induces seizure (<1/10000); usually 20-30 sessions (4-6 weeks); not covered by MSP (enquire private insurance). ECT: requires recovery time (could be up to a few hours); mild short-term memory loss and confusion; requires a seizure every time; 6-12 sessions (3-6 weeks); covered by MSP.",
+    a: [
+      para(
+        "While both are effective for the treatment of several mental illness, they work differently. In contrast to ECT, TMS is non-invasive and it does not need anesthesia.",
+      ),
+      {
+        type: "compare",
+        rows: [
+          { feature: "Anesthesia", tms: "non-invasive; does not need anesthesia", ect: "" },
+          {
+            feature: "Recovery after treatment",
+            tms: "can return to work straight after",
+            ect: "requires recovery time (could be up to a few hours)",
+          },
+          {
+            feature: "Memory effects",
+            tms: "neutral/procognitive effect on memory",
+            ect: "mild short-term memory loss and confusion",
+          },
+          {
+            feature: "Seizure involvement",
+            tms: "rarely induces seizure (<1/10000)",
+            ect: "requires a seizure every time",
+          },
+          {
+            feature: "Typical treatment course",
+            tms: "usually 20-30 sessions (4-6 weeks)",
+            ect: "6-12 sessions (3-6 weeks)",
+          },
+          {
+            feature: "Coverage",
+            tms: "not covered by MSP (enquire private insurance)",
+            ect: "covered by MSP",
+          },
+        ],
+      },
+    ],
   },
   {
     q: "I am pregnant. Can I receive TMS?",
-    a: answer(
-      "TMS is considered safe for ",
-      ["mothers", "https://link.springer.com/article/10.1007/s00737-013-0397-0"],
-      " and the ",
-      ["fetus", "https://journals.sagepub.com/doi/abs/10.1177/1039856221992636#abstract"],
-      ". Treatment of depression during the pregnancy and post-partum period is important. With significant depressive symptoms in the mother, babies have more difficulties developing a secure attachment. A recently published ",
-      ["long-term study", "https://pubmed.ncbi.nlm.nih.gov/33653123/"],
-      " demonstrated the safety of TMS in both children and mothers. After the mothers had received TMS, they and their children were followed for more than 20 years. None of the mothers or children experienced any detrimental effects from TMS.",
-    ),
+    a: [
+      para(
+        "TMS is considered safe for ",
+        ["mothers", "https://link.springer.com/article/10.1007/s00737-013-0397-0"],
+        " and the ",
+        ["fetus", "https://journals.sagepub.com/doi/abs/10.1177/1039856221992636#abstract"],
+        ". Treatment of depression during the pregnancy and post-partum period is important. With significant depressive symptoms in the mother, babies have more difficulties developing a secure attachment.",
+      ),
+      para(
+        "A recently published ",
+        ["long-term study", "https://pubmed.ncbi.nlm.nih.gov/33653123/"],
+        " demonstrated the safety of TMS in both children and mothers. After the mothers had received TMS, they and their children were followed for more than 20 years. None of the mothers or children experienced any detrimental effects from TMS.",
+      ),
+    ],
   },
   {
     q: "What factors affect the treatment outcome?",
-    a: answer(
-      "Positive predictors of TMS outcome include: shorter duration of depression; recurrent depressive episode; taking a concomitant antidepressant; being less treatment resistant; presence of sleep disturbance. Negative outcome predictors include: older age; short duration of TMS therapy (<15 sessions); psychotic depression; history of poor response to electroconvulsive therapy (ECT). Read More: ",
-      [
-        "Predictors of Response to Repetitive Transcranial Magnetic Stimulation in Depression: A Review of Recent Updates",
-        "https://pubmed.ncbi.nlm.nih.gov/30690937/",
-      ],
-    ),
+    a: [
+      label("Positive predictors of TMS outcome include"),
+      bullets(
+        "shorter duration of depression",
+        "recurrent depressive episode",
+        "taking a concomitant antidepressant",
+        "being less treatment resistant",
+        "presence of sleep disturbance",
+      ),
+      label("Negative outcome predictors include"),
+      bullets(
+        "older age",
+        "short duration of TMS therapy (<15 sessions)",
+        "psychotic depression",
+        "history of poor response to electroconvulsive therapy (ECT)",
+      ),
+      para(
+        "Read More: ",
+        [
+          "Predictors of Response to Repetitive Transcranial Magnetic Stimulation in Depression: A Review of Recent Updates",
+          "https://pubmed.ncbi.nlm.nih.gov/30690937/",
+        ],
+      ),
+    ],
   },
   {
     q: "How good is the treatment effect in obsessive-compulsive disorder (OCD)?",
-    a: answer(
-      "The data with TMS has been encouraging. About 40-60% of patients with OCD are resistant to at least one medication. With TMS, ",
-      ["near half of patients", "https://pubmed.ncbi.nlm.nih.gov/31109199/"],
-      " with treatment resistant OCD can improve their symptoms significantly. TMS also ",
-      ["improves depressive symptoms", "https://www.sciencedirect.com/science/article/pii/S0165032722000544"],
-      " in addition to the obsessive-compulsive symptoms.",
-    ),
+    a: [
+      para(
+        "The data with TMS has been encouraging. About 40-60% of patients with OCD are resistant to at least one medication. With TMS, ",
+        ["near half of patients", "https://pubmed.ncbi.nlm.nih.gov/31109199/"],
+        " with treatment resistant OCD can improve their symptoms significantly.",
+      ),
+      para(
+        "TMS also ",
+        ["improves depressive symptoms", "https://www.sciencedirect.com/science/article/pii/S0165032722000544"],
+        " in addition to the obsessive-compulsive symptoms.",
+      ),
+    ],
   },
   {
     q: "Is a shorter but more intensive course of TMS available?",
-    a: answer(
-      "Yes. The treatment course of TMS can be given several times a day over 5 days. The remission rate was near 80% for patients with depression in a ",
-      ["controlled study", "https://ajp.psychiatryonline.org/doi/10.1176/appi.ajp.2021.20101429"],
-      " conducted by Stanford University.",
-    ),
+    a: [
+      para("Yes. The treatment course of TMS can be given several times a day over 5 days."),
+      label("Published research"),
+      para(
+        "The remission rate was near 80% for patients with depression in a ",
+        ["controlled study", "https://ajp.psychiatryonline.org/doi/10.1176/appi.ajp.2021.20101429"],
+        " conducted by Stanford University.",
+      ),
+    ],
   },
 ];
 
