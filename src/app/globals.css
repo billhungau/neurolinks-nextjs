@@ -3843,6 +3843,13 @@ h3,
   text-underline-offset: 3px;
 }
 
+.ct-inquiry-note {
+  margin: 0;
+  color: var(--nl-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
 .ct-form {
   position: relative;
   display: grid;
@@ -4451,72 +4458,218 @@ h3,
   }
 }
 
+/**
+ * Ads landing hero. Uses the official homepage photograph and a compact
+ * overlay composition so the inquiry form can start in the first viewport
+ * on common laptop screens. Homepage .home-hero rules stay untouched.
+ */
 .landing-hero {
-  background: var(--nl-cream);
-}
-
-.landing-hero-grid {
-  display: flex;
-  flex-direction: column;
-}
-
-.landing-hero-copy {
-  order: 1;
-  padding: 1.15rem var(--nl-gutter) 1.1rem;
-}
-
-.landing-hero-copy h1 {
-  max-width: 38rem;
-  color: var(--nl-navy);
-  font-family: var(--font-display), ui-serif, Georgia, serif;
-  font-size: clamp(1.45rem, 5.4vw, 2.6rem);
-  font-weight: 700;
-  line-height: 1.18;
-}
-
-.landing-hero-copy p {
-  max-width: 34rem;
-  margin-top: 0.85rem;
-  color: var(--nl-navy);
-  font-size: 1rem;
-  line-height: 1.55;
-}
-
-.landing-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 1.1rem;
+  position: relative;
+  overflow: hidden;
+  background: var(--nl-navy);
 }
 
 .landing-hero-media {
   position: relative;
-  order: 2;
-  overflow: hidden;
   width: 100%;
-  aspect-ratio: 2 / 1;
+  aspect-ratio: 1960 / 802;
+}
+
+.landing-hero-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.landing-hero-copy-wrap {
+  position: relative;
+  z-index: 10;
+  margin-top: -2.5rem;
+  padding-top: 0.35rem;
+  padding-bottom: 1.35rem;
+}
+
+.landing-hero-copy {
+  max-width: 22.5rem;
+}
+
+.landing-hero-copy h1 {
+  max-width: 16ch;
+  color: #fff;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(2.05rem, 8.4vw, 2.7rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+  text-shadow: 0 1px 10px rgb(7 29 52 / 0.28);
+}
+
+.landing-hero-copy p {
+  margin-top: 0.9rem;
+  color: rgb(255 255 255 / 0.94);
+  font-size: 1rem;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 8px rgb(7 29 52 / 0.3);
+}
+
+.landing-hero-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 1.35rem;
+}
+
+.landing-hero-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3rem;
+  height: 3rem;
+  padding: 0 0.85rem;
+  border-radius: 5px;
+  box-shadow: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-align: center;
+  white-space: nowrap;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.landing-hero-primary {
+  border: 1px solid var(--nl-yellow);
+  background: var(--nl-yellow);
+  color: var(--nl-navy);
+}
+
+.landing-hero-primary:hover,
+.landing-hero-primary:focus-visible {
+  border-color: var(--nl-yellow-hover);
+  background: var(--nl-yellow-hover);
+}
+
+.landing-hero-secondary {
+  border: 1px solid rgb(255 255 255 / 0.55);
+  background: rgb(var(--nl-hero-navy) / 0.32);
+  color: #fff;
+  font-weight: 500;
+}
+
+.landing-hero-secondary:hover,
+.landing-hero-secondary:focus-visible {
+  border-color: rgb(255 255 255 / 0.78);
+  background: rgb(var(--nl-hero-navy) / 0.48);
+}
+
+@media (min-width: 390px) {
+  .landing-hero-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.landing-hero-wash {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 52%;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(var(--nl-hero-navy) / 0.2) 38%,
+    rgb(var(--nl-hero-navy) / 0.78) 78%,
+    var(--nl-navy) 100%
+  );
 }
 
 @media (min-width: 768px) {
-  .landing-hero-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    align-items: center;
-    max-width: var(--site-max);
-    margin-inline: auto;
+  .landing-hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    aspect-ratio: auto;
+    height: auto;
+  }
+
+  .landing-hero-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 52%;
+  }
+
+  .landing-hero-copy-wrap {
+    display: flex;
+    min-height: clamp(28.75rem, 56vh, 33.75rem);
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 0;
+    padding-top: 4.75rem;
+    padding-bottom: 1.75rem;
   }
 
   .landing-hero-copy {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 2.75rem var(--nl-gutter) 2.75rem;
+    max-width: 32rem;
   }
 
-  .landing-hero-media {
-    max-height: none;
-    min-height: 0;
-    aspect-ratio: 2 / 1;
+  .landing-hero-copy h1 {
+    font-size: clamp(2.35rem, 3.6vw, 3.15rem);
+    line-height: 1.07;
+    letter-spacing: -0.032em;
+    text-shadow: 0 1px 18px rgb(7 29 52 / 0.35);
+  }
+
+  .landing-hero-copy p {
+    margin-top: 1.05rem;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    text-shadow: 0 1px 14px rgb(7 29 52 / 0.4);
+  }
+
+  .landing-hero-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 14px;
+    margin-top: 1.5rem;
+  }
+
+  .landing-hero-actions a {
+    flex: 0 0 13.25rem;
+    width: 13.25rem;
+    min-width: 13.25rem;
+    height: 3.125rem;
+    min-height: 3.125rem;
+    padding: 0 1rem;
+  }
+
+  .landing-hero-wash {
+    inset: 0;
+    height: auto;
+    background:
+      linear-gradient(
+        180deg,
+        rgb(var(--nl-hero-navy) / 0.34) 0%,
+        rgb(var(--nl-hero-navy) / 0.12) 22%,
+        transparent 38%
+      ),
+      linear-gradient(
+        90deg,
+        rgb(var(--nl-hero-navy) / 0.42) 0%,
+        rgb(var(--nl-hero-navy) / 0.16) 26%,
+        rgb(var(--nl-hero-navy) / 0.04) 42%,
+        transparent 58%
+      );
   }
 }
 
@@ -4565,12 +4718,103 @@ h3,
   line-height: 1.55;
 }
 
+.landing-trust .trust-grid {
+  padding: 0.05rem 0;
+}
+
+@media (min-width: 900px) {
+  .landing-trust .trust-grid {
+    padding: 0.55rem 0;
+  }
+}
+
+.landing-inquiry-section {
+  background: #f7f3eb;
+  padding-block: 1.15rem 1.65rem;
+  scroll-margin-top: var(--nl-anchor-offset);
+}
+
 .landing-inquiry {
-  max-width: 46rem;
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+.landing-inquiry-intro h2 {
+  max-width: 16ch;
+  color: var(--nl-navy);
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.7rem, 4vw, 2.35rem);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.landing-inquiry-intro p {
+  max-width: 28rem;
+  margin-top: 0.75rem;
+  color: var(--nl-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.landing-inquiry-clinic {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 1rem;
+  color: var(--nl-navy);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.landing-inquiry-clinic a {
+  color: var(--nl-navy);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.landing-inquiry-clinic a:hover,
+.landing-inquiry-clinic a:focus-visible {
+  color: var(--nl-navy-deep);
 }
 
 .landing-inquiry-form {
-  margin-top: 1.35rem;
+  margin-top: 0;
+}
+
+.landing-inquiry-form .ct-field textarea {
+  min-height: 6.75rem;
+  height: 7.25rem;
+}
+
+.landing-inquiry-form .ct-submit {
+  background: var(--nl-yellow);
+  color: var(--nl-navy);
+}
+
+.landing-inquiry-form .ct-submit:hover:not(:disabled) {
+  background: var(--nl-yellow-hover);
+}
+
+.landing-inquiry-form .ct-submit:focus-visible {
+  outline: 2px solid var(--nl-navy);
+  outline-offset: 3px;
+}
+
+.landing-inquiry-form .ct-submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+@media (min-width: 768px) {
+  .landing-inquiry-section {
+    padding-block: 1.4rem 2rem;
+  }
+
+  .landing-inquiry {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: 1.75rem 2.25rem;
+  }
 }
 
 html:has(.landing-header) {
@@ -4583,7 +4827,7 @@ html:has(.landing-header) {
   }
 }
 
-#inquiry.home-section {
+#inquiry.landing-inquiry-section {
   scroll-margin-top: var(--nl-anchor-offset);
 }
 

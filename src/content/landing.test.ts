@@ -7,12 +7,14 @@ import { LANDING_FAQS } from "./faqs.ts";
 import {
   LANDING_HEADLINE,
   LANDING_INQUIRY_HEADING,
+  LANDING_INQUIRY_NOTE,
   LANDING_INQUIRY_SUPPORTING_TEXT,
   LANDING_NEXT_STEPS,
   LANDING_OUTCOME_NOTE,
   LANDING_REVIEWS,
   LANDING_SUPPORTING_TEXT,
   LANDING_TREATMENTS,
+  LANDING_TRUST,
   LANDING_WHY,
 } from "./landing.ts";
 import { SITE } from "../lib/site.ts";
@@ -31,6 +33,9 @@ const globalsCss = readFileSync(join(root, "../app/globals.css"), "utf8");
 test("landing and contact pages share the same ContactForm module", () => {
   assert.match(landingPage, /from "@\/components\/forms\/ContactForm"/);
   assert.match(contactPage, /from "@\/components\/forms\/ContactForm"/);
+  assert.match(contactPage, /<ContactForm \/>/);
+  assert.equal(contactPage.includes("notice="), false);
+  assert.equal(contactPage.includes("LANDING_INQUIRY_NOTE"), false);
   assert.equal(landingPage.includes("jotform.com"), false);
   assert.equal(landingPage.includes("not connected"), false);
 });
@@ -40,7 +45,10 @@ test("landing inquiry CTAs target #inquiry and keep compact navigation", () => {
   assert.match(landingHeader, /#inquiry/);
   assert.match(landingHeader, /Enquire/);
   assert.equal(landingHeader.includes("Ask about treatment options"), false);
-  assert.match(landingPage, /Ask about treatment options/);
+  assert.equal(landingHeader.includes("Physician Referral"), false);
+  assert.match(landingPage, /Request assessment/);
+  assert.match(landingPage, /Explore treatments/);
+  assert.match(landingPage, /href="#treatment"/);
   assert.equal(landingHeader.includes("About Us"), false);
   assert.match(landingHeader, /#treatment/);
   assert.match(landingHeader, /#psychiatrist/);
@@ -51,6 +59,7 @@ test("landing inquiry CTAs target #inquiry and keep compact navigation", () => {
   assert.match(landingHeader, /aria-controls/);
   assert.match(landingHeader, /landing-mobile-nav/);
   assert.equal(landingHeader.includes("PRIMARY_NAV"), false);
+  assert.equal(landingHeader.includes("document.body.style.overflow"), false);
   assert.match(landingPage, /id="psychiatrist"/);
   assert.match(landingPage, /psychiatrist-tms-nanaimo/);
 });
@@ -60,6 +69,9 @@ test("landing header uses a centred three-zone desktop layout", () => {
   assert.match(globalsCss, /html:has\(\.landing-header\) \{[\s\S]*?--nl-header-height:\s*4\.5rem/);
   assert.match(globalsCss, /@media \(max-width: 63\.99rem\) \{[\s\S]*?--nl-header-height:\s*3\.75rem/);
   assert.equal(globalsCss.includes("--nl-header-height: 6.75rem"), false);
+  assert.match(landingHeader, /site-header--transparent/);
+  assert.match(landingHeader, /SCROLL_SOLID_AT = 40/);
+  assert.match(landingHeader, /className=\{`landing-header site-header fixed/);
 });
 
 test("landing logo uses a same-page #top hash so advertising parameters are kept", () => {
@@ -80,12 +92,11 @@ test("Reveal fails open when the observer cannot run", () => {
 });
 
 test("landing keeps the approved headline, excerpt and three verbatim reviews", () => {
-  assert.equal(
-    LANDING_HEADLINE,
-    "When Medications Fall Short, Thoughtful Psychiatric Care Can Offer New Options.",
-  );
-  assert.match(LANDING_SUPPORTING_TEXT, /Nanaimo/);
-  assert.match(LANDING_SUPPORTING_TEXT, /Vancouver Island/);
+  assert.equal(LANDING_HEADLINE, "Expert care for complex mental challenges");
+  assert.match(LANDING_SUPPORTING_TEXT, /Psychiatrist-led TMS and ketamine treatments/);
+  assert.match(LANDING_SUPPORTING_TEXT, /Care tailored to your needs/);
+  assert.equal(LANDING_HEADLINE.includes("\n"), false);
+  assert.match(landingPage, /MEDIA\.homeHeroRetouched/);
   assert.match(landingPage, /DR_AU_PARAS\[0\]/);
   assert.equal(LANDING_REVIEWS.length, 3);
   assert.match(landingPage, /LANDING_REVIEWS/);
@@ -118,11 +129,23 @@ test("landing keeps the approved headline, excerpt and three verbatim reviews", 
     LANDING_NEXT_STEPS[1].body,
     "An appropriate physician referral is required for an MSP-covered assessment. The clinic can explain referral requirements when you enquire.",
   );
-  assert.equal(LANDING_INQUIRY_HEADING, "Ask about treatment options");
-  assert.match(LANDING_INQUIRY_SUPPORTING_TEXT, /assessment process or treatment options/);
+  assert.equal(LANDING_INQUIRY_HEADING, "Let’s talk about your options");
+  assert.match(LANDING_INQUIRY_SUPPORTING_TEXT, /arranging an assessment/);
   assert.equal(LANDING_INQUIRY_SUPPORTING_TEXT.includes("not a commitment to treatment"), false);
+  assert.deepEqual([...LANDING_TRUST], [
+    "Psychiatrist-led care",
+    "Personalized treatment options",
+    "MSP-covered assessment",
+  ]);
+  assert.match(LANDING_INQUIRY_NOTE, /personal health information/);
+  assert.match(LANDING_INQUIRY_NOTE, /referral documents/);
+  assert.match(landingPage, /LANDING_INQUIRY_NOTE/);
+  assert.match(landingPage, /LANDING_TRUST/);
   assert.equal(contactForm.includes("For general inquiries only"), false);
   assert.equal(contactForm.includes("personal health information"), false);
+  assert.match(contactForm, /notice\?: string/);
+  assert.equal((landingPage.match(/<ContactForm/g) ?? []).length, 1);
+  assert.equal(landingPage.includes("<Reveal>\n              <h2 id=\"inquiry-heading\""), false);
 });
 
 test("landing does not load YouTube or a disconnected-form placeholder", () => {
@@ -152,9 +175,12 @@ test("landing psychiatrist copy is one block beside the portrait", () => {
   assert.match(landingPage, /TMS coil on the left and ketamine vial on the right/);
   assert.match(globalsCss, /\.landing-psychiatrist \{[\s\S]*?display:\s*grid/);
   assert.match(globalsCss, /\.landing-psychiatrist \{[\s\S]*?align-items:\s*start/);
-  assert.match(globalsCss, /\.landing-hero-media \{[\s\S]*?aspect-ratio:\s*2\s*\/\s*1/);
+  assert.match(globalsCss, /\.landing-hero-media \{[\s\S]*?aspect-ratio:\s*1960\s*\/\s*802/);
+  assert.match(globalsCss, /\.landing-hero-copy-wrap \{[\s\S]*?min-height:\s*clamp\(28\.75rem,\s*56vh,\s*33\.75rem\)/);
   assert.equal(globalsCss.includes(".landing-hero-media {\n    max-height: none;\n    min-height: 22rem;"), false);
-  assert.match(globalsCss, /#inquiry\.home-section \{[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/);
+  assert.match(globalsCss, /#inquiry\.landing-inquiry-section \{[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/);
+  assert.match(globalsCss, /\.landing-inquiry \{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*0\.82fr\)\s*minmax\(0,\s*1\.18fr\)/);
+  assert.match(globalsCss, /\.landing-inquiry-form \.ct-submit \{[\s\S]*?background:\s*var\(--nl-yellow\)/);
 });
 
 test("contact form controls stay visible below the sticky header when focused", () => {

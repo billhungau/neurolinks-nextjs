@@ -41,7 +41,13 @@ const AUTOCOMPLETE: Record<Exclude<ContactFieldName, "message">, string> = {
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-export function ContactForm({ source = "contact" }: { source?: ContactSource }) {
+export function ContactForm({
+  source = "contact",
+  notice,
+}: {
+  source?: ContactSource;
+  notice?: string;
+}) {
   const [values, setValues] = useState<ContactFields>(EMPTY_FIELDS);
   const [errors, setErrors] = useState<ContactFieldErrors>({});
   const [status, setStatus] = useState<Status>("idle");
@@ -135,6 +141,8 @@ export function ContactForm({ source = "contact" }: { source?: ContactSource }) 
         Healthcare professionals:{" "}
         <Link href="/physician-referral/">Physician Referral Form</Link>
       </p>
+
+      {notice ? <p className="ct-inquiry-note">{notice}</p> : null}
 
       {status === "success" ? (
         <p

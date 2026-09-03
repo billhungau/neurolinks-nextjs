@@ -8,6 +8,7 @@ import { SITE } from "@/lib/site";
 const INQUIRY_HREF = "#inquiry";
 const MENU_ID = "landing-mobile-nav";
 const DESKTOP_NAV_MQ = "(min-width: 64rem)";
+const SCROLL_SOLID_AT = 40;
 
 const SECTION_NAV = [
   { href: "#treatment", label: "Treatments" },
@@ -22,9 +23,21 @@ function closeMenu(setOpen: (value: boolean) => void, button: HTMLButtonElement 
 
 export function LandingHeader() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
+  const solid = scrolled || open;
+  const overHero = !solid;
+
+  useEffect(() => {
+    const update = () => {
+      setScrolled(window.scrollY >= SCROLL_SOLID_AT);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia(DESKTOP_NAV_MQ);
@@ -94,8 +107,13 @@ export function LandingHeader() {
   return (
     <header
       ref={headerRef}
-      className="landing-header site-header site-header--solid sticky top-0 z-50 border-b border-white/10 bg-[var(--nl-navy)]/90 text-white shadow-[0_1px_0_rgba(0,0,0,0.16)] backdrop-blur-md"
+      className={`landing-header site-header fixed top-0 z-50 border-b transition-[background-color,border-color,box-shadow,color] duration-200 ease-out ${
+        overHero
+          ? "site-header--transparent border-transparent bg-transparent text-white"
+          : "site-header--solid border-white/10 bg-[var(--nl-navy)]/90 text-white shadow-[0_1px_0_rgba(0,0,0,0.16)] backdrop-blur-md"
+      }`}
     >
+      {overHero ? <div className="site-header-wash" aria-hidden="true" /> : null}
       <div className="nl-wrap site-header-bar landing-header-bar relative z-10">
         <a className="site-header-logo landing-header-brand" href="#top" aria-label="NeuroLinks">
           <Image

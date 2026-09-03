@@ -207,7 +207,7 @@ async function main() {
   }
   if (!ads.text.includes('id="inquiry"')) fail("ads landing missing #inquiry");
   else pass("ads landing has #inquiry");
-  if (!ads.text.includes("Ask about treatment options")) fail("ads landing missing inquiry heading");
+  if (!ads.text.includes("Let’s talk about your options")) fail("ads landing missing inquiry heading");
   if (!ads.text.includes('name="firstName"') || !ads.text.includes('name="message"')) {
     fail("ads landing missing shared contact form fields");
   } else pass("ads landing embeds the shared contact form");

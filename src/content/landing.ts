@@ -3,16 +3,24 @@
  * Do not invent clinical claims or shorten testimonial quotations.
  */
 
-export const LANDING_HEADLINE =
-  "When Medications Fall Short, Thoughtful Psychiatric Care Can Offer New Options.";
+export const LANDING_HEADLINE = "Expert care for complex mental challenges";
 
 export const LANDING_SUPPORTING_TEXT =
-  "Psychiatrist-led TMS and ketamine care in Nanaimo, serving Vancouver Island.";
+  "Psychiatrist-led TMS and ketamine treatments. Care tailored to your needs.";
 
-export const LANDING_INQUIRY_HEADING = "Ask about treatment options";
+export const LANDING_TRUST = [
+  "Psychiatrist-led care",
+  "Personalized treatment options",
+  "MSP-covered assessment",
+] as const;
+
+export const LANDING_INQUIRY_HEADING = "Let’s talk about your options";
 
 export const LANDING_INQUIRY_SUPPORTING_TEXT =
-  "Contact our team with questions about the assessment process or treatment options.";
+  "Contact our team to ask about treatment and arranging an assessment.";
+
+export const LANDING_INQUIRY_NOTE =
+  "For general inquiries or questions about arranging an assessment. Please do not include personal health information, referral documents or urgent medical concerns.";
 
 export const LANDING_OUTCOME_NOTE =
   "Information provided is educational and does not replace a psychiatric assessment. Treatment outcomes vary by individual. Please consult with a qualified healthcare provider for personalized medical guidance.";

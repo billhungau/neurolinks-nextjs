@@ -1,3 +1,4 @@
+import { getImageProps } from "next/image";
 import Image from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
 import { FaqAccordion } from "@/components/FaqAccordion";
@@ -13,17 +14,19 @@ import { LANDING_FAQS } from "@/content/faqs";
 import {
   LANDING_HEADLINE,
   LANDING_INQUIRY_HEADING,
+  LANDING_INQUIRY_NOTE,
   LANDING_INQUIRY_SUPPORTING_TEXT,
   LANDING_NEXT_STEPS,
   LANDING_OUTCOME_NOTE,
   LANDING_REVIEWS,
   LANDING_SUPPORTING_TEXT,
   LANDING_TREATMENTS,
+  LANDING_TRUST,
   LANDING_WHY,
 } from "@/content/landing";
 import { ADVERTISING_LANDING_SOURCE } from "@/lib/contact-form";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { MEDIA } from "@/lib/media";
+import { HOME_HERO_ASSET, MEDIA } from "@/lib/media";
 import { adsLandingRobots, PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
@@ -41,6 +44,25 @@ const TREATMENT_MEDIA = {
   ketamineHero: MEDIA.ketamineHero,
 } as const;
 
+const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLinks";
+
+function LandingHeroPhoto() {
+  const { props } = getImageProps({
+    alt: HERO_ALT,
+    sizes: IMG_SIZES.fullBleed,
+    priority: true,
+    src: MEDIA.homeHeroRetouched,
+    width: HOME_HERO_ASSET.width,
+    height: HOME_HERO_ASSET.height,
+  });
+  return (
+    // getImageProps supplies a next/image-optimized srcSet; the hero needs a
+    // plain img so one landscape file can sit in a CSS-sized frame.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img {...props} alt={HERO_ALT} className="landing-hero-photo" />
+  );
+}
+
 export default function LandingPage() {
   return (
     <>
@@ -50,29 +72,56 @@ export default function LandingPage() {
       <main id="main-content" className="flex-1" tabIndex={-1}>
         <FaqJsonLd items={LANDING_FAQS} />
 
-        <section className="landing-hero" aria-labelledby="landing-hero-heading">
-          <div className="landing-hero-grid">
+        <section id="landing-hero" className="landing-hero" aria-labelledby="landing-hero-heading">
+          <div className="landing-hero-media">
+            <LandingHeroPhoto />
+            <div className="landing-hero-wash" aria-hidden="true" />
+          </div>
+          <div className="nl-wrap landing-hero-copy-wrap">
             <div className="landing-hero-copy">
               <h1 id="landing-hero-heading">{LANDING_HEADLINE}</h1>
               <p>{LANDING_SUPPORTING_TEXT}</p>
               <div className="landing-hero-actions">
-                <ButtonLink href="#inquiry" variant="accent">
-                  Ask about treatment options
+                <ButtonLink href="#inquiry" variant="accent" className="landing-hero-primary">
+                  Request assessment
                 </ButtonLink>
-                <ButtonLink href={SITE.phoneHref} variant="ghost">
-                  Call {SITE.phone}
+                <ButtonLink href="#treatment" variant="on-dark" className="landing-hero-secondary">
+                  Explore treatments
                 </ButtonLink>
               </div>
             </div>
-            <div className="landing-hero-media">
-              <Image
-                src={MEDIA.landingHero}
-                alt="TMS coil on the left and ketamine vial on the right at NeuroLinks"
-                fill
-                priority
-                sizes={IMG_SIZES.half}
-                className="object-cover object-center"
-              />
+          </div>
+        </section>
+
+        <section className="trust-strip landing-trust" aria-label="Clinic facts">
+          <div className="nl-wrap">
+            <ul className="trust-grid">
+              {LANDING_TRUST.map((item) => (
+                <li key={item}>
+                  <p className="trust-title">{item}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section
+          id="inquiry"
+          className="landing-inquiry-section nl-anchor-section"
+          aria-labelledby="inquiry-heading"
+        >
+          <div className="nl-wrap landing-inquiry">
+            <div className="landing-inquiry-intro">
+              <h2 id="inquiry-heading">{LANDING_INQUIRY_HEADING}</h2>
+              <p>{LANDING_INQUIRY_SUPPORTING_TEXT}</p>
+              <p className="landing-inquiry-clinic">
+                <span>{SITE.shortName}</span>
+                <span>Nanaimo, BC</span>
+                <a href={SITE.phoneHref}>{SITE.phone}</a>
+              </p>
+            </div>
+            <div className="ct-form-frame landing-inquiry-form">
+              <ContactForm source={ADVERTISING_LANDING_SOURCE} notice={LANDING_INQUIRY_NOTE} />
             </div>
           </div>
         </section>
@@ -231,32 +280,6 @@ export default function LandingPage() {
             <div className="mt-6">
               <FaqAccordion items={LANDING_FAQS} />
             </div>
-          </div>
-        </section>
-
-        <section
-          id="inquiry"
-          className="home-section nl-anchor-section bg-white"
-          aria-labelledby="inquiry-heading"
-        >
-          <div className="nl-wrap landing-inquiry">
-            <Reveal>
-              <h2 id="inquiry-heading" className="home-h2 text-[var(--nl-navy)]">
-                {LANDING_INQUIRY_HEADING}
-              </h2>
-              <p className="prose-measure mt-4 leading-relaxed text-[var(--nl-muted)]">
-                {LANDING_INQUIRY_SUPPORTING_TEXT}
-              </p>
-            </Reveal>
-            <div className="ct-form-frame landing-inquiry-form">
-              <ContactForm source={ADVERTISING_LANDING_SOURCE} />
-            </div>
-            <p className="mt-6 text-sm text-[var(--nl-muted)]">
-              Prefer to speak with someone?{" "}
-              <a className="font-semibold text-[var(--nl-navy)] underline" href={SITE.phoneHref}>
-                Call {SITE.phone}
-              </a>
-            </p>
           </div>
         </section>
       </main>
