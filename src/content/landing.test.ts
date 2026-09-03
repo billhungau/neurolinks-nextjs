@@ -260,7 +260,7 @@ test("landing uses click-to-play original YouTube explainers in the treatment ca
   assert.match(explainer, /active \? \(\s*<p className="explainer-video-fallback"/);
   assert.match(explainer, /explainer-video-caption/);
   assert.match(explainer, /Watch explainer/);
-  assert.match(explainer, /Watch explainer · ≈1:30/);
+  assert.match(explainer, /\{watchLabel\} · ≈1:30/);
   assert.match(explainer, /approximately 1 minute 30 seconds/);
   assert.match(landingPage, /watchLabel="Watch explainer"/);
   assert.match(landingPage, /LANDING_VIDEO_POSTERS/);

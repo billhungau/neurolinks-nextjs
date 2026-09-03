@@ -38,14 +38,13 @@ test("services ketamine section uses the supplied orchid vial still", () => {
 test("ketamine points sit in the left column and the bottom CTA calls the clinic", () => {
   assert.match(page, /<strong>2 days a week<\/strong>/);
   assert.match(page, /<strong>3 weeks<\/strong>/);
-  assert.match(page, /Rapid-acting potential/);
-  assert.match(page, /Psychiatrist oversight and monitoring/);
-  assert.match(page, /svc-ket-point/);
+  assert.match(page, /title: "Rapid-acting potential"/);
+  assert.match(page, /title: "Psychiatrist oversight and monitoring"/);
   assert.equal(page.includes("svc-rows-gold"), false);
   const ketamineStart = page.indexOf('id="ketamine"');
   const coverageStart = page.indexOf('id="coverage"');
   const ketamineSection = page.slice(ketamineStart, coverageStart);
-  assert.match(ketamineSection, /Rapid-acting potential/);
+  assert.match(ketamineSection, /KETAMINE_GROUPS\.slice\(1\)/);
   assert.match(ketamineSection, /svc-ket-point/);
   assert.equal(ketamineSection.includes("svc-rows"), false);
   assert.match(page, /Request an assessment/);
