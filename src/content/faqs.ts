@@ -191,7 +191,7 @@ export const TMS_FAQS: FaqItem[] = [
     q: "What is the difference between TMS and electroconvulsive therapy (ECT)?",
     a: [
       para(
-        "While both are effective for the treatment of several mental illness, they work differently. In contrast to ECT, TMS is non-invasive and it does not need anesthesia.",
+        "While both are effective for the treatment of several mental health conditions, they work differently. In contrast to ECT, TMS is non-invasive and it does not need anesthesia.",
       ),
       {
         type: "compare",

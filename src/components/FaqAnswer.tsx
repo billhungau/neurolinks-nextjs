@@ -39,35 +39,37 @@ function FaqSegments({ segments }: { segments: FaqRich }) {
 
 function FaqCompareTable({ rows }: { rows: FaqCompareRow[] }) {
   return (
-    <table className="tms-faq-compare">
-      <caption className="sr-only">Comparison of TMS and ECT</caption>
-      <thead>
-        <tr>
-          <th scope="col">Feature</th>
-          <th scope="col">TMS</th>
-          <th scope="col">ECT</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={row.feature}>
-            <th scope="row">{row.feature}</th>
-            <td>
-              <span className="tms-faq-compare-key" aria-hidden="true">
-                TMS
-              </span>
-              <span className="tms-faq-compare-value">{row.tms}</span>
-            </td>
-            <td>
-              <span className="tms-faq-compare-key" aria-hidden="true">
-                ECT
-              </span>
-              <span className="tms-faq-compare-value">{row.ect || "—"}</span>
-            </td>
+    <div className="tms-faq-compare-wrap">
+      <table className="tms-faq-compare">
+        <caption className="sr-only">Comparison of TMS and ECT</caption>
+        <thead>
+          <tr>
+            <th scope="col">Feature</th>
+            <th scope="col">TMS</th>
+            <th scope="col">ECT</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.feature}>
+              <th scope="row">{row.feature}</th>
+              <td>
+                <span className="tms-faq-compare-key" aria-hidden="true">
+                  TMS
+                </span>
+                <span className="tms-faq-compare-value">{row.tms}</span>
+              </td>
+              <td>
+                <span className="tms-faq-compare-key" aria-hidden="true">
+                  ECT
+                </span>
+                <span className="tms-faq-compare-value">{row.ect || "—"}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

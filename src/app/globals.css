@@ -2122,6 +2122,13 @@ h3,
   margin-top: 0.35rem;
 }
 
+.tms-faq-compare-wrap {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
 .tms-faq-compare {
   width: 100%;
   border-collapse: collapse;

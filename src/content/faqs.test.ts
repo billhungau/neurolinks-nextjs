@@ -243,7 +243,7 @@ const TMS_SOURCE_PHRASES = [
   "any patients with non-removable metal in their head (except braces or dental fillings)",
   "facial tattoos with metallic or magnetic-sensitive ink",
   "a recent (<30 days) hemorrhagic stroke or head injury",
-  "While both are effective for the treatment of several mental illness, they work differently",
+  "While both are effective for the treatment of several mental health conditions, they work differently",
   "In contrast to ECT, TMS is non-invasive and it does not need anesthesia",
   "can return to work straight after",
   "rarely induces seizure (<1/10000)",
@@ -311,6 +311,20 @@ test("ECT comparison states that ECT needs anesthesia", () => {
     : undefined;
   assert.equal(row?.tms, "non-invasive; does not need anesthesia");
   assert.equal(row?.ect, "needs anesthesia");
+  const text = faqAnswerText(item.a);
+  assert.match(text, /several mental health conditions/);
+  assert.equal(text.includes("several mental illness,"), false);
+  assert.equal(faqEvidenceLinks(item.a).length, 0);
+  const source = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "../components/FaqAnswer.tsx"),
+    "utf8",
+  );
+  const css = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "../app/globals.css"),
+    "utf8",
+  );
+  assert.match(source, /tms-faq-compare-wrap/);
+  assert.match(css, /\.tms-faq-compare-wrap \{[\s\S]*?overflow-x:\s*auto/);
 });
 
 test("evidence-link markup uses a safe new-tab rel", () => {
