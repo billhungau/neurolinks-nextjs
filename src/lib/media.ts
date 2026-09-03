@@ -21,10 +21,10 @@ export const MEDIA = {
   serotonin: "/media/images/serotonin-300x145.jpg",
   tmsPoster: "/media/posters/tms-cover.jpg",
   ketPoster: "/media/posters/ketamine-cover.jpg",
-  /** WP ads-page TMS video card background (post 5932, 1280×720). */
-  landingTmsPoster: "/media/posters/tms-video-thumbnail-Bl3yWrXP.webp",
-  /** WP ads-page ketamine video card background (post 5932, 1280×720). */
-  landingKetPoster: "/media/posters/ketamine-video-thumbnail-BhR-uQCR.webp",
+  /** Supplied TMS video cover; logo sits on the blue field (no white badge). */
+  landingTmsPoster: "/media/posters/tms-video-cover.webp",
+  /** Supplied ketamine video cover; logo sits on the blue field (no white badge). */
+  landingKetPoster: "/media/posters/ketamine-video-cover.webp",
   referralPdf: "/documents/physician-referral-form.pdf",
   landingHero: "/media/images/hero-treatment-modalities-CnTkU5m8.webp",
   homeHero: "/media/images/home-hero-banner.jpg",
@@ -94,21 +94,18 @@ export const LANDING_YOUTUBE = {
 } as const;
 
 /**
- * Original WordPress advertising-page video covers (Elementor post 5932).
- * Native 16:9. Play control and duration badge are HTML overlays on WP, not
- * baked into these files.
+ * Supplied ads-landing video covers. Near 16:9. The NeuroLinks wordmark sits
+ * directly on the blue field (no white logo badge). Play control is CSS-only.
  */
 export const LANDING_VIDEO_POSTERS = {
   tms: {
-    wpUrl: "https://neurolinks.ca/wp-content/uploads/2026/01/tms-video-thumbnail-Bl3yWrXP.webp",
     local: MEDIA.landingTmsPoster,
-    width: 1280,
-    height: 720,
+    width: 1672,
+    height: 941,
   },
   ketamine: {
-    wpUrl: "https://neurolinks.ca/wp-content/uploads/2026/01/ketamine-video-thumbnail-BhR-uQCR.webp",
     local: MEDIA.landingKetPoster,
-    width: 1280,
-    height: 720,
+    width: 1672,
+    height: 941,
   },
 } as const;

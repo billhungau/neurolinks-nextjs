@@ -260,17 +260,12 @@ test("landing uses click-to-play original YouTube explainers in the treatment ca
   assert.match(landingPage, /LANDING_VIDEO_POSTERS/);
   assert.equal(landingPage.includes("MEDIA.tmsPoster"), false);
   assert.equal(landingPage.includes("MEDIA.ketPoster"), false);
-  assert.equal(LANDING_VIDEO_POSTERS.tms.local, "/media/posters/tms-video-thumbnail-Bl3yWrXP.webp");
-  assert.equal(
-    LANDING_VIDEO_POSTERS.ketamine.local,
-    "/media/posters/ketamine-video-thumbnail-BhR-uQCR.webp",
-  );
-  assert.equal(LANDING_VIDEO_POSTERS.tms.width / LANDING_VIDEO_POSTERS.tms.height, 16 / 9);
-  assert.equal(
-    LANDING_VIDEO_POSTERS.ketamine.width / LANDING_VIDEO_POSTERS.ketamine.height,
-    16 / 9,
-  );
+  assert.equal(LANDING_VIDEO_POSTERS.tms.local, "/media/posters/tms-video-cover.webp");
+  assert.equal(LANDING_VIDEO_POSTERS.ketamine.local, "/media/posters/ketamine-video-cover.webp");
   for (const poster of Object.values(LANDING_VIDEO_POSTERS)) {
+    assert.equal(poster.width, 1672);
+    assert.equal(poster.height, 941);
+    assert.ok(Math.abs(poster.width / poster.height - 16 / 9) < 0.002);
     const file = join(root, "../../public", poster.local.replace(/^\//, ""));
     assert.equal(existsSync(file), true, `missing ${poster.local}`);
     assert.match(readFileSync(file).subarray(0, 4).toString("ascii"), /RIFF/);
