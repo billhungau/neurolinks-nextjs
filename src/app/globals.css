@@ -2803,6 +2803,16 @@ h3,
   aspect-ratio: 1 / 1;
 }
 
+@media (min-width: 900px) {
+  .svc-ket.svc-split {
+    align-items: start;
+  }
+}
+
+.svc-ket-point {
+  margin-top: 1.35rem;
+}
+
 .svc-rows {
   display: grid;
   gap: 0;

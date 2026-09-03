@@ -8,6 +8,7 @@ import { TmsSectionNav } from "@/components/tms/TmsSectionNav";
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
+import { SITE } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Psychiatric Assessment & Treatment in Nanaimo | NeuroLinks",
@@ -368,6 +369,12 @@ export default function ServicesPage() {
                 <h2 className="tms-h2 mt-3">Ketamine Therapy</h2>
                 <h3 className="svc-group-label svc-group-label-gold">Treatment schedule</h3>
                 <p className="tms-lede mt-2">{KETAMINE_GROUPS[0].body}</p>
+                {KETAMINE_GROUPS.slice(1).map((item) => (
+                  <div key={item.title} className="svc-ket-point">
+                    <h3 className="svc-group-label svc-group-label-gold">{item.title}</h3>
+                    <p className="tms-lede mt-2">{item.body}</p>
+                  </div>
+                ))}
                 <p className="mt-6">
                   <Link
                     href="/ketamine-treatment-resistant-depression-nanaimo/"
@@ -388,14 +395,6 @@ export default function ServicesPage() {
                 />
               </div>
             </div>
-            <dl className="svc-rows svc-rows-gold">
-              {KETAMINE_GROUPS.slice(1).map((item) => (
-                <div key={item.title}>
-                  <dt>{item.title}</dt>
-                  <dd>{item.body}</dd>
-                </div>
-              ))}
-            </dl>
           </Reveal>
         </div>
       </section>
@@ -436,8 +435,8 @@ export default function ServicesPage() {
               <ButtonLink href="/contact/" variant="accent">
                 Request an assessment
               </ButtonLink>
-              <ButtonLink href="/contact/" variant="on-dark">
-                Contact the clinic
+              <ButtonLink href={SITE.phoneHref} variant="on-dark">
+                Call our clinic
               </ButtonLink>
             </div>
           </Reveal>
