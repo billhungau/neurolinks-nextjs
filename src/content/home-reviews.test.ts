@@ -18,8 +18,12 @@ test("review excerpts match the approved published wording", () => {
   assert.match(byInitials["E. H."], /knowledgeable and supportive/);
   assert.match(byInitials["B. J."], /patient and thorough with diagnosis/);
   assert.match(byInitials["J. A."], /depression for 45 years/);
-  assert.match(byInitials["P. R."], /help and hope we have been so desperately searching for/);
+  assert.match(byInitials["P. R."], /at least 5 years now/);
+  assert.match(byInitials["P. R."], /finally LISTENING/);
   assert.match(byInitials["T. H."], /top notch/);
+  assert.match(byInitials["T. H."], /not the money/);
+  assert.match(byInitials["T. H."], /…/);
+  assert.match(byInitials["E. H."], /I felt safe and cared for/);
   assert.equal(GOOGLE_REVIEWS_URL, "https://share.google/zhQv4Wd5lcK4LFLeJ");
 });
 

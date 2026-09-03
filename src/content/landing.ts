@@ -85,7 +85,7 @@ export const LANDING_REVIEWS = [
   },
   {
     who: "E. H.",
-    text: "I felt hopeless and stuck in life. I spent years trying everything I could to make a change, then one day my doctor talked to me about TMS and I thought why not try. TMS has been a life changing treatment for me. I would highly recommend this to anyone suffering with depression. Doctor Au and his team have been so knowledgeable and supportive throughout this process.",
+    text: "I felt hopeless and stuck in life. I spent years trying everything I could to make a change, then one day my doctor talked to me about TMS and I thought why not try. TMS has been a life changing treatment for me. I would highly recommend this to anyone suffering with depression. … Doctor Au and his team have been so knowledgeable and supportive throughout this process. I felt safe and cared for.",
   },
   {
     who: "J. A.",

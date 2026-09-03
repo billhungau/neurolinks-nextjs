@@ -144,8 +144,13 @@ test("landing keeps the requested headline, excerpt and three verbatim reviews",
     true,
   );
   assert.equal(
-    LANDING_REVIEWS[2].text.startsWith("The Transcranial Magnetic Stimulation took longer"),
+    LANDING_REVIEWS[1].text.includes("I felt safe and cared for"),
     true,
+  );
+  assert.match(LANDING_REVIEWS[1].text, /…/);
+  assert.match(
+    LANDING_REVIEWS[2].text,
+    /^The Transcranial Magnetic Stimulation took longer/,
   );
   assert.equal(landingPage.includes("LANDING_OUTCOME_NOTE"), false);
   assert.equal(landingPage.includes("does not replace a psychiatric assessment"), false);

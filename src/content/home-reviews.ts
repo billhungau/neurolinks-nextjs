@@ -47,13 +47,13 @@ export const HOME_REVIEWS: HomeReview[] = [
   },
   {
     initials: "P. R.",
-    text: "We have struggled to find the right help for at least five years now, and we are so grateful to Dr. Chi Hung and his staff for finally listening and giving us the help and hope we have been so desperately searching for.",
+    text: "We have struggled to find the right help for at least 5 years now and we are so grateful to Dr. Chi Hung and his staff for finally LISTENING and giving us the help and hope we have been so desperately searching for.",
     familyMember: true,
     source: "wordpress-homepage",
   },
   {
     initials: "T. H.",
-    text: "Dr Au and his staff are top notch. Dr. Au is very knowledgeable and it’s all about patient care.",
+    text: "Dr Au and his staff are top notch. … Dr. Au is very knowledgeable and it’s all about patient care and not the money.",
     source: "wordpress-homepage",
   },
 ];
