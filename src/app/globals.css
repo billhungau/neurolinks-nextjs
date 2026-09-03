@@ -4470,8 +4470,7 @@ h3,
 
 /**
  * Ads landing hero. Uses the official homepage photograph and a compact
- * overlay composition so the inquiry form can start in the first viewport
- * on common laptop screens. Homepage .home-hero rules stay untouched.
+ * overlay composition. Homepage .home-hero rules stay untouched.
  */
 .landing-hero {
   position: relative;
@@ -4506,7 +4505,7 @@ h3,
 }
 
 .landing-hero-copy h1 {
-  max-width: 16ch;
+  max-width: none;
   color: #fff;
   font-family: var(--font-display), ui-serif, Georgia, serif;
   font-size: clamp(2.05rem, 8.4vw, 2.7rem);
@@ -4751,7 +4750,7 @@ h3,
 }
 
 .landing-inquiry-intro h2 {
-  max-width: 16ch;
+  max-width: 18ch;
   color: var(--nl-navy);
   font-family: var(--font-display), ui-serif, Georgia, serif;
   font-size: clamp(1.7rem, 4vw, 2.35rem);
@@ -4889,7 +4888,7 @@ html:has(.landing-header) {
 .landing-tx-grid {
   display: grid;
   gap: 1.5rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 @media (min-width: 1024px) {
@@ -4899,22 +4898,42 @@ html:has(.landing-header) {
   }
 }
 
-.landing-tx-grid > .reveal,
 .landing-tx {
   height: 100%;
 }
 
-.landing-tx .tx-feature-copy .text-link {
-  margin-top: auto;
-  padding-top: 1rem;
+.landing-tx .tx-feature-copy {
+  gap: 0;
 }
 
 .landing-tx .explainer-video {
   min-width: 0;
+  margin-top: 1rem;
 }
 
 .landing-tx .tms-video {
-  border-radius: 0;
+  border-radius: 10px;
+}
+
+.landing-tx-actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1.1rem;
+  justify-items: start;
+}
+
+.landing-tx-cta {
+  width: 100%;
+  min-height: 3rem;
+  height: 3rem;
+  padding: 0 1rem;
+  box-shadow: none;
+}
+
+.landing-tx-actions .text-link {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .explainer-video-poster,
@@ -4927,7 +4946,7 @@ html:has(.landing-header) {
 }
 
 .explainer-video-fallback {
-  margin: 0.45rem 0.9rem 0;
+  margin: 0.45rem 0 0;
   color: var(--nl-muted);
   font-size: 0.8125rem;
   line-height: 1.4;
@@ -4939,39 +4958,58 @@ html:has(.landing-header) {
   text-underline-offset: 3px;
 }
 
-.landing-tx-watch {
-  margin: 0.4rem 0 0;
+.landing-why {
+  background: #fff;
+  padding-block: 1.6rem 1.35rem;
+}
+
+.landing-why-block {
+  max-width: 40rem;
+  padding: 0 0 0 1.15rem;
+  border-left: 3px solid var(--nl-yellow);
+}
+
+.landing-why-block h2 {
   color: var(--nl-navy);
-  font-size: 0.875rem;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.55rem, 3.4vw, 2.05rem);
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
-.landing-tx-points {
-  display: grid;
-  gap: 0.55rem;
-  margin: 0.85rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.landing-tx-points li {
-  position: relative;
-  padding-left: 1.05rem;
+.landing-why-block p {
+  margin-top: 0.7rem;
   color: var(--nl-ink);
-  font-size: 0.9375rem;
-  line-height: 1.55;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
-.landing-tx-points li::before {
-  content: "";
-  position: absolute;
-  top: 0.55em;
-  left: 0;
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 50%;
-  background: var(--nl-yellow);
+.landing-section-cta {
+  margin: 1.35rem 0 0;
+}
+
+.landing-close {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 36rem;
+  margin-top: 2rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid rgb(26 39 68 / 0.12);
+}
+
+.landing-close p {
+  margin: 0;
+  color: var(--nl-navy);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.landing-inline-cta {
+  min-height: 3rem;
+  height: 3rem;
+  padding: 0 1.15rem;
+  box-shadow: none;
 }
 
 

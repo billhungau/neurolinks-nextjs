@@ -3,10 +3,11 @@
  * Do not invent clinical claims or shorten testimonial quotations.
  */
 
-export const LANDING_HEADLINE = "Expert care for complex mental challenges";
+export const LANDING_HEADLINE =
+  "When medication hasn’t helped enough, there may be another way forward.";
 
 export const LANDING_SUPPORTING_TEXT =
-  "Psychiatrist-led TMS and ketamine treatments. Care tailored to your needs.";
+  "Explore psychiatrist-led TMS and ketamine treatment in Nanaimo, with care tailored to your needs.";
 
 export const LANDING_TRUST = [
   "Psychiatrist-led care",
@@ -14,37 +15,31 @@ export const LANDING_TRUST = [
   "MSP-covered assessment",
 ] as const;
 
-export const LANDING_INQUIRY_HEADING = "Let’s talk about your options";
+export const LANDING_TREATMENT_HEADING = "Explore your treatment options";
+
+export const LANDING_WHY_HEADING = "Care that goes beyond delivering treatment.";
+
+export const LANDING_WHY_TEXT =
+  "We review your progress, consider factors affecting your response and work with you on appropriate next steps—even when improvement is not straightforward.";
+
+export const LANDING_INQUIRY_HEADING = "Let’s explore what may be right for you.";
 
 export const LANDING_INQUIRY_SUPPORTING_TEXT =
-  "Contact our team to ask about treatment and arranging an assessment.";
+  "You do not need to choose a treatment before contacting us.";
 
 export const LANDING_INQUIRY_NOTE =
   "For general inquiries or questions about arranging an assessment. Please do not include personal health information, referral documents or urgent medical concerns.";
 
+export const LANDING_REVIEWS_CTA_LABEL = "Talk to our team";
+
+export const LANDING_CLOSE_TEXT =
+  "If you would like to discuss what may be appropriate, our team is here to help.";
+
 export const LANDING_OUTCOME_NOTE =
   "Information provided is educational and does not replace a psychiatric assessment. Treatment outcomes vary by individual. Please consult with a qualified healthcare provider for personalized medical guidance.";
 
-export const LANDING_WHY = [
-  {
-    index: "01",
-    title: "Psychiatrist-led expertise and assessment",
-    body: "Our approach begins with careful listening and a thorough understanding of your history, concerns, and goals. A psychiatrist reviews your diagnosis, treatment history, and relevant medical factors.",
-  },
-  {
-    index: "02",
-    title: "Individualized options and informed choices",
-    body: "With both TMS and ketamine available, NeuroLinks offers options beyond medication alone. We take time to explain your options so you can make decisions you understand and feel comfortable with.",
-  },
-  {
-    index: "03",
-    title: "Monitoring and support throughout treatment",
-    body: "We follow up after treatment to understand how you are doing, recognizing that symptoms can fluctuate and improvement is not always straightforward. If treatment has not helped enough, we review factors that may affect your response and explore appropriate next steps with you.",
-  },
-] as const;
-
 /**
- * Card points reuse approved TMS, ketamine, and homepage copy.
+ * Card copy reuses approved homepage, TMS, and ketamine wording.
  * Injection route is omitted: the homepage says intramuscular and
  * subcutaneous, the ketamine page says intramuscularly or subcutaneously,
  * and the landing FAQ says intramuscular only.
@@ -53,29 +48,23 @@ export const LANDING_TREATMENTS = [
   {
     href: "/about-tms-treatment-on-psychiatric-illness/",
     title: "Transcranial Magnetic Stimulation (TMS)",
-    body: "TMS Therapy — Non-invasive brain stimulation",
-    points: [
-      "Treatment is non-invasive, does not require anesthesia and is generally well tolerated.",
-      "Most patients can return to their usual activities after each session.",
-      "Suitability depends on the diagnosis, treatment history and protocol being considered.",
-    ],
+    benefit:
+      "Can be more effective than another conventional medication when antidepressants have not helped enough.",
+    body: "TMS is a non-invasive neuromodulation treatment with established evidence for depression and certain other psychiatric conditions. It is generally well tolerated. Suitability depends on the diagnosis, treatment history and protocol being considered.",
+    ctaLabel: "Ask about TMS",
     linkLabel: "Learn more about TMS",
     video: "tms",
-    watchLabel: "Watch: Understanding TMS",
     playLabel: "Play TMS explainer video",
   },
   {
     href: "/ketamine-treatment-resistant-depression-nanaimo/",
     title: "Ketamine Therapy",
-    body: "Rapid-acting, medically supervised",
-    points: [
-      "Before every session, your nurse explains what to expect and discusses any concerns.",
-      "Your nurse monitors your vital signs and how you are feeling as the experience unfolds.",
-      "After the session, your nurse helps you reflect on the experience.",
-    ],
+    benefit:
+      "For some people, improvement may begin within hours or days—considerably faster than with conventional antidepressants.",
+    body: "Ketamine is administered in a controlled clinical setting with medical supervision. An experienced registered nurse provides preparation, support and post-session reflection, with vital-sign monitoring and psychiatrist oversight.",
+    ctaLabel: "Ask about ketamine",
     linkLabel: "Learn more about ketamine",
     video: "ketamine",
-    watchLabel: "Watch: Understanding ketamine therapy",
     playLabel: "Play ketamine explainer video",
   },
 ] as const;

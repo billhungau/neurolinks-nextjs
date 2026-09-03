@@ -67,12 +67,14 @@ export function ExplainerVideo({
           </>
         )}
       </div>
-      <p className="explainer-video-fallback">
-        <a href={watchUrl} rel="noopener noreferrer" target="_blank">
-          Open on YouTube
-        </a>{" "}
-        if the player does not load.
-      </p>
+      {active ? (
+        <p className="explainer-video-fallback">
+          <a href={watchUrl} rel="noopener noreferrer" target="_blank">
+            Open on YouTube
+          </a>{" "}
+          if the player does not load.
+        </p>
+      ) : null}
     </div>
   );
 }

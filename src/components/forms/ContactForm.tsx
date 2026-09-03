@@ -44,9 +44,11 @@ type Status = "idle" | "submitting" | "success" | "error";
 export function ContactForm({
   source = "contact",
   notice,
+  showReferralNote = true,
 }: {
   source?: ContactSource;
   notice?: string;
+  showReferralNote?: boolean;
 }) {
   const [values, setValues] = useState<ContactFields>(EMPTY_FIELDS);
   const [errors, setErrors] = useState<ContactFieldErrors>({});
@@ -137,10 +139,12 @@ export function ContactForm({
 
   return (
     <div className="ct-native">
-      <p className="ct-referral-note">
-        Healthcare professionals:{" "}
-        <Link href="/physician-referral/">Physician Referral Form</Link>
-      </p>
+      {showReferralNote ? (
+        <p className="ct-referral-note">
+          Healthcare professionals:{" "}
+          <Link href="/physician-referral/">Physician Referral Form</Link>
+        </p>
+      ) : null}
 
       {notice ? <p className="ct-inquiry-note">{notice}</p> : null}
 

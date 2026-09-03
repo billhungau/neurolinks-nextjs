@@ -6,13 +6,12 @@ import { FaqAccordion } from "@/components/FaqAccordion";
 import { FaqJsonLd } from "@/components/FaqJsonLd";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { LandingHeader } from "@/components/LandingHeader";
-import { MotionReady } from "@/components/MotionReady";
-import { Reveal } from "@/components/Reveal";
 import { SiteFooter } from "@/components/SiteFooter";
 import { TextLink } from "@/components/TextLink";
 import { DR_AU_PARAS } from "@/content/about-bios";
 import { LANDING_FAQS } from "@/content/faqs";
 import {
+  LANDING_CLOSE_TEXT,
   LANDING_HEADLINE,
   LANDING_INQUIRY_HEADING,
   LANDING_INQUIRY_NOTE,
@@ -20,10 +19,13 @@ import {
   LANDING_NEXT_STEPS,
   LANDING_OUTCOME_NOTE,
   LANDING_REVIEWS,
+  LANDING_REVIEWS_CTA_LABEL,
   LANDING_SUPPORTING_TEXT,
+  LANDING_TREATMENT_HEADING,
   LANDING_TREATMENTS,
   LANDING_TRUST,
-  LANDING_WHY,
+  LANDING_WHY_HEADING,
+  LANDING_WHY_TEXT,
 } from "@/content/landing";
 import { ADVERTISING_LANDING_SOURCE } from "@/lib/contact-form";
 import { IMG_SIZES } from "@/lib/image-sizes";
@@ -75,7 +77,6 @@ function LandingHeroPhoto() {
 export default function LandingPage() {
   return (
     <>
-      <MotionReady />
       <div id="top" className="landing-top-anchor" />
       <LandingHeader />
       <main id="main-content" className="flex-1" tabIndex={-1}>
@@ -91,11 +92,11 @@ export default function LandingPage() {
               <h1 id="landing-hero-heading">{LANDING_HEADLINE}</h1>
               <p>{LANDING_SUPPORTING_TEXT}</p>
               <div className="landing-hero-actions">
-                <ButtonLink href="#inquiry" variant="accent" className="landing-hero-primary">
-                  Request assessment
+                <ButtonLink href="#treatment" variant="accent" className="landing-hero-primary">
+                  Explore treatments
                 </ButtonLink>
-                <ButtonLink href="#treatment" variant="on-dark" className="landing-hero-secondary">
-                  Watch treatment videos
+                <ButtonLink href="#inquiry" variant="on-dark" className="landing-hero-secondary">
+                  Talk to our team
                 </ButtonLink>
               </div>
             </div>
@@ -115,6 +116,55 @@ export default function LandingPage() {
         </section>
 
         <section
+          id="treatment"
+          className="home-section bg-[var(--nl-cream)]"
+          aria-labelledby="landing-treatment-heading"
+        >
+          <div className="nl-wrap">
+            <h2 id="landing-treatment-heading" className="home-h2 max-w-3xl text-[var(--nl-navy)]">
+              {LANDING_TREATMENT_HEADING}
+            </h2>
+            <div className="landing-tx-grid">
+              {LANDING_TREATMENTS.map((item) => {
+                const video = TREATMENT_VIDEOS[item.video];
+                return (
+                  <article key={item.href} className="tx-feature landing-tx">
+                    <div className="tx-feature-copy">
+                      <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
+                        {item.title}
+                      </h3>
+                      <p className="tx-feature-benefit">{item.benefit}</p>
+                      <p className="tx-feature-support">{item.body}</p>
+                      <ExplainerVideo
+                        videoId={video.id}
+                        poster={video.poster}
+                        title={video.title}
+                        playLabel={item.playLabel}
+                      />
+                      <div className="landing-tx-actions">
+                        <ButtonLink href="#inquiry" variant="accent" className="landing-tx-cta">
+                          {item.ctaLabel}
+                        </ButtonLink>
+                        <TextLink href={item.href}>{item.linkLabel}</TextLink>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="landing-why" aria-labelledby="landing-why-heading">
+          <div className="nl-wrap">
+            <div className="landing-why-block">
+              <h2 id="landing-why-heading">{LANDING_WHY_HEADING}</h2>
+              <p>{LANDING_WHY_TEXT}</p>
+            </div>
+          </div>
+        </section>
+
+        <section
           id="inquiry"
           className="landing-inquiry-section nl-anchor-section"
           aria-labelledby="inquiry-heading"
@@ -130,72 +180,11 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="ct-form-frame landing-inquiry-form">
-              <ContactForm source={ADVERTISING_LANDING_SOURCE} notice={LANDING_INQUIRY_NOTE} />
-            </div>
-          </div>
-        </section>
-
-        <section className="home-section why-nl bg-white" aria-labelledby="landing-why-heading">
-          <div className="nl-wrap why-nl-grid">
-            <Reveal>
-              <h2 id="landing-why-heading" className="home-h2 text-[var(--nl-navy)]">
-                Why NeuroLinks
-              </h2>
-            </Reveal>
-            <ol className="why-nl-list">
-              {LANDING_WHY.map((item, index) => (
-                <Reveal key={item.index} as="li" delayMs={index * 70}>
-                  <p className="why-nl-index">{item.index}</p>
-                  <div>
-                    <h3>{item.title}</h3>
-                    <p>{item.body}</p>
-                  </div>
-                </Reveal>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        <section
-          id="treatment"
-          className="home-section bg-[var(--nl-cream)]"
-          aria-labelledby="landing-treatment-heading"
-        >
-          <div className="nl-wrap">
-            <Reveal>
-              <h2 id="landing-treatment-heading" className="home-h2 max-w-3xl text-[var(--nl-navy)]">
-                TMS and ketamine
-              </h2>
-            </Reveal>
-            <div className="landing-tx-grid">
-              {LANDING_TREATMENTS.map((item) => {
-                const video = TREATMENT_VIDEOS[item.video];
-                return (
-                  <Reveal key={item.href} className="h-full">
-                    <article className="tx-feature landing-tx">
-                      <ExplainerVideo
-                        videoId={video.id}
-                        poster={video.poster}
-                        title={video.title}
-                        playLabel={item.playLabel}
-                      />
-                      <div className="tx-feature-copy">
-                        <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
-                          {item.title}
-                        </h3>
-                        <p className="landing-tx-watch">{item.watchLabel}</p>
-                        <p className="tx-feature-support">{item.body}</p>
-                        <ul className="landing-tx-points">
-                          {item.points.map((point) => (
-                            <li key={point}>{point}</li>
-                          ))}
-                        </ul>
-                        <TextLink href={item.href}>{item.linkLabel}</TextLink>
-                      </div>
-                    </article>
-                  </Reveal>
-                );
-              })}
+              <ContactForm
+                source={ADVERTISING_LANDING_SOURCE}
+                notice={LANDING_INQUIRY_NOTE}
+                showReferralNote={false}
+              />
             </div>
           </div>
         </section>
@@ -206,7 +195,7 @@ export default function LandingPage() {
           aria-labelledby="landing-psychiatrist-heading"
         >
           <div className="nl-wrap">
-            <Reveal className="landing-psychiatrist">
+            <div className="landing-psychiatrist">
               <div className="about-au-portrait landing-psychiatrist-portrait">
                 <Image
                   src={MEDIA.drAu}
@@ -226,7 +215,7 @@ export default function LandingPage() {
                   <TextLink href="/psychiatrist-tms-nanaimo/">Read the complete biography</TextLink>
                 </p>
               </div>
-            </Reveal>
+            </div>
           </div>
         </section>
 
@@ -235,22 +224,20 @@ export default function LandingPage() {
           aria-labelledby="landing-next-heading"
         >
           <div className="nl-wrap">
-            <Reveal>
-              <h2 id="landing-next-heading" className="home-h2 max-w-3xl">
-                What happens next
-              </h2>
-            </Reveal>
+            <h2 id="landing-next-heading" className="home-h2 max-w-3xl">
+              What happens next
+            </h2>
             <div className="pathway-block mt-8">
               <div className="pathway-rule" aria-hidden="true" />
               <ol className="pathway grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
-                {LANDING_NEXT_STEPS.map((step, index) => (
-                  <Reveal key={step.index} as="li" delayMs={index * 60}>
+                {LANDING_NEXT_STEPS.map((step) => (
+                  <li key={step.index}>
                     <p className="relative z-10 font-serif text-2xl text-[var(--nl-yellow)]">
                       {step.index}
                     </p>
                     <h3 className="mt-3 font-serif text-xl font-semibold">{step.title}</h3>
                     <p className="mt-2.5 text-sm leading-relaxed text-white/75">{step.body}</p>
-                  </Reveal>
+                  </li>
                 ))}
               </ol>
             </div>
@@ -259,12 +246,10 @@ export default function LandingPage() {
 
         <section className="home-section bg-white" aria-labelledby="landing-reviews-heading">
           <div className="nl-wrap">
-            <Reveal>
-              <h2 id="landing-reviews-heading" className="home-h2 text-[var(--nl-navy)]">
-                Patient experiences
-              </h2>
-              <p className="mt-2 text-sm text-[var(--nl-muted)]">on Google Reviews</p>
-            </Reveal>
+            <h2 id="landing-reviews-heading" className="home-h2 text-[var(--nl-navy)]">
+              Patient experiences
+            </h2>
+            <p className="mt-2 text-sm text-[var(--nl-muted)]">on Google Reviews</p>
             <div className="landing-reviews">
               {LANDING_REVIEWS.map((review) => (
                 <blockquote key={review.who}>
@@ -274,21 +259,30 @@ export default function LandingPage() {
               ))}
             </div>
             <p className="landing-outcome-note">{LANDING_OUTCOME_NOTE}</p>
+            <p className="landing-section-cta">
+              <ButtonLink href="#inquiry" variant="accent" className="landing-inline-cta">
+                {LANDING_REVIEWS_CTA_LABEL}
+              </ButtonLink>
+            </p>
           </div>
         </section>
 
         <section id="faq" className="home-section bg-[var(--nl-cream)]" aria-labelledby="landing-faq-heading">
           <div className="nl-wrap">
-            <Reveal>
-              <h2 id="landing-faq-heading" className="home-h2 text-[var(--nl-navy)]">
-                Frequently Asked Questions
-              </h2>
-              <p className="prose-measure mt-3 text-[var(--nl-muted)]">
-                Common questions about our treatments and approach to care.
-              </p>
-            </Reveal>
+            <h2 id="landing-faq-heading" className="home-h2 text-[var(--nl-navy)]">
+              Frequently Asked Questions
+            </h2>
+            <p className="prose-measure mt-3 text-[var(--nl-muted)]">
+              Common questions about our treatments and approach to care.
+            </p>
             <div className="mt-6">
               <FaqAccordion items={LANDING_FAQS} />
+            </div>
+            <div className="landing-close">
+              <p>{LANDING_CLOSE_TEXT}</p>
+              <ButtonLink href="#inquiry" variant="accent" className="landing-inline-cta">
+                Talk to our team
+              </ButtonLink>
             </div>
           </div>
         </section>
