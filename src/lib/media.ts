@@ -37,8 +37,10 @@ export const MEDIA = {
   ketamineHeroMobile: "/media/images/ketamine-treatment-room-hero-mobile.webp",
   tmsBanner: "/media/images/tms-banner.jpg",
   ketamineBanner: "/media/images/ketamine-banner.jpg",
-  /** Square editorial crop for the services ketamine card. */
+  /** Previous square services ketamine still. Kept so other references are unchanged. */
   ketamineVial: "/media/images/ketamine-vial-sill.webp",
+  /** Supplied square services ketamine still (orchids + real vial). 1254×1254. */
+  ketamineOrchidVial: "/media/images/neurolinks-ketamine-orchid-real-vial.png",
   servicesBanner: "/media/images/services-banner.jpg",
   aboutBanner: "/media/images/about-banner.jpg",
   contactBanner: "/media/images/contact-banner.jpg",
