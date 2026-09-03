@@ -286,6 +286,20 @@ test("FAQ plain text is available for JSON-LD and never stringifies as objects",
   assert.equal(ect.includes("usually 20-30 sessions"), false);
 });
 
+test("ketamine induction schedule is twice weekly over 3 weeks", () => {
+  const item = KETAMINE_FAQS.find((faq) => faq.q === "How is ketamine administered?");
+  assert.ok(item);
+  const text = faqAnswerText(item.a);
+  assert.match(text, /twice weekly over 3 weeks/);
+  assert.equal(text.includes("twice weekly over 4 weeks"), false);
+  const results = KETAMINE_FAQS.find(
+    (faq) => faq.q === "How soon can I expect to see results with ketamine treatment?",
+  );
+  assert.ok(results);
+  const resultsText = faqAnswerText(results.a);
+  assert.match(resultsText, /4-week treatment program/);
+});
+
 test("ECT comparison states that ECT needs anesthesia", () => {
   const item = TMS_FAQS.find((faq) => faq.q.includes("electroconvulsive therapy"));
   assert.ok(item);

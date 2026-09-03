@@ -339,7 +339,7 @@ export const KETAMINE_FAQS: FaqItem[] = [
         "subcutaneous injections",
         "https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2021.513068/full",
       ],
-      ", as they have demonstrated effectiveness. During the induction phase, ketamine is administered twice weekly over 4 weeks.",
+      ", as they have demonstrated effectiveness. During the induction phase, ketamine is administered twice weekly over 3 weeks.",
     ),
   },
   {
