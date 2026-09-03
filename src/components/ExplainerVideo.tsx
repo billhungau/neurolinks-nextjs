@@ -69,7 +69,14 @@ export function ExplainerVideo({
           </>
         )}
       </div>
-      <p className="explainer-video-caption">{watchLabel}</p>
+      <p className="explainer-video-caption">
+        <span aria-hidden="true">
+          {watchLabel} · ≈1:30
+        </span>
+        <span className="sr-only">
+          {watchLabel}, approximately 1 minute 30 seconds
+        </span>
+      </p>
       {active ? (
         <p className="explainer-video-fallback">
           <a href={watchUrl} rel="noopener noreferrer" target="_blank">

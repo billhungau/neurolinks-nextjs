@@ -260,7 +260,8 @@ test("landing uses click-to-play original YouTube explainers in the treatment ca
   assert.match(explainer, /active \? \(\s*<p className="explainer-video-fallback"/);
   assert.match(explainer, /explainer-video-caption/);
   assert.match(explainer, /Watch explainer/);
-  assert.equal(explainer.includes("Watch explainer ·"), false);
+  assert.match(explainer, /Watch explainer · ≈1:30/);
+  assert.match(explainer, /approximately 1 minute 30 seconds/);
   assert.match(landingPage, /watchLabel="Watch explainer"/);
   assert.match(landingPage, /LANDING_VIDEO_POSTERS/);
   assert.equal(landingPage.includes("MEDIA.tmsPoster"), false);
@@ -276,8 +277,7 @@ test("landing uses click-to-play original YouTube explainers in the treatment ca
     assert.match(readFileSync(file).subarray(0, 4).toString("ascii"), /RIFF/);
   }
   assert.match(globalsCss, /\.explainer-video-poster \{[\s\S]*?object-fit:\s*contain/);
-  assert.equal(explainer.includes("≈1:30"), false);
-  assert.equal(landingPage.includes("≈1:30"), false);
+  assert.match(explainer, /≈1:30/);
   assert.match(globalsCss, /\.tms-video-play:focus-visible/);
   assert.match(globalsCss, /\.landing-tx-grid \{[\s\S]*?grid-template-rows:\s*auto auto auto auto auto/);
   assert.match(globalsCss, /\.landing-tx \{[\s\S]*?grid-template-rows:\s*subgrid/);
