@@ -29,7 +29,7 @@ import {
 } from "@/content/landing";
 import { ADVERTISING_LANDING_SOURCE } from "@/lib/contact-form";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { HOME_HERO_ASSET, LANDING_YOUTUBE, MEDIA } from "@/lib/media";
+import { HOME_HERO_ASSET, LANDING_VIDEO_POSTERS, LANDING_YOUTUBE, MEDIA } from "@/lib/media";
 import { adsLandingRobots, PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
@@ -45,12 +45,12 @@ export const metadata = pageMetadata({
 const TREATMENT_VIDEOS = {
   tms: {
     id: LANDING_YOUTUBE.tms,
-    poster: MEDIA.tmsPoster,
+    poster: LANDING_VIDEO_POSTERS.tms.local,
     title: "Transcranial Magnetic Stimulation Treatment: Illuminating the Journey Through Mental Darkness",
   },
   ketamine: {
     id: LANDING_YOUTUBE.ketamine,
-    poster: MEDIA.ketPoster,
+    poster: LANDING_VIDEO_POSTERS.ketamine.local,
     title: "Ketamine's Path to Healing Treatment-Resistant Mental Illness",
   },
 } as const;

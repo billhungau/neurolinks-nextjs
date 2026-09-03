@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
@@ -21,7 +21,7 @@ import {
   LANDING_WHY_HEADING,
   LANDING_WHY_TEXT,
 } from "./landing.ts";
-import { LANDING_YOUTUBE } from "../lib/media.ts";
+import { LANDING_VIDEO_POSTERS, LANDING_YOUTUBE } from "../lib/media.ts";
 import { SITE } from "../lib/site.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -257,6 +257,27 @@ test("landing uses click-to-play original YouTube explainers in the treatment ca
   assert.match(explainer, /Watch explainer/);
   assert.equal(explainer.includes("Watch explainer ·"), false);
   assert.match(landingPage, /watchLabel="Watch explainer"/);
+  assert.match(landingPage, /LANDING_VIDEO_POSTERS/);
+  assert.equal(landingPage.includes("MEDIA.tmsPoster"), false);
+  assert.equal(landingPage.includes("MEDIA.ketPoster"), false);
+  assert.equal(LANDING_VIDEO_POSTERS.tms.local, "/media/posters/tms-video-thumbnail-Bl3yWrXP.webp");
+  assert.equal(
+    LANDING_VIDEO_POSTERS.ketamine.local,
+    "/media/posters/ketamine-video-thumbnail-BhR-uQCR.webp",
+  );
+  assert.equal(LANDING_VIDEO_POSTERS.tms.width / LANDING_VIDEO_POSTERS.tms.height, 16 / 9);
+  assert.equal(
+    LANDING_VIDEO_POSTERS.ketamine.width / LANDING_VIDEO_POSTERS.ketamine.height,
+    16 / 9,
+  );
+  for (const poster of Object.values(LANDING_VIDEO_POSTERS)) {
+    const file = join(root, "../../public", poster.local.replace(/^\//, ""));
+    assert.equal(existsSync(file), true, `missing ${poster.local}`);
+    assert.match(readFileSync(file).subarray(0, 4).toString("ascii"), /RIFF/);
+  }
+  assert.match(globalsCss, /\.explainer-video-poster \{[\s\S]*?object-fit:\s*contain/);
+  assert.equal(explainer.includes("≈1:30"), false);
+  assert.equal(landingPage.includes("≈1:30"), false);
   assert.match(globalsCss, /\.tms-video-play:focus-visible/);
   assert.match(globalsCss, /\.landing-tx-grid \{[\s\S]*?grid-template-rows:\s*auto auto auto auto auto/);
   assert.match(globalsCss, /\.landing-tx \{[\s\S]*?grid-template-rows:\s*subgrid/);

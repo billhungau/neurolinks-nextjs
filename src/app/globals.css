@@ -4974,8 +4974,15 @@ html:has(.landing-header) {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   border: 0;
+}
+
+.explainer-video-poster {
+  object-fit: contain;
+}
+
+.explainer-video-player {
+  object-fit: cover;
 }
 
 .explainer-video-caption {

@@ -54,7 +54,7 @@ export function ExplainerVideo({
           />
         ) : (
           <>
-            {/* Poster is a local 16:9 cover; next/image is unnecessary for this overlay. */}
+            {/* Poster is the original 16:9 WordPress cover; next/image is unnecessary for this overlay. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={poster} alt="" className="explainer-video-poster" />
             <button
