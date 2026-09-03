@@ -167,6 +167,7 @@ test("landing uses click-to-play original YouTube explainers in the treatment ca
   assert.match(explainer, /youtube-nocookie.com/);
   assert.match(explainer, /nl:explainer-play/);
   assert.match(explainer, /active \? \(/);
+  assert.match(globalsCss, /\.tms-video-play:focus-visible/);
   assert.equal(explainer.includes("gtag"), false);
   assert.equal(contactForm.includes("gtag"), false);
   assert.equal(contactForm.includes("dataLayer"), false);
