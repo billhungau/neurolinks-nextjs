@@ -13,14 +13,14 @@ import { LANDING_FAQS } from "@/content/faqs";
 import {
   LANDING_CLOSE_TEXT,
   LANDING_HEADLINE,
+  LANDING_INQUIRY_CALL_LABEL,
+  LANDING_INQUIRY_FOLLOW_UP,
   LANDING_INQUIRY_HEADING,
-  LANDING_INQUIRY_NOTE,
   LANDING_INQUIRY_SUPPORTING_TEXT,
   LANDING_NEXT_STEPS,
-  LANDING_OUTCOME_NOTE,
   LANDING_REVIEWS,
   LANDING_REVIEWS_CTA_LABEL,
-  LANDING_SUPPORTING_TEXT,
+  LANDING_SUPPORTING_LINES,
   LANDING_TREATMENT_HEADING,
   LANDING_TREATMENTS,
   LANDING_TRUST,
@@ -90,7 +90,11 @@ export default function LandingPage() {
           <div className="nl-wrap landing-hero-copy-wrap">
             <div className="landing-hero-copy">
               <h1 id="landing-hero-heading">{LANDING_HEADLINE}</h1>
-              <p>{LANDING_SUPPORTING_TEXT}</p>
+              <p className="landing-hero-support">
+                {LANDING_SUPPORTING_LINES.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </p>
               <div className="landing-hero-actions">
                 <ButtonLink href="#treatment" variant="accent" className="landing-hero-primary">
                   Explore treatments
@@ -173,18 +177,13 @@ export default function LandingPage() {
             <div className="landing-inquiry-intro">
               <h2 id="inquiry-heading">{LANDING_INQUIRY_HEADING}</h2>
               <p>{LANDING_INQUIRY_SUPPORTING_TEXT}</p>
-              <p className="landing-inquiry-clinic">
-                <span>{SITE.shortName}</span>
-                <span>Nanaimo, BC</span>
-                <a href={SITE.phoneHref}>{SITE.phone}</a>
-              </p>
+              <p>{LANDING_INQUIRY_FOLLOW_UP}</p>
+              <ButtonLink href={SITE.phoneHref} variant="accent" className="landing-inquiry-call">
+                {LANDING_INQUIRY_CALL_LABEL}
+              </ButtonLink>
             </div>
             <div className="ct-form-frame landing-inquiry-form">
-              <ContactForm
-                source={ADVERTISING_LANDING_SOURCE}
-                notice={LANDING_INQUIRY_NOTE}
-                showReferralNote={false}
-              />
+              <ContactForm source={ADVERTISING_LANDING_SOURCE} showReferralNote={false} />
             </div>
           </div>
         </section>
@@ -258,7 +257,6 @@ export default function LandingPage() {
                 </blockquote>
               ))}
             </div>
-            <p className="landing-outcome-note">{LANDING_OUTCOME_NOTE}</p>
             <p className="landing-section-cta">
               <ButtonLink href="#inquiry" variant="accent" className="landing-inline-cta">
                 {LANDING_REVIEWS_CTA_LABEL}
@@ -272,9 +270,6 @@ export default function LandingPage() {
             <h2 id="landing-faq-heading" className="home-h2 text-[var(--nl-navy)]">
               Frequently Asked Questions
             </h2>
-            <p className="prose-measure mt-3 text-[var(--nl-muted)]">
-              Common questions about our treatments and approach to care.
-            </p>
             <div className="mt-6">
               <FaqAccordion items={LANDING_FAQS} />
             </div>

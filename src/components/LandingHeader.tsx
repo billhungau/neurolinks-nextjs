@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { SITE } from "@/lib/site";
@@ -115,7 +116,7 @@ export function LandingHeader() {
     >
       {overHero ? <div className="site-header-wash" aria-hidden="true" /> : null}
       <div className="nl-wrap site-header-bar landing-header-bar relative z-10">
-        <a className="site-header-logo landing-header-brand" href="#top" aria-label="NeuroLinks">
+        <Link className="site-header-logo landing-header-brand" href="/" aria-label="NeuroLinks home">
           <Image
             src={SITE.logoWhite}
             alt="NeuroLinks"
@@ -125,7 +126,7 @@ export function LandingHeader() {
             sizes={IMG_SIZES.logo}
             className="site-header-logo-img"
           />
-        </a>
+        </Link>
 
         <nav className="landing-header-nav" aria-label="On this page">
           <ul>

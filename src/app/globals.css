@@ -4524,6 +4524,16 @@ h3,
   text-shadow: 0 1px 8px rgb(7 29 52 / 0.3);
 }
 
+.landing-hero-support {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.landing-hero-support span {
+  display: block;
+}
+
 .landing-hero-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -4719,14 +4729,6 @@ h3,
   font-weight: 600;
 }
 
-.landing-outcome-note {
-  max-width: 46rem;
-  margin: 1.25rem 0 0;
-  color: var(--nl-muted);
-  font-size: 0.875rem;
-  line-height: 1.55;
-}
-
 .landing-trust .trust-grid {
   padding: 0.05rem 0;
 }
@@ -4766,25 +4768,15 @@ h3,
   line-height: 1.55;
 }
 
-.landing-inquiry-clinic {
-  display: grid;
-  gap: 0.2rem;
-  margin-top: 1rem;
-  color: var(--nl-navy);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  line-height: 1.4;
+.landing-inquiry-call {
+  width: fit-content;
+  min-width: 11rem;
+  margin-top: 1.15rem;
 }
 
-.landing-inquiry-clinic a {
-  color: var(--nl-navy);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.landing-inquiry-clinic a:hover,
-.landing-inquiry-clinic a:focus-visible {
-  color: var(--nl-navy-deep);
+.landing-inquiry-call:focus-visible {
+  outline: 2px solid var(--nl-navy);
+  outline-offset: 3px;
 }
 
 .landing-inquiry-form {
@@ -4975,6 +4967,13 @@ html:has(.landing-header) {
   font-size: clamp(1.55rem, 3.4vw, 2.05rem);
   font-weight: 600;
   line-height: 1.2;
+  text-wrap: pretty;
+}
+
+@media (min-width: 768px) {
+  .landing-why-block h2 {
+    white-space: nowrap;
+  }
 }
 
 .landing-why-block p {

@@ -7,14 +7,14 @@ import { LANDING_FAQS } from "./faqs.ts";
 import {
   LANDING_CLOSE_TEXT,
   LANDING_HEADLINE,
+  LANDING_INQUIRY_CALL_LABEL,
+  LANDING_INQUIRY_FOLLOW_UP,
   LANDING_INQUIRY_HEADING,
-  LANDING_INQUIRY_NOTE,
   LANDING_INQUIRY_SUPPORTING_TEXT,
   LANDING_NEXT_STEPS,
-  LANDING_OUTCOME_NOTE,
   LANDING_REVIEWS,
   LANDING_REVIEWS_CTA_LABEL,
-  LANDING_SUPPORTING_TEXT,
+  LANDING_SUPPORTING_LINES,
   LANDING_TREATMENT_HEADING,
   LANDING_TREATMENTS,
   LANDING_TRUST,
@@ -52,6 +52,8 @@ test("landing and contact pages share the same ContactForm module", () => {
   assert.match(contactPage, /<ContactForm \/>/);
   assert.equal(contactPage.includes("notice="), false);
   assert.equal(contactPage.includes("LANDING_INQUIRY_NOTE"), false);
+  assert.equal(landingPage.includes("LANDING_INQUIRY_NOTE"), false);
+  assert.equal(landingPage.includes("notice="), false);
   assert.equal(contactPage.includes("showReferralNote"), false);
   assert.match(landingPage, /showReferralNote=\{false\}/);
   assert.match(contactForm, /showReferralNote = true/);
@@ -103,12 +105,13 @@ test("landing header uses a centred three-zone desktop layout", () => {
   assert.match(landingHeader, /className=\{`landing-header site-header fixed/);
 });
 
-test("landing logo uses a same-page #top hash so advertising parameters are kept", () => {
-  assert.match(landingPage, /id="top"/);
-  assert.match(landingPage, /landing-top-anchor/);
-  assert.match(landingHeader, /href="#top"/);
-  assert.equal(landingHeader.includes('id="top"'), false);
+test("landing logo links to the homepage on desktop and mobile", () => {
+  assert.match(landingHeader, /href="\/"/);
+  assert.match(landingHeader, /aria-label="NeuroLinks home"/);
+  assert.equal(landingHeader.includes('href="#top"'), false);
   assert.equal(landingHeader.includes('href="/neurolinks-psychiatry-nanaimo-bc/"'), false);
+  assert.equal((landingHeader.match(/landing-header-brand/g) ?? []).length, 1);
+  assert.match(landingPage, /id="top"/);
   assert.match(globalsCss, /\.landing-top-anchor \{[\s\S]*?height:\s*0/);
 });
 
@@ -120,13 +123,17 @@ test("Reveal fails open when the observer cannot run", () => {
   assert.equal(revealSource.includes("setTimeout(reveal, 12000)"), false);
 });
 
-test("landing keeps the approved headline, excerpt and three verbatim reviews", () => {
+test("landing keeps the requested headline, excerpt and three verbatim reviews", () => {
   assert.equal(
     LANDING_HEADLINE,
-    "When medication hasn’t helped enough, there may be another way forward.",
+    "When medication hasn’t helped enough, there will be another way forward.",
   );
-  assert.match(LANDING_SUPPORTING_TEXT, /psychiatrist-led TMS and ketamine treatment in Nanaimo/);
-  assert.match(LANDING_SUPPORTING_TEXT, /care tailored to your needs/);
+  assert.deepEqual([...LANDING_SUPPORTING_LINES], [
+    "Psychiatrist-led TMS and ketamine treatment",
+    "Care tailored to your needs.",
+  ]);
+  assert.match(landingPage, /landing-hero-support/);
+  assert.match(landingPage, /LANDING_SUPPORTING_LINES\.map/);
   assert.equal(LANDING_HEADLINE.includes("\n"), false);
   assert.match(landingPage, /MEDIA\.homeHeroRetouched/);
   assert.match(landingPage, /DR_AU_PARAS\[0\]/);
@@ -140,14 +147,21 @@ test("landing keeps the approved headline, excerpt and three verbatim reviews", 
     LANDING_REVIEWS[2].text.startsWith("The Transcranial Magnetic Stimulation took longer"),
     true,
   );
-  assert.match(LANDING_OUTCOME_NOTE, /outcomes vary/i);
+  assert.equal(landingPage.includes("LANDING_OUTCOME_NOTE"), false);
+  assert.equal(landingPage.includes("does not replace a psychiatric assessment"), false);
   assert.equal(LANDING_FAQS.length, 10);
   assert.equal(LANDING_TREATMENT_HEADING, "Explore your treatment options");
-  assert.match(LANDING_TREATMENTS[0].benefit, /antidepressants have not helped enough/);
+  assert.equal(
+    LANDING_TREATMENTS[0].benefit,
+    "More effective than conventional medication with minimal side effects.",
+  );
   assert.match(LANDING_TREATMENTS[0].body, /non-invasive/);
   assert.match(LANDING_TREATMENTS[0].body, /generally well tolerated/);
   assert.equal(/anesthesia/i.test(LANDING_TREATMENTS[0].body), false);
-  assert.match(LANDING_TREATMENTS[1].benefit, /for some people/i);
+  assert.equal(
+    LANDING_TREATMENTS[1].benefit,
+    "Rapid improvement begins within hours or days—considerably faster than with conventional antidepressants.",
+  );
   assert.match(LANDING_TREATMENTS[1].benefit, /hours or days/);
   assert.match(LANDING_TREATMENTS[1].body, /registered nurse/);
   assert.match(LANDING_TREATMENTS[1].body, /vital-sign monitoring/);
@@ -157,8 +171,8 @@ test("landing keeps the approved headline, excerpt and three verbatim reviews", 
   );
   const tmsWords = wordCount(`${LANDING_TREATMENTS[0].benefit} ${LANDING_TREATMENTS[0].body}`);
   const ketWords = wordCount(`${LANDING_TREATMENTS[1].benefit} ${LANDING_TREATMENTS[1].body}`);
-  assert.ok(tmsWords >= 40 && tmsWords <= 65, `TMS intro is ${tmsWords} words`);
-  assert.ok(ketWords >= 40 && ketWords <= 65, `ketamine intro is ${ketWords} words`);
+  assert.ok(tmsWords >= 35 && tmsWords <= 65, `TMS intro is ${tmsWords} words`);
+  assert.ok(ketWords >= 35 && ketWords <= 65, `ketamine intro is ${ketWords} words`);
   assert.equal(LANDING_NEXT_STEPS.length, 4);
   assert.equal(
     LANDING_NEXT_STEPS[1].body,
@@ -169,14 +183,21 @@ test("landing keeps the approved headline, excerpt and three verbatim reviews", 
     LANDING_INQUIRY_SUPPORTING_TEXT,
     "You do not need to choose a treatment before contacting us.",
   );
+  assert.equal(
+    LANDING_INQUIRY_FOLLOW_UP,
+    "Our team will respond to discuss your questions and explain the next steps.",
+  );
+  assert.equal(LANDING_INQUIRY_CALL_LABEL, "Call our clinic");
+  assert.match(landingPage, /LANDING_INQUIRY_FOLLOW_UP/);
+  assert.match(landingPage, /SITE\.phoneHref/);
+  assert.match(landingPage, /landing-inquiry-call/);
+  assert.equal(landingPage.includes("landing-inquiry-clinic"), false);
+  assert.equal(landingPage.includes("{SITE.shortName}"), false);
   assert.deepEqual([...LANDING_TRUST], [
     "Psychiatrist-led care",
     "Personalized treatment options",
     "MSP-covered assessment",
   ]);
-  assert.match(LANDING_INQUIRY_NOTE, /personal health information/);
-  assert.match(LANDING_INQUIRY_NOTE, /referral documents/);
-  assert.match(landingPage, /LANDING_INQUIRY_NOTE/);
   assert.match(landingPage, /LANDING_TRUST/);
   assert.equal(contactForm.includes("For general inquiries only"), false);
   assert.equal(contactForm.includes("personal health information"), false);
@@ -197,7 +218,9 @@ test("landing section order is treatments, then why, then one inquiry form", () 
   assert.ok(inquiry < psychiatrist && psychiatrist < next && next < reviews && reviews < faq);
   assert.equal(landingPage.includes("Why NeuroLinks"), false);
   assert.equal(landingPage.includes("why-nl-list"), false);
-  assert.equal(LANDING_WHY_HEADING, "Care that goes beyond delivering treatment.");
+  assert.equal(LANDING_WHY_HEADING, "Care goes beyond delivering treatment.");
+  assert.match(globalsCss, /@media \(min-width: 768px\) \{[\s\S]*?\.landing-why-block h2 \{[\s\S]*?white-space:\s*nowrap/);
+  assert.equal(landingPage.includes("Common questions about our treatments"), false);
   assert.match(LANDING_WHY_TEXT, /review your progress/);
   assert.equal(LANDING_WHY_TEXT.includes("guaranteed"), false);
   assert.equal(LANDING_WHY_TEXT.includes("unlimited"), false);

@@ -1,13 +1,16 @@
 /**
- * Advertising landing copy drawn from existing approved page text.
- * Do not invent clinical claims or shorten testimonial quotations.
+ * Advertising landing copy. Headline and treatment-card benefits below
+ * strengthen clinical claims and need clinical/evidence approval before
+ * publication. Do not invent supporting references.
  */
 
 export const LANDING_HEADLINE =
-  "When medication hasn’t helped enough, there may be another way forward.";
+  "When medication hasn’t helped enough, there will be another way forward.";
 
-export const LANDING_SUPPORTING_TEXT =
-  "Explore psychiatrist-led TMS and ketamine treatment in Nanaimo, with care tailored to your needs.";
+export const LANDING_SUPPORTING_LINES = [
+  "Psychiatrist-led TMS and ketamine treatment",
+  "Care tailored to your needs.",
+] as const;
 
 export const LANDING_TRUST = [
   "Psychiatrist-led care",
@@ -17,7 +20,7 @@ export const LANDING_TRUST = [
 
 export const LANDING_TREATMENT_HEADING = "Explore your treatment options";
 
-export const LANDING_WHY_HEADING = "Care that goes beyond delivering treatment.";
+export const LANDING_WHY_HEADING = "Care goes beyond delivering treatment.";
 
 export const LANDING_WHY_TEXT =
   "We review your progress, consider factors affecting your response and work with you on appropriate next steps—even when improvement is not straightforward.";
@@ -27,19 +30,19 @@ export const LANDING_INQUIRY_HEADING = "Let’s explore what may be right for yo
 export const LANDING_INQUIRY_SUPPORTING_TEXT =
   "You do not need to choose a treatment before contacting us.";
 
-export const LANDING_INQUIRY_NOTE =
-  "For general inquiries or questions about arranging an assessment. Please do not include personal health information, referral documents or urgent medical concerns.";
+export const LANDING_INQUIRY_FOLLOW_UP =
+  "Our team will respond to discuss your questions and explain the next steps.";
+
+export const LANDING_INQUIRY_CALL_LABEL = "Call our clinic";
 
 export const LANDING_REVIEWS_CTA_LABEL = "Talk to our team";
 
 export const LANDING_CLOSE_TEXT =
   "If you would like to discuss what may be appropriate, our team is here to help.";
 
-export const LANDING_OUTCOME_NOTE =
-  "Information provided is educational and does not replace a psychiatric assessment. Treatment outcomes vary by individual. Please consult with a qualified healthcare provider for personalized medical guidance.";
-
 /**
- * Card copy reuses approved homepage, TMS, and ketamine wording.
+ * Card bodies reuse approved TMS and ketamine wording. The bold benefits
+ * are requested landing-only claims pending clinical/evidence approval.
  * Injection route is omitted: the homepage says intramuscular and
  * subcutaneous, the ketamine page says intramuscularly or subcutaneously,
  * and the landing FAQ says intramuscular only.
@@ -48,8 +51,7 @@ export const LANDING_TREATMENTS = [
   {
     href: "/about-tms-treatment-on-psychiatric-illness/",
     title: "Transcranial Magnetic Stimulation (TMS)",
-    benefit:
-      "Can be more effective than another conventional medication when antidepressants have not helped enough.",
+    benefit: "More effective than conventional medication with minimal side effects.",
     body: "TMS is a non-invasive neuromodulation treatment with established evidence for depression and certain other psychiatric conditions. It is generally well tolerated. Suitability depends on the diagnosis, treatment history and protocol being considered.",
     ctaLabel: "Ask about TMS",
     linkLabel: "Learn more about TMS",
@@ -60,7 +62,7 @@ export const LANDING_TREATMENTS = [
     href: "/ketamine-treatment-resistant-depression-nanaimo/",
     title: "Ketamine Therapy",
     benefit:
-      "For some people, improvement may begin within hours or days—considerably faster than with conventional antidepressants.",
+      "Rapid improvement begins within hours or days—considerably faster than with conventional antidepressants.",
     body: "Ketamine is administered in a controlled clinical setting with medical supervision. An experienced registered nurse provides preparation, support and post-session reflection, with vital-sign monitoring and psychiatrist oversight.",
     ctaLabel: "Ask about ketamine",
     linkLabel: "Learn more about ketamine",
