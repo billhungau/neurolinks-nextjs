@@ -60,8 +60,9 @@ export const LANDING_TREATMENTS = [
       "Suitability depends on the diagnosis, treatment history and protocol being considered.",
     ],
     linkLabel: "Learn more about TMS",
-    image: "tmsMachine",
-    alt: "TMS treatment",
+    video: "tms",
+    watchLabel: "Watch: Understanding TMS",
+    playLabel: "Play TMS explainer video",
   },
   {
     href: "/ketamine-treatment-resistant-depression-nanaimo/",
@@ -73,9 +74,9 @@ export const LANDING_TREATMENTS = [
       "After the session, your nurse helps you reflect on the experience.",
     ],
     linkLabel: "Learn more about ketamine",
-    image: "ketamineHero",
-    alt: "Ketamine treatment room with a recliner, window and side table at NeuroLinks",
-    objectPosition: "object-[58%_center]",
+    video: "ketamine",
+    watchLabel: "Watch: Understanding ketamine therapy",
+    playLabel: "Play ketamine explainer video",
   },
 ] as const;
 

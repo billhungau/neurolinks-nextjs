@@ -17,6 +17,7 @@ import {
   LANDING_TRUST,
   LANDING_WHY,
 } from "./landing.ts";
+import { LANDING_YOUTUBE } from "../lib/media.ts";
 import { SITE } from "../lib/site.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -47,8 +48,10 @@ test("landing inquiry CTAs target #inquiry and keep compact navigation", () => {
   assert.equal(landingHeader.includes("Ask about treatment options"), false);
   assert.equal(landingHeader.includes("Physician Referral"), false);
   assert.match(landingPage, /Request assessment/);
-  assert.match(landingPage, /Explore treatments/);
+  assert.match(landingPage, /Watch treatment videos/);
+  assert.equal(landingPage.includes("Explore treatments"), false);
   assert.match(landingPage, /href="#treatment"/);
+  assert.ok(landingPage.indexOf('id="inquiry"') < landingPage.indexOf('id="treatment"'));
   assert.equal(landingHeader.includes("About Us"), false);
   assert.match(landingHeader, /#treatment/);
   assert.match(landingHeader, /#psychiatrist/);
@@ -148,10 +151,23 @@ test("landing keeps the approved headline, excerpt and three verbatim reviews", 
   assert.equal(landingPage.includes("<Reveal>\n              <h2 id=\"inquiry-heading\""), false);
 });
 
-test("landing does not load YouTube or a disconnected-form placeholder", () => {
-  assert.match(landingPage, /as="li"/);
+test("landing uses click-to-play original YouTube explainers in the treatment cards", () => {
+  const explainer = readFileSync(join(root, "../components/ExplainerVideo.tsx"), "utf8");
+  assert.match(landingPage, /from "@\/components\/ExplainerVideo"/);
+  assert.match(landingPage, /LANDING_YOUTUBE/);
+  assert.equal(LANDING_YOUTUBE.tms, "hIMYP1bC3UE");
+  assert.equal(LANDING_YOUTUBE.ketamine, "tbAN-E4iXzY");
   assert.equal(landingPage.includes("YouTubeEmbed"), false);
-  assert.equal(landingPage.includes("LANDING_YOUTUBE"), false);
+  assert.equal(landingPage.includes("tms-introduction.mp4"), false);
+  assert.equal(landingPage.includes("ketamine-introduction.mp4"), false);
+  assert.equal(landingPage.includes("Understanding these treatments"), false);
+  assert.equal((landingPage.match(/<ExplainerVideo/g) ?? []).length, 1);
+  assert.equal(LANDING_TREATMENTS[0].watchLabel, "Watch: Understanding TMS");
+  assert.equal(LANDING_TREATMENTS[1].watchLabel, "Watch: Understanding ketamine therapy");
+  assert.match(explainer, /youtube-nocookie.com/);
+  assert.match(explainer, /nl:explainer-play/);
+  assert.match(explainer, /active \? \(/);
+  assert.equal(explainer.includes("gtag"), false);
   assert.equal(contactForm.includes("gtag"), false);
   assert.equal(contactForm.includes("dataLayer"), false);
 });

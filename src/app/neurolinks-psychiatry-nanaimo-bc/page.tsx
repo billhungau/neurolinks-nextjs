@@ -1,6 +1,7 @@
 import { getImageProps } from "next/image";
 import Image from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
+import { ExplainerVideo } from "@/components/ExplainerVideo";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { FaqJsonLd } from "@/components/FaqJsonLd";
 import { ContactForm } from "@/components/forms/ContactForm";
@@ -26,7 +27,7 @@ import {
 } from "@/content/landing";
 import { ADVERTISING_LANDING_SOURCE } from "@/lib/contact-form";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { HOME_HERO_ASSET, MEDIA } from "@/lib/media";
+import { HOME_HERO_ASSET, LANDING_YOUTUBE, MEDIA } from "@/lib/media";
 import { adsLandingRobots, PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
@@ -39,9 +40,17 @@ export const metadata = pageMetadata({
   robots: adsLandingRobots,
 });
 
-const TREATMENT_MEDIA = {
-  tmsMachine: MEDIA.tmsMachine,
-  ketamineHero: MEDIA.ketamineHero,
+const TREATMENT_VIDEOS = {
+  tms: {
+    id: LANDING_YOUTUBE.tms,
+    poster: MEDIA.tmsPoster,
+    title: "Transcranial Magnetic Stimulation Treatment: Illuminating the Journey Through Mental Darkness",
+  },
+  ketamine: {
+    id: LANDING_YOUTUBE.ketamine,
+    poster: MEDIA.ketPoster,
+    title: "Ketamine's Path to Healing Treatment-Resistant Mental Illness",
+  },
 } as const;
 
 const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLinks";
@@ -86,7 +95,7 @@ export default function LandingPage() {
                   Request assessment
                 </ButtonLink>
                 <ButtonLink href="#treatment" variant="on-dark" className="landing-hero-secondary">
-                  Explore treatments
+                  Watch treatment videos
                 </ButtonLink>
               </div>
             </div>
@@ -159,33 +168,34 @@ export default function LandingPage() {
               </h2>
             </Reveal>
             <div className="landing-tx-grid">
-              {LANDING_TREATMENTS.map((item) => (
-                <Reveal key={item.href} className="h-full">
-                  <article className="tx-feature landing-tx">
-                    <div className="img-frame relative aspect-[16/10]">
-                      <Image
-                        src={TREATMENT_MEDIA[item.image]}
-                        alt={item.alt}
-                        fill
-                        sizes={IMG_SIZES.half}
-                        className={`object-cover ${"objectPosition" in item ? item.objectPosition : ""}`.trim()}
+              {LANDING_TREATMENTS.map((item) => {
+                const video = TREATMENT_VIDEOS[item.video];
+                return (
+                  <Reveal key={item.href} className="h-full">
+                    <article className="tx-feature landing-tx">
+                      <ExplainerVideo
+                        videoId={video.id}
+                        poster={video.poster}
+                        title={video.title}
+                        playLabel={item.playLabel}
                       />
-                    </div>
-                    <div className="tx-feature-copy">
-                      <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
-                        {item.title}
-                      </h3>
-                      <p className="tx-feature-support">{item.body}</p>
-                      <ul className="landing-tx-points">
-                        {item.points.map((point) => (
-                          <li key={point}>{point}</li>
-                        ))}
-                      </ul>
-                      <TextLink href={item.href}>{item.linkLabel}</TextLink>
-                    </div>
-                  </article>
-                </Reveal>
-              ))}
+                      <div className="tx-feature-copy">
+                        <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
+                          {item.title}
+                        </h3>
+                        <p className="landing-tx-watch">{item.watchLabel}</p>
+                        <p className="tx-feature-support">{item.body}</p>
+                        <ul className="landing-tx-points">
+                          {item.points.map((point) => (
+                            <li key={point}>{point}</li>
+                          ))}
+                        </ul>
+                        <TextLink href={item.href}>{item.linkLabel}</TextLink>
+                      </div>
+                    </article>
+                  </Reveal>
+                );
+              })}
             </div>
           </div>
         </section>

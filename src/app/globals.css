@@ -4569,7 +4569,7 @@ h3,
   background: rgb(var(--nl-hero-navy) / 0.48);
 }
 
-@media (min-width: 390px) {
+@media (min-width: 430px) {
   .landing-hero-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -4645,9 +4645,9 @@ h3,
   }
 
   .landing-hero-actions a {
-    flex: 0 0 13.25rem;
-    width: 13.25rem;
-    min-width: 13.25rem;
+    flex: 0 0 14.5rem;
+    width: 14.5rem;
+    min-width: 14.5rem;
     height: 3.125rem;
     min-height: 3.125rem;
     padding: 0 1rem;
@@ -4897,6 +4897,44 @@ html:has(.landing-header) {
 .landing-tx .tx-feature-copy .text-link {
   margin-top: auto;
   padding-top: 1rem;
+}
+
+.landing-tx .explainer-video {
+  min-width: 0;
+}
+
+.landing-tx .tms-video {
+  border-radius: 0;
+}
+
+.explainer-video-poster,
+.explainer-video-player {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 0;
+}
+
+.explainer-video-fallback {
+  margin: 0.45rem 0.9rem 0;
+  color: var(--nl-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.explainer-video-fallback a {
+  color: var(--nl-navy);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.landing-tx-watch {
+  margin: 0.4rem 0 0;
+  color: var(--nl-navy);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .landing-tx-points {
