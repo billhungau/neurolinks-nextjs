@@ -133,24 +133,27 @@ export default function LandingPage() {
                 const video = TREATMENT_VIDEOS[item.video];
                 return (
                   <article key={item.href} className="tx-feature landing-tx">
-                    <div className="tx-feature-copy">
-                      <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
-                        {item.title}
-                      </h3>
-                      <p className="tx-feature-benefit">{item.benefit}</p>
-                      <p className="tx-feature-support">{item.body}</p>
-                      <ExplainerVideo
-                        videoId={video.id}
-                        poster={video.poster}
-                        title={video.title}
-                        playLabel={item.playLabel}
-                      />
-                      <div className="landing-tx-actions">
-                        <ButtonLink href="#inquiry" variant="accent" className="landing-tx-cta">
-                          {item.ctaLabel}
-                        </ButtonLink>
-                        <TextLink href={item.href}>{item.linkLabel}</TextLink>
-                      </div>
+                    <h3 className="landing-tx-title font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
+                      {item.title}
+                    </h3>
+                    <p className="tx-feature-benefit">{item.benefit}</p>
+                    <ul className="landing-tx-points">
+                      {item.points.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
+                    <ExplainerVideo
+                      videoId={video.id}
+                      poster={video.poster}
+                      title={video.title}
+                      playLabel={item.playLabel}
+                      watchLabel="Watch explainer"
+                    />
+                    <div className="landing-tx-actions">
+                      <ButtonLink href="#inquiry" variant="accent" className="landing-tx-cta">
+                        {item.ctaLabel}
+                      </ButtonLink>
+                      <TextLink href={item.href}>{item.linkLabel}</TextLink>
                     </div>
                   </article>
                 );
@@ -270,7 +273,7 @@ export default function LandingPage() {
             <h2 id="landing-faq-heading" className="home-h2 text-[var(--nl-navy)]">
               Frequently Asked Questions
             </h2>
-            <div className="mt-6">
+            <div className="landing-faq mt-6">
               <FaqAccordion items={LANDING_FAQS} />
             </div>
             <div className="landing-close">

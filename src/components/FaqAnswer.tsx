@@ -22,15 +22,19 @@ export function EvidenceLink({
 }
 
 function FaqSegments({ segments }: { segments: FaqRich }) {
-  return segments.map((segment, index) =>
-    segment.type === "text" ? (
-      <Fragment key={index}>{segment.value}</Fragment>
-    ) : (
+  return segments.map((segment, index) => {
+    if (segment.type === "text") {
+      return <Fragment key={index}>{segment.value}</Fragment>;
+    }
+    if (segment.type === "strong") {
+      return <strong key={index}>{segment.value}</strong>;
+    }
+    return (
       <EvidenceLink key={index} href={segment.href}>
         {segment.value}
       </EvidenceLink>
-    ),
-  );
+    );
+  });
 }
 
 function FaqCompareTable({ rows }: { rows: FaqCompareRow[] }) {

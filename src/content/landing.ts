@@ -52,7 +52,10 @@ export const LANDING_TREATMENTS = [
     href: "/about-tms-treatment-on-psychiatric-illness/",
     title: "Transcranial Magnetic Stimulation (TMS)",
     benefit: "More effective than conventional medication with minimal side effects.",
-    body: "TMS is a non-invasive neuromodulation treatment with established evidence for depression and certain other psychiatric conditions. It is generally well tolerated. Suitability depends on the diagnosis, treatment history and protocol being considered.",
+    points: [
+      "Non-invasive neuromodulation with established evidence for depression and certain other psychiatric conditions.",
+      "Generally well tolerated. Suitability depends on diagnosis, treatment history and the protocol being considered.",
+    ],
     ctaLabel: "Ask about TMS",
     linkLabel: "Learn more about TMS",
     video: "tms",
@@ -63,7 +66,10 @@ export const LANDING_TREATMENTS = [
     title: "Ketamine Therapy",
     benefit:
       "Rapid improvement begins within hours or days—considerably faster than with conventional antidepressants.",
-    body: "Ketamine is administered in a controlled clinical setting with medical supervision. An experienced registered nurse provides preparation, support and post-session reflection, with vital-sign monitoring and psychiatrist oversight.",
+    points: [
+      "An experienced registered nurse provides preparation, support during treatment and post-session reflection, with vital-sign monitoring.",
+      "A psychiatrist oversees each session in a medically supervised clinic setting.",
+    ],
     ctaLabel: "Ask about ketamine",
     linkLabel: "Learn more about ketamine",
     video: "ketamine",

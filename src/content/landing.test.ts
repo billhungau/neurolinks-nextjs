@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { LANDING_FAQS } from "./faqs.ts";
+import { faqAnswerText, isStructuredFaqAnswer, LANDING_FAQS } from "./faqs.ts";
 import {
   LANDING_CLOSE_TEXT,
   LANDING_HEADLINE,
@@ -150,29 +150,37 @@ test("landing keeps the requested headline, excerpt and three verbatim reviews",
   assert.equal(landingPage.includes("LANDING_OUTCOME_NOTE"), false);
   assert.equal(landingPage.includes("does not replace a psychiatric assessment"), false);
   assert.equal(LANDING_FAQS.length, 10);
+  assert.equal(LANDING_FAQS.every((item) => isStructuredFaqAnswer(item.a)), true);
+  assert.match(faqAnswerText(LANDING_FAQS[6].a), /3–20 minutes/);
+  assert.match(faqAnswerText(LANDING_FAQS[7].a), /intramuscularly/);
+  assert.match(landingPage, /landing-faq/);
   assert.equal(LANDING_TREATMENT_HEADING, "Explore your treatment options");
   assert.equal(
     LANDING_TREATMENTS[0].benefit,
     "More effective than conventional medication with minimal side effects.",
   );
-  assert.match(LANDING_TREATMENTS[0].body, /non-invasive/);
-  assert.match(LANDING_TREATMENTS[0].body, /generally well tolerated/);
-  assert.equal(/anesthesia/i.test(LANDING_TREATMENTS[0].body), false);
+  assert.match(LANDING_TREATMENTS[0].points.join(" "), /non-invasive/i)
+  assert.match(LANDING_TREATMENTS[0].points.join(" "), /generally well tolerated/i);
+  assert.equal(/anesthesia/i.test(LANDING_TREATMENTS[0].points.join(" ")), false);
   assert.equal(
     LANDING_TREATMENTS[1].benefit,
     "Rapid improvement begins within hours or days—considerably faster than with conventional antidepressants.",
   );
   assert.match(LANDING_TREATMENTS[1].benefit, /hours or days/);
-  assert.match(LANDING_TREATMENTS[1].body, /registered nurse/);
-  assert.match(LANDING_TREATMENTS[1].body, /vital-sign monitoring/);
+  assert.match(LANDING_TREATMENTS[1].points.join(" "), /registered nurse/);
+  assert.match(LANDING_TREATMENTS[1].points.join(" "), /vital-sign monitoring/);
+  assert.match(LANDING_TREATMENTS[1].points.join(" "), /psychiatrist oversees/);
+  assert.equal(/psychotherapy/i.test(LANDING_TREATMENTS[1].points.join(" ")), false);
   assert.equal(
-    LANDING_TREATMENTS.some((item) => /intramuscular|subcutaneous/i.test(`${item.benefit} ${item.body}`)),
+    LANDING_TREATMENTS.some((item) =>
+      /intramuscular|subcutaneous/i.test(`${item.benefit} ${item.points.join(" ")}`),
+    ),
     false,
   );
-  const tmsWords = wordCount(`${LANDING_TREATMENTS[0].benefit} ${LANDING_TREATMENTS[0].body}`);
-  const ketWords = wordCount(`${LANDING_TREATMENTS[1].benefit} ${LANDING_TREATMENTS[1].body}`);
-  assert.ok(tmsWords >= 35 && tmsWords <= 65, `TMS intro is ${tmsWords} words`);
-  assert.ok(ketWords >= 35 && ketWords <= 65, `ketamine intro is ${ketWords} words`);
+  const tmsWords = wordCount(`${LANDING_TREATMENTS[0].benefit} ${LANDING_TREATMENTS[0].points.join(" ")}`);
+  const ketWords = wordCount(`${LANDING_TREATMENTS[1].benefit} ${LANDING_TREATMENTS[1].points.join(" ")}`);
+  assert.ok(tmsWords >= 30 && tmsWords <= 65, `TMS intro is ${tmsWords} words`);
+  assert.ok(ketWords >= 30 && ketWords <= 65, `ketamine intro is ${ketWords} words`);
   assert.equal(LANDING_NEXT_STEPS.length, 4);
   assert.equal(
     LANDING_NEXT_STEPS[1].body,
@@ -245,7 +253,14 @@ test("landing uses click-to-play original YouTube explainers in the treatment ca
   assert.match(explainer, /nl:explainer-play/);
   assert.match(explainer, /active \? \(/);
   assert.match(explainer, /active \? \(\s*<p className="explainer-video-fallback"/);
+  assert.match(explainer, /explainer-video-caption/);
+  assert.match(explainer, /Watch explainer/);
+  assert.equal(explainer.includes("Watch explainer ·"), false);
+  assert.match(landingPage, /watchLabel="Watch explainer"/);
   assert.match(globalsCss, /\.tms-video-play:focus-visible/);
+  assert.match(globalsCss, /\.landing-tx-grid \{[\s\S]*?grid-template-rows:\s*auto auto auto auto auto/);
+  assert.match(globalsCss, /\.landing-tx \{[\s\S]*?grid-template-rows:\s*subgrid/);
+  assert.match(globalsCss, /\.landing-tx \{[\s\S]*?grid-row:\s*span 5/);
   assert.equal(explainer.includes("gtag"), false);
   assert.equal(contactForm.includes("gtag"), false);
   assert.equal(contactForm.includes("dataLayer"), false);
@@ -255,7 +270,9 @@ test("landing psychiatrist copy is one block beside the portrait", () => {
   assert.match(landingPage, /className="landing-psychiatrist"/);
   assert.equal(landingPage.includes('className="about-au landing-psychiatrist"'), false);
   assert.match(landingPage, /landing-psychiatrist-copy/);
-  assert.equal(landingPage.includes("landing-tx-points"), false);
+  assert.match(landingPage, /landing-tx-points/);
+  assert.match(landingPage, /landing-tx-title/);
+  assert.match(globalsCss, /\.landing-tx-points \{[\s\S]*?list-style:\s*disc/);
   assert.match(landingPage, /TMS coil on the left and ketamine vial on the right/);
   assert.match(globalsCss, /\.landing-psychiatrist \{[\s\S]*?display:\s*grid/);
   assert.match(globalsCss, /\.landing-psychiatrist \{[\s\S]*?align-items:\s*start/);

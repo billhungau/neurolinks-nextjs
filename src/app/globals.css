@@ -4886,16 +4886,57 @@ html:has(.landing-header) {
 @media (min-width: 1024px) {
   .landing-tx-grid {
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto auto auto;
     align-items: stretch;
   }
 }
 
 .landing-tx {
+  display: flex;
   height: 100%;
+  flex-direction: column;
+  padding: 1.2rem 1.2rem 1.25rem;
 }
 
-.landing-tx .tx-feature-copy {
-  gap: 0;
+@media (min-width: 768px) {
+  .landing-tx {
+    padding: 1.4rem 1.5rem 1.45rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-tx {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 5;
+    height: auto;
+  }
+}
+
+.landing-tx-title {
+  margin: 0;
+}
+
+.landing-tx .tx-feature-benefit {
+  margin-top: 0.7rem;
+}
+
+.landing-tx-points {
+  margin: 0.65rem 0 0;
+  padding: 0 0 0 1.15rem;
+  list-style: disc;
+  list-style-position: outside;
+}
+
+.landing-tx-points li {
+  display: list-item;
+  color: var(--nl-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.landing-tx-points li + li {
+  margin-top: 0.4rem;
 }
 
 .landing-tx .explainer-video {
@@ -4935,6 +4976,15 @@ html:has(.landing-header) {
   height: 100%;
   object-fit: cover;
   border: 0;
+}
+
+.explainer-video-caption {
+  margin: 0.5rem 0 0;
+  color: var(--nl-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
 }
 
 .explainer-video-fallback {
@@ -4994,6 +5044,32 @@ html:has(.landing-header) {
   margin-top: 2rem;
   padding-top: 1.35rem;
   border-top: 1px solid rgb(26 39 68 / 0.12);
+}
+
+.landing-faq [role="region"] p + p,
+.landing-faq [role="region"] p + ul,
+.landing-faq [role="region"] ul + p {
+  margin-top: 0.7rem;
+}
+
+.landing-faq [role="region"] ul {
+  margin: 0;
+  padding-left: 1.15rem;
+  list-style: disc;
+  list-style-position: outside;
+}
+
+.landing-faq [role="region"] li {
+  display: list-item;
+}
+
+.landing-faq [role="region"] li + li {
+  margin-top: 0.35rem;
+}
+
+.landing-faq [role="region"] strong {
+  font-weight: 600;
+  color: var(--nl-navy);
 }
 
 .landing-close p {

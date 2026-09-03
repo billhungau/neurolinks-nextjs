@@ -10,11 +10,13 @@ export function ExplainerVideo({
   poster,
   title,
   playLabel,
+  watchLabel = "Watch explainer",
 }: {
   videoId: string;
   poster: string;
   title: string;
   playLabel: string;
+  watchLabel?: string;
 }) {
   const [active, setActive] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -67,6 +69,7 @@ export function ExplainerVideo({
           </>
         )}
       </div>
+      <p className="explainer-video-caption">{watchLabel}</p>
       {active ? (
         <p className="explainer-video-fallback">
           <a href={watchUrl} rel="noopener noreferrer" target="_blank">

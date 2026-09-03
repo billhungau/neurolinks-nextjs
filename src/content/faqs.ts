@@ -1,6 +1,7 @@
 export type FaqSegment =
   | { type: "text"; value: string }
-  | { type: "link"; value: string; href: string };
+  | { type: "link"; value: string; href: string }
+  | { type: "strong"; value: string };
 
 export type FaqRich = FaqSegment[];
 
@@ -33,7 +34,8 @@ function segmentsLinks(segments: FaqRich): FaqEvidenceLink[] {
 }
 
 export function isStructuredFaqAnswer(answer: FaqAnswer): answer is FaqBlock[] {
-  return Array.isArray(answer) && answer[0]?.type !== "text" && answer[0]?.type !== "link";
+  const first = Array.isArray(answer) ? answer[0]?.type : undefined;
+  return first === "p" || first === "label" || first === "ul" || first === "compare";
 }
 
 export function faqAnswerText(answer: FaqAnswer): string {
@@ -66,13 +68,17 @@ export function collectFaqEvidenceLinks(items: FaqItem[]): FaqEvidenceLink[] {
   return items.flatMap((item) => faqEvidenceLinks(item.a));
 }
 
-function answer(...parts: Array<string | [phrase: string, href: string]>): FaqRich {
-  return parts.map((part) =>
-    typeof part === "string" ? { type: "text", value: part } : { type: "link", value: part[0], href: part[1] },
-  );
+type AnswerPart = string | [phrase: string, href: string] | { strong: string };
+
+function answer(...parts: AnswerPart[]): FaqRich {
+  return parts.map((part) => {
+    if (typeof part === "string") return { type: "text", value: part };
+    if (Array.isArray(part)) return { type: "link", value: part[0], href: part[1] };
+    return { type: "strong", value: part.strong };
+  });
 }
 
-function para(...parts: Array<string | [phrase: string, href: string]>): FaqBlock {
+function para(...parts: AnswerPart[]): FaqBlock {
   return { type: "p", content: answer(...parts) };
 }
 
@@ -394,42 +400,151 @@ export const KETAMINE_FAQS: FaqItem[] = [
 export const LANDING_FAQS: FaqItem[] = [
   {
     q: "Why consider TMS or ketamine when medications haven't worked?",
-    a: "Some individuals do not experience sufficient benefit from antidepressant medications, or cannot tolerate their side effects. TMS and ketamine are evidence-based treatments that work through different mechanisms than traditional medications and may offer additional options when standard approaches have not provided adequate relief. These treatments are considered within a psychiatrist-led assessment to determine appropriateness and safety.",
+    a: [
+      para(
+        "Some individuals do not experience sufficient benefit from antidepressant medications, or cannot tolerate their side effects.",
+      ),
+      para(
+        "TMS and ketamine are ",
+        { strong: "evidence-based treatments" },
+        " that work through different mechanisms than traditional medications and may offer additional options when standard approaches have not provided adequate relief.",
+      ),
+      para(
+        "These treatments are considered within a ",
+        { strong: "psychiatrist-led assessment" },
+        " to determine appropriateness and safety.",
+      ),
+    ],
   },
   {
     q: "How soon could I start noticing changes with treatment?",
-    a: "Response timelines vary. With TMS, changes often emerge gradually over the course of treatment, though some individuals notice improvements earlier. Ketamine therapy may produce more rapid changes for some people, sometimes within days, though responses differ. Your psychiatrist will discuss realistic expectations based on your clinical profile.",
+    a: [
+      para({ strong: "Response timelines vary." }),
+      para(
+        "With TMS, changes often emerge gradually over the course of treatment, though some individuals notice improvements earlier.",
+      ),
+      para(
+        "Ketamine therapy may produce more rapid changes for some people, ",
+        { strong: "sometimes within days" },
+        ", though responses differ.",
+      ),
+      para("Your psychiatrist will discuss realistic expectations based on your clinical profile."),
+    ],
   },
   {
     q: "Will the results last, or will my symptoms come back?",
-    a: "Both TMS and ketamine aim to produce meaningful symptom improvement, but long-term outcomes vary between individuals. Some people experience sustained benefit, while others may require maintenance strategies or additional treatments. Ongoing psychiatric monitoring helps guide next steps if symptoms return.",
+    a: [
+      para(
+        "Both TMS and ketamine aim to produce meaningful symptom improvement, but ",
+        { strong: "long-term outcomes vary" },
+        " between individuals.",
+      ),
+      para(
+        "Some people experience sustained benefit, while others may require maintenance strategies or additional treatments.",
+      ),
+      para(
+        { strong: "Ongoing psychiatric monitoring" },
+        " helps guide next steps if symptoms return.",
+      ),
+    ],
   },
   {
     q: "How do I know if I'm the right candidate for TMS or ketamine therapy?",
-    a: "Candidacy is determined through a comprehensive psychiatric assessment that reviews your diagnosis, treatment history, medical factors, and goals of care. Not everyone is suitable for these treatments, and careful evaluation ensures that recommendations are safe, appropriate, and individualized.",
+    a: [
+      para(
+        "Candidacy is determined through a ",
+        { strong: "comprehensive psychiatric assessment" },
+        " that reviews your diagnosis, treatment history, medical factors, and goals of care.",
+      ),
+      para(
+        { strong: "Not everyone is suitable" },
+        " for these treatments, and careful evaluation ensures that recommendations are safe, appropriate, and individualized.",
+      ),
+    ],
   },
   {
     q: "Are there any side effects I should know about?",
-    a: "TMS is generally well tolerated; common side effects may include scalp discomfort or headache, usually mild and temporary. Ketamine therapy can cause short-term effects such as dissociation, changes in blood pressure, or nausea, which are monitored closely during treatment. Your psychiatrist will review potential risks and benefits in detail before proceeding.",
+    a: [
+      bullets(
+        "TMS is generally well tolerated; common side effects may include scalp discomfort or headache, usually mild and temporary.",
+        "Ketamine therapy can cause short-term effects such as dissociation, changes in blood pressure, or nausea, which are monitored closely during treatment.",
+      ),
+      para("Your psychiatrist will review potential risks and benefits in detail before proceeding."),
+    ],
   },
   {
     q: "How do TMS and ketamine actually work on the brain?",
-    a: "Transcranial Magnetic Stimulation (TMS) uses focused magnetic fields to stimulate specific areas of the brain involved in mood regulation, particularly regions that may be underactive in depression. Repeated stimulation over time can help modify activity in neural circuits associated with depression and related conditions. TMS is non-invasive and does not require anesthesia. Ketamine therapy works through a different mechanism. Ketamine affects glutamate signaling in the brain and is thought to promote rapid changes in neural connectivity and plasticity. This mechanism is distinct from traditional antidepressants and may help explain why some individuals experience improvement even after multiple medication trials. Ketamine is administered in a medically supervised setting with careful monitoring. Both treatments are offered within a structured psychiatric assessment to determine appropriateness, safety, and expected benefit based on an individual's clinical history.",
+    a: [
+      para(
+        "Transcranial Magnetic Stimulation (TMS) uses ",
+        { strong: "focused magnetic fields" },
+        " to stimulate specific areas of the brain involved in mood regulation, particularly regions that may be underactive in depression. Repeated stimulation over time can help modify activity in neural circuits associated with depression and related conditions. TMS is ",
+        { strong: "non-invasive" },
+        " and does not require anesthesia.",
+      ),
+      para(
+        "Ketamine therapy works through a different mechanism. Ketamine affects ",
+        { strong: "glutamate signaling" },
+        " in the brain and is thought to promote rapid changes in neural connectivity and plasticity. This mechanism is distinct from traditional antidepressants and may help explain why some individuals experience improvement even after multiple medication trials. Ketamine is administered in a medically supervised setting with careful monitoring.",
+      ),
+      para(
+        "Both treatments are offered within a structured psychiatric assessment to determine appropriateness, safety, and expected benefit based on an individual's clinical history.",
+      ),
+    ],
   },
   {
     q: "What does a typical TMS treatment course look like?",
-    a: "TMS is delivered in outpatient sessions typically lasting 3–20 minutes, depending on the protocol. Treatments are usually provided multiple times per week over several weeks. An accelerated TMS option may be available for selected individuals following psychiatric assessment.",
+    a: [
+      para(
+        "TMS is delivered in outpatient sessions typically lasting ",
+        { strong: "3–20 minutes" },
+        ", depending on the protocol.",
+      ),
+      para("Treatments are usually provided ", { strong: "multiple times per week" }, " over several weeks."),
+      para(
+        "An accelerated TMS option may be available for selected individuals following psychiatric assessment.",
+      ),
+    ],
   },
   {
     q: "How is ketamine therapy administered and monitored?",
-    a: "Ketamine is administered intramuscularly by a registered nurse under the supervision of a psychiatrist. Each session takes place in a medically monitored setting, with careful observation before, during, and after treatment to ensure safety and comfort.",
+    a: [
+      para(
+        "Ketamine is administered ",
+        { strong: "intramuscularly" },
+        " by a ",
+        { strong: "registered nurse" },
+        " under the supervision of a psychiatrist.",
+      ),
+      para(
+        "Each session takes place in a medically monitored setting, with careful observation before, during, and after treatment to ensure safety and comfort.",
+      ),
+    ],
   },
   {
     q: "What happens if I don't respond to TMS or ketamine?",
-    a: "Not all individuals respond to these treatments. If adequate benefit is not achieved, your psychiatrist will review alternative strategies, which may include adjustments to treatment, additional therapies, or referral for other evidence-based options.",
+    a: [
+      para({ strong: "Not all individuals respond" }, " to these treatments."),
+      para(
+        "If adequate benefit is not achieved, your psychiatrist will review alternative strategies, which may include:",
+      ),
+      bullets(
+        "adjustments to treatment",
+        "additional therapies",
+        "referral for other evidence-based options",
+      ),
+    ],
   },
   {
     q: "Can I continue my current medications during treatment?",
-    a: "In many cases, existing psychiatric medications are continued, though this depends on individual circumstances. Medication decisions are reviewed and managed by your psychiatrist as part of the overall treatment plan.",
+    a: [
+      para(
+        { strong: "In many cases" },
+        ", existing psychiatric medications are continued, though this depends on individual circumstances.",
+      ),
+      para(
+        "Medication decisions are reviewed and managed by your psychiatrist as part of the overall treatment plan.",
+      ),
+    ],
   },
 ];
