@@ -146,7 +146,7 @@ challenges`}
           </Reveal>
           <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
             <Reveal>
-              <article className="tx-feature group">
+              <article className="tx-feature group home-tx-card">
                 <div className="img-frame relative aspect-[16/10]">
                   <Image
                     src={MEDIA.tmsMachine}
@@ -160,16 +160,23 @@ challenges`}
                   <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
                     Transcranial Magnetic Stimulation
                   </h3>
-                  <p className="tx-feature-benefit">
+                  <p className="tx-feature-benefit home-tx-benefit home-tx-benefit--tms">
                     Can be more effective than another conventional medication when antidepressants
                     have not helped enough.
                   </p>
-                  <p className="tx-feature-support">
-                    TMS is a non-invasive neuromodulation treatment with established evidence for
-                    depression and certain other psychiatric conditions. It is generally well
-                    tolerated. Suitability depends on the diagnosis, treatment history and protocol
-                    being considered.
-                  </p>
+                  <div className="home-tx-support">
+                    <p className="tx-feature-support">
+                      TMS is a <strong>non-invasive neuromodulation treatment</strong> with
+                      established evidence for depression and certain other psychiatric conditions.
+                    </p>
+                    <p className="tx-feature-support">
+                      It is <strong>generally well tolerated</strong>.
+                    </p>
+                    <p className="tx-feature-support">
+                      Suitability depends on the diagnosis, treatment history and protocol being
+                      considered.
+                    </p>
+                  </div>
                   <TextLink href="/about-tms-treatment-on-psychiatric-illness/">
                     Discover how TMS could help
                   </TextLink>
@@ -177,7 +184,7 @@ challenges`}
               </article>
             </Reveal>
             <Reveal delayMs={80}>
-              <article className="tx-feature group">
+              <article className="tx-feature group home-tx-card">
                 <div className="img-frame relative aspect-[16/10]">
                   <Image
                     src={MEDIA.ketamineHero}
@@ -192,14 +199,19 @@ challenges`}
                   <h3 className="font-serif text-2xl font-semibold text-[var(--nl-navy)] md:text-[1.75rem]">
                     Ketamine therapy
                   </h3>
-                  <p className="tx-feature-benefit">
+                  <p className="tx-feature-benefit home-tx-benefit home-tx-benefit--ket">
                     Improvement may begin within hours or days.
                   </p>
-                  <p className="tx-feature-support">
-                    Ketamine can reduce depressive symptoms considerably faster than conventional
-                    antidepressants. It is administered through intramuscular and subcutaneous
-                    injections in a controlled clinical setting with medical supervision.
-                  </p>
+                  <div className="home-tx-support">
+                    <p className="tx-feature-support">
+                      Ketamine can reduce depressive symptoms{" "}
+                      <strong>considerably faster than conventional antidepressants</strong>.
+                    </p>
+                    <p className="tx-feature-support">
+                      It is administered through intramuscular and subcutaneous injections in a
+                      controlled clinical setting with medical supervision.
+                    </p>
+                  </div>
                   <TextLink href="/ketamine-treatment-resistant-depression-nanaimo/">
                     Explore how ketamine could help
                   </TextLink>

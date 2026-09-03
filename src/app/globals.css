@@ -438,6 +438,40 @@ h3,
   padding-top: 1rem;
 }
 
+/* Homepage treatment cards only. Shared .tx-feature styles also serve the ads landing. */
+.home-tx-benefit {
+  padding: 0.65rem 0.8rem;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+}
+
+.home-tx-benefit--tms {
+  background: #eef3f8;
+  border-left-color: rgb(61 90 140 / 0.35);
+}
+
+.home-tx-benefit--ket {
+  background: #f6eed8;
+  border-left-color: rgb(196 164 74 / 0.45);
+}
+
+.home-tx-support {
+  margin-top: 0.2rem;
+}
+
+.home-tx-support .tx-feature-support {
+  margin-top: 0.45rem;
+}
+
+.home-tx-support .tx-feature-support + .tx-feature-support {
+  margin-top: 0.4rem;
+}
+
+.home-tx-support strong {
+  font-weight: 600;
+  color: var(--nl-navy);
+}
+
 .team-id {
   margin-top: 1.25rem;
   padding-top: 1.15rem;
@@ -1088,15 +1122,19 @@ h3,
   line-height: 1.55;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .funding-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
     gap: 1.75rem;
   }
 
   .funding-grid > div + div {
     padding-left: 1.75rem;
     border-left: 1px solid rgb(26 39 68 / 0.1);
+  }
+
+  .funding-grid dd {
+    max-width: none;
   }
 }
 
