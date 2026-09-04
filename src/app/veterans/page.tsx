@@ -282,6 +282,20 @@ export default function VeteransPage() {
             <div>
               <Eyebrow>Coverage and authorization</Eyebrow>
               <h2 className="tms-h2 mt-3">{VETERAN_COVERAGE.heading}</h2>
+              <div className="vet-external">
+                <p className="vet-external-label">Official benefit information</p>
+                <p className="vet-external-target">
+                  <a
+                    className="evidence-link"
+                    href={VAC_MENTAL_HEALTH_BENEFITS_URL}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Veterans Affairs Canada — Mental Health Benefits
+                  </a>
+                </p>
+                <p className="vet-external-note">Opens veterans.gc.ca in a new tab.</p>
+              </div>
             </div>
             <div className="vet-coverage-copy">
               {VETERAN_COVERAGE.body.map((paragraph) => (
@@ -290,20 +304,6 @@ export default function VeteransPage() {
                 </p>
               ))}
               <aside className="vet-note">{VETERAN_COVERAGE.note}</aside>
-              <div className="vet-external">
-                <p>
-                  Official benefit information:{" "}
-                  <a
-                    className="evidence-link"
-                    href={VAC_MENTAL_HEALTH_BENEFITS_URL}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    Veterans Affairs Canada — Mental Health Benefits
-                  </a>{" "}
-                  <span className="vet-external-note">(opens on veterans.gc.ca)</span>
-                </p>
-              </div>
             </div>
           </Reveal>
         </div>

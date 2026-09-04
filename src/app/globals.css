@@ -3853,19 +3853,32 @@ h3,
 }
 
 .vet-external {
-  margin-top: 1.75rem;
+  max-width: 24rem;
+  margin-top: 2rem;
   padding-top: 1.25rem;
-  border-top: 1px solid rgb(26 39 68 / 0.12);
+  border-top: 1px solid rgb(26 39 68 / 0.14);
 }
 
-.vet-external p {
+.vet-external-label {
   margin: 0;
+  color: var(--nl-navy);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vet-external-target {
+  margin: 0.55rem 0 0;
   font-size: 0.9375rem;
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .vet-external-note {
+  margin: 0.3rem 0 0;
   color: var(--nl-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .vet-cta-actions {

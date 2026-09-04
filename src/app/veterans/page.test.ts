@@ -211,8 +211,9 @@ test("experience and coverage sections carry the supplied wording", () => {
   assert.match(coverage, /VETERAN_COVERAGE\.heading/);
   assert.match(coverage, /VETERAN_COVERAGE\.body\.map/);
   assert.match(coverage, /VETERAN_COVERAGE\.note/);
+  assert.match(coverage, /Official benefit information/);
   assert.match(coverage, /Veterans Affairs Canada — Mental Health Benefits/);
-  assert.match(coverage, /\(opens on veterans\.gc\.ca\)/);
+  assert.match(coverage, /Opens veterans\.gc\.ca in a new tab\./);
   assert.match(page, /VAC_MENTAL_HEALTH_BENEFITS_URL/);
   assert.match(page, /rel="noopener noreferrer"\s*\n?\s*target="_blank"/);
   assert.match(globalsCss, /\.vet-note \{/);
