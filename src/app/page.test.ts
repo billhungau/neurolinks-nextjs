@@ -81,10 +81,15 @@ test("homepage care pathway uses the supplied forward copy and contact CTA", () 
   assert.match(pathway, /Understand the full picture/);
   assert.match(pathway, /Receive care tailored to you/);
   assert.match(pathway, /Keep moving forward/);
-  assert.match(pathway, /bright-light therapy or another approach/);
-  assert.match(
-    pathway,
-    /For an MSP-covered psychiatric assessment, a physician referral is required/,
+  assert.match(pathway, /We will answer your questions and explain how an assessment can be arranged/);
+  assert.match(pathway, /Questionnaires may help complete the picture/);
+  assert.match(pathway, /options suited to your needs, including TMS, ketamine, medication, bright light therapy/);
+  assert.match(pathway, /If progress is uneven, we follow up and consider the next steps with you/);
+  assert.equal(pathway.includes("We will answer your initial questions"), false);
+  assert.equal(pathway.includes("bright-light therapy"), false);
+  assert.equal(
+    pathway.includes("For an MSP-covered psychiatric assessment, a physician referral is required"),
+    false,
   );
   assert.match(pathway, /Talk to our team/);
   assert.match(homePage, /href="\/contact\/"/);

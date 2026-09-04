@@ -47,25 +47,25 @@ const FORWARD = [
   {
     index: "01",
     title: "Start with a conversation",
-    body: "Contact us by phone, email or the contact form. We will answer your initial questions and explain how an assessment can be arranged.",
+    body: "Contact us by phone, email or the contact form. We will answer your questions and explain how an assessment can be arranged.",
     icon: "talk",
   },
   {
     index: "02",
     title: "Understand the full picture",
-    body: "A psychiatrist considers your symptoms, diagnosis, treatment history, medical factors, needs and preferences. Questionnaires may also help us understand how you are feeling.",
+    body: "A psychiatrist considers your symptoms, treatment history, medical factors, needs and preferences. Questionnaires may help complete the picture.",
     icon: "assess",
   },
   {
     index: "03",
     title: "Receive care tailored to you",
-    body: "After the assessment, we explain the options that may be appropriate for you. These may include TMS, ketamine, medication, bright-light therapy or another approach.",
+    body: "After the assessment, we explain options suited to your needs, including TMS, ketamine, medication, bright light therapy or another approach.",
     icon: "path",
   },
   {
     index: "04",
     title: "Keep moving forward",
-    body: "If treatment begins, our team monitors your comfort, progress and response. When symptoms fluctuate or improvement is incomplete, we follow up, review what has changed and consider appropriate next steps with you.",
+    body: "If treatment begins, our team monitors your comfort, progress and response. If progress is uneven, we follow up and consider the next steps with you.",
     icon: "follow",
   },
 ] as const;
@@ -321,7 +321,7 @@ challenges`}
             <div className="home-forward-track">
               <svg
                 className="home-forward-rail-svg"
-                viewBox="0 0 1000 72"
+                viewBox="0 0 1000 84"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
@@ -332,7 +332,7 @@ challenges`}
                   </linearGradient>
                 </defs>
                 <path
-                  d="M70 56 C 300 48, 700 22, 930 16"
+                  d="M0 60 C 280 54, 720 38, 1000 32.4"
                   fill="none"
                   stroke="url(#home-forward-line)"
                   strokeWidth="1.75"
@@ -355,10 +355,6 @@ challenges`}
               </ol>
             </div>
             <div className="home-forward-foot">
-              <p>
-                For an MSP-covered psychiatric assessment, a physician referral is required. We can
-                explain the referral process when you contact us.
-              </p>
               <ButtonLink href="/contact/" variant="accent" className="home-forward-cta">
                 Talk to our team
                 <span aria-hidden="true">→</span>
