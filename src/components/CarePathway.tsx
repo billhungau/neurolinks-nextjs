@@ -1,4 +1,5 @@
 import { ButtonLink } from "@/components/ButtonLink";
+import { Eyebrow } from "@/components/Eyebrow";
 import { HomeForwardMotion } from "@/components/HomeForwardMotion";
 import { Reveal } from "@/components/Reveal";
 
@@ -81,6 +82,8 @@ export function CarePathway({
   steps,
   ctaHref,
   ctaLabel,
+  eyebrow,
+  sectionId,
 }: {
   headingId: string;
   heading: string;
@@ -88,12 +91,19 @@ export function CarePathway({
   steps: readonly CarePathwayStep[];
   ctaHref: string;
   ctaLabel: string;
+  eyebrow?: string;
+  sectionId?: string;
 }) {
   return (
-    <section className="home-section home-forward text-white" aria-labelledby={headingId}>
+    <section
+      id={sectionId}
+      className="home-section home-forward text-white"
+      aria-labelledby={headingId}
+    >
       <div className="nl-wrap">
         <Reveal>
-          <h2 id={headingId} className="home-h2 max-w-3xl">
+          {eyebrow ? <Eyebrow className="text-white/70">{eyebrow}</Eyebrow> : null}
+          <h2 id={headingId} className={`home-h2 max-w-3xl${eyebrow ? " mt-3" : ""}`}>
             {heading}
           </h2>
           <p className="home-forward-lede">{intro}</p>
