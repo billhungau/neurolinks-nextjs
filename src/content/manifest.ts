@@ -46,6 +46,16 @@ export const PAGE_MANIFEST = [
     inSitemap: true,
   },
   {
+    // Net-new NeuroLinks page: no WordPress source to migrate.
+    wpId: 0,
+    route: "/veterans/",
+    title: "Care for Veterans",
+    seoTitle: "TMS & Ketamine Treatment for Veterans in BC | NeuroLinks",
+    seoDescription:
+      "Psychiatrist-led assessment, TMS and ketamine treatment for Veterans in BC, with support navigating VAC and Medavie Blue Cross preauthorization.",
+    inSitemap: true,
+  },
+  {
     wpId: 2197,
     route: "/psychiatrist-tms-nanaimo/",
     title: "About Us",
