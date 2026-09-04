@@ -1,24 +1,30 @@
 import Image from "next/image";
-import Link from "next/link";
 import { ButtonLink } from "@/components/ButtonLink";
 import { CarePathway } from "@/components/CarePathway";
 import { Eyebrow } from "@/components/Eyebrow";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { FaqJsonLd } from "@/components/FaqJsonLd";
+import { VeteransContactForm } from "@/components/forms/VeteransContactForm";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
 import { TextLink } from "@/components/TextLink";
 import {
   VAC_MENTAL_HEALTH_BENEFITS_URL,
   VETERAN_CONDITIONS,
+  VETERAN_CONDITIONS_INTRO,
+  VETERAN_CONDITIONS_NOTE,
+  VETERAN_CONTACT,
   VETERAN_COVERAGE,
+  VETERAN_EXPERIENCE,
   VETERAN_EXPERIENCE_POINTS,
   VETERAN_FAQS,
   VETERAN_IMPACT,
   VETERAN_PATHWAY,
   VETERAN_PATHWAY_CTA,
+  VETERAN_PATHWAY_EYEBROW,
   VETERAN_PATHWAY_HEADING,
   VETERAN_PATHWAY_INTRO,
+  VETERAN_TREATMENT_INTRO,
   VETERAN_TREATMENTS,
   VETERAN_TRUST,
 } from "@/content/veterans";
@@ -28,9 +34,9 @@ import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
 export const metadata = pageMetadata({
-  title: "TMS & Ketamine Treatment for Veterans in BC | NeuroLinks",
+  title: "Mental Health Treatment for Veterans in BC | NeuroLinks",
   description:
-    "Psychiatrist-led assessment, TMS and ketamine treatment for Veterans in BC, with support navigating VAC and Medavie Blue Cross preauthorization.",
+    "Psychiatrist-led assessment and treatment for Veterans experiencing depression, anxiety or trauma-related symptoms, with support preparing VAC preauthorization documentation.",
   path: "/veterans/",
   image: PAGE_OG_IMAGES.tms,
 });
@@ -78,29 +84,36 @@ export default function VeteransPage() {
               Specialist mental health treatment for Veterans
             </h1>
             <p className="hero-enter hero-enter-2 vet-hero-lede">
-              When depression, anxiety or trauma-related symptoms continue despite medication and
-              therapy, it can feel as though the options are running out. They may not be.
+              When depression, anxiety or trauma-related symptoms have not improved enough with
+              medication or therapy, there may still be options.
             </p>
             <p className="hero-enter hero-enter-2 vet-hero-lede">
-              NeuroLinks provides psychiatrist-led assessment, TMS and ketamine treatment in
-              Nanaimo, with experience supporting Veterans through treatment planning,
-              preauthorization and ongoing monitoring.
+              NeuroLinks provides psychiatrist-led assessment and treatment in Nanaimo, with
+              experience helping Veterans navigate treatment planning and VAC preauthorization.
             </p>
-            <div className="hero-enter hero-enter-3 mt-7 flex flex-wrap gap-3">
-              <ButtonLink
-                href="/contact/"
-                variant="accent"
-                className="grow basis-full md:grow-0 md:basis-auto"
-              >
-                Ask about care for Veterans
-              </ButtonLink>
-              <ButtonLink
-                href="/physician-referral/"
-                variant="on-dark"
-                className="grow basis-full md:grow-0 md:basis-auto"
-              >
-                Information for clinicians and case managers
-              </ButtonLink>
+            <div className="hero-enter hero-enter-3 vet-hero-actions">
+              <div className="vet-hero-buttons">
+                <ButtonLink
+                  href="#veterans-contact"
+                  variant="accent"
+                  className="grow basis-full md:grow-0 md:basis-auto"
+                >
+                  Request a confidential conversation
+                </ButtonLink>
+                <ButtonLink
+                  href="#treatment-options"
+                  variant="on-dark"
+                  className="grow basis-full md:grow-0 md:basis-auto"
+                >
+                  Explore treatment options
+                </ButtonLink>
+              </div>
+              <a className="text-link vet-hero-link" href="#coordination">
+                <span>For clinicians and case managers</span>
+                <span aria-hidden="true" className="text-link-arrow">
+                  →
+                </span>
+              </a>
             </div>
           </div>
         </div>
@@ -131,29 +144,19 @@ export default function VeteransPage() {
                 <p>{VETERAN_IMPACT.emphasis}</p>
               </blockquote>
               <p>{VETERAN_IMPACT.closing}</p>
-              <div className="vet-inline-link">
-                <TextLink href="/services-psychiatric-tms-ketamine-treatment/">
-                  See how assessment and treatment work
-                </TextLink>
-              </div>
             </div>
           </Reveal>
         </div>
       </section>
 
-      <section id="conditions" className="tms-section ket-ivory">
+      <section id="conditions" className="tms-section bg-[var(--nl-cream)]">
         <div className="tms-wrap">
           <Reveal>
             <Eyebrow>Conditions commonly assessed in Veterans</Eyebrow>
             <h2 className="tms-h2 mt-3">
               Mental health difficulties do not always occur one at a time
             </h2>
-            <p className="tms-lede mt-4">
-              Depression, anxiety and trauma-related symptoms frequently overlap. Their effects may
-              also be complicated by chronic pain, disrupted sleep, medication burden and
-              difficulties returning to everyday roles. Treatment should reflect the full clinical
-              picture rather than a single diagnosis.
-            </p>
+            <p className="tms-lede mt-4">{VETERAN_CONDITIONS_INTRO}</p>
           </Reveal>
           <Reveal className="vet-stagger vet-conditions">
             {VETERAN_CONDITIONS.map((condition) => (
@@ -163,34 +166,22 @@ export default function VeteransPage() {
               >
                 <p className="vet-condition-label">{condition.label}</p>
                 <h3>{condition.title}</h3>
-                {condition.body.map((paragraph) => (
-                  <p key={paragraph} className="vet-condition-text">
-                    {paragraph}
-                  </p>
-                ))}
-                <TextLink href={condition.href}>{condition.linkLabel}</TextLink>
+                <p className="vet-condition-text">{condition.body}</p>
               </article>
             ))}
           </Reveal>
-          <p className="tms-note">
-            A diagnosis listed here does not mean that TMS or ketamine will be recommended. Neither
-            treatment is routinely indicated for every condition, and suitability is determined
-            through psychiatric assessment.
-          </p>
+          <p className="tms-note">{VETERAN_CONDITIONS_NOTE}</p>
         </div>
       </section>
 
       <section id="treatment-options" className="tms-section bg-white">
         <div className="tms-wrap">
           <Reveal>
-            <Eyebrow>How TMS and ketamine may help</Eyebrow>
-            <h2 className="tms-h2 mt-3">When conventional treatment has not brought enough relief</h2>
-            <p className="tms-lede mt-4">
-              TMS and ketamine work differently from conventional antidepressant medications. They
-              may provide another path forward for selected patients, but neither treatment is
-              appropriate for everyone. A psychiatric assessment is required to determine whether
-              the potential benefits justify the risks and demands of treatment.
-            </p>
+            <Eyebrow>Specialist treatment options</Eyebrow>
+            <h2 className="tms-h2 mt-3">
+              Specialist options when standard care has not helped enough
+            </h2>
+            <p className="tms-lede mt-4">{VETERAN_TREATMENT_INTRO}</p>
           </Reveal>
           <Reveal className="vet-stagger vet-tx-grid">
             {VETERAN_TREATMENTS.map((treatment) => (
@@ -200,34 +191,28 @@ export default function VeteransPage() {
                   <h3>{treatment.title}</h3>
                 </div>
                 <div className="vet-tx-body">
-                  {treatment.body.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
+                  <p>{treatment.body}</p>
                   <ul className="vet-tx-points">
                     {treatment.points.map((point) => (
                       <li key={point}>{point}</li>
                     ))}
                   </ul>
                   <div className="vet-tx-action">
-                    <ButtonLink href={treatment.href}>{treatment.buttonLabel}</ButtonLink>
+                    <TextLink href={treatment.href}>{treatment.linkLabel}</TextLink>
                   </div>
                 </div>
               </article>
             ))}
           </Reveal>
+          <div className="vet-tx-foot">
+            <ButtonLink href="#veterans-contact" variant="accent">
+              Ask whether an assessment may be appropriate
+            </ButtonLink>
+          </div>
         </div>
       </section>
 
-      <CarePathway
-        headingId="veteran-pathway-heading"
-        heading={VETERAN_PATHWAY_HEADING}
-        intro={VETERAN_PATHWAY_INTRO}
-        steps={VETERAN_PATHWAY}
-        ctaHref={VETERAN_PATHWAY_CTA.href}
-        ctaLabel={VETERAN_PATHWAY_CTA.label}
-      />
-
-      <section id="experience" className="tms-section bg-white">
+      <section id="experience" className="tms-section tms-mist">
         <div className="tms-wrap">
           <Reveal className="vet-experience">
             <div className="img-frame vet-experience-photo">
@@ -241,42 +226,40 @@ export default function VeteransPage() {
               />
             </div>
             <div className="vet-experience-copy">
-              <Eyebrow>Experience that reduces uncertainty</Eyebrow>
-              <h2 className="tms-h2 mt-3">
-                Veterans should not have to explain the treatment process to their clinic
-              </h2>
-              <p className="vet-experience-text">
-                NeuroLinks has experience assessing and treating Veterans, including patients whose
-                care has been authorized through Veterans Affairs Canada.
-              </p>
-              <p className="vet-experience-text">
-                Our team understands that receiving treatment involves more than selecting a
-                protocol. It may require a detailed treatment plan, clinical rationale,
-                preauthorization, progress monitoring and communication with existing healthcare
-                providers or case managers.
-              </p>
-              <p className="vet-experience-text">
-                We approach each Veteran as an individual—not as a diagnosis or a funding file.
-              </p>
+              <Eyebrow>{VETERAN_EXPERIENCE.eyebrow}</Eyebrow>
+              <h2 className="tms-h2 mt-3">{VETERAN_EXPERIENCE.heading}</h2>
+              <p className="vet-experience-text">{VETERAN_EXPERIENCE.opening}</p>
+              <p className="vet-experience-text">{VETERAN_EXPERIENCE.closing}</p>
+              <blockquote className="vet-emphasis">
+                <p>{VETERAN_EXPERIENCE.quote}</p>
+              </blockquote>
               <div className="vet-inline-link">
                 <TextLink href="/psychiatrist-tms-nanaimo/">Meet the team providing care</TextLink>
               </div>
             </div>
           </Reveal>
           <Reveal>
-            <div className="vet-points-block">
-              <h3 className="vet-points-heading">What we provide</h3>
-              <ul className="vet-points">
-                {VETERAN_EXPERIENCE_POINTS.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
-            </div>
+            <ul className="vet-points">
+              {VETERAN_EXPERIENCE_POINTS.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
           </Reveal>
         </div>
       </section>
 
-      <section id="coverage" className="tms-section ket-ivory">
+      <CarePathway
+        sectionId="veteran-pathway"
+        headingId="veteran-pathway-heading"
+        eyebrow={VETERAN_PATHWAY_EYEBROW}
+        heading={VETERAN_PATHWAY_HEADING}
+        intro={VETERAN_PATHWAY_INTRO}
+        steps={VETERAN_PATHWAY}
+        ctaHref={VETERAN_PATHWAY_CTA.href}
+        ctaLabel={VETERAN_PATHWAY_CTA.label}
+      />
+
+      <section id="coverage" className="tms-section bg-[var(--nl-cream)]">
         <div className="tms-wrap">
           <Reveal className="vet-coverage">
             <div>
@@ -303,7 +286,16 @@ export default function VeteransPage() {
                   {paragraph}
                 </p>
               ))}
-              <aside className="vet-note">{VETERAN_COVERAGE.note}</aside>
+              <aside id="coordination" className="vet-coord">
+                <h3>{VETERAN_COVERAGE.coordinationHeading}</h3>
+                <p>{VETERAN_COVERAGE.coordination}</p>
+                <div className="vet-coord-actions">
+                  <ButtonLink href="/physician-referral/">Submit a physician referral</ButtonLink>
+                  <ButtonLink href="#veterans-contact" variant="ghost">
+                    Contact NeuroLinks about coordination
+                  </ButtonLink>
+                </div>
+              </aside>
             </div>
           </Reveal>
         </div>
@@ -316,14 +308,14 @@ export default function VeteransPage() {
             <div className="tms-faq-intro">
               <h2 className="tms-h2">Questions Veterans ask</h2>
               <p className="tms-lede mt-4">
-                Answers about coverage, preauthorization, referrals, travel and what happens if
-                treatment does not help enough. Where an answer depends on your individual
-                situation, we say so.
+                Answers about coverage, preauthorization, referrals, travel and how existing
+                clinicians can reach the clinic. Where an answer depends on your situation, we say
+                so.
               </p>
               <p className="mt-6">
-                <Link href="/contact/" className="tms-text-link">
-                  Contact the clinic
-                </Link>
+                <a href="#veterans-contact" className="tms-text-link">
+                  Request a confidential conversation
+                </a>
               </p>
             </div>
             <FaqAccordion items={VETERAN_FAQS} variant="editorial" />
@@ -331,22 +323,20 @@ export default function VeteransPage() {
         </div>
       </section>
 
-      <section className="tms-section tms-navy tms-assess">
+      <section id="veterans-contact" className="tms-section tms-navy tms-assess">
         <div className="tms-wrap">
-          <Reveal>
-            <h2 className="tms-h2">You do not have to determine the next step alone</h2>
-            <p className="tms-lede tms-lede-on-dark mt-4">
-              Tell us what you have tried, what remains difficult and what you hope will change.
-              Our team can explain the assessment process, whether TMS or ketamine may be worth
-              considering, and what would be required to request authorization.
-            </p>
-            <div className="vet-cta-actions">
-              <ButtonLink href="/contact/" variant="accent">
-                Ask about care for Veterans
-              </ButtonLink>
-              <ButtonLink href={SITE.phoneHref} variant="on-dark">
-                Call {SITE.phone}
-              </ButtonLink>
+          <Reveal className="vet-contact">
+            <div className="vet-contact-copy">
+              <h2 className="tms-h2">{VETERAN_CONTACT.heading}</h2>
+              <p className="tms-lede tms-lede-on-dark mt-4">{VETERAN_CONTACT.body}</p>
+              <div className="vet-cta-actions">
+                <ButtonLink href={SITE.phoneHref} variant="on-dark">
+                  Call {SITE.phone}
+                </ButtonLink>
+              </div>
+            </div>
+            <div className="vet-contact-form">
+              <VeteransContactForm />
             </div>
           </Reveal>
         </div>

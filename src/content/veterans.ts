@@ -14,11 +14,11 @@ export const VETERAN_TRUST = [
 export const VETERAN_IMPACT = {
   heading: "The impact of service can continue long after service ends",
   opening:
-    "For some Veterans, depression, anxiety and trauma-related symptoms remain present for years. Sleep may be disrupted. Motivation and relationships may suffer. Medications may cause side effects without providing enough relief. Therapy may help, but important symptoms can persist.",
+    "Depression, anxiety and trauma-related symptoms can remain present for years. Sleep, relationships, motivation and everyday functioning may all be affected—even after medication or therapy.",
   emphasis:
-    "Continuing to struggle does not mean that you have failed treatment. It may mean that the treatments tried so far have not fully met your needs.",
+    "Continuing to struggle does not mean that you have failed treatment. It may mean that a different assessment or treatment approach is worth considering.",
   closing:
-    "At NeuroLinks, we begin by understanding your history, what you have already tried and what you most want to regain. Only then do we consider whether a treatment such as TMS or ketamine may be appropriate.",
+    "We begin by understanding what you have experienced, what you have already tried and what you most want to regain.",
 } as const;
 
 export type VeteranCondition = {
@@ -26,9 +26,7 @@ export type VeteranCondition = {
   tone: "teal" | "sage" | "gold";
   label: string;
   title: string;
-  body: readonly string[];
-  linkLabel: string;
-  href: string;
+  body: string;
 };
 
 export const VETERAN_CONDITIONS = [
@@ -36,44 +34,35 @@ export const VETERAN_CONDITIONS = [
     tone: "teal",
     label: "01 · Depression",
     title: "Depression",
-    body: [
-      "Depression can gradually take away energy, motivation, interest and hope. Even ordinary responsibilities can begin to feel overwhelming.",
-      "TMS is an established, non-invasive treatment option for depression that has not improved sufficiently with conventional treatment. Ketamine may be considered for selected patients with treatment-resistant depression and may produce improvement more rapidly.",
-    ],
-    linkLabel: "Learn about treatment-resistant depression",
-    href: "/ketamine-treatment-resistant-depression-nanaimo/",
+    body: "Depression can drain energy, motivation, interest and hope, making even ordinary responsibilities feel difficult. We assess what has already been tried and whether another treatment approach may be appropriate.",
   },
   {
     tone: "sage",
     label: "02 · PTSD",
     title: "PTSD and trauma-related symptoms",
-    body: [
-      "PTSD may affect far more than memories of trauma. It can involve hypervigilance, irritability, avoidance, emotional detachment, disrupted sleep and a persistent sense of being unsafe.",
-      "TMS or ketamine may be considered in selected cases, particularly when significant depressive symptoms are also present. Evidence, regulatory status and appropriate protocols differ from those for depression. These treatments may complement—but do not necessarily replace—trauma-focused psychotherapy.",
-    ],
-    linkLabel: "Understand how treatment may fit",
-    href: "/about-tms-treatment-on-psychiatric-illness/",
+    body: "Hypervigilance, disrupted sleep, irritability, avoidance and emotional detachment can continue long after the immediate danger has passed. Assessment considers these symptoms alongside depression, anxiety, pain and sleep.",
   },
   {
     tone: "gold",
     label: "03 · Anxiety",
     title: "Anxiety",
-    body: [
-      "Persistent anxiety can keep the mind and body in a state of constant readiness. It may appear as worry, tension, panic, restlessness, irritability or difficulty sleeping.",
-      "Anxiety may occur independently or alongside depression and PTSD. Whether TMS or ketamine is appropriate depends on the underlying diagnosis, symptom pattern and previous treatment response.",
-    ],
-    linkLabel: "Ask about an individual assessment",
-    href: "/contact/",
+    body: "Persistent anxiety can leave the mind and body in a constant state of readiness. We consider the underlying diagnosis, symptom pattern and previous treatment response before recommending care.",
   },
 ] as const satisfies readonly VeteranCondition[];
+
+export const VETERAN_CONDITIONS_INTRO =
+  "Depression, anxiety and trauma-related symptoms frequently overlap. Assessment should reflect the complete clinical picture rather than treating each symptom in isolation.";
+
+export const VETERAN_CONDITIONS_NOTE =
+  "A condition listed here does not mean that TMS or ketamine will automatically be recommended. Suitability is determined through psychiatric assessment.";
 
 export type VeteranTreatment = {
   key: "tms" | "ketamine";
   eyebrow: string;
   title: string;
-  body: readonly string[];
+  body: string;
   points: readonly string[];
-  buttonLabel: string;
+  linkLabel: string;
   href: string;
 };
 
@@ -82,127 +71,125 @@ export const VETERAN_TREATMENTS = [
     key: "tms",
     eyebrow: "TMS",
     title: "Non-invasive treatment that works differently from medication",
-    body: [
-      "TMS uses focused magnetic pulses to influence brain networks involved in mood and emotional regulation. It does not require sedation or anaesthesia, and patients remain awake throughout treatment.",
-      "Its strongest established role is in treating depression, including depression that has not responded adequately to medication. The treatment protocol, frequency and brain target are selected according to the individual clinical presentation.",
-    ],
+    body: "TMS uses focused magnetic pulses to influence brain networks involved in mood regulation. Patients remain awake, and sedation or anaesthesia is not required.",
     points: [
-      "Non-invasive treatment",
-      "No sedation or anaesthesia",
-      "Established evidence for depression",
-      "Generally delivered repeatedly over several weeks",
-      "Individualized protocol and brain mapping",
-      "Progress and tolerability monitored throughout treatment",
+      "Strongest established role in depression",
+      "Non-invasive, without sedation",
+      "Delivered through repeated clinic visits",
+      "Protocol selected following assessment",
     ],
-    buttonLabel: "Learn more about TMS",
+    linkLabel: "Learn more about TMS",
     href: "/about-tms-treatment-on-psychiatric-illness/",
   },
   {
     key: "ketamine",
     eyebrow: "Ketamine",
-    title: "A different treatment pathway, with the potential for earlier change",
-    body: [
-      "Ketamine affects glutamate-related brain pathways and may reduce depressive symptoms more rapidly than conventional antidepressants in some patients. Improvement may begin within hours or days, although several treatments may be required and not everyone responds.",
-      "At NeuroLinks, ketamine is administered in a controlled clinical setting with medical supervision and appropriate monitoring before, during and after treatment.",
-    ],
+    title: "A medically supervised treatment pathway",
+    body: "Ketamine may be considered for selected patients with treatment-resistant depression following medical and psychiatric screening. Treatment is provided in a controlled clinical setting with appropriate monitoring.",
     points: [
       "Primarily considered for treatment-resistant depression",
-      "Potential for a more rapid response",
       "Medical screening before treatment",
       "Supervised administration and monitoring",
-      "Response and side effects reviewed throughout the course",
-      "Maintenance considered individually",
+      "Response and tolerability reviewed throughout care",
     ],
-    buttonLabel: "Learn more about ketamine",
+    linkLabel: "Learn more about ketamine",
     href: "/ketamine-treatment-resistant-depression-nanaimo/",
   },
 ] as const satisfies readonly VeteranTreatment[];
 
-export const VETERAN_PATHWAY_HEADING = "A clear path from first contact to treatment";
+export const VETERAN_TREATMENT_INTRO =
+  "TMS and ketamine work differently from conventional antidepressant medications. They may offer another path forward for selected patients, but neither treatment is appropriate for everyone.";
+
+export const VETERAN_PATHWAY_EYEBROW = "A clear way forward";
+export const VETERAN_PATHWAY_HEADING = "From first contact to treatment";
 
 export const VETERAN_PATHWAY_INTRO =
-  "Seeking care should not require you to navigate every clinical and administrative step alone. NeuroLinks can explain the process, develop the treatment plan and help provide the information required for authorization.";
+  "You should not have to navigate every clinical and administrative step alone. NeuroLinks can explain the process, develop the treatment plan and help prepare the information required for authorization.";
 
 export const VETERAN_PATHWAY_CTA = {
-  href: "/contact/",
-  label: "Talk to our team",
+  href: "#veterans-contact",
+  label: "Talk with our team",
 } as const;
 
 export const VETERAN_PATHWAY = [
   {
     index: "01",
     title: "Start with a conversation",
-    body: "Contact NeuroLinks directly, or ask your physician, therapist or case manager to reach out. You do not need to decide whether TMS or ketamine is right for you before contacting us.",
+    body: "Contact NeuroLinks directly, or ask your physician, therapist or case manager to reach out. You do not need to choose a treatment before contacting us.",
     icon: "talk",
   },
   {
     index: "02",
     title: "Understand the full picture",
-    body: "A psychiatrist reviews your symptoms, diagnoses, treatment history, medications, medical considerations and goals. If TMS or ketamine appears appropriate, we develop an individualized treatment recommendation.",
+    body: "A psychiatrist reviews your symptoms, previous treatment, medications, medical considerations and what you hope to regain.",
     icon: "assess",
   },
   {
     index: "03",
-    title: "Obtain preauthorization",
-    body: "NeuroLinks prepares the proposed protocol, clinical rationale, treatment schedule and estimated cost required for review. Coverage must be confirmed through Veterans Affairs Canada and Medavie Blue Cross before treatment begins.",
+    title: "Request preauthorization",
+    body: "If treatment is recommended, NeuroLinks prepares the proposed protocol, clinical rationale, schedule and estimated cost required for review.",
     icon: "authorize",
   },
   {
     index: "04",
     title: "Begin treatment and monitor progress",
-    body: "Once written authorization and scheduling are confirmed, treatment can begin. We monitor symptoms, comfort, side effects and progress throughout the course and provide follow-up information when required.",
+    body: "Once written authorization and scheduling are confirmed, treatment can begin. Symptoms, tolerability and progress are monitored throughout the course.",
     icon: "follow",
   },
 ] as const;
 
+export const VETERAN_EXPERIENCE = {
+  eyebrow: "Experience that reduces uncertainty",
+  heading: "Veterans should not have to explain the treatment process to their clinic",
+  opening:
+    "NeuroLinks has experience assessing and treating Veterans, including patients whose treatment has been authorized through Veterans Affairs Canada.",
+  closing:
+    "Our team understands that care may involve treatment planning, clinical rationale, preauthorization, progress monitoring and communication with existing healthcare providers or case managers.",
+  quote: "We approach each Veteran as an individual—not as a diagnosis or a funding file.",
+} as const;
+
 export const VETERAN_EXPERIENCE_POINTS = [
   "Psychiatrist-led assessment and treatment planning",
   "Experience providing VAC-authorized treatment",
-  "Familiarity with Medavie Blue Cross preauthorization requirements",
-  "Standardized symptom monitoring",
-  "Clinical review throughout treatment",
+  "Familiarity with preauthorization documentation",
   "Communication with clinicians and case managers, with consent",
-  "Follow-up and maintenance planning when appropriate",
 ] as const;
 
 export const VETERAN_COVERAGE = {
   heading: "Clear information before treatment begins",
   body: [
-    "No Veteran should begin treatment uncertain about whether it has been authorized.",
-    "Veterans Affairs Canada may authorize TMS or ketamine treatment in eligible cases. NeuroLinks can prepare the proposed treatment plan, clinical rationale, treatment schedule and estimated cost required for review.",
-    "Coverage is not automatic. Eligibility and authorization depend on the individual Veteran’s benefits, clinical circumstances and the proposed treatment. Treatment begins only after written authorization has been confirmed through VAC and Medavie Blue Cross.",
+    "Veterans Affairs Canada may authorize treatment in eligible cases. NeuroLinks can prepare the proposed treatment plan, clinical rationale, schedule and estimated cost required for review.",
+    "Coverage is not automatic. Eligibility and authorization depend on the individual Veteran’s benefits, clinical circumstances and proposed treatment. Treatment begins only after written authorization has been confirmed through VAC and Medavie Blue Cross.",
   ],
-  note: "Already working with a VAC case manager, therapist or physician? With your consent, they can contact NeuroLinks directly to discuss the referral and documentation process.",
+  coordinationHeading: "Already working with a clinician or case manager?",
+  coordination:
+    "With the Veteran’s consent, physicians, therapists and VAC case managers can contact NeuroLinks to discuss the referral and documentation process.",
 } as const;
 
 /** Corrected coverage wording shared with the Services page. */
 export const VETERAN_COVERAGE_STATEMENT =
   "Veterans Affairs Canada may authorize TMS or ketamine treatment in eligible cases. NeuroLinks can prepare the proposed treatment plan and supporting clinical information required for review. Coverage is not automatic, and treatment begins only after written authorization has been confirmed through VAC and Medavie Blue Cross.";
 
+export const VETERAN_CONTACT = {
+  heading: "You do not have to determine the next step alone",
+  body: "You do not need to decide whether TMS or ketamine is right for you before contacting us. Tell us what you would like help understanding, and our team can explain the assessment and authorization process.",
+  reassurance:
+    "You do not need to describe your trauma or medical history here. A brief question is enough.",
+  submitLabel: "Ask our team to contact me",
+} as const;
+
 export const VETERAN_FAQS: FaqItem[] = [
   {
     q: "Does VAC cover TMS or ketamine treatment?",
-    a: "Veterans Affairs Canada may authorize TMS or ketamine treatment in eligible cases. Coverage is not automatic. It depends on your benefits, your clinical circumstances and the treatment being proposed, and treatment begins only after written authorization has been confirmed through VAC and Medavie Blue Cross.",
+    a: "Veterans Affairs Canada may authorize TMS or ketamine treatment in eligible cases. Coverage is not automatic. It depends on your benefits, your clinical circumstances and the treatment being proposed. Treatment begins only after written authorization has been confirmed through VAC and Medavie Blue Cross. We can explain what documentation is typically required, but the decision rests with VAC and Medavie Blue Cross.",
   },
   {
     q: "Will NeuroLinks help obtain preauthorization?",
-    a: "Yes. Following the psychiatric assessment, we can prepare the proposed treatment plan, clinical rationale, treatment schedule and estimated cost required for review, and we can respond to requests for further information. The authorization decision rests with VAC and Medavie Blue Cross rather than the clinic.",
+    a: "Yes. After the psychiatric assessment, we can prepare the proposed treatment plan, clinical rationale, treatment schedule and estimated cost required for review. We can also respond if further information is requested. The authorization decision rests with VAC and Medavie Blue Cross rather than the clinic.",
   },
   {
     q: "Do I need a physician referral?",
-    a: "A physician or nurse practitioner referral is required for an MSP-covered psychiatric assessment. You are welcome to contact the clinic first: we can explain what is needed and, with your consent, correspond with your care provider or case manager. Clinicians can refer through our physician referral page or by fax.",
-  },
-  {
-    q: "Is the psychiatric assessment covered by MSP?",
-    a: "For eligible British Columbia residents with an appropriate referral, the comprehensive psychiatric assessment is covered by the Medical Services Plan. TMS and ketamine treatment are not covered by MSP and are considered separately, which is why authorization through VAC and Medavie Blue Cross is required before treatment begins.",
-  },
-  {
-    q: "Can my VAC case manager contact NeuroLinks?",
-    a: "Yes. With your consent, a VAC case manager can contact the clinic directly to discuss the referral, the treatment being proposed and the documentation required for review. We confirm your consent before sharing any clinical information.",
-  },
-  {
-    q: "Can NeuroLinks communicate with my therapist or physician?",
-    a: "With your written consent, we can share assessment findings, the treatment plan and progress updates with your therapist, family physician, nurse practitioner or psychiatrist. You decide who we communicate with, and you can change that at any time.",
+    a: "A physician or nurse practitioner referral is required for an MSP-covered psychiatric assessment. You are welcome to contact the clinic first. We can explain what is needed and, with your consent, correspond with your care provider or case manager. Clinicians can refer through our physician referral page or by fax.",
   },
   {
     q: "How long does authorization usually take?",
@@ -210,22 +197,10 @@ export const VETERAN_FAQS: FaqItem[] = [
   },
   {
     q: "How frequently will I need to travel to Nanaimo?",
-    a: "It depends on the treatment. A standard TMS course is generally delivered five days a week over several weeks, and an accelerated course given over five days may be considered for selected patients. Ketamine is typically given twice a week during the initial phase. We confirm the schedule before treatment begins so that travel and accommodation can be planned.",
+    a: "It depends on the treatment. A standard TMS course is generally delivered five days a week over several weeks, and an accelerated course given over five days may be considered for selected patients. Ketamine is typically given twice a week during the initial phase. We confirm the schedule before treatment begins so travel can be planned.",
   },
   {
-    q: "Can TMS or ketamine be combined with psychotherapy?",
-    a: "In most cases yes, and continuing trauma-focused or other psychotherapy is often appropriate. Neither treatment is intended to replace psychotherapy. Your psychiatrist will review how treatments fit together, alongside your current medications.",
-  },
-  {
-    q: "What happens if treatment does not help enough?",
-    a: "Not everyone responds, and a partial response is common. If improvement is insufficient, we review the factors that may be affecting your response, including diagnosis, protocol, medications, sleep and pain, then discuss the options with you. These may include adjusting treatment, considering the other treatment or referral for another evidence-based approach.",
-  },
-  {
-    q: "Is maintenance treatment available?",
-    a: "Maintenance is considered individually after an initial course, when it is clinically appropriate and when response supports continuing. Maintenance requires its own clinical review, and separate authorization may be required before it can begin.",
-  },
-  {
-    q: "Does NeuroLinks treat serving CAF or RCMP members?",
-    a: "We assess and treat serving Canadian Armed Forces and RCMP members as well as Veterans. The funding route differs between serving members and Veterans, so what applies depends on your situation. Contact the clinic and we can explain the process for your circumstances.",
+    q: "Can my VAC case manager, therapist or physician contact NeuroLinks?",
+    a: "Yes. With your consent, a VAC case manager, therapist or physician can contact the clinic to discuss the referral, the treatment being proposed and the documentation required for review. With your written consent, we can also share assessment findings and progress updates. You decide who we communicate with.",
   },
 ];
