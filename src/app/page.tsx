@@ -1,8 +1,9 @@
 import Image, { getImageProps } from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
+import { CarePathway } from "@/components/CarePathway";
 import { ClinicMap } from "@/components/ClinicMap";
 import { CtaBand } from "@/components/CtaBand";
-import { HomeForwardMotion } from "@/components/HomeForwardMotion";
+import { Eyebrow } from "@/components/Eyebrow";
 import { HomeReviews } from "@/components/HomeReviews";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
@@ -71,53 +72,12 @@ const FORWARD = [
   },
 ] as const;
 
-function ForwardIcon({ name }: { name: (typeof FORWARD)[number]["icon"] }) {
-  const common = {
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.7,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  };
-  if (name === "talk") {
-    return (
-      <svg {...common}>
-        <path d="M4.5 15.2V7.8A2.3 2.3 0 0 1 6.8 5.5h7.4A2.3 2.3 0 0 1 16.5 7.8v5.2a2.3 2.3 0 0 1-2.3 2.3H9.2L4.5 18.4z" />
-        <path d="M16.4 9.2h.8A2.3 2.3 0 0 1 19.5 11.5v5.1l-3.1-2.1H11.8" />
-      </svg>
-    );
-  }
-  if (name === "assess") {
-    return (
-      <svg {...common}>
-        <path d="M8 4.5H5.5V7" />
-        <path d="M16 4.5h2.5V7" />
-        <path d="M8 19.5H5.5V17" />
-        <path d="M16 19.5h2.5V17" />
-        <circle cx="12" cy="12" r="3.2" />
-      </svg>
-    );
-  }
-  if (name === "path") {
-    return (
-      <svg {...common}>
-        <path d="M6 19.2c0-4.2 2.4-6.2 6-6.2" />
-        <path d="M12 13c3.6 0 6-2 6-6.2" />
-        <circle cx="6" cy="19.2" r="1.35" fill="currentColor" stroke="none" />
-        <circle cx="18" cy="6.8" r="1.35" fill="currentColor" stroke="none" />
-        <circle cx="12" cy="13" r="1.45" fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  return (
-    <svg {...common}>
-      <path d="M7.2 9.2A5.1 5.1 0 0 1 16.6 8.4L18 6.8v4.4h-4.4" />
-      <path d="M16.8 14.8A5.1 5.1 0 0 1 7.4 15.6L6 17.2v-4.4h4.4" />
-    </svg>
-  );
-}
+const FORWARD_HEADING = "A clear way forward";
+
+const FORWARD_INTRO =
+  "You do not need to choose a treatment before contacting us. Start by telling us what has not helped enough and what you hope will change. We will explain the next steps and support you throughout your care.";
+
+const FORWARD_CTA = { href: "/contact/", label: "Talk to our team" } as const;
 
 const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLinks";
 
@@ -282,6 +242,38 @@ challenges`}
         </div>
       </section>
 
+      <section className="home-section home-vet" aria-labelledby="home-vet-heading">
+        <div className="nl-wrap home-vet-split">
+          <Reveal>
+            <div className="img-frame home-vet-photo relative">
+              <Image
+                src={MEDIA.eval}
+                alt="NeuroLinks psychiatrist talking with a patient across a desk during an assessment"
+                fill
+                sizes={IMG_SIZES.half}
+                loading="lazy"
+                className="object-cover object-[62%_center]"
+              />
+            </div>
+          </Reveal>
+          <Reveal delayMs={70}>
+            <Eyebrow>Care for Veterans</Eyebrow>
+            <h2 id="home-vet-heading" className="home-h2 mt-3 text-[var(--nl-navy)]">
+              Specialist mental health treatment for Veterans
+            </h2>
+            <p className="mt-4 max-w-[34rem] leading-relaxed text-[var(--nl-muted)]">
+              Depression, anxiety and trauma-related symptoms can persist even after years of
+              medication and therapy. NeuroLinks provides psychiatrist-led TMS and ketamine
+              treatment and has experience supporting Veterans through the VAC authorization
+              process.
+            </p>
+            <div className="mt-5">
+              <TextLink href="/veterans/">Explore care for Veterans</TextLink>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       <section className="home-section why-nl bg-white" aria-labelledby="why-nl-heading">
         <div className="nl-wrap why-nl-grid">
           <Reveal>
@@ -305,66 +297,14 @@ challenges`}
         </div>
       </section>
 
-      <section
-        className="home-section home-forward text-white"
-        aria-labelledby="pathway-heading"
-      >
-        <div className="nl-wrap">
-          <Reveal>
-            <h2 id="pathway-heading" className="home-h2 max-w-3xl">
-              A clear way forward
-            </h2>
-            <p className="home-forward-lede">
-              You do not need to choose a treatment before contacting us. Start by telling us what
-              has not helped enough and what you hope will change. We will explain the next steps
-              and support you throughout your care.
-            </p>
-          </Reveal>
-          <HomeForwardMotion>
-            <svg
-              className="home-forward-rail-svg"
-              viewBox="0 0 1000 84"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <defs>
-                <linearGradient id="home-forward-line" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0" stopColor="#6f9c96" />
-                  <stop offset="1" stopColor="#e8b923" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M0 50.4 C 280 46, 720 32, 1000 27.2"
-                fill="none"
-                pathLength={1}
-                stroke="url(#home-forward-line)"
-                strokeWidth="1.75"
-                strokeLinecap="round"
-              />
-            </svg>
-            <ol className="home-forward-list">
-              {FORWARD.map((step) => (
-                <li key={step.index} className="home-forward-item">
-                  <span className="home-forward-node" aria-hidden="true">
-                    <ForwardIcon name={step.icon} />
-                  </span>
-                  <div className="home-forward-copy">
-                    <p className="home-forward-step">Step {step.index}</p>
-                    <h3>{step.title}</h3>
-                    <p>{step.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </HomeForwardMotion>
-          <div className="home-forward-foot">
-            <ButtonLink href="/contact/" variant="accent" className="home-forward-cta">
-              Talk to our team
-              <span aria-hidden="true">→</span>
-            </ButtonLink>
-          </div>
-        </div>
-      </section>
+      <CarePathway
+        headingId="pathway-heading"
+        heading={FORWARD_HEADING}
+        intro={FORWARD_INTRO}
+        steps={FORWARD}
+        ctaHref={FORWARD_CTA.href}
+        ctaLabel={FORWARD_CTA.label}
+      />
 
       <section className="home-section bg-white" aria-labelledby="funding-heading">
         <div className="nl-wrap">

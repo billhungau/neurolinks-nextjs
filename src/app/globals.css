@@ -1472,6 +1472,38 @@ h3,
   }
 }
 
+/**
+ * Homepage Veterans feature. Cool surface between the cream treatment
+ * section and the white "why" section, so it reads as a distinct entry
+ * point without competing with the hero.
+ */
+.home-vet {
+  background: #eef3f8;
+  border-block: 1px solid rgb(26 39 68 / 0.08);
+}
+
+.home-vet-split {
+  display: grid;
+  gap: 1.75rem;
+  align-items: center;
+}
+
+.home-vet-photo {
+  aspect-ratio: 3 / 2;
+  border-radius: var(--nl-radius-lg);
+}
+
+@media (min-width: 960px) {
+  .home-vet-split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 3rem;
+  }
+
+  .home-vet-photo {
+    aspect-ratio: 4 / 3;
+  }
+}
+
 .location-split {
   display: grid;
   gap: 1.75rem;
@@ -3341,6 +3373,558 @@ h3,
   .svc-hero .hero-enter,
   .svc-path-line,
   .svc-path-step {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/**
+ * Veterans page. Shares .tms-* editorial structure and the homepage care
+ * pathway, then adds Veteran-specific panels. Scoped to .vet-* so no other
+ * route changes.
+ */
+.vet-hero-wash {
+  background:
+    linear-gradient(
+      100deg,
+      rgb(var(--nl-hero-navy) / 0.94) 0%,
+      rgb(var(--nl-hero-navy) / 0.86) 30%,
+      rgb(var(--nl-hero-navy) / 0.6) 52%,
+      rgb(var(--nl-hero-navy) / 0.24) 74%,
+      rgb(var(--nl-hero-navy) / 0.08) 90%
+    );
+}
+
+@media (max-width: 767px) {
+  .vet-hero .hero-scrim {
+    background: linear-gradient(
+      to bottom,
+      rgb(var(--nl-hero-navy) / 0.14) 0%,
+      rgb(var(--nl-hero-navy) / 0.3) 32%,
+      rgb(var(--nl-hero-navy) / 0.66) 55%,
+      rgb(var(--nl-hero-navy) / 0.92) 76%,
+      rgb(var(--nl-hero-navy)) 100%
+    );
+  }
+}
+
+/* Restrained md+ entrance; phones already run the shared hero sequence. */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .vet-hero .hero-photo {
+    animation: nl-hero-photo 400ms ease-out both;
+  }
+
+  .vet-hero .hero-enter {
+    animation: nl-hero-enter 480ms cubic-bezier(0.22, 0.68, 0.31, 1) both;
+    animation-delay: 40ms;
+  }
+
+  .vet-hero .hero-enter-2 {
+    animation-delay: 130ms;
+  }
+
+  .vet-hero .hero-enter-3 {
+    animation-delay: 190ms;
+  }
+}
+
+.vet-hero-lede {
+  max-width: 34rem;
+  margin-top: 1rem;
+  color: rgb(255 255 255 / 0.92);
+  font-size: 0.975rem;
+  line-height: 1.6;
+  text-shadow: 0 1px 12px rgb(7 29 52 / 0.34);
+}
+
+.vet-hero-lede + .vet-hero-lede {
+  margin-top: 0.85rem;
+  color: rgb(255 255 255 / 0.82);
+}
+
+@media (min-width: 768px) {
+  .vet-hero-lede {
+    max-width: 36rem;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+}
+
+/* Four facts instead of the homepage three. */
+.vet-trust .trust-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .vet-trust .trust-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 2rem;
+  }
+
+  .vet-trust .trust-grid li:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+}
+
+@media (min-width: 900px) {
+  .vet-trust .trust-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .vet-trust .trust-title {
+    font-size: 0.9375rem;
+  }
+}
+
+.vet-impact {
+  display: grid;
+  gap: 1.75rem;
+}
+
+@media (min-width: 960px) {
+  .vet-impact {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 4rem;
+    align-items: start;
+  }
+}
+
+.vet-impact-rule {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .vet-impact-rule {
+    display: block;
+    width: 3rem;
+    height: 2px;
+    margin-top: 1.5rem;
+    background: var(--nl-yellow);
+  }
+}
+
+.vet-impact-copy p {
+  max-width: 36rem;
+  margin: 0;
+  color: var(--nl-muted);
+  font-size: 1.03125rem;
+  line-height: 1.75;
+}
+
+.vet-impact-copy p + p {
+  margin-top: 1.15rem;
+}
+
+.vet-emphasis {
+  margin: 1.5rem 0;
+  padding: 0.15rem 0 0.15rem 1.15rem;
+  border-left: 2px solid var(--nl-yellow);
+}
+
+.vet-impact-copy .vet-emphasis p {
+  color: var(--nl-navy);
+  font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  letter-spacing: -0.012em;
+}
+
+@media (min-width: 768px) {
+  .vet-impact-copy .vet-emphasis p {
+    font-size: 1.35rem;
+  }
+}
+
+.vet-inline-link {
+  margin-top: 0.5rem;
+}
+
+.vet-conditions {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 900px) {
+  .vet-conditions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+.vet-condition {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 1.35rem 1.35rem 1.4rem;
+  border: 1px solid var(--nl-border);
+  border-top: 3px solid var(--nl-blue);
+  border-radius: var(--nl-radius-lg);
+  background: var(--nl-white);
+  box-shadow: 0 1px 2px rgb(26 39 68 / 0.04);
+}
+
+.vet-condition--teal {
+  border-top-color: #6f9c96;
+}
+
+.vet-condition--sage {
+  border-top-color: #8eaa7e;
+}
+
+.vet-condition--gold {
+  border-top-color: var(--nl-yellow);
+}
+
+.vet-condition-label {
+  margin: 0;
+  color: var(--nl-blue);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.vet-condition h3 {
+  margin: 0.6rem 0 0;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgb(26 39 68 / 0.1);
+  color: var(--nl-navy);
+  font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.vet-condition-text {
+  margin: 0.95rem 0 0;
+  color: var(--nl-muted);
+  font-size: 0.975rem;
+  line-height: 1.7;
+}
+
+.vet-condition .text-link {
+  margin-top: auto;
+  padding-top: 0.9rem;
+}
+
+.vet-tx-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .vet-tx-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+.vet-tx {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--nl-border);
+  border-radius: var(--nl-radius-lg);
+  background: var(--nl-white);
+}
+
+.vet-tx-head {
+  padding: 1.35rem 1.35rem 1.25rem;
+  border-bottom: 1px solid var(--nl-border);
+}
+
+.vet-tx--tms .vet-tx-head {
+  background: #eef3f8;
+}
+
+.vet-tx--ketamine .vet-tx-head {
+  background: #f6eed8;
+}
+
+.vet-tx-head h3 {
+  margin: 0.55rem 0 0;
+  color: var(--nl-navy);
+  font-family: var(--font-display), "Source Serif 4", ui-serif, Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+@media (min-width: 768px) {
+  .vet-tx-head {
+    padding: 1.5rem 1.6rem 1.4rem;
+  }
+
+  .vet-tx-head h3 {
+    font-size: 1.5rem;
+  }
+}
+
+.vet-tx-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1.3rem 1.35rem 1.45rem;
+}
+
+@media (min-width: 768px) {
+  .vet-tx-body {
+    padding: 1.5rem 1.6rem 1.65rem;
+  }
+}
+
+.vet-tx-body > p {
+  margin: 0;
+  color: var(--nl-muted);
+  font-size: 0.975rem;
+  line-height: 1.7;
+}
+
+.vet-tx-body > p + p {
+  margin-top: 0.85rem;
+}
+
+.vet-tx-points {
+  margin: 1.35rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgb(26 39 68 / 0.1);
+}
+
+.vet-tx-points li {
+  position: relative;
+  padding: 0.55rem 0 0.55rem 1rem;
+  border-bottom: 1px solid rgb(26 39 68 / 0.1);
+  color: var(--nl-ink);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.vet-tx-points li::before {
+  content: "";
+  position: absolute;
+  top: 1.05rem;
+  left: 0;
+  width: 0.4rem;
+  height: 1px;
+  background: var(--nl-yellow);
+}
+
+.vet-tx-action {
+  margin-top: auto;
+  padding-top: 1.4rem;
+}
+
+.vet-experience {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (min-width: 960px) {
+  .vet-experience {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+    gap: 3.5rem;
+  }
+}
+
+.vet-experience-photo {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #e8e4dc;
+}
+
+@media (min-width: 960px) {
+  .vet-experience-photo {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.vet-experience-text {
+  max-width: 36rem;
+  margin: 1rem 0 0;
+  color: var(--nl-muted);
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+.vet-points-block {
+  margin-top: 2.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid rgb(26 39 68 / 0.12);
+}
+
+.vet-points-heading {
+  margin: 0;
+  color: var(--nl-navy);
+  font-family: var(--font-body), Inter, ui-sans-serif, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vet-points {
+  display: grid;
+  gap: 0 2.5rem;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 700px) {
+  .vet-points {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .vet-points {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.vet-points li {
+  position: relative;
+  padding: 0.6rem 0 0.6rem 1.05rem;
+  border-bottom: 1px solid rgb(26 39 68 / 0.1);
+  color: var(--nl-ink);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.vet-points li::before {
+  content: "";
+  position: absolute;
+  top: 1.1rem;
+  left: 0;
+  width: 0.4rem;
+  height: 1px;
+  background: var(--nl-yellow);
+}
+
+.vet-coverage {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .vet-coverage {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 4rem;
+    align-items: start;
+  }
+}
+
+.vet-coverage-text {
+  max-width: 36rem;
+  margin: 0;
+  color: var(--nl-muted);
+  font-size: 1.03125rem;
+  line-height: 1.72;
+}
+
+.vet-coverage-text + .vet-coverage-text {
+  margin-top: 1.1rem;
+}
+
+.vet-coverage-text:first-child {
+  color: var(--nl-navy);
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+.vet-note {
+  margin-top: 1.75rem;
+  padding: 1.15rem 1.25rem;
+  border-left: 3px solid var(--nl-yellow);
+  border-radius: 0 var(--nl-radius-lg) var(--nl-radius-lg) 0;
+  background: #f7f3eb;
+  color: var(--nl-ink);
+  font-size: 0.975rem;
+  line-height: 1.65;
+}
+
+.vet-external {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(26 39 68 / 0.12);
+}
+
+.vet-external p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.vet-external-note {
+  color: var(--nl-muted);
+}
+
+.vet-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.vet-cta-actions > a {
+  flex: 1 1 100%;
+}
+
+@media (min-width: 480px) {
+  .vet-cta-actions > a {
+    flex: 0 0 auto;
+  }
+}
+
+/* Staggered panel reveals, driven by the section-level Reveal. */
+@media (prefers-reduced-motion: no-preference) {
+  .motion-ready .vet-stagger.reveal:not(.is-visible) > * {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .motion-ready .vet-stagger.reveal.is-visible > * {
+    animation: vet-stagger-in 480ms var(--nl-ease) both;
+  }
+
+  .motion-ready .vet-stagger.reveal.is-visible > :nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  .motion-ready .vet-stagger.reveal.is-visible > :nth-child(3) {
+    animation-delay: 140ms;
+  }
+
+  .motion-ready .nl-hash-target .vet-stagger.reveal:not(.is-visible) > * {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes vet-stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vet-hero .hero-photo,
+  .vet-hero .hero-enter,
+  .vet-stagger.reveal > * {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
