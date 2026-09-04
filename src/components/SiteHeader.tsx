@@ -16,6 +16,7 @@ function overlayHeroId(pathname: string) {
   if (path === "/about-tms-treatment-on-psychiatric-illness") return "tms-hero";
   if (path === "/ketamine-treatment-resistant-depression-nanaimo") return "ket-hero";
   if (path === "/services-psychiatric-tms-ketamine-treatment") return "svc-hero";
+  if (path === "/veterans") return "veterans-hero";
   if (path === "/psychiatrist-tms-nanaimo") return "about-hero";
   if (path === "/physician-referral") return "referral-hero";
   if (path === "/contact") return "contact-hero";
@@ -151,7 +152,7 @@ export function SiteHeader() {
           />
         </Link>
         <nav className="hidden min-w-0 flex-1 xl:block" aria-label="Primary">
-          <ul className="flex flex-nowrap items-center justify-end gap-x-4 text-[13px] font-medium tracking-[0.01em] text-white xl:gap-x-6 xl:text-[14px]">
+          <ul className="flex flex-nowrap items-center justify-end gap-x-4 text-[13px] font-medium tracking-[0.01em] text-white xl:gap-x-5 xl:text-[14px] 2xl:gap-x-6">
             {PRIMARY_NAV.map((item) => {
               const current = isActivePath(pathname, item.href);
               return (

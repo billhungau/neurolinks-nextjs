@@ -16,6 +16,7 @@ const MAIN_ROUTES = [
   "/about-tms-treatment-on-psychiatric-illness/",
   "/ketamine-treatment-resistant-depression-nanaimo/",
   "/services-psychiatric-tms-ketamine-treatment/",
+  "/veterans/",
   "/psychiatrist-tms-nanaimo/",
   "/physician-referral/",
   "/contact/",
@@ -31,6 +32,7 @@ const TITLES = {
     "Ketamine Therapy in Nanaimo, BC | NeuroLinks",
   "/services-psychiatric-tms-ketamine-treatment/":
     "Psychiatric Assessment &amp; Treatment in Nanaimo | NeuroLinks",
+  "/veterans/": "TMS &amp; Ketamine Treatment for Veterans in BC | NeuroLinks",
   "/psychiatrist-tms-nanaimo/": "Dr. Chi Hung Au &amp; Our Team | NeuroLinks Nanaimo",
   "/physician-referral/": "Refer a Patient for TMS or Ketamine | NeuroLinks",
   "/contact/": "Contact NeuroLinks | Nanaimo TMS &amp; Ketamine Clinic",

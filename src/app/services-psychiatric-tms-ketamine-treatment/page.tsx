@@ -5,6 +5,7 @@ import { ButtonLink } from "@/components/ButtonLink";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Reveal } from "@/components/Reveal";
 import { TmsSectionNav } from "@/components/tms/TmsSectionNav";
+import { VETERAN_COVERAGE_STATEMENT } from "@/content/veterans";
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
@@ -151,8 +152,8 @@ const COVERAGE = [
     body: "If you have extended health insurance, you may be covered. We will issue a letter of support and can fill out necessary insurance documents to assist you with reimbursement. However, since coverage policies differ among insurance companies, please contact your agent for more information.",
   },
   {
-    title: "Medavie Blue Cross",
-    body: "The TMS treatment is covered by the Medavie Blue Cross insurance, which provides coverage for members of the Canadian Armed Forces and Royal Canadian Mounted Police.",
+    title: "Veterans Affairs Canada and Medavie Blue Cross",
+    body: VETERAN_COVERAGE_STATEMENT,
   },
   {
     title: "WorkSafeBC",

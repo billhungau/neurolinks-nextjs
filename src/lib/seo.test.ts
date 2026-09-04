@@ -8,6 +8,7 @@ const REQUIRED_TITLES: Record<string, string> = {
   "/about-tms-treatment-on-psychiatric-illness/": "TMS Therapy in Nanaimo, Vancouver Island | NeuroLinks",
   "/ketamine-treatment-resistant-depression-nanaimo/": "Ketamine Therapy in Nanaimo, BC | NeuroLinks",
   "/services-psychiatric-tms-ketamine-treatment/": "Psychiatric Assessment & Treatment in Nanaimo | NeuroLinks",
+  "/veterans/": "TMS & Ketamine Treatment for Veterans in BC | NeuroLinks",
   "/psychiatrist-tms-nanaimo/": "Dr. Chi Hung Au & Our Team | NeuroLinks Nanaimo",
   "/physician-referral/": "Refer a Patient for TMS or Ketamine | NeuroLinks",
   "/contact/": "Contact NeuroLinks | Nanaimo TMS & Ketamine Clinic",
@@ -32,18 +33,30 @@ test("descriptions are unique and the ketamine title no longer has a missing spa
   assert.equal(ketamine?.seoTitle.includes("&Anxiety"), false);
 });
 
-test("sitemap routes are the seven indexable English pages only", () => {
+test("sitemap routes are the eight indexable English pages only", () => {
   assert.deepEqual([...SITEMAP_ROUTES], [
     "/",
     "/about-tms-treatment-on-psychiatric-illness/",
     "/ketamine-treatment-resistant-depression-nanaimo/",
     "/services-psychiatric-tms-ketamine-treatment/",
+    "/veterans/",
     "/psychiatrist-tms-nanaimo/",
     "/physician-referral/",
     "/contact/",
   ]);
   const landing = PAGE_MANIFEST.find((page) => page.route === "/neurolinks-psychiatry-nanaimo-bc/");
   assert.equal(landing?.inSitemap, false);
+  const veterans = PAGE_MANIFEST.find((page) => page.route === "/veterans/");
+  assert.equal(veterans?.inSitemap, true);
+  assert.equal(
+    veterans?.seoTitle,
+    "TMS & Ketamine Treatment for Veterans in BC | NeuroLinks",
+  );
+  assert.equal(
+    veterans?.seoDescription,
+    "Psychiatrist-led assessment, TMS and ketamine treatment for Veterans in BC, with support navigating VAC and Medavie Blue Cross preauthorization.",
+  );
+  assert.equal(productionUrl("/veterans/"), "https://neurolinks.ca/veterans/");
 });
 
 test("Open Graph image URLs are production-origin and 1200x630 files exist", async () => {
