@@ -687,6 +687,7 @@ h3,
 }
 
 .home-forward-node svg {
+  display: block;
   width: 1.3rem;
   height: 1.3rem;
 }

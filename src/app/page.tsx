@@ -49,72 +49,73 @@ const FORWARD = [
     index: "01",
     title: "Start with a conversation",
     body: "Contact us by phone, email or the contact form. We will answer your questions and explain how an assessment can be arranged.",
-    icon: "talk",
+    icon: "MessagesSquare",
   },
   {
     index: "02",
     title: "Understand the full picture",
     body: "A psychiatrist considers your symptoms, treatment history, medical factors, needs and preferences. Questionnaires may help complete the picture.",
-    icon: "assess",
+    icon: "ClipboardCheck",
   },
   {
     index: "03",
     title: "Receive care tailored to you",
     body: "After the assessment, we explain options suited to your needs, including TMS, ketamine, medication, bright light therapy or another approach.",
-    icon: "path",
+    icon: "UserRoundCheck",
   },
   {
     index: "04",
     title: "Keep moving forward",
     body: "If treatment begins, our team monitors your comfort, progress and response. If progress is uneven, we follow up and consider the next steps with you.",
-    icon: "follow",
+    icon: "HandHeart",
   },
 ] as const;
 
+/** Official Lucide 24×24 outlines (lucide-static), inlined so no extra package is added. */
 function ForwardIcon({ name }: { name: (typeof FORWARD)[number]["icon"] }) {
   const common = {
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
-    strokeWidth: 1.7,
+    strokeWidth: 2,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
-    "aria-hidden": true,
+    "aria-hidden": true as const,
+    className: `home-forward-icon home-forward-icon--${name}`,
   };
-  if (name === "talk") {
+
+  if (name === "MessagesSquare") {
     return (
       <svg {...common}>
-        <path d="M4.5 15.2V7.8A2.3 2.3 0 0 1 6.8 5.5h7.4A2.3 2.3 0 0 1 16.5 7.8v5.2a2.3 2.3 0 0 1-2.3 2.3H9.2L4.5 18.4z" />
-        <path d="M16.4 9.2h.8A2.3 2.3 0 0 1 19.5 11.5v5.1l-3.1-2.1H11.8" />
+        <path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+        <path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1" />
       </svg>
     );
   }
-  if (name === "assess") {
+  if (name === "ClipboardCheck") {
     return (
       <svg {...common}>
-        <path d="M8 4.5H5.5V7" />
-        <path d="M16 4.5h2.5V7" />
-        <path d="M8 19.5H5.5V17" />
-        <path d="M16 19.5h2.5V17" />
-        <circle cx="12" cy="12" r="3.2" />
+        <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        <path d="m9 14 2 2 4-4" />
       </svg>
     );
   }
-  if (name === "path") {
+  if (name === "UserRoundCheck") {
     return (
       <svg {...common}>
-        <path d="M6 19.2c0-4.2 2.4-6.2 6-6.2" />
-        <path d="M12 13c3.6 0 6-2 6-6.2" />
-        <circle cx="6" cy="19.2" r="1.35" fill="currentColor" stroke="none" />
-        <circle cx="18" cy="6.8" r="1.35" fill="currentColor" stroke="none" />
-        <circle cx="12" cy="13" r="1.45" fill="currentColor" stroke="none" />
+        <path d="M2 21a8 8 0 0 1 13.292-6" />
+        <circle cx="10" cy="8" r="5" />
+        <path d="m16 19 2 2 4-4" />
       </svg>
     );
   }
   return (
     <svg {...common}>
-      <path d="M7.2 9.2A5.1 5.1 0 0 1 16.6 8.4L18 6.8v4.4h-4.4" />
-      <path d="M16.8 14.8A5.1 5.1 0 0 1 7.4 15.6L6 17.2v-4.4h4.4" />
+      <path d="M11 14h2a2 2 0 0 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16" />
+      <path d="m14.45 13.39 5.05-4.694C20.196 8 21 6.85 21 5.75a2.75 2.75 0 0 0-4.797-1.837.276.276 0 0 1-.406 0A2.75 2.75 0 0 0 11 5.75c0 1.2.802 2.248 1.5 2.946L16 11.95" />
+      <path d="m2 15 6 6" />
+      <path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a1 1 0 0 0-2.75-2.91" />
     </svg>
   );
 }
