@@ -3,6 +3,7 @@ import { Inter, Source_Serif_4 } from "next/font/google";
 import Script from "next/script";
 import { AnchorOffset } from "@/components/AnchorOffset";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
+import { MotionReady } from "@/components/MotionReady";
 import { SkipLink } from "@/components/SkipLink";
 import { DEFAULT_OG_IMAGE, pageRobots } from "@/lib/seo";
 import {
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SkipLink />
         <AnchorOffset />
         <ClinicJsonLd />
+        <MotionReady />
         {children}
       </body>
     </html>

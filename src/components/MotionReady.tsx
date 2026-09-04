@@ -7,7 +7,12 @@ export function MotionReady() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
+
     document.documentElement.classList.add("motion-ready");
+
+    return () => {
+      document.documentElement.classList.remove("motion-ready");
+    };
   }, []);
 
   return null;

@@ -1,17 +1,23 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
+import { shouldRevealImmediately } from "@/lib/motion-policy";
 
-/** Fail-open if the observer never fires so essential copy is not left hidden. */
-export const REVEAL_FALLBACK_MS = 1200;
+export { shouldRevealImmediately };
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function isInOrPastView(node: Element) {
-  const rect = node.getBoundingClientRect();
-  return rect.top < window.innerHeight + 80 && rect.bottom > 0;
+function isScrolledPast(node: Element) {
+  return node.getBoundingClientRect().bottom < 0;
+}
+
+function targetsReveal(node: Element) {
+  const id = window.location.hash.replace("#", "");
+  if (!id) return false;
+  const target = document.getElementById(id);
+  return Boolean(target && (node === target || node.contains(target) || target.contains(node)));
 }
 
 export function Reveal({
@@ -33,53 +39,62 @@ export function Reveal({
     if (!node) return undefined;
 
     const reveal = () => setVisible(true);
+    let frame = 0;
+    const revealAfterPaint = () => {
+      frame = window.requestAnimationFrame(() => {
+        setVisible(true);
+      });
+    };
 
-    if (prefersReducedMotion()) {
+    if (
+      shouldRevealImmediately({
+        reducedMotion: prefersReducedMotion(),
+        observerSupported: typeof IntersectionObserver !== "undefined",
+      })
+    ) {
       reveal();
       return undefined;
     }
 
-    if (typeof IntersectionObserver === "undefined" || isInOrPastView(node)) {
+    if (targetsReveal(node) || isScrolledPast(node)) {
       reveal();
       return undefined;
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          reveal();
+    let observer: IntersectionObserver;
+    try {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          revealAfterPaint();
           observer.disconnect();
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
-    );
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+      );
+    } catch {
+      reveal();
+      return undefined;
+    }
+
     observer.observe(node);
 
     const onHash = () => {
-      const id = window.location.hash.replace("#", "");
-      if (!id) return;
-      const target = document.getElementById(id);
-      if (target && (node === target || node.contains(target) || target.contains(node))) {
-        reveal();
-      }
+      if (targetsReveal(node)) reveal();
     };
-    onHash();
     window.addEventListener("hashchange", onHash);
 
     const revealIfPast = () => {
-      if (node.getBoundingClientRect().bottom < 0) reveal();
+      if (isScrolledPast(node)) reveal();
     };
     window.addEventListener("scroll", revealIfPast, { passive: true });
     window.addEventListener("pageshow", revealIfPast);
 
-    const fallback = window.setTimeout(reveal, REVEAL_FALLBACK_MS);
-
     return () => {
       observer.disconnect();
+      window.cancelAnimationFrame(frame);
       window.removeEventListener("hashchange", onHash);
       window.removeEventListener("scroll", revealIfPast);
       window.removeEventListener("pageshow", revealIfPast);
-      window.clearTimeout(fallback);
     };
   }, []);
 

@@ -840,7 +840,7 @@ h3,
 @media (prefers-reduced-motion: no-preference) {
   .home-forward-track--prepare .home-forward-node {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.82);
   }
 
   .home-forward-track--prepare .home-forward-rail-svg path {
@@ -854,50 +854,47 @@ h3,
 
   .home-forward-track--prepare.home-forward-track--play .home-forward-rail-svg path {
     stroke-dashoffset: 0;
-    transition: stroke-dashoffset 850ms var(--nl-ease);
+    transition: stroke-dashoffset 2300ms var(--nl-ease);
   }
 
-  .home-forward-track--prepare.home-forward-track--play .home-forward-item:nth-child(1)::before {
+  .home-forward-track--prepare .home-forward-item--play:not(:last-child)::before {
     transform: translateX(-50%) scaleY(1);
-    transition: transform 280ms var(--nl-ease);
-    transition-delay: 80ms;
+    transition: transform 400ms var(--nl-ease);
   }
 
-  .home-forward-track--prepare.home-forward-track--play .home-forward-item:nth-child(2)::before {
-    transform: translateX(-50%) scaleY(1);
-    transition: transform 280ms var(--nl-ease);
-    transition-delay: 260ms;
+  .home-forward-track--prepare .home-forward-item--play .home-forward-node {
+    animation: home-forward-node-in 420ms var(--nl-ease) both;
   }
 
-  .home-forward-track--prepare.home-forward-track--play .home-forward-item:nth-child(3)::before {
-    transform: translateX(-50%) scaleY(1);
-    transition: transform 280ms var(--nl-ease);
-    transition-delay: 440ms;
+  .home-forward-track--prepare .home-forward-item:nth-child(4).home-forward-item--play .home-forward-node {
+    animation:
+      home-forward-node-in 420ms var(--nl-ease) both,
+      home-forward-glow 580ms var(--nl-ease) 420ms both;
   }
 
   .home-forward-track--prepare.home-forward-track--play .home-forward-item:nth-child(1) .home-forward-node {
-    animation: home-forward-node-in 280ms var(--nl-ease) 0ms both;
+    animation: home-forward-node-in 420ms var(--nl-ease) 0ms both;
   }
 
   .home-forward-track--prepare.home-forward-track--play .home-forward-item:nth-child(2) .home-forward-node {
-    animation: home-forward-node-in 280ms var(--nl-ease) 160ms both;
+    animation: home-forward-node-in 420ms var(--nl-ease) 380ms both;
   }
 
   .home-forward-track--prepare.home-forward-track--play .home-forward-item:nth-child(3) .home-forward-node {
-    animation: home-forward-node-in 280ms var(--nl-ease) 320ms both;
+    animation: home-forward-node-in 420ms var(--nl-ease) 760ms both;
   }
 
   .home-forward-track--prepare.home-forward-track--play .home-forward-item:nth-child(4) .home-forward-node {
     animation:
-      home-forward-node-in 280ms var(--nl-ease) 480ms both,
-      home-forward-glow 580ms var(--nl-ease) 640ms both;
+      home-forward-node-in 420ms var(--nl-ease) 1140ms both,
+      home-forward-glow 580ms var(--nl-ease) 1560ms both;
   }
 }
 
 @keyframes home-forward-node-in {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.82);
   }
   to {
     opacity: 1;
@@ -907,7 +904,8 @@ h3,
 
 @media (prefers-reduced-motion: reduce) {
   .home-forward-track--prepare .home-forward-node,
-  .home-forward-track--prepare.home-forward-track--play .home-forward-node {
+  .home-forward-track--prepare.home-forward-track--play .home-forward-node,
+  .home-forward-track--prepare .home-forward-item--play .home-forward-node {
     opacity: 1;
     transform: none;
     animation: none;
@@ -920,7 +918,8 @@ h3,
   }
 
   .home-forward-track--prepare .home-forward-item:not(:last-child)::before,
-  .home-forward-track--prepare.home-forward-track--play .home-forward-item:not(:last-child)::before {
+  .home-forward-track--prepare.home-forward-track--play .home-forward-item:not(:last-child)::before,
+  .home-forward-track--prepare .home-forward-item--play:not(:last-child)::before {
     transform: translateX(-50%) scaleY(1);
     transition: none;
   }

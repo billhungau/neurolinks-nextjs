@@ -116,11 +116,10 @@ test("landing logo links to the homepage on desktop and mobile", () => {
 });
 
 test("Reveal fails open when the observer cannot run", () => {
-  assert.match(revealSource, /REVEAL_FALLBACK_MS = 1200/);
-  assert.match(revealSource, /prefersReducedMotion\(\)[\s\S]*reveal\(\)/);
-  assert.match(revealSource, /typeof IntersectionObserver === "undefined"/);
-  assert.match(revealSource, /isInOrPastView\(node\)/);
-  assert.equal(revealSource.includes("setTimeout(reveal, 12000)"), false);
+  assert.match(revealSource, /shouldRevealImmediately/);
+  assert.match(revealSource, /typeof IntersectionObserver/);
+  assert.equal(revealSource.includes("REVEAL_FALLBACK_MS"), false);
+  assert.equal(revealSource.includes("setTimeout"), false);
 });
 
 test("landing keeps the requested headline, excerpt and three verbatim reviews", () => {
