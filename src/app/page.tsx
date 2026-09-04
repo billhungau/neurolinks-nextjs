@@ -43,28 +43,80 @@ const WHY = [
   },
 ] as const;
 
-const PATHWAY = [
+const FORWARD = [
   {
     index: "01",
-    title: "Contact the clinic",
-    body: "Phone, email, or the contact form on this site to ask about a psychiatric assessment.",
+    title: "Start with a conversation",
+    body: "Contact us by phone, email or the contact form. We will answer your initial questions and explain how an assessment can be arranged.",
+    icon: "talk",
   },
   {
     index: "02",
-    title: "Physician referral",
-    body: "An appropriate physician referral is required for an MSP-covered assessment. The clinic can explain referral requirements when you enquire.",
+    title: "Understand the full picture",
+    body: "A psychiatrist considers your symptoms, diagnosis, treatment history, medical factors, needs and preferences. Questionnaires may also help us understand how you are feeling.",
+    icon: "assess",
   },
   {
     index: "03",
-    title: "Psychiatric assessment",
-    body: "A psychiatrist reviews your diagnosis, treatment history, and relevant medical factors. Questionnaires may be used to understand symptom severity.",
+    title: "Receive care tailored to you",
+    body: "After the assessment, we explain the options that may be appropriate for you. These may include TMS, ketamine, medication, bright-light therapy or another approach.",
+    icon: "path",
   },
   {
     index: "04",
-    title: "After the assessment",
-    body: "TMS, ketamine, or another option may be recommended when clinically appropriate. Treatment coverage is separate from the assessment.",
+    title: "Keep moving forward",
+    body: "If treatment begins, our team monitors your comfort, progress and response. When symptoms fluctuate or improvement is incomplete, we follow up, review what has changed and consider appropriate next steps with you.",
+    icon: "follow",
   },
 ] as const;
+
+function ForwardIcon({ name }: { name: (typeof FORWARD)[number]["icon"] }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.7,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+  if (name === "talk") {
+    return (
+      <svg {...common}>
+        <path d="M4.5 15.2V7.8A2.3 2.3 0 0 1 6.8 5.5h7.4A2.3 2.3 0 0 1 16.5 7.8v5.2a2.3 2.3 0 0 1-2.3 2.3H9.2L4.5 18.4z" />
+        <path d="M16.4 9.2h.8A2.3 2.3 0 0 1 19.5 11.5v5.1l-3.1-2.1H11.8" />
+      </svg>
+    );
+  }
+  if (name === "assess") {
+    return (
+      <svg {...common}>
+        <path d="M8 4.5H5.5V7" />
+        <path d="M16 4.5h2.5V7" />
+        <path d="M8 19.5H5.5V17" />
+        <path d="M16 19.5h2.5V17" />
+        <circle cx="12" cy="12" r="3.2" />
+      </svg>
+    );
+  }
+  if (name === "path") {
+    return (
+      <svg {...common}>
+        <path d="M6 19.2c0-4.2 2.4-6.2 6-6.2" />
+        <path d="M12 13c3.6 0 6-2 6-6.2" />
+        <circle cx="6" cy="19.2" r="1.35" fill="currentColor" stroke="none" />
+        <circle cx="18" cy="6.8" r="1.35" fill="currentColor" stroke="none" />
+        <circle cx="12" cy="13" r="1.45" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...common}>
+      <path d="M7.2 9.2A5.1 5.1 0 0 1 16.6 8.4L18 6.8v4.4h-4.4" />
+      <path d="M16.8 14.8A5.1 5.1 0 0 1 7.4 15.6L6 17.2v-4.4h4.4" />
+    </svg>
+  );
+}
 
 const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLinks";
 
@@ -252,29 +304,67 @@ challenges`}
         </div>
       </section>
 
-      <section className="home-section bg-[var(--nl-navy)] text-white" aria-labelledby="pathway-heading">
+      <section
+        className="home-section home-forward text-white"
+        aria-labelledby="pathway-heading"
+      >
         <div className="nl-wrap">
           <Reveal>
             <h2 id="pathway-heading" className="home-h2 max-w-3xl">
-              How care typically proceeds
+              A clear way forward
             </h2>
-          </Reveal>
-          <div className="pathway-block mt-8">
-            <div className="pathway-rule" aria-hidden="true" />
-            <ol className="pathway grid list-none gap-8 p-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
-              {PATHWAY.map((step, index) => (
-                <Reveal key={step.index} delayMs={index * 60}>
-                  <li>
-                    <p className="relative z-10 font-serif text-2xl text-[var(--nl-yellow)]">
-                      {step.index}
-                    </p>
-                    <h3 className="mt-3 font-serif text-xl font-semibold">{step.title}</h3>
-                    <p className="mt-2.5 text-sm leading-relaxed text-white/75">{step.body}</p>
+            <p className="home-forward-lede">
+              You do not need to choose a treatment before contacting us. Start by telling us what
+              has not helped enough and what you hope will change. We will explain the next steps
+              and support you throughout your care.
+            </p>
+            <div className="home-forward-track">
+              <svg
+                className="home-forward-rail-svg"
+                viewBox="0 0 1000 72"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <defs>
+                  <linearGradient id="home-forward-line" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#6f9c96" />
+                    <stop offset="1" stopColor="#e8b923" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M70 56 C 300 48, 700 22, 930 16"
+                  fill="none"
+                  stroke="url(#home-forward-line)"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <ol className="home-forward-list">
+                {FORWARD.map((step) => (
+                  <li key={step.index} className="home-forward-item">
+                    <span className="home-forward-node" aria-hidden="true">
+                      <ForwardIcon name={step.icon} />
+                    </span>
+                    <div className="home-forward-copy">
+                      <p className="home-forward-step">Step {step.index}</p>
+                      <h3>{step.title}</h3>
+                      <p>{step.body}</p>
+                    </div>
                   </li>
-                </Reveal>
-              ))}
-            </ol>
-          </div>
+                ))}
+              </ol>
+            </div>
+            <div className="home-forward-foot">
+              <p>
+                For an MSP-covered psychiatric assessment, a physician referral is required. We can
+                explain the referral process when you contact us.
+              </p>
+              <ButtonLink href="/contact/" variant="accent" className="home-forward-cta">
+                Talk to our team
+                <span aria-hidden="true">→</span>
+              </ButtonLink>
+            </div>
+          </Reveal>
         </div>
       </section>
 

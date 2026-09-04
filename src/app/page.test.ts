@@ -67,6 +67,35 @@ test("homepage funding copy is unchanged", () => {
   );
 });
 
+test("homepage care pathway uses the supplied forward copy and contact CTA", () => {
+  const start = homePage.indexOf("const FORWARD");
+  const end = homePage.indexOf('id="funding-heading"');
+  const pathway = visibleText(homePage.slice(start, end));
+  assert.match(pathway, /A clear way forward/);
+  assert.equal(homePage.includes("How care typically proceeds"), false);
+  assert.match(
+    pathway,
+    /You do not need to choose a treatment before contacting us\. Start by telling us what has not helped enough and what you hope will change/,
+  );
+  assert.match(pathway, /Start with a conversation/);
+  assert.match(pathway, /Understand the full picture/);
+  assert.match(pathway, /Receive care tailored to you/);
+  assert.match(pathway, /Keep moving forward/);
+  assert.match(pathway, /bright-light therapy or another approach/);
+  assert.match(
+    pathway,
+    /For an MSP-covered psychiatric assessment, a physician referral is required/,
+  );
+  assert.match(pathway, /Talk to our team/);
+  assert.match(homePage, /href="\/contact\/"/);
+  assert.match(homePage, /<ol className="home-forward-list">/);
+  assert.match(homePage, /aria-hidden="true"/);
+  assert.equal(landingPage.includes("home-forward"), false);
+  assert.match(landingPage, /className="pathway-block mt-8"/);
+  assert.match(globalsCss, /\.home-forward \{/);
+  assert.match(globalsCss, /\.pathway-rule \{/);
+});
+
 test("treatment-card emphasis and funding columns are homepage-scoped", () => {
   assert.match(homePage, /home-tx-benefit--tms/);
   assert.match(homePage, /home-tx-benefit--ket/);
