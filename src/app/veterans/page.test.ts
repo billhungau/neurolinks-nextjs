@@ -95,11 +95,11 @@ test("hero carries the supplied eyebrow, single H1, copy and on-page CTAs", () =
     hero,
     /NeuroLinks provides psychiatrist-led assessment and treatment in Nanaimo, with experience helping Veterans navigate treatment planning and VAC preauthorization\./,
   );
-  assert.match(hero, /Request a confidential conversation/);
-  assert.match(hero, /Explore treatment options/);
+  assert.match(hero, /VETERAN_HERO_PRIMARY_CTA\.label/);
+  assert.match(hero, /VETERAN_HERO_SECONDARY_CTA\.label/);
+  assert.match(page, /href=\{VETERAN_HERO_PRIMARY_CTA\.href\}/);
+  assert.match(page, /href=\{VETERAN_HERO_SECONDARY_CTA\.href\}/);
   assert.match(hero, /For clinicians and case managers/);
-  assert.match(page, /href="#veterans-contact"/);
-  assert.match(page, /href="#treatment-options"/);
   assert.match(page, /href="#coordination"/);
   assert.equal((page.match(/<h1/g) ?? []).length, 1);
   assert.match(page, /hero-enter hero-enter-2/);
@@ -166,7 +166,8 @@ test("treatment panels stay secondary and scroll the primary CTA on-page", () =>
   assert.match(page, /<Reveal className="vet-stagger vet-tx-grid">/);
   assert.match(page, /vet-tx vet-tx--\$\{treatment\.key\}/);
   assert.match(page, /<TextLink href=\{treatment\.href\}>/);
-  assert.match(pageCopy, /Ask whether an assessment may be appropriate/);
+  assert.match(page, /\{VETERAN_TREATMENT_CTA\.label\}/);
+  assert.match(page, /href=\{VETERAN_TREATMENT_CTA\.href\}/);
   assert.match(globalsCss, /\.vet-tx--tms \.vet-tx-head \{[\s\S]*?background:\s*#eef3f8/);
   assert.match(globalsCss, /\.vet-tx--ketamine \.vet-tx-head \{[\s\S]*?background:\s*#f6eed8/);
   assert.equal(/\bIV\b|intravenous/i.test(veteransContent), false);
@@ -197,11 +198,16 @@ test("coverage includes the official VAC link and an on-page coordination panel"
   const coverage = visibleText(page.slice(page.indexOf('id="coverage"'), page.indexOf('id="faqs"')));
   assert.match(coverage, /Coverage and authorization/);
   assert.match(coverage, /VETERAN_COVERAGE\.coordinationHeading/);
-  assert.match(coverage, /Submit a physician referral/);
-  assert.match(coverage, /Contact NeuroLinks about coordination/);
+  assert.match(coverage, /VETERAN_COORDINATION_PRIMARY_CTA\.label/);
+  assert.match(coverage, /VETERAN_COORDINATION_SECONDARY_CTA\.label/);
+  assert.match(page, /href=\{VETERAN_COORDINATION_PRIMARY_CTA\.href\}/);
+  assert.match(page, /href=\{VETERAN_COORDINATION_SECONDARY_CTA\.href\}/);
+  assert.match(
+    globalsCss,
+    /@media \(min-width: 560px\) \{\s*\.vet-coord-actions \{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) minmax\(0, 1fr\)/,
+  );
   assert.match(coverage, /Veterans Affairs Canada — Mental Health Benefits/);
   assert.match(page, /id="coordination"/);
-  assert.match(page, /href="\/physician-referral\/"/);
   assert.match(page, /VAC_MENTAL_HEALTH_BENEFITS_URL/);
   assert.match(page, /rel="noopener noreferrer"\s*\n?\s*target="_blank"/);
   assert.match(globalsCss, /\.vet-coord \{/);
@@ -212,6 +218,7 @@ test("FAQs render through the editorial accordion and emit matching FAQPage JSON
   assert.match(page, /<FaqAccordion items=\{VETERAN_FAQS\} variant="editorial" \/>/);
   assert.match(page, /className="tms-faq-layout"/);
   const faqSection = page.slice(page.indexOf('id="faqs"'), page.indexOf('id="veterans-contact"'));
+  assert.equal(faqSection.includes("Start a confidential conversation"), false);
   assert.equal(faqSection.includes("Request a confidential conversation"), false);
   const jsonLd = readFileSync(join(root, "../../components/FaqJsonLd.tsx"), "utf8");
   assert.match(jsonLd, /"@type": "FAQPage"/);
@@ -256,8 +263,10 @@ test("the final contact section hosts the Veteran form and clinic phone number",
   assert.match(page, /href=\{SITE\.phoneHref\}/);
   assert.match(page, /Call \{SITE\.phone\}/);
   assert.match(form, /data-nl-form-source=\{VETERANS_SOURCE\}/);
-  assert.match(form, /Ask our team to contact me/);
-  assert.match(form, /You do not need to describe your trauma or medical history here/);
+  assert.match(form, /VETERAN_CONTACT\.submitLabel/);
+  assert.equal(form.includes("You do not need to describe your trauma or medical history here"), false);
+  assert.equal(form.includes("vet-form-reassurance"), false);
+  assert.equal(form.includes("veterans-message-hint"), false);
   assert.match(form, /source: VETERANS_SOURCE/);
   assert.equal(form.includes("Preferred contact method"), false);
   assert.equal(form.includes("What would you like help with?"), false);
@@ -268,9 +277,13 @@ test("the final contact section hosts the Veteran form and clinic phone number",
     form.indexOf('<Field id="veterans-phone"'),
     form.indexOf('<Field id="veterans-message"'),
   );
-  assert.match(phoneField, /optional/);
+  assert.match(phoneField, /label="Phone"/);
+  assert.equal(/optional/i.test(phoneField), false);
   assert.equal(phoneField.includes("required"), false);
+  assert.equal(form.includes("vet-optional"), false);
   assert.match(form, /name="message"[\s\S]{0,240}required[\s\S]{0,120}aria-required="true"/);
+  assert.equal(globalsCss.includes(".vet-optional"), false);
+  assert.equal(globalsCss.includes(".vet-form-reassurance"), false);
   assert.equal(form.includes("JOTFORM_API_KEY"), false);
   assert.equal(form.includes("searchParams"), false);
   assert.equal(form.includes("gtag"), false);
@@ -279,12 +292,8 @@ test("the final contact section hosts the Veteran form and clinic phone number",
 
 test("primary CTAs stay on the Veterans page instead of leaving for \/contact\/", () => {
   assert.equal(page.includes('href="/contact/"'), false);
-  for (const href of [
-    "/physician-referral/",
-    "/psychiatrist-tms-nanaimo/",
-  ]) {
-    assert.ok(page.includes(href), `missing internal link ${href}`);
-  }
+  assert.match(page, /href=\{VETERAN_COORDINATION_PRIMARY_CTA\.href\}/);
+  assert.ok(page.includes("/psychiatrist-tms-nanaimo/"), "missing internal link /psychiatrist-tms-nanaimo/");
   assert.match(page, /VETERAN_TREATMENTS/);
   assert.match(page, /VETERAN_CONDITIONS/);
 });

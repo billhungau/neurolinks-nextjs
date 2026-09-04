@@ -5,6 +5,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { VETERAN_CONTACT, VETERAN_HERO_PRIMARY_CTA } from "@/content/veterans";
 import {
   CONTACT_ERROR_WITH_PHONE,
   CONTACT_LIMITS,
@@ -186,7 +187,7 @@ export function VeteransContactForm() {
         onSubmit={onSubmit}
         noValidate
         aria-busy={submitting}
-        aria-label="Request a confidential conversation"
+        aria-label={VETERAN_HERO_PRIMARY_CTA.label}
         data-nl-form-source={VETERANS_SOURCE}
       >
         <div className="ct-hp" aria-hidden="true">
@@ -243,7 +244,7 @@ export function VeteransContactForm() {
           />
         </Field>
 
-        <Field id="veterans-phone" label="Phone" error={errors.phone} optional>
+        <Field id="veterans-phone" label="Phone" error={errors.phone}>
           <input
             ref={phoneRef}
             id="veterans-phone"
@@ -270,22 +271,15 @@ export function VeteransContactForm() {
             required
             aria-required="true"
             aria-invalid={Boolean(errors.message)}
-            aria-describedby={
-              errors.message ? "veterans-message-error veterans-message-hint" : "veterans-message-hint"
-            }
+            aria-describedby={errors.message ? "veterans-message-error" : undefined}
             disabled={submitting}
             onChange={(event) => update("message", event.target.value)}
           />
         </Field>
 
-        <p id="veterans-message-hint" className="vet-form-reassurance">
-          You do not need to describe your trauma or medical history here. A brief question is
-          enough.
-        </p>
-
         <div className="ct-form-actions">
           <button className="ct-submit" type="submit" disabled={submitting}>
-            {submitting ? "Sending…" : "Ask our team to contact me"}
+            {submitting ? "Sending…" : VETERAN_CONTACT.submitLabel}
           </button>
         </div>
       </form>
@@ -298,26 +292,26 @@ function Field({
   label,
   error,
   required = false,
-  optional = false,
   children,
 }: {
   id: string;
   label: string;
   error?: string;
   required?: boolean;
-  optional?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className={`ct-field${error ? " is-invalid" : ""}`}>
       <label htmlFor={id}>
-        {label}{" "}
+        {label}
         {required ? (
-          <span className="ct-req" aria-hidden="true">
-            *
-          </span>
+          <>
+            {" "}
+            <span className="ct-req" aria-hidden="true">
+              *
+            </span>
+          </>
         ) : null}
-        {optional ? <span className="vet-optional">Optional</span> : null}
       </label>
       {children}
       {error ? (

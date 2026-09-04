@@ -13,16 +13,21 @@ import {
   VETERAN_CONDITIONS,
   VETERAN_CONDITIONS_INTRO,
   VETERAN_CONTACT,
+  VETERAN_COORDINATION_PRIMARY_CTA,
+  VETERAN_COORDINATION_SECONDARY_CTA,
   VETERAN_COVERAGE,
   VETERAN_EXPERIENCE,
   VETERAN_EXPERIENCE_POINTS,
   VETERAN_FAQS,
+  VETERAN_HERO_PRIMARY_CTA,
+  VETERAN_HERO_SECONDARY_CTA,
   VETERAN_IMPACT,
   VETERAN_PATHWAY,
   VETERAN_PATHWAY_CTA,
   VETERAN_PATHWAY_EYEBROW,
   VETERAN_PATHWAY_HEADING,
   VETERAN_PATHWAY_INTRO,
+  VETERAN_TREATMENT_CTA,
   VETERAN_TREATMENT_INTRO,
   VETERAN_TREATMENTS,
   VETERAN_TRUST,
@@ -93,18 +98,18 @@ export default function VeteransPage() {
             <div className="hero-enter hero-enter-3 vet-hero-actions">
               <div className="vet-hero-buttons">
                 <ButtonLink
-                  href="#veterans-contact"
+                  href={VETERAN_HERO_PRIMARY_CTA.href}
                   variant="accent"
                   className="grow basis-full md:grow-0 md:basis-auto"
                 >
-                  Request a confidential conversation
+                  {VETERAN_HERO_PRIMARY_CTA.label}
                 </ButtonLink>
                 <ButtonLink
-                  href="#treatment-options"
+                  href={VETERAN_HERO_SECONDARY_CTA.href}
                   variant="on-dark"
                   className="grow basis-full md:grow-0 md:basis-auto"
                 >
-                  Explore treatment options
+                  {VETERAN_HERO_SECONDARY_CTA.label}
                 </ButtonLink>
               </div>
               <a className="text-link vet-hero-link" href="#coordination">
@@ -209,8 +214,8 @@ export default function VeteransPage() {
             ))}
           </Reveal>
           <div className="vet-tx-foot">
-            <ButtonLink href="#veterans-contact" variant="accent">
-              Ask whether an assessment may be appropriate
+            <ButtonLink href={VETERAN_TREATMENT_CTA.href} variant="accent">
+              {VETERAN_TREATMENT_CTA.label}
             </ButtonLink>
           </div>
         </div>
@@ -300,9 +305,11 @@ export default function VeteransPage() {
                 <h3>{VETERAN_COVERAGE.coordinationHeading}</h3>
                 <p>{VETERAN_COVERAGE.coordination}</p>
                 <div className="vet-coord-actions">
-                  <ButtonLink href="/physician-referral/">Submit a physician referral</ButtonLink>
-                  <ButtonLink href="#veterans-contact" variant="ghost">
-                    Contact NeuroLinks about coordination
+                  <ButtonLink href={VETERAN_COORDINATION_PRIMARY_CTA.href}>
+                    {VETERAN_COORDINATION_PRIMARY_CTA.label}
+                  </ButtonLink>
+                  <ButtonLink href={VETERAN_COORDINATION_SECONDARY_CTA.href} variant="ghost">
+                    {VETERAN_COORDINATION_SECONDARY_CTA.label}
                   </ButtonLink>
                 </div>
               </aside>

@@ -103,9 +103,34 @@ export const VETERAN_PATHWAY_HEADING = "From first contact to treatment";
 export const VETERAN_PATHWAY_INTRO =
   "You should not have to navigate every clinical and administrative step alone. NeuroLinks can explain the process, develop the treatment plan and help prepare the information required for authorization.";
 
+export const VETERAN_HERO_PRIMARY_CTA = {
+  href: "#veterans-contact",
+  label: "Start a confidential conversation",
+} as const;
+
+export const VETERAN_HERO_SECONDARY_CTA = {
+  href: "#treatment-options",
+  label: "Explore treatment options",
+} as const;
+
+export const VETERAN_TREATMENT_CTA = {
+  href: "#veterans-contact",
+  label: "Discuss treatment options",
+} as const;
+
 export const VETERAN_PATHWAY_CTA = {
   href: "#veterans-contact",
   label: "Talk with our team",
+} as const;
+
+export const VETERAN_COORDINATION_PRIMARY_CTA = {
+  href: "/physician-referral/",
+  label: "Submit a physician referral",
+} as const;
+
+export const VETERAN_COORDINATION_SECONDARY_CTA = {
+  href: "#veterans-contact",
+  label: "Discuss care coordination",
 } as const;
 
 export const VETERAN_PATHWAY = [
@@ -170,9 +195,7 @@ export const VETERAN_COVERAGE_STATEMENT =
 export const VETERAN_CONTACT = {
   heading: "You do not have to determine the next step alone",
   body: "You do not need to decide whether TMS or ketamine is right for you before contacting us. Tell us what you would like help understanding, and our team can explain the assessment and authorization process.",
-  reassurance:
-    "You do not need to describe your trauma or medical history here. A brief question is enough.",
-  submitLabel: "Ask our team to contact me",
+  submitLabel: "Request a confidential reply",
 } as const;
 
 export const VETERAN_FAQS: FaqItem[] = [

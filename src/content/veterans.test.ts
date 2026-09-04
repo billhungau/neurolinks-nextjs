@@ -6,16 +6,21 @@ import {
   VETERAN_CONDITIONS,
   VETERAN_CONDITIONS_INTRO,
   VETERAN_CONTACT,
+  VETERAN_COORDINATION_PRIMARY_CTA,
+  VETERAN_COORDINATION_SECONDARY_CTA,
   VETERAN_COVERAGE,
   VETERAN_COVERAGE_STATEMENT,
   VETERAN_EXPERIENCE,
   VETERAN_EXPERIENCE_POINTS,
   VETERAN_FAQS,
+  VETERAN_HERO_PRIMARY_CTA,
+  VETERAN_HERO_SECONDARY_CTA,
   VETERAN_IMPACT,
   VETERAN_PATHWAY,
   VETERAN_PATHWAY_CTA,
   VETERAN_PATHWAY_HEADING,
   VETERAN_PATHWAY_INTRO,
+  VETERAN_TREATMENT_CTA,
   VETERAN_TREATMENTS,
   VETERAN_TRUST,
 } from "./veterans.ts";
@@ -118,6 +123,26 @@ test("Veteran pathway is four shortened steps with shared-component icons", () =
     { ...VETERAN_PATHWAY_CTA },
     { href: "#veterans-contact", label: "Talk with our team" },
   );
+  assert.deepEqual(
+    { ...VETERAN_HERO_PRIMARY_CTA },
+    { href: "#veterans-contact", label: "Start a confidential conversation" },
+  );
+  assert.deepEqual(
+    { ...VETERAN_HERO_SECONDARY_CTA },
+    { href: "#treatment-options", label: "Explore treatment options" },
+  );
+  assert.deepEqual(
+    { ...VETERAN_TREATMENT_CTA },
+    { href: "#veterans-contact", label: "Discuss treatment options" },
+  );
+  assert.deepEqual(
+    { ...VETERAN_COORDINATION_PRIMARY_CTA },
+    { href: "/physician-referral/", label: "Submit a physician referral" },
+  );
+  assert.deepEqual(
+    { ...VETERAN_COORDINATION_SECONDARY_CTA },
+    { href: "#veterans-contact", label: "Discuss care coordination" },
+  );
 });
 
 test("experience points stay at four and avoid partner claims", () => {
@@ -219,6 +244,6 @@ test("individual-situation answers say so instead of committing", () => {
 test("final contact copy stays on-page and does not demand a treatment choice", () => {
   assert.equal(VETERAN_CONTACT.heading, "You do not have to determine the next step alone");
   assert.match(VETERAN_CONTACT.body, /You do not need to decide whether TMS or ketamine is right for you/);
-  assert.match(VETERAN_CONTACT.reassurance, /You do not need to describe your trauma or medical history here/);
-  assert.equal(VETERAN_CONTACT.submitLabel, "Ask our team to contact me");
+  assert.equal("reassurance" in VETERAN_CONTACT, false);
+  assert.equal(VETERAN_CONTACT.submitLabel, "Request a confidential reply");
 });
