@@ -171,7 +171,7 @@ test("treatment panels stay secondary and scroll the primary CTA on-page", () =>
 
 test("experience precedes the pathway and uses the team photograph", () => {
   assert.ok(page.indexOf('id="experience"') < page.indexOf("<CarePathway"));
-  assert.match(page, /className="tms-section tms-mist"/);
+  assert.match(page, /className="tms-section [^"]*tms-mist"/);
   assert.match(page, /MEDIA\.team/);
   assert.match(page, /Meet the team providing care/);
   assert.match(page, /VETERAN_EXPERIENCE_POINTS\.map/);
@@ -208,8 +208,43 @@ test("FAQs render through the editorial accordion and emit matching FAQPage JSON
   assert.match(page, /<FaqJsonLd items=\{VETERAN_FAQS\} \/>/);
   assert.match(page, /<FaqAccordion items=\{VETERAN_FAQS\} variant="editorial" \/>/);
   assert.match(page, /className="tms-faq-layout"/);
+  const faqSection = page.slice(page.indexOf('id="faqs"'), page.indexOf('id="veterans-contact"'));
+  assert.equal(faqSection.includes("Request a confidential conversation"), false);
   const jsonLd = readFileSync(join(root, "../../components/FaqJsonLd.tsx"), "utf8");
   assert.match(jsonLd, /"@type": "FAQPage"/);
+});
+
+test("Veterans page anchors share the measured header offset", () => {
+  for (const id of [
+    "treatment-options",
+    "experience",
+    "coverage",
+    "coordination",
+    "faqs",
+    "veterans-contact",
+  ]) {
+    assert.match(page, new RegExp(`id="${id}"[\\s\\S]{0,100}vet-anchor-target`));
+  }
+  assert.match(carePathway, /className="home-section home-forward text-white"/);
+  assert.match(globalsCss, /\.home-forward \{[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/);
+  assert.match(
+    globalsCss,
+    /\.vet-anchor-target :is\(\.tms-h2, \.home-h2\),[\s\S]*?scroll-margin-top:\s*var\(--nl-anchor-offset\)/,
+  );
+});
+
+test("the three longest editorial sections use tighter Veterans-page spacing", () => {
+  for (const id of ["conditions", "treatment-options", "experience"]) {
+    assert.match(page, new RegExp(`id="${id}"[\\s\\S]{0,120}vet-compact-section`));
+  }
+  assert.match(
+    globalsCss,
+    /\.tms-section\.vet-compact-section \{[\s\S]*?--vet-section-pad:\s*3\.75rem/,
+  );
+  assert.match(
+    globalsCss,
+    /@media \(min-width: 768px\) \{\s*\.tms-section\.vet-compact-section \{\s*--vet-section-pad:\s*4\.75rem/,
+  );
 });
 
 test("the final contact section hosts the Veteran form and clinic phone number", () => {
@@ -221,6 +256,12 @@ test("the final contact section hosts the Veteran form and clinic phone number",
   assert.match(form, /Ask our team to contact me/);
   assert.match(form, /You do not need to describe your trauma or medical history here/);
   assert.match(form, /source: VETERANS_SOURCE/);
+  assert.match(
+    form,
+    /role="radiogroup"[\s\S]*?aria-required="true"[\s\S]*?aria-invalid=\{Boolean\(errors\.preferredContact\)\}/,
+  );
+  assert.match(form, /name="preferredContact"[\s\S]*?required/);
+  assert.match(form, /id="veterans-preferred-error"[\s\S]*?role="alert"/);
   assert.equal(form.includes("JOTFORM_API_KEY"), false);
   assert.equal(form.includes("searchParams"), false);
   assert.equal(form.includes("gtag"), false);

@@ -3385,6 +3385,30 @@ h3,
  * pathway, then adds Veteran-specific panels. Scoped to .vet-* so no other
  * route changes.
  */
+.tms-section.vet-compact-section {
+  --vet-section-pad: 3.75rem;
+  --nl-target-pad-top: var(--vet-section-pad);
+  padding-block: var(--vet-section-pad);
+}
+
+.tms-section.vet-compact-section:has(.eyebrow) {
+  --nl-target-pad-top: calc(var(--vet-section-pad) + 1.875rem);
+}
+
+@media (min-width: 768px) {
+  .tms-section.vet-compact-section {
+    --vet-section-pad: 4.75rem;
+  }
+}
+
+/* Keep every Veterans-page destination one consistent header-plus-gap away.
+   The measured custom property resolves to 80px with the desktop header and
+   adapts if the header height changes. */
+.vet-anchor-target :is(.tms-h2, .home-h2),
+.vet-anchor-target.vet-coord {
+  scroll-margin-top: var(--nl-anchor-offset);
+}
+
 .vet-hero-wash {
   background:
     linear-gradient(
@@ -3566,7 +3590,7 @@ h3,
 .vet-conditions {
   display: grid;
   gap: 1.25rem;
-  margin-top: 2.5rem;
+  margin-top: 2rem;
 }
 
 @media (min-width: 900px) {
@@ -3630,7 +3654,7 @@ h3,
 .vet-tx-foot {
   display: flex;
   justify-content: center;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 .vet-tx-foot > a {
@@ -3646,7 +3670,7 @@ h3,
 .vet-tx-grid {
   display: grid;
   gap: 1.5rem;
-  margin-top: 2.5rem;
+  margin-top: 2rem;
 }
 
 @media (min-width: 1024px) {
@@ -3762,7 +3786,7 @@ h3,
 @media (min-width: 960px) {
   .vet-experience {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
-    gap: 3.5rem;
+    gap: 3rem;
   }
 }
 
@@ -3795,7 +3819,7 @@ h3,
 .vet-points {
   display: grid;
   gap: 0 2.5rem;
-  margin: 2rem 0 0;
+  margin: 1.5rem 0 0;
   padding: 0;
   list-style: none;
 }
@@ -6223,7 +6247,6 @@ html:has(.landing-header) {
   padding: 0 1.15rem;
   box-shadow: none;
 }
-
 
 
 

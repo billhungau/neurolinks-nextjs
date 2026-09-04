@@ -282,13 +282,22 @@ export function VeteransContactForm() {
               *
             </span>
           </legend>
-          <div className="vet-pref-options" role="radiogroup" aria-required="true">
+          <div
+            className="vet-pref-options"
+            role="radiogroup"
+            aria-required="true"
+            aria-invalid={Boolean(errors.preferredContact)}
+            aria-describedby={
+              errors.preferredContact ? "veterans-preferred-error" : undefined
+            }
+          >
             {VETERAN_CONTACT_METHODS.map((method) => (
               <label key={method} className="vet-pref-option">
                 <input
                   type="radio"
                   name="preferredContact"
                   value={method}
+                  required
                   checked={values.preferredContact === method}
                   disabled={submitting}
                   onChange={() => update("preferredContact", method)}
@@ -298,7 +307,7 @@ export function VeteransContactForm() {
             ))}
           </div>
           {errors.preferredContact ? (
-            <p id="veterans-preferred-error" className="ct-field-error">
+            <p id="veterans-preferred-error" className="ct-field-error" role="alert">
               {errors.preferredContact}
             </p>
           ) : null}

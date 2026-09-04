@@ -149,7 +149,10 @@ export default function VeteransPage() {
         </div>
       </section>
 
-      <section id="conditions" className="tms-section bg-[var(--nl-cream)]">
+      <section
+        id="conditions"
+        className="tms-section vet-compact-section bg-[var(--nl-cream)]"
+      >
         <div className="tms-wrap">
           <Reveal>
             <Eyebrow>Conditions commonly assessed in Veterans</Eyebrow>
@@ -174,7 +177,10 @@ export default function VeteransPage() {
         </div>
       </section>
 
-      <section id="treatment-options" className="tms-section bg-white">
+      <section
+        id="treatment-options"
+        className="tms-section vet-anchor-target vet-compact-section bg-white"
+      >
         <div className="tms-wrap">
           <Reveal>
             <Eyebrow>Specialist treatment options</Eyebrow>
@@ -212,7 +218,10 @@ export default function VeteransPage() {
         </div>
       </section>
 
-      <section id="experience" className="tms-section tms-mist">
+      <section
+        id="experience"
+        className="tms-section vet-anchor-target vet-compact-section tms-mist"
+      >
         <div className="tms-wrap">
           <Reveal className="vet-experience">
             <div className="img-frame vet-experience-photo">
@@ -259,7 +268,10 @@ export default function VeteransPage() {
         ctaLabel={VETERAN_PATHWAY_CTA.label}
       />
 
-      <section id="coverage" className="tms-section bg-[var(--nl-cream)]">
+      <section
+        id="coverage"
+        className="tms-section vet-anchor-target bg-[var(--nl-cream)]"
+      >
         <div className="tms-wrap">
           <Reveal className="vet-coverage">
             <div>
@@ -286,7 +298,7 @@ export default function VeteransPage() {
                   {paragraph}
                 </p>
               ))}
-              <aside id="coordination" className="vet-coord">
+              <aside id="coordination" className="vet-anchor-target vet-coord">
                 <h3>{VETERAN_COVERAGE.coordinationHeading}</h3>
                 <p>{VETERAN_COVERAGE.coordination}</p>
                 <div className="vet-coord-actions">
@@ -301,7 +313,7 @@ export default function VeteransPage() {
         </div>
       </section>
 
-      <section id="faqs" className="tms-section bg-white">
+      <section id="faqs" className="tms-section vet-anchor-target bg-white">
         <div className="tms-wrap">
           <FaqJsonLd items={VETERAN_FAQS} />
           <div className="tms-faq-layout">
@@ -312,18 +324,16 @@ export default function VeteransPage() {
                 clinicians can reach the clinic. Where an answer depends on your situation, we say
                 so.
               </p>
-              <p className="mt-6">
-                <a href="#veterans-contact" className="tms-text-link">
-                  Request a confidential conversation
-                </a>
-              </p>
             </div>
             <FaqAccordion items={VETERAN_FAQS} variant="editorial" />
           </div>
         </div>
       </section>
 
-      <section id="veterans-contact" className="tms-section tms-navy tms-assess">
+      <section
+        id="veterans-contact"
+        className="tms-section vet-anchor-target tms-navy tms-assess"
+      >
         <div className="tms-wrap">
           <Reveal className="vet-contact">
             <div className="vet-contact-copy">
