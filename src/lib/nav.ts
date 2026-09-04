@@ -6,18 +6,12 @@ export type NavItem = {
 /** Shared primary routes. Desktop renders Contact as the yellow button. */
 export const PRIMARY_NAV = [
   { href: "/", label: "Home" },
-  { href: "/about-tms-treatment-on-psychiatric-illness/", label: "About TMS" },
-  {
-    href: "/ketamine-treatment-resistant-depression-nanaimo/",
-    label: "About Ketamine",
-  },
-  {
-    href: "/services-psychiatric-tms-ketamine-treatment/",
-    label: "Assessment & Treatment",
-  },
+  { href: "/about-tms-treatment-on-psychiatric-illness/", label: "TMS" },
+  { href: "/ketamine-treatment-resistant-depression-nanaimo/", label: "Ketamine" },
+  { href: "/services-psychiatric-tms-ketamine-treatment/", label: "Services" },
   { href: "/veterans/", label: "Veterans" },
-  { href: "/psychiatrist-tms-nanaimo/", label: "About Us" },
-  { href: "/physician-referral/", label: "Physician Referral" },
+  { href: "/psychiatrist-tms-nanaimo/", label: "About" },
+  { href: "/physician-referral/", label: "Referral" },
 ] as const satisfies readonly NavItem[];
 
 export const CONTACT_NAV = {
