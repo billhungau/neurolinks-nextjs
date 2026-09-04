@@ -106,6 +106,13 @@ test("homepage care pathway uses the supplied forward copy and contact CTA", () 
   assert.match(globalsCss, /\.home-forward-cta \{[\s\S]*?width:\s*100%/);
   assert.match(homePage, /HomeForwardMotion/);
   assert.match(homePage, /pathLength=\{1\}/);
+  assert.match(homePage, /icon: "MessagesSquare"/);
+  assert.match(homePage, /icon: "ClipboardCheck"/);
+  assert.match(homePage, /icon: "UserRoundCheck"/);
+  assert.match(homePage, /icon: "HandHeart"/);
+  assert.match(homePage, /strokeWidth: 2/);
+  assert.equal(homePage.includes('icon: "talk"'), false);
+  assert.equal(homePage.includes('icon: "assess"'), false);
   assert.match(globalsCss, /home-forward-track--prepare/);
   assert.match(globalsCss, /prefers-reduced-motion:\s*reduce/);
   assert.match(globalsCss, /stroke-dashoffset/);
