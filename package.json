@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --experimental-default-type=module --test src/content/faqs.test.ts src/content/home-reviews.test.ts src/content/landing.test.ts src/lib/contact-form.test.ts src/lib/referral-form.test.ts src/lib/site.test.ts src/lib/redirects.test.ts src/lib/seo.test.ts src/lib/anchor-offset.test.ts src/lib/anchor-target.test.ts src/app/api/forms/contact/route.test.ts src/app/api/forms/referral/route.test.ts src/app/services-psychiatric-tms-ketamine-treatment/page.test.ts src/app/page.test.ts",
+    "test": "node --experimental-strip-types --experimental-default-type=module --test src/content/faqs.test.ts src/content/home-reviews.test.ts src/content/landing.test.ts src/lib/contact-form.test.ts src/lib/referral-form.test.ts src/lib/site.test.ts src/lib/redirects.test.ts src/lib/seo.test.ts src/lib/anchor-offset.test.ts src/lib/anchor-target.test.ts src/app/api/forms/contact/route.test.ts src/app/api/forms/referral/route.test.ts src/app/services-psychiatric-tms-ketamine-treatment/page.test.ts src/app/page.test.ts src/components/HomeForwardMotion.test.ts",
     "verify:seo": "node --experimental-strip-types --experimental-default-type=module scripts/verify-seo.mjs"
   },
   "dependencies": {

@@ -2,6 +2,7 @@ import Image, { getImageProps } from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
 import { ClinicMap } from "@/components/ClinicMap";
 import { CtaBand } from "@/components/CtaBand";
+import { HomeForwardMotion } from "@/components/HomeForwardMotion";
 import { HomeReviews } from "@/components/HomeReviews";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
@@ -318,49 +319,50 @@ challenges`}
               has not helped enough and what you hope will change. We will explain the next steps
               and support you throughout your care.
             </p>
-            <div className="home-forward-track">
-              <svg
-                className="home-forward-rail-svg"
-                viewBox="0 0 1000 84"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <defs>
-                  <linearGradient id="home-forward-line" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0" stopColor="#6f9c96" />
-                    <stop offset="1" stopColor="#e8b923" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M0 50.4 C 280 46, 720 32, 1000 27.2"
-                  fill="none"
-                  stroke="url(#home-forward-line)"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <ol className="home-forward-list">
-                {FORWARD.map((step) => (
-                  <li key={step.index} className="home-forward-item">
-                    <span className="home-forward-node" aria-hidden="true">
-                      <ForwardIcon name={step.icon} />
-                    </span>
-                    <div className="home-forward-copy">
-                      <p className="home-forward-step">Step {step.index}</p>
-                      <h3>{step.title}</h3>
-                      <p>{step.body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="home-forward-foot">
-              <ButtonLink href="/contact/" variant="accent" className="home-forward-cta">
-                Talk to our team
-                <span aria-hidden="true">→</span>
-              </ButtonLink>
-            </div>
           </Reveal>
+          <HomeForwardMotion>
+            <svg
+              className="home-forward-rail-svg"
+              viewBox="0 0 1000 84"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="home-forward-line" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stopColor="#6f9c96" />
+                  <stop offset="1" stopColor="#e8b923" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M0 50.4 C 280 46, 720 32, 1000 27.2"
+                fill="none"
+                pathLength={1}
+                stroke="url(#home-forward-line)"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
+            </svg>
+            <ol className="home-forward-list">
+              {FORWARD.map((step) => (
+                <li key={step.index} className="home-forward-item">
+                  <span className="home-forward-node" aria-hidden="true">
+                    <ForwardIcon name={step.icon} />
+                  </span>
+                  <div className="home-forward-copy">
+                    <p className="home-forward-step">Step {step.index}</p>
+                    <h3>{step.title}</h3>
+                    <p>{step.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </HomeForwardMotion>
+          <div className="home-forward-foot">
+            <ButtonLink href="/contact/" variant="accent" className="home-forward-cta">
+              Talk to our team
+              <span aria-hidden="true">→</span>
+            </ButtonLink>
+          </div>
         </div>
       </section>
 

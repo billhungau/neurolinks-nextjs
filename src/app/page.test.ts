@@ -104,6 +104,11 @@ test("homepage care pathway uses the supplied forward copy and contact CTA", () 
     /@media \(min-width: 1024px\) \{[\s\S]*?\.home-forward-foot \{[\s\S]*?justify-content:\s*center/,
   );
   assert.match(globalsCss, /\.home-forward-cta \{[\s\S]*?width:\s*100%/);
+  assert.match(homePage, /HomeForwardMotion/);
+  assert.match(homePage, /pathLength=\{1\}/);
+  assert.match(globalsCss, /home-forward-track--prepare/);
+  assert.match(globalsCss, /prefers-reduced-motion:\s*reduce/);
+  assert.match(globalsCss, /stroke-dashoffset/);
 });
 
 test("treatment-card emphasis and funding columns are homepage-scoped", () => {
