@@ -99,6 +99,11 @@ test("homepage care pathway uses the supplied forward copy and contact CTA", () 
   assert.match(landingPage, /className="pathway-block mt-8"/);
   assert.match(globalsCss, /\.home-forward \{/);
   assert.match(globalsCss, /\.pathway-rule \{/);
+  assert.match(
+    globalsCss,
+    /@media \(min-width: 1024px\) \{[\s\S]*?\.home-forward-foot \{[\s\S]*?justify-content:\s*center/,
+  );
+  assert.match(globalsCss, /\.home-forward-cta \{[\s\S]*?width:\s*100%/);
 });
 
 test("treatment-card emphasis and funding columns are homepage-scoped", () => {

@@ -751,6 +751,12 @@ h3,
     --home-forward-col-gap: 1.5rem;
   }
 
+  .home-forward-foot {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.75rem;
+  }
+
   .home-forward-cta {
     width: auto;
     min-width: 14.5rem;
