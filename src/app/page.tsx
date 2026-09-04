@@ -332,7 +332,7 @@ challenges`}
                   </linearGradient>
                 </defs>
                 <path
-                  d="M0 60 C 280 54, 720 38, 1000 32.4"
+                  d="M0 50.4 C 280 46, 720 32, 1000 27.2"
                   fill="none"
                   stroke="url(#home-forward-line)"
                   strokeWidth="1.75"

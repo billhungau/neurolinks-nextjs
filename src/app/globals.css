@@ -748,6 +748,7 @@ h3,
 @media (min-width: 1024px) {
   .home-forward {
     --home-forward-node: 3.4rem;
+    --home-forward-col-gap: 1.5rem;
   }
 
   .home-forward-cta {
@@ -757,7 +758,7 @@ h3,
 
   .home-forward-list {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.75rem 1.5rem;
+    gap: 1.75rem var(--home-forward-col-gap);
     padding-top: 0.25rem;
   }
 
@@ -771,7 +772,7 @@ h3,
     top: 0.25rem;
     left: calc(var(--home-forward-node) / 2);
     z-index: 0;
-    width: 75%;
+    width: calc(75% + 0.75 * var(--home-forward-col-gap));
     height: 5.25rem;
   }
 
