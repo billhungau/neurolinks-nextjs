@@ -12,7 +12,6 @@ import {
   VAC_MENTAL_HEALTH_BENEFITS_URL,
   VETERAN_CONDITIONS,
   VETERAN_CONDITIONS_INTRO,
-  VETERAN_CONDITIONS_NOTE,
   VETERAN_CONTACT,
   VETERAN_COVERAGE,
   VETERAN_EXPERIENCE,
@@ -173,7 +172,6 @@ export default function VeteransPage() {
               </article>
             ))}
           </Reveal>
-          <p className="tms-note">{VETERAN_CONDITIONS_NOTE}</p>
         </div>
       </section>
 

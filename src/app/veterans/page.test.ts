@@ -14,6 +14,7 @@ const carePathway = readFileSync(join(root, "../../components/CarePathway.tsx"),
 const header = readFileSync(join(root, "../../components/SiteHeader.tsx"), "utf8");
 const footer = readFileSync(join(root, "../../components/SiteFooter.tsx"), "utf8");
 const form = readFileSync(join(root, "../../components/forms/VeteransContactForm.tsx"), "utf8");
+const veteransContent = readFileSync(join(root, "../../content/veterans.ts"), "utf8");
 const servicesPage = readFileSync(
   join(root, "../services-psychiatric-tms-ketamine-treatment/page.tsx"),
   "utf8",
@@ -150,6 +151,7 @@ test("editorial sections use one H1 and a logical H2/H3 hierarchy", () => {
 
 test("condition panels have no per-card CTAs", () => {
   assert.match(pageCopy, /Mental health difficulties do not always occur one at a time/);
+  assert.equal(veteransContent.includes("A condition listed here does not mean"), false);
   assert.match(page, /<Reveal className="vet-stagger vet-conditions">/);
   assert.match(page, /vet-condition vet-condition--\$\{condition\.tone\}/);
   const conditions = page.slice(page.indexOf('id="conditions"'), page.indexOf('id="treatment-options"'));
@@ -167,6 +169,7 @@ test("treatment panels stay secondary and scroll the primary CTA on-page", () =>
   assert.match(pageCopy, /Ask whether an assessment may be appropriate/);
   assert.match(globalsCss, /\.vet-tx--tms \.vet-tx-head \{[\s\S]*?background:\s*#eef3f8/);
   assert.match(globalsCss, /\.vet-tx--ketamine \.vet-tx-head \{[\s\S]*?background:\s*#f6eed8/);
+  assert.equal(/\bIV\b|intravenous/i.test(veteransContent), false);
 });
 
 test("experience precedes the pathway and uses the team photograph", () => {
@@ -256,12 +259,18 @@ test("the final contact section hosts the Veteran form and clinic phone number",
   assert.match(form, /Ask our team to contact me/);
   assert.match(form, /You do not need to describe your trauma or medical history here/);
   assert.match(form, /source: VETERANS_SOURCE/);
-  assert.match(
-    form,
-    /role="radiogroup"[\s\S]*?aria-required="true"[\s\S]*?aria-invalid=\{Boolean\(errors\.preferredContact\)\}/,
+  assert.equal(form.includes("Preferred contact method"), false);
+  assert.equal(form.includes("What would you like help with?"), false);
+  assert.equal(form.includes('name="preferredContact"'), false);
+  assert.equal(form.includes('name="topic"'), false);
+  assert.match(form, /name="email"[\s\S]{0,240}required[\s\S]{0,120}aria-required="true"/);
+  const phoneField = form.slice(
+    form.indexOf('<Field id="veterans-phone"'),
+    form.indexOf('<Field id="veterans-message"'),
   );
-  assert.match(form, /name="preferredContact"[\s\S]*?required/);
-  assert.match(form, /id="veterans-preferred-error"[\s\S]*?role="alert"/);
+  assert.match(phoneField, /optional/);
+  assert.equal(phoneField.includes("required"), false);
+  assert.match(form, /name="message"[\s\S]{0,240}required[\s\S]{0,120}aria-required="true"/);
   assert.equal(form.includes("JOTFORM_API_KEY"), false);
   assert.equal(form.includes("searchParams"), false);
   assert.equal(form.includes("gtag"), false);

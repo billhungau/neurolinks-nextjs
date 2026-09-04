@@ -3960,38 +3960,8 @@ h3,
 }
 
 .vet-contact-form .ct-field input,
-.vet-contact-form .ct-field textarea,
-.vet-contact-form .ct-field select {
+.vet-contact-form .ct-field textarea {
   scroll-margin-top: var(--nl-anchor-offset);
-}
-
-.vet-pref legend {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--nl-navy);
-}
-
-.vet-pref-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem 1.15rem;
-  margin-top: 0.45rem;
-}
-
-.vet-pref-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 2.75rem;
-  color: var(--nl-ink);
-  font-size: 0.975rem;
-  font-weight: 600;
-}
-
-.vet-pref-option input {
-  width: 1.05rem;
-  height: 1.05rem;
-  accent-color: var(--nl-navy);
 }
 
 .vet-optional {
@@ -6247,6 +6217,5 @@ html:has(.landing-header) {
   padding: 0 1.15rem;
   box-shadow: none;
 }
-
 
 

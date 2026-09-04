@@ -5,7 +5,6 @@ import {
   VAC_MENTAL_HEALTH_BENEFITS_URL,
   VETERAN_CONDITIONS,
   VETERAN_CONDITIONS_INTRO,
-  VETERAN_CONDITIONS_NOTE,
   VETERAN_CONTACT,
   VETERAN_COVERAGE,
   VETERAN_COVERAGE_STATEMENT,
@@ -43,7 +42,7 @@ test("impact copy keeps the reassurance that symptoms are not a treatment failur
   assert.match(VETERAN_IMPACT.closing, /what you most want to regain/);
 });
 
-test("condition panels stay hedged and do not carry outbound CTAs", () => {
+test("condition panels stay contextual and do not carry outbound CTAs", () => {
   assert.equal(VETERAN_CONDITIONS.length, 3);
   assert.deepEqual(
     VETERAN_CONDITIONS.map((item) => item.title),
@@ -51,7 +50,6 @@ test("condition panels stay hedged and do not carry outbound CTAs", () => {
   );
   assert.equal(new Set(VETERAN_CONDITIONS.map((item) => item.tone)).size, 3);
   assert.match(VETERAN_CONDITIONS_INTRO, /rather than treating each symptom in isolation/);
-  assert.match(VETERAN_CONDITIONS_NOTE, /does not mean that TMS or ketamine will automatically be recommended/);
 
   const ptsd = VETERAN_CONDITIONS[1].body;
   assert.match(ptsd, /Hypervigilance, disrupted sleep, irritability, avoidance/);
@@ -82,9 +80,16 @@ test("treatment panels stay scannable and cautious", () => {
   assert.equal(tms.href, "/about-tms-treatment-on-psychiatric-illness/");
   assert.equal(tms.linkLabel, "Learn more about TMS");
 
-  assert.equal(ketamine.title, "A medically supervised treatment pathway");
-  assert.match(ketamine.body, /selected patients with treatment-resistant depression/);
+  assert.equal(ketamine.eyebrow, "IM ketamine");
+  assert.equal(ketamine.title, "Rapid-acting treatment when depression has not lifted");
+  assert.match(ketamine.body, /improvement can begin within hours or days/);
   assert.equal(ketamine.points.length, 4);
+  assert.deepEqual([...ketamine.points], [
+    "Can act more quickly than conventional antidepressants",
+    "Works through a different brain pathway",
+    "May help when several treatments have not worked",
+    "Individualized treatment with psychiatrist-led monitoring",
+  ]);
   assert.equal(ketamine.href, "/ketamine-treatment-resistant-depression-nanaimo/");
   assert.equal(ketamine.linkLabel, "Learn more about ketamine");
 });
@@ -107,7 +112,8 @@ test("Veteran pathway is four shortened steps with shared-component icons", () =
     ["talk", "assess", "authorize", "follow"],
   );
   assert.match(VETERAN_PATHWAY[0].body, /You do not need to choose a treatment before contacting us/);
-  assert.match(VETERAN_PATHWAY[2].body, /If treatment is recommended/);
+  assert.match(VETERAN_PATHWAY[2].body, /Medavie Blue Cross/);
+  assert.match(VETERAN_PATHWAY[2].body, /must be taking an antidepressant/);
   assert.deepEqual(
     { ...VETERAN_PATHWAY_CTA },
     { href: "#veterans-contact", label: "Talk with our team" },
@@ -128,7 +134,9 @@ test("coverage copy never promises approval and keeps the official VAC page", ()
   assert.equal(VETERAN_COVERAGE.heading, "Clear information before treatment begins");
   const body = VETERAN_COVERAGE.body.join(" ");
   assert.match(body, /Coverage is not automatic/);
-  assert.match(body, /only after written authorization has been confirmed through VAC and Medavie Blue Cross/);
+  assert.match(body, /IM ketamine treatment offered by NeuroLinks is not included/);
+  assert.match(body, /must be taking an antidepressant/);
+  assert.match(body, /only after authorization has been confirmed/);
   assert.equal(VETERAN_COVERAGE.coordinationHeading, "Already working with a clinician or case manager?");
   assert.match(VETERAN_COVERAGE.coordination, /With the Veteran/);
   assert.equal(
@@ -140,8 +148,10 @@ test("coverage copy never promises approval and keeps the official VAC page", ()
 test("the shared coverage statement replaces the blanket Medavie wording", () => {
   assert.match(
     VETERAN_COVERAGE_STATEMENT,
-    /^Veterans Affairs Canada may authorize TMS or ketamine treatment in eligible cases\./,
+    /^Veterans Affairs Canada may authorize TMS or Spravato® treatment in eligible cases\./,
   );
+  assert.match(VETERAN_COVERAGE_STATEMENT, /IM ketamine/);
+  assert.match(VETERAN_COVERAGE_STATEMENT, /not included in the current VAC benefit schedule/);
   assert.match(VETERAN_COVERAGE_STATEMENT, /Coverage is not automatic/);
   assert.equal(VETERAN_COVERAGE_STATEMENT.includes("is covered by the Medavie Blue Cross"), false);
 });
@@ -150,10 +160,10 @@ test("Veterans FAQ is the six conversion questions in order", () => {
   assert.deepEqual(
     VETERAN_FAQS.map((item) => item.q),
     [
-      "Does VAC cover TMS or ketamine treatment?",
+      "What is usually required for Spravato coverage?",
       "Will NeuroLinks help obtain preauthorization?",
       "Do I need a physician referral?",
-      "How long does authorization usually take?",
+      "Why might NeuroLinks recommend TMS first?",
       "How frequently will I need to travel to Nanaimo?",
       "Can my VAC case manager, therapist or physician contact NeuroLinks?",
     ],
@@ -172,14 +182,29 @@ test("Veterans FAQ answers stay JSON-LD safe, concise and promise nothing", () =
       `unsupported promise in: ${item.q}`,
     );
   }
+  assert.equal(
+    VETERAN_FAQS.some((item) => /more effective than IM ketamine/i.test(item.q)),
+    false,
+  );
 });
 
 test("individual-situation answers say so instead of committing", () => {
   const byQuestion = new Map(VETERAN_FAQS.map((item) => [item.q, faqAnswerText(item.a)]));
-  assert.match(byQuestion.get("Does VAC cover TMS or ketamine treatment?")!, /Coverage is not automatic/);
   assert.match(
-    byQuestion.get("How long does authorization usually take?")!,
-    /so we cannot promise a date/,
+    byQuestion.get("What is usually required for Spravato coverage?")!,
+    /must be taking an antidepressant/,
+  );
+  assert.match(
+    byQuestion.get("What is usually required for Spravato coverage?")!,
+    /antipsychotic augmentation/,
+  );
+  assert.match(
+    byQuestion.get("Why might NeuroLinks recommend TMS first?")!,
+    /sedation or dissociation/,
+  );
+  assert.match(
+    byQuestion.get("Why might NeuroLinks recommend TMS first?")!,
+    /decision remains with VAC and Medavie Blue Cross/,
   );
   assert.match(
     byQuestion.get("Will NeuroLinks help obtain preauthorization?")!,

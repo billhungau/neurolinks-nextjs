@@ -29,16 +29,6 @@ export const ADVERTISING_LANDING_SOURCE = "advertising-landing" as const;
 export const ADVERTISING_LANDING_MESSAGE_PREFIX = "[Advertising landing page]";
 export const VETERANS_SOURCE = "veterans" as const;
 export const VETERANS_MESSAGE_PREFIX = "[Veterans page]";
-export const VETERAN_HELP_TOPICS = [
-  "Understanding treatment options",
-  "VAC or preauthorization questions",
-  "Referral questions",
-  "Travel and treatment schedule",
-  "Something else",
-] as const;
-export type VeteranHelpTopic = (typeof VETERAN_HELP_TOPICS)[number];
-export const VETERAN_CONTACT_METHODS = ["phone", "email"] as const;
-export type VeteranContactMethod = (typeof VETERAN_CONTACT_METHODS)[number];
 export const CONTACT_NAME_LIMIT = CONTACT_LIMITS.firstName + CONTACT_LIMITS.lastName;
 
 export function jotformTimeoutMs() {
@@ -63,7 +53,7 @@ export const FIELD_LABELS: Record<ContactFieldName, string> = {
 };
 
 export type ContactFieldErrors = Partial<
-  Record<ContactFieldName | "preferredContact" | "topic" | "name", string>
+  Record<ContactFieldName | "name", string>
 >;
 
 export type ValidatedContact =
@@ -120,14 +110,6 @@ export function validateContactFields(fields: ContactFields): ContactFieldErrors
   return errors;
 }
 
-export function isVeteranHelpTopic(value: string): value is VeteranHelpTopic {
-  return (VETERAN_HELP_TOPICS as readonly string[]).includes(value);
-}
-
-export function isVeteranContactMethod(value: string): value is VeteranContactMethod {
-  return (VETERAN_CONTACT_METHODS as readonly string[]).includes(value);
-}
-
 export function splitPersonName(name: string): Pick<ContactFields, "firstName" | "lastName"> {
   const trimmed = name.trim();
   const breakAt = trimmed.search(/\s+/);
@@ -140,31 +122,14 @@ export function splitPersonName(name: string): Pick<ContactFields, "firstName" |
   };
 }
 
-export function composeVeteransMessage(input: {
-  preferredContact: VeteranContactMethod;
-  topic: VeteranHelpTopic;
-  message: string;
-}): string {
-  const lines = [
-    `Preferred contact: ${input.preferredContact === "phone" ? "Phone" : "Email"}`,
-    `Help with: ${input.topic}`,
-  ];
-  if (input.message) {
-    lines.push("", input.message);
-  }
-  return lines.join("\n");
-}
-
 function parseVeteransContactPayload(
   record: Record<string, unknown>,
   honeypot: boolean,
 ): ValidatedContact {
   const name = asString(record.name).trim() ||
     [asString(record.firstName), asString(record.lastName)].filter(Boolean).join(" ").trim();
-  const preferredRaw = asString(record.preferredContact).trim();
   const email = asString(record.email).trim();
   const phone = asString(record.phone).trim();
-  const topic = asString(record.topic).trim();
   const message = asString(record.message).trim();
   const errors: ContactFieldErrors = {};
 
@@ -174,33 +139,19 @@ function parseVeteransContactPayload(
     errors.name = `Name must be ${CONTACT_NAME_LIMIT} characters or fewer.`;
   }
 
-  if (!isVeteranContactMethod(preferredRaw)) {
-    errors.preferredContact = "Choose how we should contact you.";
-  } else if (preferredRaw === "email") {
-    if (!email) {
-      errors.email = "Enter your email address.";
-    } else if (email.length > CONTACT_LIMITS.email || !EMAIL_PATTERN.test(email)) {
-      errors.email = "Enter a valid email address.";
-    }
-    if (phone.length > CONTACT_LIMITS.phone) {
-      errors.phone = `Phone number must be ${CONTACT_LIMITS.phone} characters or fewer.`;
-    }
-  } else {
-    if (!phone) {
-      errors.phone = "Enter your phone number.";
-    } else if (phone.length > CONTACT_LIMITS.phone) {
-      errors.phone = `Phone number must be ${CONTACT_LIMITS.phone} characters or fewer.`;
-    }
-    if (email && (email.length > CONTACT_LIMITS.email || !EMAIL_PATTERN.test(email))) {
-      errors.email = "Enter a valid email address.";
-    }
+  if (!email) {
+    errors.email = "Enter your email address.";
+  } else if (email.length > CONTACT_LIMITS.email || !EMAIL_PATTERN.test(email)) {
+    errors.email = "Enter a valid email address.";
   }
 
-  if (!isVeteranHelpTopic(topic)) {
-    errors.topic = "Choose what you would like help with.";
+  if (phone.length > CONTACT_LIMITS.phone) {
+    errors.phone = `Phone number must be ${CONTACT_LIMITS.phone} characters or fewer.`;
   }
 
-  if (message.length > CONTACT_LIMITS.message) {
+  if (!message) {
+    errors.message = "Enter a message.";
+  } else if (message.length > CONTACT_LIMITS.message) {
     errors.message = `Message must be ${CONTACT_LIMITS.message.toLocaleString("en-CA")} characters or fewer.`;
   }
 
@@ -216,11 +167,7 @@ function parseVeteransContactPayload(
       lastName,
       email,
       phone,
-      message: composeVeteransMessage({
-        preferredContact: preferredRaw as VeteranContactMethod,
-        topic: topic as VeteranHelpTopic,
-        message,
-      }),
+      message,
     },
     honeypot,
   };

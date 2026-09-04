@@ -163,89 +163,60 @@ test("advertising landing source prefixes the Jotform message without changing f
 const veteransBase = {
   source: VETERANS_SOURCE,
   name: "Jane Doe",
-  preferredContact: "phone",
+  email: "jane@example.com",
   phone: "250-555-0100",
-  topic: "VAC or preauthorization questions",
   message: "Please call about authorization.",
 };
 
-test("veterans submissions accept a single contact method and tag the Jotform message", () => {
-  const parsed = parseContactPayload(veteransBase);
+test("veterans submissions accept an optional phone and tag the Jotform message", () => {
+  const parsed = parseContactPayload({ ...veteransBase, phone: "" });
   assert.equal(parsed.ok, true);
   if (!parsed.ok) return;
   assert.equal(parsed.fields.firstName, "Jane");
   assert.equal(parsed.fields.lastName, "Doe");
-  assert.equal(parsed.fields.phone, "250-555-0100");
-  assert.equal(parsed.fields.email, "");
-  assert.match(parsed.fields.message, /Preferred contact: Phone/);
-  assert.match(parsed.fields.message, /Help with: VAC or preauthorization questions/);
-  assert.match(parsed.fields.message, /Please call about authorization/);
-  const body = jotformSubmissionBody(parsed.fields, VETERANS_SOURCE);
-  assert.equal(body.get("submission[5]")?.startsWith(VETERANS_MESSAGE_PREFIX), true);
-  assert.equal(body.get("submission[5]")?.includes("trauma"), false);
-  assert.equal(body.get("submission[3]"), "");
-});
-
-test("veterans submissions accept email instead of phone", () => {
-  const parsed = parseContactPayload({
-    ...veteransBase,
-    preferredContact: "email",
-    email: "jane@example.com",
-    phone: "",
-    message: "",
-  });
-  assert.equal(parsed.ok, true);
-  if (!parsed.ok) return;
   assert.equal(parsed.fields.email, "jane@example.com");
   assert.equal(parsed.fields.phone, "");
-  assert.match(parsed.fields.message, /Preferred contact: Email/);
+  assert.equal(parsed.fields.message, "Please call about authorization.");
+  const body = jotformSubmissionBody(parsed.fields, VETERANS_SOURCE);
+  assert.equal(body.get("submission[5]")?.startsWith(VETERANS_MESSAGE_PREFIX), true);
+  assert.equal(body.get("submission[4_full]"), "");
 });
 
-test("veterans submissions reject a missing contact method", () => {
+test("veterans submissions preserve a phone number when provided", () => {
+  const parsed = parseContactPayload(veteransBase);
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+  assert.equal(parsed.fields.phone, "250-555-0100");
+});
+
+test("veterans submissions require a valid email", () => {
+  const missing = parseContactPayload({ ...veteransBase, email: "" });
+  assert.equal(missing.ok, false);
+  if (!missing.ok) assert.ok(missing.errors.email);
+
+  const invalid = parseContactPayload({ ...veteransBase, email: "not-an-email" });
+  assert.equal(invalid.ok, false);
+  if (!invalid.ok) assert.ok(invalid.errors.email);
+});
+
+test("veterans submissions require a non-empty message", () => {
   const parsed = parseContactPayload({
     ...veteransBase,
-    preferredContact: "",
-    phone: "",
-    email: "",
+    message: "  ",
   });
   assert.equal(parsed.ok, false);
   if (parsed.ok) return;
-  assert.ok(parsed.errors.preferredContact);
+  assert.ok(parsed.errors.message);
 });
 
-test("veterans submissions reject the unselected empty contact field only", () => {
-  const missingPhone = parseContactPayload({
-    ...veteransBase,
-    preferredContact: "phone",
-    phone: "",
-  });
-  assert.equal(missingPhone.ok, false);
-
-  const missingEmail = parseContactPayload({
-    ...veteransBase,
-    preferredContact: "email",
-    email: "",
-    phone: "",
-  });
-  assert.equal(missingEmail.ok, false);
-
-  const bothMissing = parseContactPayload({
-    source: VETERANS_SOURCE,
-    name: "Jane Doe",
-    preferredContact: "email",
-    topic: "Referral questions",
-  });
-  assert.equal(bothMissing.ok, false);
-});
-
-test("veterans message may be omitted when a help topic is present", () => {
+test("veterans submissions reject an oversized optional phone", () => {
   const parsed = parseContactPayload({
     ...veteransBase,
-    message: "",
+    phone: "1".repeat(CONTACT_LIMITS.phone + 1),
   });
-  assert.equal(parsed.ok, true);
-  if (!parsed.ok) return;
-  assert.match(parsed.fields.message, /Help with: VAC or preauthorization questions/);
+  assert.equal(parsed.ok, false);
+  if (parsed.ok) return;
+  assert.ok(parsed.errors.phone);
 });
 
 test("splitPersonName keeps multi-word family names together", () => {
@@ -280,4 +251,3 @@ test("built client bundles do not contain the Jotform API key env name", () => {
     assert.equal(src.includes("JOTFORM_API_KEY"), false, file);
   }
 });
-

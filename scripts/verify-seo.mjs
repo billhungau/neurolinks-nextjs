@@ -32,7 +32,7 @@ const TITLES = {
     "Ketamine Therapy in Nanaimo, BC | NeuroLinks",
   "/services-psychiatric-tms-ketamine-treatment/":
     "Psychiatric Assessment &amp; Treatment in Nanaimo | NeuroLinks",
-  "/veterans/": "TMS &amp; Ketamine Treatment for Veterans in BC | NeuroLinks",
+  "/veterans/": "Mental Health Treatment for Veterans in BC | NeuroLinks",
   "/psychiatrist-tms-nanaimo/": "Dr. Chi Hung Au &amp; Our Team | NeuroLinks Nanaimo",
   "/physician-referral/": "Refer a Patient for TMS or Ketamine | NeuroLinks",
   "/contact/": "Contact NeuroLinks | Nanaimo TMS &amp; Ketamine Clinic",
@@ -209,7 +209,9 @@ async function main() {
   }
   if (!ads.text.includes('id="inquiry"')) fail("ads landing missing #inquiry");
   else pass("ads landing has #inquiry");
-  if (!ads.text.includes("Let’s talk about your options")) fail("ads landing missing inquiry heading");
+  if (!ads.text.includes("Let’s explore what may be right for you.")) {
+    fail("ads landing missing inquiry heading");
+  } else pass("ads landing inquiry heading");
   if (!ads.text.includes('name="firstName"') || !ads.text.includes('name="message"')) {
     fail("ads landing missing shared contact form fields");
   } else pass("ads landing embeds the shared contact form");

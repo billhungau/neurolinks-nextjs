@@ -53,9 +53,6 @@ export const VETERAN_CONDITIONS = [
 export const VETERAN_CONDITIONS_INTRO =
   "Depression, anxiety and trauma-related symptoms frequently overlap. Assessment should reflect the complete clinical picture rather than treating each symptom in isolation.";
 
-export const VETERAN_CONDITIONS_NOTE =
-  "A condition listed here does not mean that TMS or ketamine will automatically be recommended. Suitability is determined through psychiatric assessment.";
-
 export type VeteranTreatment = {
   key: "tms" | "ketamine";
   eyebrow: string;
@@ -83,14 +80,14 @@ export const VETERAN_TREATMENTS = [
   },
   {
     key: "ketamine",
-    eyebrow: "Ketamine",
-    title: "A medically supervised treatment pathway",
-    body: "Ketamine may be considered for selected patients with treatment-resistant depression following medical and psychiatric screening. Treatment is provided in a controlled clinical setting with appropriate monitoring.",
+    eyebrow: "IM ketamine",
+    title: "Rapid-acting treatment when depression has not lifted",
+    body: "IM ketamine works through different brain pathways than conventional antidepressants. For some people with treatment-resistant depression, improvement can begin within hours or days—even after several previous treatments have not provided enough relief.",
     points: [
-      "Primarily considered for treatment-resistant depression",
-      "Medical screening before treatment",
-      "Supervised administration and monitoring",
-      "Response and tolerability reviewed throughout care",
+      "Can act more quickly than conventional antidepressants",
+      "Works through a different brain pathway",
+      "May help when several treatments have not worked",
+      "Individualized treatment with psychiatrist-led monitoring",
     ],
     linkLabel: "Learn more about ketamine",
     href: "/ketamine-treatment-resistant-depression-nanaimo/",
@@ -98,7 +95,7 @@ export const VETERAN_TREATMENTS = [
 ] as const satisfies readonly VeteranTreatment[];
 
 export const VETERAN_TREATMENT_INTRO =
-  "TMS and ketamine work differently from conventional antidepressant medications. They may offer another path forward for selected patients, but neither treatment is appropriate for everyone.";
+  "TMS and IM ketamine work differently from conventional antidepressant medications. They may offer another path forward for selected patients, but neither treatment is appropriate for everyone.";
 
 export const VETERAN_PATHWAY_EYEBROW = "A clear way forward";
 export const VETERAN_PATHWAY_HEADING = "From first contact to treatment";
@@ -127,7 +124,7 @@ export const VETERAN_PATHWAY = [
   {
     index: "03",
     title: "Request preauthorization",
-    body: "If treatment is recommended, NeuroLinks prepares the proposed protocol, clinical rationale, schedule and estimated cost required for review.",
+    body: "If treatment is recommended, NeuroLinks prepares the clinical rationale, proposed protocol, schedule and estimated cost for Medavie Blue Cross. If Spravato is being considered, you must be taking an antidepressant when the coverage application is submitted.",
     icon: "authorize",
   },
   {
@@ -158,8 +155,8 @@ export const VETERAN_EXPERIENCE_POINTS = [
 export const VETERAN_COVERAGE = {
   heading: "Clear information before treatment begins",
   body: [
-    "Veterans Affairs Canada may authorize treatment in eligible cases. NeuroLinks can prepare the proposed treatment plan, clinical rationale, schedule and estimated cost required for review.",
-    "Coverage is not automatic. Eligibility and authorization depend on the individual Veteran’s benefits, clinical circumstances and proposed treatment. Treatment begins only after written authorization has been confirmed through VAC and Medavie Blue Cross.",
+    "Veterans Affairs Canada may authorize TMS or Spravato® treatment in eligible cases. The IM ketamine treatment offered by NeuroLinks is not included in the current VAC benefit schedule.",
+    "Coverage is not automatic. Spravato requires written preauthorization through VAC and Medavie Blue Cross, and you must be taking an antidepressant when the application is submitted. Treatment begins only after authorization has been confirmed.",
   ],
   coordinationHeading: "Already working with a clinician or case manager?",
   coordination:
@@ -168,7 +165,7 @@ export const VETERAN_COVERAGE = {
 
 /** Corrected coverage wording shared with the Services page. */
 export const VETERAN_COVERAGE_STATEMENT =
-  "Veterans Affairs Canada may authorize TMS or ketamine treatment in eligible cases. NeuroLinks can prepare the proposed treatment plan and supporting clinical information required for review. Coverage is not automatic, and treatment begins only after written authorization has been confirmed through VAC and Medavie Blue Cross.";
+  "Veterans Affairs Canada may authorize TMS or Spravato® treatment in eligible cases. NeuroLinks also provides IM ketamine, but this treatment is not included in the current VAC benefit schedule. Coverage is not automatic, and treatment begins only after written authorization has been confirmed through VAC and Medavie Blue Cross.";
 
 export const VETERAN_CONTACT = {
   heading: "You do not have to determine the next step alone",
@@ -180,8 +177,8 @@ export const VETERAN_CONTACT = {
 
 export const VETERAN_FAQS: FaqItem[] = [
   {
-    q: "Does VAC cover TMS or ketamine treatment?",
-    a: "Veterans Affairs Canada may authorize TMS or ketamine treatment in eligible cases. Coverage is not automatic. It depends on your benefits, your clinical circumstances and the treatment being proposed. Treatment begins only after written authorization has been confirmed through VAC and Medavie Blue Cross. We can explain what documentation is typically required, but the decision rests with VAC and Medavie Blue Cross.",
+    q: "What is usually required for Spravato coverage?",
+    a: "To apply for VAC coverage for Spravato, you must be taking an antidepressant. The application should document multiple adequate antidepressant trials that did not provide sufficient improvement and other treatment strategies, such as antipsychotic augmentation, when clinically appropriate. NeuroLinks can review your history and prepare the supporting information for Medavie Blue Cross. Written preauthorization is required before treatment begins.",
   },
   {
     q: "Will NeuroLinks help obtain preauthorization?",
@@ -192,8 +189,8 @@ export const VETERAN_FAQS: FaqItem[] = [
     a: "A physician or nurse practitioner referral is required for an MSP-covered psychiatric assessment. You are welcome to contact the clinic first. We can explain what is needed and, with your consent, correspond with your care provider or case manager. Clinicians can refer through our physician referral page or by fax.",
   },
   {
-    q: "How long does authorization usually take?",
-    a: "Timelines are set by VAC and Medavie Blue Cross rather than by the clinic, so we cannot promise a date. Incomplete documentation is a common cause of delay, so we aim to submit the required clinical information in full. We will tell you what has been submitted and what remains outstanding.",
+    q: "Why might NeuroLinks recommend TMS first?",
+    a: "When clinically appropriate, we often recommend considering TMS first because it is non-invasive and generally has fewer treatment-day side effects. It does not normally cause medication-related sedation or dissociation, and most people can return to their usual activities afterward. If TMS does not provide enough improvement, documenting the treatment may also strengthen the clinical rationale for a later Spravato application, although the decision remains with VAC and Medavie Blue Cross.",
   },
   {
     q: "How frequently will I need to travel to Nanaimo?",
