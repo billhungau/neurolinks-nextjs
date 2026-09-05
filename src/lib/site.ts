@@ -68,6 +68,11 @@ export function isAdsLandingPath(pathname: string): boolean {
   return normalized === ADS_LANDING_PATH;
 }
 
+export function isStudioPath(pathname: string): boolean {
+  const normalized = withTrailingSlash(pathname.split("?")[0] ?? pathname);
+  return normalized === "/studio/" || normalized.startsWith("/studio/");
+}
+
 /** Absolute URL on the designated production origin. */
 export function productionUrl(path: string): string {
   const pathname = withTrailingSlash(path);
@@ -102,6 +107,7 @@ export function googleSiteVerification(): string | undefined {
  */
 export function robotsTagForRequest(host: string | null | undefined, pathname: string): string | null {
   if (!isPublicProductionIndexing(host)) return CLOSED_ROBOTS_HEADER;
+  if (isStudioPath(pathname)) return CLOSED_ROBOTS_HEADER;
   if (isAdsLandingPath(pathname)) return ADS_ROBOTS_HEADER;
   return null;
 }

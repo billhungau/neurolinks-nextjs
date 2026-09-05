@@ -4,6 +4,7 @@ import Script from "next/script";
 import { AnchorOffset } from "@/components/AnchorOffset";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
 import { MotionReady } from "@/components/MotionReady";
+import { InsightsSanityRuntime } from "@/components/insights/InsightsSanityRuntime";
 import { SkipLink } from "@/components/SkipLink";
 import { DEFAULT_OG_IMAGE, pageRobots } from "@/lib/seo";
 import {
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AnchorOffset />
         <ClinicJsonLd />
         <MotionReady />
+        <InsightsSanityRuntime />
         {children}
       </body>
     </html>

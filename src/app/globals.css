@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./insights.css";
 
 :root {
   --nl-navy: #1a2744;

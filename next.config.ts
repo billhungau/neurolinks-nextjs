@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
   skipProxyUrlNormalize: true,
   images: {
     formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+      },
+    ],
   },
   async headers() {
     const adsSources = [ADS_LANDING_PATH, ADS_LANDING_PATH.replace(/\/$/, "")];
@@ -15,12 +21,22 @@ const nextConfig: NextConfig = {
       source,
       headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
     }));
+    const studioHeaders = [
+      {
+        source: "/studio",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        source: "/studio/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
 
     if (isSearchIndexable()) {
       // Production HTML is indexable. Host-based noindex for vercel.app is
       // applied at request time in src/proxy.ts so the production alias cannot
       // inherit public indexing before neurolinks.ca DNS cutover.
-      return adsHeaders;
+      return [...adsHeaders, ...studioHeaders];
     }
 
     return [

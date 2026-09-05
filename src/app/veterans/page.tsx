@@ -36,6 +36,7 @@ import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
+import { VeteransRelatedInsights } from "@/components/insights/VeteransRelatedInsights";
 
 export const metadata = pageMetadata({
   title: "Mental Health Treatment for Veterans in BC | NeuroLinks",
@@ -317,6 +318,8 @@ export default function VeteransPage() {
           </Reveal>
         </div>
       </section>
+
+      <VeteransRelatedInsights />
 
       <section id="faqs" className="tms-section vet-anchor-target bg-white">
         <div className="tms-wrap">

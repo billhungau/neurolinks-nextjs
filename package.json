@@ -8,13 +8,18 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test src/content/faqs.test.ts src/content/home-reviews.test.ts src/content/landing.test.ts src/content/veterans.test.ts src/lib/contact-form.test.ts src/lib/referral-form.test.ts src/lib/site.test.ts src/lib/redirects.test.ts src/lib/seo.test.ts src/lib/anchor-offset.test.ts src/lib/anchor-target.test.ts src/lib/motion-policy.test.ts src/app/api/forms/contact/route.test.ts src/app/api/forms/referral/route.test.ts src/app/services-psychiatric-tms-ketamine-treatment/page.test.ts src/app/veterans/page.test.ts src/app/page.test.ts src/components/HomeForwardMotion.test.ts src/components/Reveal.test.ts",
+    "test": "node --experimental-strip-types --test src/content/faqs.test.ts src/content/home-reviews.test.ts src/content/landing.test.ts src/content/veterans.test.ts src/content/insights-briefs.test.ts src/lib/contact-form.test.ts src/lib/referral-form.test.ts src/lib/site.test.ts src/lib/redirects.test.ts src/lib/seo.test.ts src/lib/insights.test.ts src/lib/insights-seo.test.ts src/lib/anchor-offset.test.ts src/lib/anchor-target.test.ts src/lib/motion-policy.test.ts src/app/api/forms/contact/route.test.ts src/app/api/forms/referral/route.test.ts src/app/services-psychiatric-tms-ketamine-treatment/page.test.ts src/app/veterans/page.test.ts src/app/insights/page.test.ts src/app/page.test.ts src/components/HomeForwardMotion.test.ts src/components/Reveal.test.ts src/sanity/env.test.ts",
     "verify:seo": "node --experimental-strip-types scripts/verify-seo.mjs"
   },
   "dependencies": {
+    "@portabletext/react": "^8.0.1",
+    "@sanity/image-url": "^2.1.1",
+    "@sanity/vision": "^6.12.0",
     "next": "16.3.3",
+    "next-sanity": "^13.3.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "sanity": "^6.12.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
