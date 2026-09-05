@@ -50,16 +50,16 @@ test("the route is in the manifest and therefore in the sitemap", () => {
   assert.ok(SITEMAP_ROUTES.includes("/veterans/"));
 });
 
-test("main navigation places Veterans between Assessment & Treatment and About Us", () => {
+test("main navigation places Veterans between Services and About", () => {
   const labels = PRIMARY_NAV.map((item) => item.label);
   assert.deepEqual(labels, [
     "Home",
-    "About TMS",
-    "About Ketamine",
-    "Assessment & Treatment",
+    "TMS",
+    "Ketamine",
+    "Services",
     "Veterans",
-    "About Us",
-    "Physician Referral",
+    "About",
+    "Referral",
   ]);
   const veterans = PRIMARY_NAV.find((item) => item.label === "Veterans");
   assert.equal(veterans?.href, "/veterans/");
