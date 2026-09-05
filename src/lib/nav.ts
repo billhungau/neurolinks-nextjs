@@ -38,6 +38,20 @@ export const FOOTER_QUICK_LINKS = [
   { href: "/physician-referral/", label: "Physician Referral" },
 ] as const satisfies readonly NavItem[];
 
+export const INSIGHTS_NAV = {
+  href: "/insights/",
+  label: "Insights",
+} as const satisfies NavItem;
+
+/** Quick links, with Insights inserted after Veterans when the public section is enabled. */
+export function footerQuickLinks(): NavItem[] {
+  const links: NavItem[] = [...FOOTER_QUICK_LINKS];
+  if (process.env.NEXT_PUBLIC_INSIGHTS_ENABLED === "true") {
+    links.splice(1, 0, INSIGHTS_NAV);
+  }
+  return links;
+}
+
 export function normalizePath(path: string) {
   if (!path || path === "/") return "/";
   return path.endsWith("/") ? path.slice(0, -1) : path;

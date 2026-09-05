@@ -94,11 +94,11 @@ export const PAGE_OG_IMAGES = {
 
 function ogImage(image: SeoImage) {
   return {
-    url: productionUrl(image.path),
+    url: image.path.startsWith("http") ? image.path : productionUrl(image.path),
     width: image.width,
     height: image.height,
     alt: image.alt,
-    type: "image/jpeg" as const,
+    type: image.path.includes(".png") ? ("image/png" as const) : ("image/jpeg" as const),
   };
 }
 

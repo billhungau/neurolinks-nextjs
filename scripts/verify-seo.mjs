@@ -260,6 +260,8 @@ async function main() {
     if (sitemap.text.includes("neurolinks-psychiatry-nanaimo-bc")) {
       fail("sitemap includes ads landing");
     }
+    if (sitemap.text.includes("/studio")) fail("sitemap includes studio");
+    if (sitemap.text.includes("/insights")) fail("sitemap includes Insights while the section is disabled");
     if (sitemap.text.includes("quest-ce-que-le-tms") || sitemap.text.includes("关于")) {
       fail("sitemap includes multilingual URLs");
     }
@@ -323,6 +325,24 @@ async function main() {
   const unknown = await request("/this-page-does-not-exist/");
   if (unknown.response.status !== 404) fail(`unknown URL status ${unknown.response.status}`);
   else pass("unknown URL 404");
+
+  const insights = await request("/insights/");
+  if (insights.response.status !== 404) fail(`disabled Insights index status ${insights.response.status}`);
+  else pass("disabled Insights index 404");
+
+  const insightsArticle = await request("/insights/how-vac-authorization-for-tms-works-in-british-columbia/");
+  if (insightsArticle.response.status !== 404) {
+    fail(`unpublished Insights article status ${insightsArticle.response.status}`);
+  } else pass("unpublished Insights article 404");
+
+  const studio = await request("/studio/");
+  if (studio.response.status !== 200) fail(`studio status ${studio.response.status}`);
+  else pass("studio HTTP 200");
+  const studioRobots = meta(studio.text, "robots");
+  if (!/\bnoindex\b/i.test(studioRobots)) fail(`studio HTML robots missing noindex: ${studioRobots}`);
+  else pass(`studio HTML robots ${studioRobots}`);
+  if (studio.text.toLowerCase().includes(">blog<")) fail("studio labelled as blog");
+
 
   const shop = await request("/shop-2/");
   if (shop.response.status !== 404) fail(`shop-2 should 404, got ${shop.response.status}`);

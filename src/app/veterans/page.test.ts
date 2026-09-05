@@ -4,7 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { PAGE_MANIFEST, SITEMAP_ROUTES } from "../../content/manifest.ts";
-import { CONTACT_NAV, FOOTER_QUICK_LINKS, PRIMARY_NAV } from "../../lib/nav.ts";
+import { CONTACT_NAV, FOOTER_QUICK_LINKS, footerQuickLinks, PRIMARY_NAV } from "../../lib/nav.ts";
 import { productionUrl } from "../../lib/site.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -78,8 +78,12 @@ test("the header treats the Veterans hero like the other overlay heroes", () => 
 test("Veterans appears under footer quick links", () => {
   assert.equal(FOOTER_QUICK_LINKS[0].label, "Veterans");
   assert.equal(FOOTER_QUICK_LINKS[0].href, "/veterans/");
-  assert.match(footer, /FOOTER_QUICK_LINKS/);
+  assert.match(footer, /footerQuickLinks/);
   assert.match(footer, /Quick links/);
+  assert.equal(
+    footerQuickLinks().some((item) => item.label === "Insights"),
+    false,
+  );
 });
 
 test("hero carries the supplied eyebrow, single H1, copy and on-page CTAs", () => {
@@ -317,6 +321,17 @@ test("reveal animation fails open and honours reduced motion", () => {
   assert.match(globalsCss, /animation:\s*vet-stagger-in 480ms/);
   assert.match(globalsCss, /> :nth-child\(2\) \{\s*animation-delay:\s*70ms/);
   assert.match(globalsCss, /> :nth-child\(3\) \{\s*animation-delay:\s*140ms/);
+});
+
+test("Veterans related Insights only render when published articles exist", () => {
+  assert.match(page, /VeteransRelatedInsights/);
+  const related = readFileSync(
+    join(root, "../../components/insights/VeteransRelatedInsights.tsx"),
+    "utf8",
+  );
+  assert.match(related, /shouldExposeInsightsPublicly/);
+  assert.match(related, /getArticlesByTopic\("veterans-and-coverage"\)/);
+  assert.match(related, /if \(!articles\.length\) return null/);
 });
 
 test("the Services page no longer claims blanket Medavie Blue Cross coverage", () => {

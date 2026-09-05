@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { FOOTER_QUICK_LINKS, FOOTER_TREATMENTS } from "@/lib/nav";
+import { footerQuickLinks, FOOTER_TREATMENTS } from "@/lib/nav";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { SITE } from "@/lib/site";
 
@@ -97,7 +97,7 @@ export function SiteFooter() {
             <nav aria-label="Quick links">
               <p className="site-footer-heading">Quick links</p>
               <ul className="site-footer-list">
-                {FOOTER_QUICK_LINKS.map((item) => (
+                {footerQuickLinks().map((item) => (
                   <li key={item.href}>
                     <Link className="site-footer-link" href={item.href}>
                       {item.label}
