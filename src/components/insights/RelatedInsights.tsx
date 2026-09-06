@@ -1,4 +1,4 @@
-import type { InsightsArticleCard } from "@/sanity/types";
+import type { InsightsArticleCard } from "@/lib/payload/types";
 import { ArticleCard } from "./ArticleCard";
 
 export function RelatedInsights({
@@ -16,7 +16,7 @@ export function RelatedInsights({
       </h2>
       <div className="insights-card-grid">
         {articles.slice(0, 3).map((article) => (
-          <ArticleCard key={article._id} article={article} />
+          <ArticleCard key={article.id} article={article} />
         ))}
       </div>
     </section>

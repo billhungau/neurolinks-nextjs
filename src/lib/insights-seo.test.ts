@@ -28,10 +28,31 @@ test("article JSON-LD uses visible fields only and production canonicals", () =>
     productionUrl("/insights/how-vac-authorization-for-tms-works-in-british-columbia/"),
   );
   assert.equal((data.author as { name: string }).name, "Dr. Chi Hung Au");
-  assert.equal((data.reviewedBy as { name: string }).name, "Dr. Chi Hung Au");
   assert.equal((data.publisher as { name: string }).name, "NeuroLinks");
   assert.equal(JSON.stringify(data).includes("miracle"), false);
   assert.equal("image" in data, false);
+});
+
+test("MedicalWebPage and reviewedBy are only added where they are justified", () => {
+  // A coverage article is not clinical guidance, so it stays a plain Article.
+  const coverage = articleJsonLd({ ...article, topics: ["veterans-and-coverage"] });
+  assert.equal(coverage["@type"], "Article");
+  assert.equal("reviewedBy" in coverage, false);
+  assert.equal("lastReviewed" in coverage, false);
+
+  const clinical = articleJsonLd({ ...article, topics: ["tms"] });
+  assert.deepEqual(clinical["@type"], ["Article", "MedicalWebPage"]);
+  assert.equal((clinical.reviewedBy as { name: string }).name, "Dr. Chi Hung Au");
+  assert.equal(clinical.lastReviewed, article.lastReviewedAt);
+
+  // No reviewer recorded means no review claim, even on a clinical topic.
+  const unreviewed = articleJsonLd({
+    ...article,
+    topics: ["tms"],
+    medicalReviewer: undefined,
+  });
+  assert.equal(unreviewed["@type"], "Article");
+  assert.equal("reviewedBy" in unreviewed, false);
 });
 
 test("breadcrumb JSON-LD lists Home, Insights and the article", () => {
@@ -59,6 +80,18 @@ test("article metadata uses unique titles, canonicals, article Open Graph and da
   assert.match(seoSource, /articleShareImage/);
   assert.match(seoSource, /path: "\/insights\/"/);
   assert.equal(seoSource.includes("miracle"), false);
+});
+
+test("SEO fallbacks and the noindex switch are wired through one resolver each", () => {
+  assert.match(seoSource, /resolveSeoTitle\(article, INSIGHTS_NAME\)/);
+  assert.match(seoSource, /resolveMetaDescription\(article, INSIGHTS_INDEX_DESCRIPTION\)/);
+  assert.match(seoSource, /resolveSocialTitle\(article, title\)/);
+  assert.match(seoSource, /resolveSocialDescription\(article, description\)/);
+  // social image → featured image → NeuroLinks default share image
+  assert.match(seoSource, /article\.socialImage \?\? article\.featuredImage/);
+  assert.match(seoSource, /if \(!source\) return DEFAULT_OG_IMAGE/);
+  assert.match(seoSource, /article\.indexable === false/);
+  assert.match(seoSource, /article\.canonicalUrl \|\| productionUrl\(path\)/);
 });
 
 test("references render a consistent citation string without injecting HTML", () => {

@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  PUBLISHED_ARTICLE_GROQ_FILTER,
   countWords,
   defaultCtaHref,
   insightsArticlePath,
+  isIndexableArticle,
   isInsightsPublicEnabled,
   isInsightsTopicSlug,
+  isMedicalArticle,
+  isPublishedArticle,
   readingTimeMinutes,
   slugifyHeading,
   uniqueHeadingIds,
@@ -24,11 +26,29 @@ test("Insights stays disabled unless the launch flag is exactly true", () => {
   else process.env.NEXT_PUBLIC_INSIGHTS_ENABLED = previous;
 });
 
-test("published article GROQ excludes drafts and unpublished documents", () => {
-  assert.match(PUBLISHED_ARTICLE_GROQ_FILTER, /_type == "article"/);
-  assert.match(PUBLISHED_ARTICLE_GROQ_FILTER, /!\(_id in path\("drafts\.\*\*"\)\)/);
-  assert.match(PUBLISHED_ARTICLE_GROQ_FILTER, /defined\(publishedAt\)/);
-  assert.match(PUBLISHED_ARTICLE_GROQ_FILTER, /defined\(slug\.current\)/);
+test("only published Payload documents with a slug and a date are public", () => {
+  const published = { _status: "published", slug: "tms-and-vac", publishedAt: "2026-09-01" };
+  assert.equal(isPublishedArticle(published), true);
+  assert.equal(isPublishedArticle({ ...published, _status: "draft" }), false);
+  assert.equal(isPublishedArticle({ ...published, publishedAt: null }), false);
+  assert.equal(isPublishedArticle({ ...published, slug: null }), false);
+  assert.equal(isPublishedArticle(null), false);
+});
+
+test("noindex articles stay out of the indexable set even once published", () => {
+  const published = { _status: "published", slug: "tms-and-vac", publishedAt: "2026-09-01" };
+  assert.equal(isIndexableArticle(published), true);
+  assert.equal(isIndexableArticle({ ...published, indexable: true }), true);
+  assert.equal(isIndexableArticle({ ...published, indexable: false }), false);
+  assert.equal(isIndexableArticle({ ...published, _status: "draft" }), false);
+});
+
+test("MedicalWebPage typing is limited to clinical topics", () => {
+  assert.equal(isMedicalArticle(["tms"]), true);
+  assert.equal(isMedicalArticle(["ketamine-and-spravato"]), true);
+  assert.equal(isMedicalArticle(["veterans-and-coverage"]), false);
+  assert.equal(isMedicalArticle([]), false);
+  assert.equal(isMedicalArticle(null), false);
 });
 
 test("article paths keep trailing slashes and topic slugs are known", () => {

@@ -1,8 +1,7 @@
 import Image from "next/image";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { MEDIA } from "@/lib/media";
-import { insightsImageUrl } from "@/sanity/image";
-import type { InsightsArticleCard } from "@/sanity/types";
+import type { InsightsArticleCard } from "@/lib/payload/types";
 import { NeuralMotif } from "./EditorialDiagram";
 
 const FALLBACK_BY_TOPIC: Record<string, { src: string; alt: string }> = {
@@ -27,20 +26,19 @@ export function InsightsCardImage({
   article: InsightsArticleCard;
   featured?: boolean;
 }) {
-  const sanityUrl = insightsImageUrl(article.featuredImage, featured ? 1400 : 900);
+  const image = article.featuredImage;
   const fallback =
     FALLBACK_BY_TOPIC[article.topics?.[0] ?? ""] ||
     FALLBACK_BY_TOPIC[article.category?.slug ?? ""] ||
     null;
-  const alt = article.featuredImage?.alt || fallback?.alt;
   const className = featured ? "insights-featured-media" : "insights-card-media";
 
-  if (sanityUrl && alt) {
+  if (image) {
     return (
       <div className={className}>
         <Image
-          src={sanityUrl}
-          alt={alt}
+          src={image.url}
+          alt={image.alt}
           fill
           sizes={featured ? IMG_SIZES.insightsFeatured : IMG_SIZES.insightsCard}
           className="object-cover"

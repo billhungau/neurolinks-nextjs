@@ -1,0 +1,14 @@
+/*
+ * Small admin-only refinements. The public NeuroLinks design is untouched by
+ * this file: it is loaded solely inside the Payload admin layout.
+ */
+
+/* Keep long editorial descriptions readable in the sidebar. */
+.field-description {
+  max-width: 34rem;
+}
+
+/* The article body is the main job in here, so give it room. */
+.rich-text-lexical .editor-container {
+  min-height: 28rem;
+}

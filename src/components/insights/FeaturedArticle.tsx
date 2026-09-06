@@ -2,7 +2,7 @@ import Link from "next/link";
 import { TextLink } from "@/components/TextLink";
 import { Reveal } from "@/components/Reveal";
 import { formatInsightsDate, insightsArticlePath, readingTimeMinutes } from "@/lib/insights";
-import type { InsightsArticleCard } from "@/sanity/types";
+import type { InsightsArticleCard } from "@/lib/payload/types";
 import { InsightsCardImage } from "./InsightsCardImage";
 
 export function FeaturedArticle({ article }: { article: InsightsArticleCard }) {

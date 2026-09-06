@@ -1,7 +1,7 @@
 import { productionUrl, withTrailingSlash } from "./site.ts";
 
 export const INSIGHTS_PATH = "/insights/";
-export const STUDIO_PATH = "/studio/";
+export const ADMIN_PATH = "/admin/";
 
 export const INSIGHTS_NAME = "NeuroLinks Insights";
 export const INSIGHTS_EYEBROW = "NeuroLinks Insights";
@@ -27,6 +27,14 @@ export const DEFAULT_ARTICLE_CTA = {
   label: "Start a confidential conversation",
 } as const;
 
+export const INSIGHTS_CONTACT_HEADING =
+  "A conversation can help you make sense of the options";
+export const INSIGHTS_CONTACT_BODY =
+  "If you are considering specialist treatment, the NeuroLinks team can help you understand whether an assessment may be appropriate.";
+
+/** Cache tag shared by every cached CMS read behind the Insights section. */
+export const INSIGHTS_CACHE_TAG = "insights";
+
 export const INSIGHTS_TOPICS = [
   { slug: "veterans-and-coverage", title: "Veterans and coverage" },
   { slug: "tms", title: "TMS" },
@@ -49,7 +57,7 @@ export const TOPIC_PAGE_HREFS: Record<InsightsTopicSlug, string> = {
 
 export const WORDS_PER_MINUTE = 220;
 
-/** Public Insights listing and article URLs. Studio is independent of this flag. */
+/** Public Insights listing and article URLs. The Payload admin is independent of this flag. */
 export function isInsightsPublicEnabled() {
   return process.env.NEXT_PUBLIC_INSIGHTS_ENABLED === "true";
 }
@@ -131,17 +139,29 @@ export function formatInsightsDate(iso: string | null | undefined) {
   }).format(date);
 }
 
-export const PUBLISHED_ARTICLE_GROQ_FILTER =
-  '_type == "article" && defined(slug.current) && !(_id in path("drafts.**")) && defined(publishedAt)';
-
+/**
+ * Payload publishes through `_status`. A public article needs a slug, the
+ * published status and an editorial published date. Draft-only documents and
+ * published documents without a date never reach the public site.
+ */
 export function isPublishedArticle(article: {
-  _id?: string | null;
+  _status?: string | null;
   slug?: string | null;
   publishedAt?: string | null;
 } | null) {
   if (!article?.slug) return false;
-  if (article._id?.startsWith("drafts.")) return false;
+  if (article._status !== "published") return false;
   return Boolean(article.publishedAt);
+}
+
+/** Published articles that search engines may index. */
+export function isIndexableArticle(article: {
+  _status?: string | null;
+  slug?: string | null;
+  publishedAt?: string | null;
+  indexable?: boolean | null;
+} | null) {
+  return isPublishedArticle(article) && article?.indexable !== false;
 }
 
 export function doiHref(doi: string | null | undefined) {
@@ -186,6 +206,39 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
   };
 }
 
+type JsonLdPerson = {
+  name?: string | null;
+  role?: string | null;
+  credentials?: string | null;
+} | null;
+
+function personJsonLd(person: JsonLdPerson | undefined) {
+  if (!person?.name) return undefined;
+  return {
+    "@type": "Person",
+    name: person.name,
+    jobTitle: person.role || undefined,
+    honorificSuffix: person.credentials || undefined,
+  };
+}
+
+/**
+ * Topics whose articles genuinely describe treatment or clinical conditions.
+ * Only those get the MedicalWebPage type, so the extra typing stays
+ * justified rather than being sprayed across every article.
+ */
+const MEDICAL_TOPICS: readonly string[] = [
+  "tms",
+  "ketamine-and-spravato",
+  "treatment-resistant-depression",
+  "depression",
+  "ptsd-and-anxiety",
+];
+
+export function isMedicalArticle(topics: readonly string[] | null | undefined) {
+  return Boolean(topics?.some((topic) => MEDICAL_TOPICS.includes(topic)));
+}
+
 export function articleJsonLd(article: {
   title: string;
   slug: string;
@@ -193,15 +246,21 @@ export function articleJsonLd(article: {
   publishedAt?: string | null;
   lastReviewedAt?: string | null;
   canonicalUrl?: string | null;
-  author?: { name?: string | null; role?: string | null } | null;
-  medicalReviewer?: { name?: string | null; role?: string | null } | null;
+  author?: JsonLdPerson;
+  medicalReviewer?: JsonLdPerson;
   image?: string | null;
+  topics?: readonly string[] | null;
 }) {
   const path = insightsArticlePath(article.slug);
   const canonical = article.canonicalUrl || productionUrl(path);
+  const reviewer = personJsonLd(article.medicalReviewer);
+  // `reviewedBy` and `lastReviewed` belong to WebPage, so they are only
+  // emitted when the article is also typed as a MedicalWebPage.
+  const medicalPage = Boolean(reviewer) && isMedicalArticle(article.topics);
+
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": medicalPage ? ["Article", "MedicalWebPage"] : "Article",
     headline: article.title,
     description: article.summary || undefined,
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
@@ -215,19 +274,11 @@ export function articleJsonLd(article: {
     },
   };
   if (article.image) data.image = article.image;
-  if (article.author?.name) {
-    data.author = {
-      "@type": "Person",
-      name: article.author.name,
-      jobTitle: article.author.role || undefined,
-    };
-  }
-  if (article.medicalReviewer?.name) {
-    data.reviewedBy = {
-      "@type": "Person",
-      name: article.medicalReviewer.name,
-      jobTitle: article.medicalReviewer.role || undefined,
-    };
+  const author = personJsonLd(article.author);
+  if (author) data.author = author;
+  if (medicalPage && reviewer) {
+    data.reviewedBy = reviewer;
+    if (article.lastReviewedAt) data.lastReviewed = article.lastReviewedAt;
   }
   return data;
 }

@@ -2,12 +2,27 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { lookupRedirect } from "@/lib/redirects";
 import {
+  CMS_API_PATH,
   hostnameFromHostHeader,
   PRODUCTION_ORIGIN,
   robotsTagForRequest,
   withTrailingSlash,
   WWW_HOST,
 } from "@/lib/site";
+
+/**
+ * Payload owns its own URLs. Rewriting them to trailing slashes breaks admin
+ * navigation and the REST calls the admin makes, so they pass straight
+ * through with only the noindex header applied.
+ */
+function isCmsRequest(pathname: string) {
+  return (
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname === CMS_API_PATH ||
+    pathname.startsWith(`${CMS_API_PATH}/`)
+  );
+}
 
 function applyRobots(request: NextRequest, response: NextResponse) {
   const tag = robotsTagForRequest(request.headers.get("host"), request.nextUrl.pathname);
@@ -43,6 +58,7 @@ export function proxy(request: NextRequest) {
   if (
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/api/") ||
+    isCmsRequest(pathname) ||
     pathname.includes(".")
   ) {
     return applyRobots(request, NextResponse.next());

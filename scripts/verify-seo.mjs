@@ -3,13 +3,21 @@
  * HTTP checks for SEO/migration behaviour against a running Next server.
  * Usage: SEO_BASE_URL=http://127.0.0.1:3010 node scripts/verify-seo.mjs
  *
- * SEO_HTML_INDEXABLE=true — server was built with ALLOW_SEARCH_INDEXING=true.
+ * SEO_HTML_INDEXABLE=true — server was built with the launch config, i.e. both
+ *   ALLOW_SEARCH_INDEXING=true and NEXT_PUBLIC_SITE_URL=https://neurolinks.ca.
+ *   With the staging site URL the build stays noindex whatever the flag says.
+ * SEO_INSIGHTS_ENABLED=true — server was built with NEXT_PUBLIC_INSIGHTS_ENABLED=true
+ *   and the CMS has at least one published article. Set SEO_INSIGHTS_SLUG to
+ *   that article's slug. When unset, Insights is expected to 404 everywhere.
  * Production-host checks use a raw Host header (Node fetch cannot set Host).
  */
 const base = (process.env.SEO_BASE_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
 const htmlIndexable = process.env.SEO_HTML_INDEXABLE === "true";
 const productionHost = process.env.SEO_PRODUCTION_HOST || "neurolinks.ca";
 const requireVideos = process.env.SEO_REQUIRE_VIDEOS === "true";
+const insightsEnabled = process.env.SEO_INSIGHTS_ENABLED === "true";
+const insightsSlug = process.env.SEO_INSIGHTS_SLUG || "";
+const draftSlug = process.env.SEO_INSIGHTS_DRAFT_SLUG || "";
 
 const MAIN_ROUTES = [
   "/",
@@ -260,8 +268,23 @@ async function main() {
     if (sitemap.text.includes("neurolinks-psychiatry-nanaimo-bc")) {
       fail("sitemap includes ads landing");
     }
-    if (sitemap.text.includes("/studio")) fail("sitemap includes studio");
-    if (sitemap.text.includes("/insights")) fail("sitemap includes Insights while the section is disabled");
+    if (sitemap.text.includes("/admin")) fail("sitemap includes the CMS admin");
+    if (sitemap.text.includes("/payload-api")) fail("sitemap includes the CMS API");
+    if (insightsEnabled) {
+      if (!sitemap.text.includes("https://neurolinks.ca/insights/")) {
+        fail("sitemap missing the Insights index while the section is enabled");
+      } else pass("sitemap includes the Insights index");
+      if (insightsSlug) {
+        const articleUrl = `https://neurolinks.ca/insights/${insightsSlug}/`;
+        if (!sitemap.text.includes(articleUrl)) fail(`sitemap missing ${articleUrl}`);
+        else pass(`sitemap includes the published article ${insightsSlug}`);
+      }
+      if (draftSlug && sitemap.text.includes(`/insights/${draftSlug}/`)) {
+        fail(`sitemap includes the draft article ${draftSlug}`);
+      } else if (draftSlug) pass(`sitemap excludes the draft article ${draftSlug}`);
+    } else if (sitemap.text.includes("/insights")) {
+      fail("sitemap includes Insights while the section is disabled");
+    }
     if (sitemap.text.includes("quest-ce-que-le-tms") || sitemap.text.includes("关于")) {
       fail("sitemap includes multilingual URLs");
     }
@@ -327,21 +350,81 @@ async function main() {
   else pass("unknown URL 404");
 
   const insights = await request("/insights/");
-  if (insights.response.status !== 404) fail(`disabled Insights index status ${insights.response.status}`);
-  else pass("disabled Insights index 404");
+  if (insightsEnabled) {
+    if (insights.response.status !== 200) fail(`Insights index status ${insights.response.status}`);
+    else pass("Insights index HTTP 200");
+    if (insights.text.toLowerCase().includes(">blog<")) fail("Insights index labelled as blog");
+    if (insights.text.includes("Previewing unpublished")) {
+      fail("Insights index shows the preview banner to an anonymous visitor");
+    } else pass("Insights index has no preview banner");
+  } else if (insights.response.status !== 404) {
+    fail(`disabled Insights index status ${insights.response.status}`);
+  } else pass("disabled Insights index 404");
 
-  const insightsArticle = await request("/insights/how-vac-authorization-for-tms-works-in-british-columbia/");
-  if (insightsArticle.response.status !== 404) {
-    fail(`unpublished Insights article status ${insightsArticle.response.status}`);
-  } else pass("unpublished Insights article 404");
+  if (insightsSlug) {
+    const article = await request(`/insights/${insightsSlug}/`);
+    if (insightsEnabled) {
+      if (article.response.status !== 200) fail(`published article status ${article.response.status}`);
+      else pass(`published article /insights/${insightsSlug}/ HTTP 200`);
+      if (canonical(article.text) !== `https://neurolinks.ca/insights/${insightsSlug}/`) {
+        fail(`published article canonical ${canonical(article.text)}`);
+      } else pass("published article canonical uses the production origin");
+      if (!article.text.includes('"@type":["Article","MedicalWebPage"]') &&
+          !article.text.includes('"@type":"Article"')) {
+        fail("published article missing Article JSON-LD");
+      } else pass("published article emits Article JSON-LD");
+      if (!article.text.includes('"@type":"BreadcrumbList"')) {
+        fail("published article missing BreadcrumbList JSON-LD");
+      } else pass("published article emits BreadcrumbList JSON-LD");
+      if (article.text.includes("Previewing unpublished")) {
+        fail("published article shows the preview banner to an anonymous visitor");
+      }
+      if (article.text.includes('"@type":"FAQPage"')) fail("published article invents FAQ schema");
+    } else if (article.response.status !== 404) {
+      fail(`article status ${article.response.status} while Insights is disabled`);
+    } else pass("article 404 while Insights is disabled");
+  }
 
-  const studio = await request("/studio/");
-  if (studio.response.status !== 200) fail(`studio status ${studio.response.status}`);
-  else pass("studio HTTP 200");
-  const studioRobots = meta(studio.text, "robots");
-  if (!/\bnoindex\b/i.test(studioRobots)) fail(`studio HTML robots missing noindex: ${studioRobots}`);
-  else pass(`studio HTML robots ${studioRobots}`);
-  if (studio.text.toLowerCase().includes(">blog<")) fail("studio labelled as blog");
+  if (draftSlug) {
+    const draft = await request(`/insights/${draftSlug}/`);
+    if (draft.response.status !== 404) {
+      fail(`draft article is reachable anonymously (${draft.response.status})`);
+    } else pass("draft article 404 for anonymous visitors");
+  }
+
+  const admin = await request("/admin");
+  if (admin.response.status !== 200) fail(`CMS admin status ${admin.response.status}`);
+  else pass("CMS admin HTTP 200");
+  const adminXRobots = header(admin.response, "x-robots-tag") || "";
+  if (!/\bnoindex\b/i.test(adminXRobots)) {
+    fail(`CMS admin X-Robots-Tag missing noindex: ${adminXRobots || "(empty)"}`);
+  } else pass(`CMS admin X-Robots-Tag ${adminXRobots}`);
+  const adminRobots = meta(admin.text, "robots");
+  if (!/\bnoindex\b/i.test(adminRobots)) {
+    fail(`CMS admin HTML robots missing noindex: ${adminRobots || "(empty)"}`);
+  } else pass(`CMS admin HTML robots ${adminRobots}`);
+
+  const cmsUsers = await request("/payload-api/users");
+  if (cmsUsers.response.status !== 403) {
+    fail(`anonymous CMS user list returned ${cmsUsers.response.status}`);
+  } else pass("anonymous CMS user list forbidden");
+
+  const cmsVersions = await request("/payload-api/insights/versions");
+  if (cmsVersions.response.status !== 403) {
+    fail(`anonymous version history returned ${cmsVersions.response.status}`);
+  } else pass("anonymous version history forbidden");
+
+  const cmsDrafts = await request("/payload-api/insights?draft=true&limit=100");
+  if (cmsDrafts.response.status !== 200) {
+    fail(`anonymous Insights API returned ${cmsDrafts.response.status}`);
+  } else if (draftSlug && cmsDrafts.text.includes(`"${draftSlug}"`)) {
+    fail("anonymous Insights API leaks a draft article");
+  } else pass("anonymous Insights API returns published documents only");
+
+  const preview = await request("/api/insights-preview?slug=anything&token=forged");
+  if (preview.response.status !== 401) {
+    fail(`forged preview link returned ${preview.response.status}`);
+  } else pass("forged preview link rejected");
 
 
   const shop = await request("/shop-2/");

@@ -11,7 +11,7 @@ function read(relative: string) {
 }
 
 test("anchor offset uses one measured strategy without doubled CSS offsets", () => {
-  const css = read("app/globals.css");
+  const css = read("app/(frontend)/globals.css");
   assert.match(css, /--nl-anchor-offset:/);
   assert.match(css, /--nl-header-height:/);
   assert.match(css, /--nl-subnav-height:/);
@@ -28,7 +28,7 @@ test("anchor offset uses one measured strategy without doubled CSS offsets", () 
 });
 
 test("smooth scrolling is CSS-gated and skipped for reduced motion", () => {
-  const css = read("app/globals.css");
+  const css = read("app/(frontend)/globals.css");
   assert.match(css, /html\[data-nl-smooth-scroll\]:not\(\.nl-instant-scroll\)\s*\{[^}]*scroll-behavior:\s*smooth/);
   assert.equal(/html\s*\{[^}]*scroll-behavior:\s*smooth/.test(css), false);
   assert.match(
@@ -39,7 +39,7 @@ test("smooth scrolling is CSS-gated and skipped for reduced motion", () => {
 
 test("hash restore stays instant and clicks do not set JS smooth behavior", () => {
   const source = read("components/AnchorOffset.tsx");
-  const layout = read("app/layout.tsx");
+  const layout = read("app/(frontend)/layout.tsx");
   assert.match(source, /data-nl-smooth-scroll/);
   assert.match(source, /nl-instant-scroll/);
   assert.match(source, /data-scroll-behavior/);

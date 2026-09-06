@@ -2,7 +2,10 @@ import type { MetadataRoute } from "next";
 import { SITEMAP_ROUTES } from "@/content/manifest";
 import { insightsArticlePath } from "@/lib/insights";
 import { isSearchIndexable, productionUrl } from "@/lib/site";
-import { getIndexableArticleSlugs, shouldExposeInsightsPublicly } from "@/sanity/fetch";
+import {
+  getIndexableArticleSlugs,
+  shouldExposeInsightsPublicly,
+} from "@/lib/payload/insights";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!isSearchIndexable()) return [];

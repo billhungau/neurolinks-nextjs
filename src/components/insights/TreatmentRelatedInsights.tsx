@@ -1,5 +1,5 @@
 import { RelatedInsights } from "./RelatedInsights";
-import { getArticlesByTopic, shouldExposeInsightsPublicly } from "@/sanity/fetch";
+import { getArticlesByTopic, shouldExposeInsightsPublicly } from "@/lib/payload/insights";
 
 /** Ready for TMS and ketamine treatment pages when published articles exist. */
 export async function TreatmentRelatedInsights({

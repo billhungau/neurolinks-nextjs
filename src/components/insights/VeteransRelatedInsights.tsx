@@ -1,4 +1,4 @@
-import { getArticlesByTopic, shouldExposeInsightsPublicly } from "@/sanity/fetch";
+import { getArticlesByTopic, shouldExposeInsightsPublicly } from "@/lib/payload/insights";
 import { RelatedInsights } from "./RelatedInsights";
 
 export async function VeteransRelatedInsights() {

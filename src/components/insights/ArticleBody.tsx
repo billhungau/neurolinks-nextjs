@@ -1,4 +1,12 @@
-import { PortableText, stegaClean, type PortableTextBlock, type PortableTextComponents } from "next-sanity";
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from "@payloadcms/richtext-lexical";
+import {
+  RichText,
+  type JSXConvertersFunction,
+} from "@payloadcms/richtext-lexical/react";
 import Image from "next/image";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ButtonLink";
@@ -7,106 +15,183 @@ import {
   DEFAULT_ARTICLE_CTA,
   countWords,
   defaultCtaHref,
+  insightsArticlePath,
   slugifyHeading,
-  uniqueHeadingIds,
 } from "@/lib/insights";
-import { insightsImageUrl } from "@/sanity/image";
-import type { InsightsArticle, InsightsSource } from "@/sanity/types";
-import { VacCoverageNote } from "./VacCoverageNote";
+import {
+  lexicalHasBlock,
+  lexicalHeadings,
+  lexicalWordCount,
+  type LexicalState,
+} from "@/lib/insights-content";
+import { mapImage, mapSources } from "@/lib/payload/map";
+import type { InsightsArticle, InsightsImage } from "@/lib/payload/types";
+import type {
+  CitationInlineBlock,
+  ClinicalNoteBlock,
+  ComparisonTableBlock,
+  ContextualCtaBlock,
+  EditorialDiagramBlock,
+  EvidenceSummaryBlock,
+  ImageWithCaptionBlock,
+  ImportantLimitationBlock,
+  Insight,
+  KeyPointsBox,
+  Media,
+  ProcessTimelineBlock,
+  PullQuoteBlock,
+  ReferencesSectionBlock,
+  RelatedReadingBlock,
+  VacCoverageNoteBlock,
+} from "@/payload-types";
 import { ComparisonTable } from "./ComparisonTable";
 import { EditorialDiagram } from "./EditorialDiagram";
 import { EvidenceSummary } from "./EvidenceSummary";
 import { ProcessTimeline } from "./ProcessTimeline";
 import { ReferencesList } from "./ReferencesList";
+import { VacCoverageNote } from "./VacCoverageNote";
 
-type BlockValue = PortableTextBlock & {
-  _key?: string;
-  style?: string;
-  children?: Array<{ text?: string; marks?: string[] }>;
-};
+/**
+ * The editorial blocks the Lexical editor can insert. Naming them here keeps
+ * every converter below fully typed against the generated Payload schema.
+ */
+type InsightsBodyBlock =
+  | ClinicalNoteBlock
+  | ComparisonTableBlock
+  | ContextualCtaBlock
+  | EditorialDiagramBlock
+  | EvidenceSummaryBlock
+  | ImageWithCaptionBlock
+  | ImportantLimitationBlock
+  | KeyPointsBox
+  | ProcessTimelineBlock
+  | PullQuoteBlock
+  | ReferencesSectionBlock
+  | RelatedReadingBlock
+  | VacCoverageNoteBlock;
 
-function blockText(value: { children?: Array<{ text?: string }> } | null | undefined) {
-  return (value?.children ?? []).map((child) => child.text || "").join("");
-}
+type InsightsNode =
+  | DefaultNodeTypes
+  | SerializedBlockNode<InsightsBodyBlock>
+  | SerializedInlineBlockNode<CitationInlineBlock>;
 
-export function portableTextPlainText(blocks: PortableTextBlock[] | null | undefined) {
-  if (!blocks?.length) return "";
-  return blocks
-    .map((block) => {
-      if (block._type === "block") return blockText(block as BlockValue);
-      return "";
-    })
-    .join(" ");
-}
+export { lexicalHeadings as extractHeadings };
 
+/** Total readable words in the article, used for the reading-time estimate. */
 export function articleWordCount(article: InsightsArticle) {
   const keyPoints = (article.keyPoints ?? []).join(" ");
-  return countWords(`${article.title} ${article.summary ?? ""} ${keyPoints} ${portableTextPlainText(article.body)}`);
+  return (
+    countWords(`${article.title} ${article.summary ?? ""} ${keyPoints}`) +
+    lexicalWordCount(article.body)
+  );
 }
 
-export function extractHeadings(blocks: PortableTextBlock[] | null | undefined) {
-  const headings = (blocks ?? [])
-    .filter((block): block is BlockValue => block._type === "block" && (block as BlockValue).style === "h2")
-    .map((block) => stegaClean(blockText(block)).trim())
+/** True when the editor already placed a contact invitation in the body. */
+export function bodyContainsCta(body: LexicalState) {
+  return lexicalHasBlock(body, "contextualCta");
+}
+
+/** The existing components take optional strings; Payload stores nulls. */
+function text(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+/** Flattens a Payload array field down to its non-empty string values. */
+function arrayText<T, K extends keyof T>(rows: T[] | null | undefined, key: K): string[] {
+  if (!Array.isArray(rows)) return [];
+  return rows
+    .map((row) => (typeof row[key] === "string" ? (row[key] as string).trim() : ""))
     .filter(Boolean);
-  const ids = uniqueHeadingIds(headings);
-  return headings.map((text, index) => ({ text, id: ids[index] ?? slugifyHeading(text) }));
 }
 
-function headingIdMap(blocks: PortableTextBlock[] | null | undefined) {
-  const headings = extractHeadings(blocks);
-  const map = new Map<string, string>();
-  let i = 0;
-  for (const block of blocks ?? []) {
-    if (block._type === "block" && (block as BlockValue).style === "h2") {
-      const text = stegaClean(blockText(block as BlockValue)).trim();
-      if (text && headings[i]) {
-        map.set((block as BlockValue)._key || text, headings[i].id);
-        i += 1;
-      }
-    }
+type LinkFields = {
+  linkType?: "custom" | "internal" | null;
+  url?: string | null;
+  newTab?: boolean | null;
+  doc?: { relationTo?: string; value?: number | string | Insight } | null;
+};
+
+function linkHref(fields: LinkFields | undefined): string {
+  if (fields?.linkType === "internal") {
+    const doc = fields.doc?.value;
+    const slug = doc && typeof doc === "object" ? doc.slug : undefined;
+    return slug ? insightsArticlePath(slug) : "/insights/";
   }
-  return map;
+  return fields?.url ?? "";
 }
 
-export function bodyContainsCta(blocks: PortableTextBlock[] | null | undefined) {
-  return Boolean(blocks?.some((block) => block._type === "contextualCta"));
+function ArticleFigure({ image }: { image: NonNullable<InsightsImage> }) {
+  return (
+    <figure className="insights-figure">
+      <Image
+        src={image.url}
+        alt={image.alt}
+        width={image.width || 1200}
+        height={image.height || 800}
+        sizes="(max-width: 800px) 100vw, 760px"
+      />
+      {image.caption ? <figcaption>{image.caption}</figcaption> : null}
+    </figure>
+  );
 }
 
-function componentsFor(
-  article: InsightsArticle,
-  headingIds: Map<string, string>,
-): PortableTextComponents {
-  return {
-    block: {
-      h2: ({ children, value }) => {
-        const id = headingIds.get((value as BlockValue)._key || "") || slugifyHeading(blockText(value as BlockValue));
-        return (
-          <h2 id={id} className="insights-h2">
-            {children}
-          </h2>
-        );
-      },
-      h3: ({ children }) => <h3 className="insights-h3">{children}</h3>,
-      blockquote: ({ children }) => <blockquote className="insights-quote">{children}</blockquote>,
-      normal: ({ children }) => <p>{children}</p>,
+/**
+ * Maps Payload's Lexical nodes onto the existing NeuroLinks article markup.
+ * The CMS supplies content; every class name and component here belongs to
+ * the website, so the published design is unchanged.
+ */
+function convertersFor(article: InsightsArticle): JSXConvertersFunction<InsightsNode> {
+  const headingIds = new Map<string, string>();
+  for (const heading of lexicalHeadings(article.body)) {
+    headingIds.set(heading.text, heading.id);
+  }
+
+  const ctaFallbackHref = article.ctaHref || defaultCtaHref(article.topics);
+
+  return ({ defaultConverters }) => ({
+    ...defaultConverters,
+    heading: ({ node, nodesToJSX }) => {
+      const children = nodesToJSX({ nodes: node.children });
+      if (node.tag === "h3") return <h3 className="insights-h3">{children}</h3>;
+      const label = node.children
+        .map((child) => ("text" in child ? String(child.text ?? "") : ""))
+        .join("")
+        .trim();
+      const id = headingIds.get(label) || slugifyHeading(label);
+      return (
+        <h2 id={id} className="insights-h2">
+          {children}
+        </h2>
+      );
     },
-    marks: {
-      link: ({ children, value }) => {
-        const href = String(value?.href || "");
-        const external = href.startsWith("http") || Boolean(value?.blank);
-        if (!href) return <>{children}</>;
-        if (external) {
-          return (
-            <a href={href} rel="noopener noreferrer" target="_blank">
-              {children}
-            </a>
-          );
-        }
-        return <Link href={href}>{children}</Link>;
-      },
-      citation: ({ value }) => {
-        const number = Number(value?.number);
+    quote: ({ node, nodesToJSX }) => (
+      <blockquote className="insights-quote">{nodesToJSX({ nodes: node.children })}</blockquote>
+    ),
+    link: ({ node, nodesToJSX }) => {
+      const children = nodesToJSX({ nodes: node.children });
+      const fields = node.fields as LinkFields | undefined;
+      const href = linkHref(fields);
+      if (!href) return <>{children}</>;
+      if (href.startsWith("http") || fields?.newTab) {
+        return (
+          <a href={href} rel="noopener noreferrer" target="_blank">
+            {children}
+          </a>
+        );
+      }
+      return <Link href={href}>{children}</Link>;
+    },
+    upload: ({ node }) => {
+      if (node.relationTo !== "media") return null;
+      const image = mapImage(node.value as Media | number, {
+        caption: (node.fields as { caption?: string | null } | undefined)?.caption,
+      });
+      return image ? <ArticleFigure image={image} /> : null;
+    },
+    inlineBlocks: {
+      citation: ({ node }) => {
+        const number = Number(node.fields.number);
         if (!number) return null;
         return (
           <a className="insights-cite" href={`#reference-${number}`}>
@@ -116,92 +201,137 @@ function componentsFor(
         );
       },
     },
-    types: {
-      keyPointsBox: ({ value }) => (
-        <aside className="insights-keypoints">
-          <p className="insights-box-label">{value.heading || "Key points"}</p>
-          <ul>
-            {(value.points ?? []).map((point: string) => (
-              <li key={point}>{point}</li>
-            ))}
-          </ul>
-        </aside>
-      ),
-      evidenceSummary: ({ value }) => <EvidenceSummary value={value} />,
-      clinicalNote: ({ value }) => (
-        <aside className="insights-note">
-          <p className="insights-box-label">{value.heading || "Clinical note"}</p>
-          {value.body ? <PortableText value={value.body} /> : null}
-        </aside>
-      ),
-      importantLimitation: ({ value }) => (
-        <aside className="insights-limitation">
-          <p className="insights-box-label">{value.heading || "Important limitation"}</p>
-          {value.body ? <PortableText value={value.body} /> : null}
-        </aside>
-      ),
-      vacCoverageNote: ({ value }) => <VacCoverageNote value={value} />,
-      processTimeline: ({ value }) => <ProcessTimeline value={value} />,
-      comparisonTable: ({ value }) => <ComparisonTable value={value} />,
-      pullQuote: ({ value }) => (
-        <blockquote className="insights-pull">
-          <p>{value.quote}</p>
-          {value.attribution ? <footer>{value.attribution}</footer> : null}
-        </blockquote>
-      ),
-      imageWithCaption: ({ value }) => {
-        const src = insightsImageUrl(value.image, 1200);
-        if (!src || !value.alt) return null;
+    blocks: {
+      keyPointsBox: ({ node }) => {
+        const points = arrayText(node.fields.points, "text");
+        if (!points.length) return null;
         return (
-          <figure className="insights-figure">
-            <Image
-              src={src}
-              alt={value.alt}
-              width={1200}
-              height={800}
-              sizes="(max-width: 800px) 100vw, 760px"
-            />
-            {value.caption ? <figcaption>{value.caption}</figcaption> : null}
-          </figure>
+          <aside className="insights-keypoints">
+            <p className="insights-box-label">{node.fields.heading || "Key points"}</p>
+            <ul>
+              {points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </aside>
         );
       },
-      relatedReading: ({ value }) => (
-        <aside className="insights-related-inline">
-          <p className="insights-box-label">{value.heading || "Related reading"}</p>
-          <ul>
-            {(value.articles ?? []).map((item: { title?: string; slug?: { current?: string } }) => {
-              const slug = typeof item.slug === "string" ? item.slug : item.slug?.current;
-              if (!item.title || !slug) return null;
-              return (
-                <li key={slug}>
-                  <TextLink href={`/insights/${slug}/`}>{item.title}</TextLink>
-                </li>
-              );
-            })}
-            {(value.links ?? []).map((link: { title: string; href: string }) => (
-              <li key={link.href}>
-                <TextLink href={link.href}>{link.title}</TextLink>
-              </li>
-            ))}
-          </ul>
-        </aside>
-      ),
-      contextualCta: ({ value }) => (
-        <ArticleCta
-          heading={value.heading}
-          body={value.body}
-          label={value.label}
-          href={value.href || article.ctaHref || defaultCtaHref(article.topics)}
+      evidenceSummary: ({ node }) => (
+        <EvidenceSummary
+          value={{
+            studyType: text(node.fields.studyType),
+            population: text(node.fields.population),
+            mainFinding: text(node.fields.mainFinding),
+            limitation: text(node.fields.limitation),
+            doi: text(node.fields.doi),
+            url: text(node.fields.url),
+          }}
         />
       ),
-      referencesSection: ({ value }) => (
-        <ReferencesList heading={value.heading} sources={(value.sources as InsightsSource[]) || article.references} />
+      clinicalNote: ({ node }) => (
+        <aside className="insights-note">
+          <p className="insights-box-label">{node.fields.heading || "Clinical note"}</p>
+          <p>{node.fields.body}</p>
+        </aside>
       ),
-      editorialDiagram: ({ value }) => (
-        <EditorialDiagram diagram={value.diagram} caption={value.caption} />
+      importantLimitation: ({ node }) => (
+        <aside className="insights-limitation">
+          <p className="insights-box-label">
+            {node.fields.heading || "Important limitation"}
+          </p>
+          <p>{node.fields.body}</p>
+        </aside>
+      ),
+      vacCoverageNote: ({ node }) => (
+        <VacCoverageNote
+          value={{
+            heading: text(node.fields.heading),
+            suitability: node.fields.suitability,
+            funding: node.fields.funding,
+            preauthorization: node.fields.preauthorization,
+            availability: node.fields.availability,
+          }}
+        />
+      ),
+      processTimeline: ({ node }) => (
+        <ProcessTimeline
+          value={{
+            heading: text(node.fields.heading),
+            intro: text(node.fields.intro),
+            steps: (node.fields.steps ?? []).map((step) => ({
+              title: step.title,
+              body: text(step.body),
+            })),
+          }}
+        />
+      ),
+      comparisonTable: ({ node }) => (
+        <ComparisonTable
+          value={{
+            caption: text(node.fields.caption),
+            columns: arrayText(node.fields.columns, "label"),
+            rows: (node.fields.rows ?? []).map((row) => ({
+              heading: row.heading,
+              cells: arrayText(row.cells, "text"),
+            })),
+            footnote: text(node.fields.footnote),
+          }}
+        />
+      ),
+      pullQuote: ({ node }) => (
+        <blockquote className="insights-pull">
+          <p>{node.fields.quote}</p>
+          {node.fields.attribution ? <footer>{node.fields.attribution}</footer> : null}
+        </blockquote>
+      ),
+      imageWithCaption: ({ node }) => {
+        const image = mapImage(node.fields.image, { caption: node.fields.caption });
+        return image ? <ArticleFigure image={image} /> : null;
+      },
+      relatedReading: ({ node }) => {
+        const articles = (node.fields.articles ?? []).filter(
+          (entry): entry is Insight & { slug: string } =>
+            typeof entry === "object" && Boolean(entry.slug),
+        );
+        const links = node.fields.links ?? [];
+        if (!articles.length && !links.length) return null;
+        return (
+          <aside className="insights-related-inline">
+            <p className="insights-box-label">{node.fields.heading || "Related reading"}</p>
+            <ul>
+              {articles.map((entry) => (
+                <li key={entry.slug}>
+                  <TextLink href={insightsArticlePath(entry.slug)}>{entry.title}</TextLink>
+                </li>
+              ))}
+              {links.map((link) => (
+                <li key={link.href}>
+                  <TextLink href={link.href}>{link.title}</TextLink>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        );
+      },
+      contextualCta: ({ node }) => (
+        <ArticleCta
+          heading={node.fields.heading}
+          body={node.fields.body}
+          label={node.fields.label || article.ctaLabel}
+          href={node.fields.href || ctaFallbackHref}
+        />
+      ),
+      referencesSection: ({ node }) => (
+        <ReferencesList
+          heading={node.fields.heading}
+          sources={mapSources(node.fields.sources) || article.references}
+        />
+      ),
+      editorialDiagram: ({ node }) => (
+        <EditorialDiagram diagram={node.fields.diagram} caption={node.fields.caption} />
       ),
     },
-  };
+  });
 }
 
 export function ArticleCta({
@@ -225,7 +355,14 @@ export function ArticleCta({
 }
 
 export function ArticleBody({ article }: { article: InsightsArticle }) {
-  const headingIds = headingIdMap(article.body);
-  if (!article.body?.length) return null;
-  return <PortableText value={article.body} components={componentsFor(article, headingIds)} />;
+  if (!article.body) return null;
+  return (
+    <RichText
+      data={article.body as never}
+      converters={convertersFor(article)}
+      disableContainer
+      disableTextAlign
+      disableIndent
+    />
+  );
 }

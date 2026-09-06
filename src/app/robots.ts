@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
-import { isPublicProductionIndexing, PRODUCTION_HOST, productionUrl } from "@/lib/site";
+import {
+  CMS_ADMIN_PATH,
+  CMS_API_PATH,
+  isPublicProductionIndexing,
+  PRODUCTION_HOST,
+  productionUrl,
+} from "@/lib/site";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const headerList = await headers();
@@ -18,7 +24,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/studio/", "/api/"],
+      disallow: [CMS_ADMIN_PATH, `${CMS_API_PATH}/`, "/api/"],
     },
     sitemap: productionUrl("/sitemap.xml"),
     host: PRODUCTION_HOST,

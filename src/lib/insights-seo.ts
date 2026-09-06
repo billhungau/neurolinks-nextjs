@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
-import { pageMetadata, type SeoImage } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE, pageMetadata, type SeoImage } from "@/lib/seo";
 import {
   INSIGHTS_NAME,
   INSIGHTS_SUPPORTING,
   articleJsonLd as articleJsonLdBase,
   insightsArticlePath,
 } from "@/lib/insights";
+import {
+  resolveMetaDescription,
+  resolveSeoTitle,
+  resolveSocialDescription,
+  resolveSocialTitle,
+} from "@/lib/insights-content";
 import { productionUrl } from "@/lib/site";
-import type { InsightsArticle } from "@/sanity/types";
-import { insightsImageUrl } from "@/sanity/image";
+import type { InsightsArticle } from "@/lib/payload/types";
 
 export { breadcrumbJsonLd, doiHref, formatReference } from "@/lib/insights";
 
@@ -23,25 +28,25 @@ export function insightsIndexMetadata(): Metadata {
   });
 }
 
-export function articleShareImage(article: InsightsArticle): SeoImage | undefined {
-  const source = article.socialImage?.asset ? article.socialImage : article.featuredImage;
-  const url = insightsImageUrl(source, 1200, 630);
-  if (!url) return undefined;
+/** social image → featured image → NeuroLinks default share image. */
+export function articleShareImage(article: InsightsArticle): SeoImage {
+  const source = article.socialImage ?? article.featuredImage;
+  if (!source) return DEFAULT_OG_IMAGE;
   return {
-    path: url,
-    width: 1200,
-    height: 630,
-    alt: source?.alt || article.title,
+    path: source.url,
+    width: source.width || 1200,
+    height: source.height || 630,
+    alt: source.alt || article.title,
   };
 }
 
 export function articleMetadataRecord(article: InsightsArticle): Metadata {
   const path = insightsArticlePath(article.slug);
   const canonical = article.canonicalUrl || productionUrl(path);
-  const title = article.seoTitle || `${article.title} | ${INSIGHTS_NAME}`;
-  const description = article.metaDescription || article.summary || INSIGHTS_INDEX_DESCRIPTION;
-  const ogTitle = article.socialTitle || title;
-  const ogDescription = article.socialDescription || description;
+  const title = resolveSeoTitle(article, INSIGHTS_NAME);
+  const description = resolveMetaDescription(article, INSIGHTS_INDEX_DESCRIPTION);
+  const ogTitle = resolveSocialTitle(article, title);
+  const ogDescription = resolveSocialDescription(article, description);
   const image = articleShareImage(article);
   const robots =
     article.indexable === false
@@ -78,10 +83,17 @@ export function articleMetadataRecord(article: InsightsArticle): Metadata {
 }
 
 export function articleJsonLd(article: InsightsArticle) {
-  const image = insightsImageUrl(
-    article.socialImage?.asset ? article.socialImage : article.featuredImage,
-    1200,
-    630,
-  );
-  return articleJsonLdBase({ ...article, image });
+  const image = articleShareImage(article);
+  return articleJsonLdBase({
+    title: article.title,
+    slug: article.slug,
+    summary: article.summary,
+    publishedAt: article.publishedAt,
+    lastReviewedAt: article.lastReviewedAt,
+    canonicalUrl: article.canonicalUrl,
+    author: article.author,
+    medicalReviewer: article.medicalReviewer,
+    image: image.path.startsWith("http") ? image.path : productionUrl(image.path),
+    topics: article.topics,
+  });
 }
