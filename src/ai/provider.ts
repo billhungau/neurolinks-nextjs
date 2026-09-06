@@ -42,7 +42,9 @@ export async function runArticleAI(request: AssistantRequest): Promise<unknown> 
   const isSeo = request.action === "seo";
   const schema = isSeo ? seoReviewJsonSchema() : articleDraftJsonSchema();
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 60_000);
+  // Leave enough time for a full medical article while still returning before
+  // the Vercel route's 240-second ceiling.
+  const timer = setTimeout(() => controller.abort(), 210_000);
   try {
     const response = await fetch(OPENAI_URL, {
       method: "POST",
@@ -50,6 +52,11 @@ export async function runArticleAI(request: AssistantRequest): Promise<unknown> 
       signal: controller.signal,
       body: JSON.stringify({
         model: process.env.OPENAI_CONTENT_MODEL || DEFAULT_MODEL,
+        // Low reasoning is sufficient for editorial drafting and materially
+        // reduces latency versus letting a long reasoning pass consume most of
+        // the request window.
+        reasoning: { effort: "low" },
+        max_output_tokens: isSeo ? 5000 : 8000,
         instructions: instructions(request),
         input: userContext(request),
         text: {
@@ -63,7 +70,8 @@ export async function runArticleAI(request: AssistantRequest): Promise<unknown> 
       }),
     });
     if (!response.ok) {
-      console.error("[ai-article-assistant] provider request failed", response.status);
+      const providerText = await response.text().catch(() => "");
+      console.error("[ai-article-assistant] provider request failed", response.status, providerText.slice(0, 1000));
       throw new Error("AI_PROVIDER_ERROR");
     }
     const payload = await response.json() as { output_text?: string; output?: Array<{ content?: Array<{ type?: string; text?: string }> }> };
