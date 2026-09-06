@@ -87,7 +87,7 @@ function DraftResult({ draft }: { draft: ArticleDraft }) {
     <strong>Proposed draft — review before copying into the editor</strong>
     <h3 style={{ margin: "12px 0 4px" }}>{draft.title}</h3><p>{draft.summary}</p>
     {draft.keyPoints.length > 0 && <><strong>Key points</strong><ul>{draft.keyPoints.map((x) => <li key={x}>{x}</li>)}</ul></>}
-    {draft.sections.map((section, i) => <div key={`${section.heading}-${i}`}><h4>{section.heading}</h4>{section.paragraphs.map((p) => <p key={p}>{p}</p>)}{section.bullets.length > 0 && <ul>{section.bullets.map((b) => <li key={b}>{b}</li>)}</ul>}</div>)}
+    {draft.sections.map((section, i) => <div key={`${section.heading}-${i}`}><h4>{section.heading}</h4>{section.paragraphs.map((p) => <p key={p}>{p}</p>)}{(section.bullets?.length ?? 0) > 0 && <ul>{section.bullets?.map((b) => <li key={b}>{b}</li>)}</ul>}</div>)}
     <p><strong>SEO title:</strong> {draft.seoTitle}<br/><strong>Meta:</strong> {draft.metaDescription}</p>
     {draft.referenceRequirements.length > 0 && <><strong>References to verify before publishing</strong><ul>{draft.referenceRequirements.map((x) => <li key={x}>{x}</li>)}</ul></>}
     {draft.suggestedInternalLinks.length > 0 && <><strong>Internal-link suggestions</strong><ul>{draft.suggestedInternalLinks.map((x) => <li key={`${x.href}-${x.anchor}`}><code>{x.anchor}</code> → {x.href} — {x.reason}</li>)}</ul></>}
