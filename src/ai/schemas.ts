@@ -9,7 +9,10 @@ export const ARTICLE_TYPES = [
   "Local treatment guide",
 ] as const;
 
+export const ARTICLE_LENGTHS = ["Concise", "Standard", "Detailed"] as const;
+
 export type ArticleType = (typeof ARTICLE_TYPES)[number];
+export type ArticleLength = (typeof ARTICLE_LENGTHS)[number];
 export type AIAction = "generate" | "improve" | "seo";
 
 export type ArticleSection = {
@@ -56,6 +59,7 @@ export type AssistantRequest = {
   goal?: string;
   location?: string;
   articleType?: string;
+  articleLength?: ArticleLength;
   current?: {
     title?: string;
     summary?: string;
@@ -77,6 +81,7 @@ export function parseAssistantRequest(value: unknown): AssistantRequest | null {
   const input = value as Record<string, unknown>;
   if (input.action !== "generate" && input.action !== "improve" && input.action !== "seo") return null;
   const currentRaw = input.current && typeof input.current === "object" ? (input.current as Record<string, unknown>) : undefined;
+  const articleLength = ARTICLE_LENGTHS.includes(input.articleLength as ArticleLength) ? input.articleLength as ArticleLength : "Concise";
   const result: AssistantRequest = {
     action: input.action,
     topic: text(input.topic, 300),
@@ -85,6 +90,7 @@ export function parseAssistantRequest(value: unknown): AssistantRequest | null {
     goal: text(input.goal, 500),
     location: text(input.location, 200),
     articleType: text(input.articleType, 100),
+    articleLength,
     current: currentRaw
       ? {
           title: text(currentRaw.title, 300),
