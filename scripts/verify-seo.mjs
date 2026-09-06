@@ -3,7 +3,9 @@
  * HTTP checks for SEO/migration behaviour against a running Next server.
  * Usage: SEO_BASE_URL=http://127.0.0.1:3010 node scripts/verify-seo.mjs
  *
- * SEO_HTML_INDEXABLE=true — server was built with ALLOW_SEARCH_INDEXING=true.
+ * SEO_HTML_INDEXABLE=true — server was built with the launch config, i.e. both
+ *   ALLOW_SEARCH_INDEXING=true and NEXT_PUBLIC_SITE_URL=https://neurolinks.ca.
+ *   With the staging site URL the build stays noindex whatever the flag says.
  * SEO_INSIGHTS_ENABLED=true — server was built with NEXT_PUBLIC_INSIGHTS_ENABLED=true
  *   and the CMS has at least one published article. Set SEO_INSIGHTS_SLUG to
  *   that article's slug. When unset, Insights is expected to 404 everywhere.

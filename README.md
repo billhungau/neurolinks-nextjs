@@ -26,7 +26,7 @@ The deployed CMS currently lives on the staging deployment, `https://neurolinks-
 
 ### Local setup
 
-1. Copy `.env.example` to `.env` and fill in `DATABASE_URL` and `PAYLOAD_SECRET`. Leave `NEXT_PUBLIC_SITE_URL` unset locally so it falls back to `http://localhost:3000`. `BLOB_READ_WRITE_TOKEN` is optional locally — without it, uploads are written to `public/cms-media/`, which is gitignored.
+1. Copy `.env.example` to `.env` and fill in `DATABASE_URL` and `PAYLOAD_SECRET`. Comment out `NEXT_PUBLIC_SITE_URL` so it falls back to `http://localhost:3000`. `BLOB_READ_WRITE_TOKEN` is optional locally — without it, uploads are written to `public/cms-media/`, which is gitignored.
 2. Create the database, then apply the migrations:
 
 ```bash
