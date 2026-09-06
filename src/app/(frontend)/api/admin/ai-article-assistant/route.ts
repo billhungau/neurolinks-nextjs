@@ -4,6 +4,10 @@ import { runArticleAI } from "@/ai/provider";
 import { getPayloadClient, isCmsConfigured } from "@/lib/payload/client";
 
 export const runtime = "nodejs";
+// Long-form structured generation can exceed one minute. Vercel supports
+// per-route maxDuration for App Router functions; keep this below the provider
+// abort window plus response overhead.
+export const maxDuration = 240;
 
 export async function POST(request: NextRequest) {
   if (!isCmsConfigured()) return NextResponse.json({ error: "CMS is not configured." }, { status: 503 });
