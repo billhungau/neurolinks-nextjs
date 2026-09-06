@@ -11,14 +11,36 @@ import { INSIGHTS_CACHE_TAG, INSIGHTS_PATH, insightsArticlePath } from "../../li
  * new deployment. Dropping the shared tag rebuilds the cached queries; the
  * path calls refresh the prerendered Insights routes that embed them.
  */
-function revalidateInsightsSection(slugs: string[] = []) {
-  revalidateTag(INSIGHTS_CACHE_TAG, "max");
-  revalidatePath(INSIGHTS_PATH);
-  revalidatePath("/sitemap.xml");
-  revalidatePath("/veterans/");
-  for (const slug of slugs) {
-    if (slug) revalidatePath(insightsArticlePath(slug));
+/**
+ * Next's cache primitives need a request store, which a `payload` CLI script
+ * or a seed run does not have. The document is already written by the time
+ * these hooks run, so a failure here must not surface as a failed save.
+ */
+function safely(label: string, revalidate: () => void) {
+  try {
+    revalidate();
+  } catch (error) {
+    console.warn(`[insights] ${label} could not revalidate`, error);
   }
+}
+
+function revalidateInsightsSection(slugs: string[] = []) {
+  safely("insights section", () => {
+    revalidateTag(INSIGHTS_CACHE_TAG, "max");
+    revalidatePath(INSIGHTS_PATH);
+    revalidatePath("/sitemap.xml");
+    revalidatePath("/veterans/");
+    for (const slug of slugs) {
+      if (slug) revalidatePath(insightsArticlePath(slug));
+    }
+  });
+}
+
+function revalidateInsightsIndex(label: string) {
+  safely(label, () => {
+    revalidateTag(INSIGHTS_CACHE_TAG, "max");
+    revalidatePath(INSIGHTS_PATH);
+  });
 }
 
 export const revalidateInsight: CollectionAfterChangeHook = ({
@@ -49,8 +71,7 @@ export const revalidateSupportingContent: CollectionAfterChangeHook = ({
   req: { context },
 }) => {
   if (context?.disableRevalidate) return doc;
-  revalidateTag(INSIGHTS_CACHE_TAG, "max");
-  revalidatePath(INSIGHTS_PATH);
+  revalidateInsightsIndex("supporting content");
   return doc;
 };
 
@@ -59,7 +80,6 @@ export const revalidateInsightsSettings: GlobalAfterChangeHook = ({
   req: { context },
 }) => {
   if (context?.disableRevalidate) return doc;
-  revalidateTag(INSIGHTS_CACHE_TAG, "max");
-  revalidatePath(INSIGHTS_PATH);
+  revalidateInsightsIndex("insights settings");
   return doc;
 };

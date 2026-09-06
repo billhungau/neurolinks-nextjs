@@ -36,13 +36,16 @@ const PUBLIC_SORT = ["sortOrder", "-publishedAt"];
 
 const cacheOptions = { revalidate: 3600, tags: [INSIGHTS_CACHE_TAG] };
 
-async function queryPublished(where: Where, limit = 100): Promise<InsightsArticleCard[]> {
+async function queryPublished(
+  where: Where | null = null,
+  limit = 100,
+): Promise<InsightsArticleCard[]> {
   return safeCmsRead(
     "published insights query",
     async (payload) => {
       const result = await payload.find({
         collection: "insights",
-        where: { and: [PUBLISHED, where] },
+        where: where ? { and: [PUBLISHED, where] } : PUBLISHED,
         sort: PUBLIC_SORT,
         limit,
         depth: 1,
@@ -57,7 +60,7 @@ async function queryPublished(where: Where, limit = 100): Promise<InsightsArticl
 }
 
 const cachedPublishedArticles = unstable_cache(
-  async () => queryPublished({}),
+  async () => queryPublished(),
   ["insights", "published"],
   cacheOptions,
 );
