@@ -1,5 +1,6 @@
 import { lexicalWordCount, type LexicalState } from "../insights-content.ts";
 import { isInsightsTopicSlug, type InsightsTopicSlug } from "../insights.ts";
+import { relativizeToSite } from "../site.ts";
 import type {
   InsightsArticle,
   InsightsArticleCard,
@@ -37,7 +38,7 @@ export function mapImage(
   if (!alt) return null;
   const caption = overrides.caption?.trim() || media.caption?.trim() || null;
   return {
-    url: media.url,
+    url: relativizeToSite(media.url),
     alt,
     caption: media.credit ? [caption, media.credit].filter(Boolean).join(" — ") : caption,
     width: media.width ?? null,

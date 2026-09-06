@@ -38,15 +38,76 @@ export const CLOSED_ROBOTS_HEADER = "noindex, nofollow, noarchive";
 export const ADS_ROBOTS_HEADER = "noindex, follow";
 
 /**
- * Explicit launch switch. VERCEL_ENV=production is not enough: the
- * `*.vercel.app` production alias can serve the production deployment
- * before neurolinks.ca DNS points here.
+ * Where this deployment actually answers requests.
  *
- * Set ALLOW_SEARCH_INDEXING=true only after neurolinks.ca (apex) is this app.
- * Never set it on Preview or Development.
+ * Staging, production and localhost all differ, so this is read from the
+ * environment. It is the single source of truth for absolute URLs that have to
+ * reach *this* app: Payload's `serverURL`, the CMS session-cookie allowlist and
+ * preview links.
+ *
+ * It is deliberately not the canonical SEO origin. Canonicals, Open Graph
+ * URLs, JSON-LD and the sitemap always use PRODUCTION_ORIGIN, so a staging
+ * deployment never advertises itself as the public site.
+ */
+export function siteOrigin(): string {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/+$/, "");
+  if (explicit) return explicit;
+  const deployment = process.env.VERCEL_URL?.trim().replace(/\/+$/, "");
+  if (deployment) return `https://${deployment}`;
+  return `http://localhost:${process.env.PORT || "3000"}`;
+}
+
+/** True only when this deployment is configured to serve neurolinks.ca itself. */
+export function isProductionDeployment(): boolean {
+  try {
+    return isProductionHostname(new URL(siteOrigin()).hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Explicit launch switch, with a second gate so a staging deployment cannot be
+ * indexed by accident.
+ *
+ * ALLOW_SEARCH_INDEXING on its own is not enough. VERCEL_ENV=production is
+ * already true for the `*.vercel.app` alias long before neurolinks.ca DNS
+ * points here, and the flag itself can be copied into the wrong project.
+ * Indexing therefore also requires NEXT_PUBLIC_SITE_URL to name the production
+ * domain, which a staging deployment never does.
+ *
+ * At cutover, set both NEXT_PUBLIC_SITE_URL=https://neurolinks.ca and
+ * ALLOW_SEARCH_INDEXING=true, on Production only.
  */
 export function isSearchIndexable() {
-  return process.env.ALLOW_SEARCH_INDEXING === "true";
+  return process.env.ALLOW_SEARCH_INDEXING === "true" && isProductionDeployment();
+}
+
+/**
+ * Origins allowed to present a CMS session cookie.
+ *
+ * Payload ignores the cookie when a request carries an `Origin` outside this
+ * list, so it has to contain every origin the admin is genuinely browsed from:
+ * the configured site URL, this particular Vercel deployment (branch previews
+ * get their own hostname), the production domains for after cutover, and the
+ * local dev origins. Leaving it empty would switch the check off altogether.
+ */
+export function cmsTrustedOrigins(): string[] {
+  const origins = new Set<string>([siteOrigin(), PRODUCTION_ORIGIN, `https://${WWW_HOST}`]);
+
+  for (const host of [process.env.VERCEL_URL, process.env.VERCEL_PROJECT_PRODUCTION_URL]) {
+    const trimmed = host?.trim().replace(/\/+$/, "");
+    if (trimmed) origins.add(`https://${trimmed}`);
+  }
+
+  if (!process.env.VERCEL) {
+    for (const port of new Set(["3000", process.env.PORT || "3000"])) {
+      origins.add(`http://localhost:${port}`);
+      origins.add(`http://127.0.0.1:${port}`);
+    }
+  }
+
+  return [...origins];
 }
 
 export function hostnameFromHostHeader(host: string | null | undefined): string {
@@ -92,14 +153,23 @@ export function productionUrl(path: string): string {
 }
 
 /**
- * Request origin for CORS and local previews only. Do not use this for
- * canonicals, Open Graph URLs, JSON-LD, or the sitemap.
+ * Strips this deployment's own origin off an absolute URL.
+ *
+ * Payload stamps `serverURL` onto locally stored upload URLs, which would make
+ * the same media row render a different absolute host per environment and would
+ * force every deployment hostname into `images.remotePatterns`. Same-origin
+ * media is served back as a path; Vercel Blob and other external URLs are left
+ * untouched.
  */
-export function siteOrigin() {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  if (explicit) return explicit;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
-  return "http://localhost:3000";
+export function relativizeToSite(url: string): string {
+  if (!url.startsWith("http")) return url;
+  try {
+    const parsed = new URL(url);
+    if (parsed.origin !== new URL(siteOrigin()).origin) return url;
+    return `${parsed.pathname}${parsed.search}`;
+  } catch {
+    return url;
+  }
 }
 
 /** @deprecated Use productionUrl() for SEO. Kept for non-SEO absolute links. */

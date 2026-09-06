@@ -159,6 +159,40 @@ test("the CMS is mounted off /api and GraphQL is not exposed", () => {
   assert.match(config, /vercelBlobStorage/);
 });
 
+test("Payload derives its absolute URL from the one authoritative site URL", () => {
+  // serverURL follows NEXT_PUBLIC_SITE_URL via siteOrigin(), so staging and
+  // production differ by that variable alone.
+  assert.match(config, /serverURL: siteOrigin\(\)/);
+  // No hostname literal anywhere in the executable config (comments aside).
+  const configCode = config.replace(/^\s*\/\/.*$/gm, "");
+  assert.doesNotMatch(configCode, /neurolinks-nextjs\.vercel\.app/);
+  assert.doesNotMatch(configCode, /https:\/\/neurolinks\.ca/);
+  // The database and the signing key stay on the variables Vercel provisioned.
+  assert.match(config, /connectionString: process\.env\.DATABASE_URL/);
+  assert.match(config, /secret: process\.env\.PAYLOAD_SECRET/);
+  assert.equal(config.includes("NEXT_PUBLIC_PAYLOAD_SECRET"), false);
+});
+
+test("the CMS API stays same-origin and session cookies are origin-checked", () => {
+  // Admin and REST share one origin, so no Access-Control-Allow-Origin is needed.
+  assert.match(config, /cors: \[\]/);
+  assert.match(config, /csrf: cmsTrustedOrigins\(\)/);
+});
+
+test("preview links stay on the host serving the admin", () => {
+  // Relative preview paths resolve against whichever deployment the editor is
+  // signed in to, so a staging preview never opens neurolinks.ca.
+  const previous = process.env.PAYLOAD_SECRET;
+  process.env.PAYLOAD_SECRET = "test-secret";
+  for (const value of [previewPath("tms-and-vac"), previewUrl({ slug: "tms-and-vac" }), previewUrl(null)]) {
+    assert.ok(value.startsWith("/"), `${value} is relative`);
+    assert.equal(value.includes("neurolinks.ca"), false);
+    assert.equal(value.includes("vercel.app"), false);
+  }
+  if (previous === undefined) delete process.env.PAYLOAD_SECRET;
+  else process.env.PAYLOAD_SECRET = previous;
+});
+
 test("the admin navigation is limited to the six editorial areas", () => {
   const collections = config.match(/collections: \[([^\]]+)\]/)?.[1] ?? "";
   assert.deepEqual(

@@ -4,24 +4,39 @@ WordPress at `https://neurolinks.ca` remains the live site until DNS cutover. Th
 
 Canonical URLs, Open Graph URLs, MedicalClinic JSON-LD, and the sitemap always use `https://neurolinks.ca`. They are never taken from the request `Host` header or `VERCEL_URL`.
 
+## Two URLs, two jobs
+
+| | Value | Job |
+| --- | --- | --- |
+| `PRODUCTION_ORIGIN` (`src/lib/site.ts`) | `https://neurolinks.ca`, hard-coded | Canonicals, Open Graph, JSON-LD, sitemap. Identical in every environment so staging never advertises itself as the public site. |
+| `NEXT_PUBLIC_SITE_URL` → `siteOrigin()` | staging: `https://neurolinks-nextjs.vercel.app` | Where this deployment answers requests: Payload `serverURL`, the CMS session-cookie allowlist, form CORS. Changes per environment. |
+
+The staging deployment therefore serves the public site with canonicals pointing at `neurolinks.ca` while being fully noindex. That is intentional: it keeps the production SEO architecture verifiable before cutover without competing for the same URLs.
+
 ## Indexing strategy
 
-| Environment | `ALLOW_SEARCH_INDEXING` | Host | HTML robots | `X-Robots-Tag` | robots.txt | sitemap |
-| --- | --- | --- | --- | --- | --- | --- |
-| Preview / Development | unset | any | noindex, nofollow | noindex, nofollow, noarchive | `Disallow: /` | empty |
-| Vercel production alias (`*.vercel.app`) | `true` | not neurolinks.ca | index,follow (build-time) | **noindex, nofollow, noarchive** (proxy, host-based) | `Disallow: /` | production URLs |
-| Public production | `true` | `neurolinks.ca` | index,follow except ads | absent on public pages | `Allow: /` + sitemap | seven English pages, plus published indexable Insights |
-| CMS `/admin/` and `/payload-api/` | any | any | noindex, nofollow | noindex, nofollow, noarchive | `Disallow:` both | excluded |
-| Advertising landing `/neurolinks-psychiatry-nanaimo-bc/` | `true` | `neurolinks.ca` | noindex, follow | noindex, follow | not blocked | excluded |
+Indexing requires **both** `ALLOW_SEARCH_INDEXING=true` **and** `NEXT_PUBLIC_SITE_URL` naming the production domain (`isSearchIndexable()` in `src/lib/site.ts`). The second gate means copying the flag into the staging project cannot expose it.
+
+| Environment | `NEXT_PUBLIC_SITE_URL` | `ALLOW_SEARCH_INDEXING` | Host | HTML robots | `X-Robots-Tag` | robots.txt | sitemap |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Preview / Development | any | unset | any | noindex, nofollow | noindex, nofollow, noarchive | `Disallow: /` | empty |
+| Staging (`neurolinks-nextjs.vercel.app`) | staging URL | either | any | noindex, nofollow | noindex, nofollow, noarchive | `Disallow: /` | empty |
+| Vercel production alias (`*.vercel.app`) | `https://neurolinks.ca` | `true` | not neurolinks.ca | index,follow (build-time) | **noindex, nofollow, noarchive** (proxy, host-based) | `Disallow: /` | production URLs |
+| Public production | `https://neurolinks.ca` | `true` | `neurolinks.ca` | index,follow except ads | absent on public pages | `Allow: /` + sitemap | seven English pages, plus published indexable Insights |
+| CMS `/admin/` and `/payload-api/` | any | any | any | noindex, nofollow | noindex, nofollow, noarchive | `Disallow:` both | excluded |
+| Advertising landing `/neurolinks-psychiatry-nanaimo-bc/` | `https://neurolinks.ca` | `true` | `neurolinks.ca` | noindex, follow | noindex, follow | not blocked | excluded |
 
 `VERCEL_ENV=production` is not used as the indexing switch. The Vercel production alias can serve the production deployment before the custom domain is live.
 
 ### Required Vercel environment variables
 
-**Preview and Development**
+**All environments**
+
+- `NEXT_PUBLIC_SITE_URL` — the deployment's own URL. Staging: `https://neurolinks-nextjs.vercel.app`. Payload's `serverURL`, the CMS session-cookie allowlist and preview links all follow it, so it is required, not optional. Leave it off Preview to fall back to that deployment's own `VERCEL_URL`.
+
+**Staging and Preview**
 
 - Do **not** set `ALLOW_SEARCH_INDEXING`
-- `NEXT_PUBLIC_SITE_URL` optional (forms CORS only)
 
 **All environments (Insights CMS)**
 
@@ -31,6 +46,7 @@ Canonical URLs, Open Graph URLs, MedicalClinic JSON-LD, and the sitemap always u
 
 **Production (set only at DNS cutover)**
 
+- `NEXT_PUBLIC_SITE_URL=https://neurolinks.ca` — change it from the staging URL. Indexing stays off until this is the production domain.
 - `ALLOW_SEARCH_INDEXING=true`
 - `NEXT_PUBLIC_INSIGHTS_ENABLED=true` once at least one medically reviewed article is published. The `/admin/` CMS works regardless of this flag; the flag only opens the public `/insights/` routes and their sitemap entries.
 - Optional: `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` if Search Console uses an HTML tag (do not invent a token)

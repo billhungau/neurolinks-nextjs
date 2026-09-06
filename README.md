@@ -22,9 +22,11 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 The Insights section is managed by [Payload](https://payloadcms.com) inside this same Next.js app. The editorial interface is at `/admin/`; everything else on the site is ordinary Next.js pages and is unaffected by the CMS.
 
+The deployed CMS currently lives on the staging deployment, `https://neurolinks-nextjs.vercel.app`. `NEXT_PUBLIC_SITE_URL` is the one variable that says where a deployment answers requests, and Payload's `serverURL`, the CMS session-cookie allowlist and preview links all derive from it. Canonical URLs, Open Graph URLs, JSON-LD and the sitemap are separate and always use `https://neurolinks.ca`; see `docs/PREVIEW.md` and `docs/LAUNCH.md`.
+
 ### Local setup
 
-1. Copy `.env.example` to `.env` and fill in `DATABASE_URL` and `PAYLOAD_SECRET`. `BLOB_READ_WRITE_TOKEN` is optional locally — without it, uploads are written to `public/cms-media/`, which is gitignored.
+1. Copy `.env.example` to `.env` and fill in `DATABASE_URL` and `PAYLOAD_SECRET`. Leave `NEXT_PUBLIC_SITE_URL` unset locally so it falls back to `http://localhost:3000`. `BLOB_READ_WRITE_TOKEN` is optional locally — without it, uploads are written to `public/cms-media/`, which is gitignored.
 2. Create the database, then apply the migrations:
 
 ```bash

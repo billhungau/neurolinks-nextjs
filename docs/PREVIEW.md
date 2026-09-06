@@ -1,21 +1,23 @@
-# Vercel preview (non-production)
+# Vercel staging and preview (non-production)
 
 WordPress at `https://neurolinks.ca` remains the live site. This app must not receive `neurolinks.ca` DNS until the owner approves cutover.
 
-Canonicals, Open Graph, JSON-LD and the sitemap always use `https://neurolinks.ca`, even on preview. Indexing is still closed on preview (see below). Do not set `ALLOW_SEARCH_INDEXING=true` on Preview.
+The stable staging deployment is `https://neurolinks-nextjs.vercel.app`. It is the current home of the Payload admin (`/admin/`) and the public Insights section, and it is configured with `NEXT_PUBLIC_SITE_URL=https://neurolinks-nextjs.vercel.app`.
+
+Canonicals, Open Graph, JSON-LD and the sitemap always use `https://neurolinks.ca`, even on staging. Indexing is closed there (see below), so staging never competes with the production URLs it points at. Do not set `ALLOW_SEARCH_INDEXING=true` on Staging or Preview.
 
 After DNS cutover, follow `docs/LAUNCH.md`.
 
 ## Indexing
 
-Until `ALLOW_SEARCH_INDEXING=true` **and** the request host is `neurolinks.ca` or `www.neurolinks.ca`:
+Indexing needs `ALLOW_SEARCH_INDEXING=true`, `NEXT_PUBLIC_SITE_URL` naming `neurolinks.ca`, **and** a request host of `neurolinks.ca` or `www.neurolinks.ca`. Until all three hold:
 
 - HTML `robots`: noindex, nofollow, noarchive
 - `X-Robots-Tag: noindex, nofollow, noarchive`
 - `robots.txt` disallows `/`
-- sitemap is empty (populated only when the launch flag is set at build time)
+- sitemap is empty (populated only when the launch config is in place at build time)
 
-`VERCEL_ENV=production` is not treated as “the custom domain is live”.
+`VERCEL_ENV=production` is not treated as “the custom domain is live”, and neither is the launch flag on its own.
 
 ## Forms
 
@@ -42,7 +44,7 @@ Do not commit the MP4s. Host them on Vercel Blob or another CDN and set `NEXT_PU
 | Production branch | `main` |
 | Preview | Vercel-generated `*.vercel.app` only until cutover |
 | Domains | none until cutover — then `neurolinks.ca` apex + `www` redirect to apex |
-| Env Preview | do not set `ALLOW_SEARCH_INDEXING` |
-| Env Production | leave `ALLOW_SEARCH_INDEXING` unset until cutover |
+| Env Production | `NEXT_PUBLIC_SITE_URL=https://neurolinks-nextjs.vercel.app` while staging; leave `ALLOW_SEARCH_INDEXING` unset until cutover |
+| Env Preview | leave `NEXT_PUBLIC_SITE_URL` unset so each deployment uses its own `VERCEL_URL`; do not set `ALLOW_SEARCH_INDEXING` |
 
 No SMTP, Formidable, or WordPress credentials are required for preview.
