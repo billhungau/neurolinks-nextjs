@@ -333,6 +333,33 @@
   text-underline-offset: 0.18em;
 }
 
+/* Tailwind's preflight clears list markers site-wide. Editorial prose and the
+   numbered citation list need them back, so restore them only in those two
+   places rather than lifting the global reset. */
+.insights-prose ul,
+.insights-prose ol {
+  margin: 0 0 1.25rem;
+  padding-left: 1.4rem;
+}
+
+.insights-prose ul {
+  list-style: disc;
+}
+
+.insights-prose ol,
+.insights-references ol {
+  list-style: decimal;
+}
+
+.insights-prose li {
+  margin-bottom: 0.4rem;
+}
+
+.insights-prose li::marker,
+.insights-references li::marker {
+  color: var(--nl-blue);
+}
+
 .insights-h2 {
   scroll-margin-top: var(--nl-anchor-offset);
   margin: 2.4rem 0 0.9rem;

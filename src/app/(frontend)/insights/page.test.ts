@@ -130,6 +130,11 @@ test("editorial blocks and references are rendered by dedicated components", () 
   assert.match(insightsCss, /\.insights-compare-table-wrap \{\s*display:\s*none/);
 });
 
+test("Lexical lists and citation numbers keep their markers despite the Tailwind reset", () => {
+  assert.match(insightsCss, /\.insights-prose ul \{\s*list-style:\s*disc/);
+  assert.match(insightsCss, /\.insights-prose ol,\s*\n\.insights-references ol \{\s*list-style:\s*decimal/);
+});
+
 test("internal links use existing clinic routes and the Veterans contact anchor", () => {
   assert.match(articlePage, /\/veterans\/#veterans-contact/);
   assert.match(indexPage, /href="\/contact\/"/);
