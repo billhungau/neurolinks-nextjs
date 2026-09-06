@@ -2,6 +2,7 @@ import { draftMode } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { insightsArticlePath } from "@/lib/insights";
 import { getPayloadClient, isCmsConfigured } from "@/lib/payload/client";
+import { sameHostRedirect } from "@/lib/same-host-redirect";
 import { isValidPreviewToken } from "@/payload/preview";
 
 /**
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
   const payload = await getPayloadClient();
   const { user } = await payload.auth({ headers: request.headers });
   if (!user) {
-    return NextResponse.redirect(new URL("/admin/login", request.nextUrl.origin));
+    return sameHostRedirect("/admin/login");
   }
 
   const found = await payload.find({
@@ -47,7 +48,5 @@ export async function GET(request: NextRequest) {
   draft.enable();
 
   // Redirect using the slug from the database, never the query string.
-  return NextResponse.redirect(
-    new URL(insightsArticlePath(article.slug), request.nextUrl.origin),
-  );
+  return sameHostRedirect(insightsArticlePath(article.slug));
 }

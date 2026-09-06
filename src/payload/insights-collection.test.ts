@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { INSIGHTS_TOPICS } from "../lib/insights.ts";
+import { sameHostRedirect } from "../lib/same-host-redirect.ts";
 import { slugField, slugify } from "./fields/slug.ts";
 import {
   isValidPreviewToken,
@@ -69,6 +70,19 @@ test("preview links are signed and cannot be forged or reused across articles", 
   assert.equal(PREVIEW_DISABLE_PATH, "/api/insights-preview/exit");
   if (previous === undefined) delete process.env.PAYLOAD_SECRET;
   else process.env.PAYLOAD_SECRET = previous;
+});
+
+test("the preview routes redirect on the requesting host so the draft cookie survives", () => {
+  const response = sameHostRedirect("/insights/tms-and-vac/");
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "/insights/tms-and-vac/");
+
+  const enable = read("../app/(frontend)/api/insights-preview/route.ts");
+  const exit = read("../app/(frontend)/api/insights-preview/exit/route.ts");
+  for (const route of [enable, exit]) {
+    assert.match(route, /sameHostRedirect/);
+    assert.doesNotMatch(route, /nextUrl\.origin/);
+  }
 });
 
 test("the Insights collection carries the content, SEO and authorship fields", () => {

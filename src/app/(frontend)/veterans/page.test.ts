@@ -80,10 +80,25 @@ test("Veterans appears under footer quick links", () => {
   assert.equal(FOOTER_QUICK_LINKS[0].href, "/veterans/");
   assert.match(footer, /footerQuickLinks/);
   assert.match(footer, /Quick links/);
-  assert.equal(
-    footerQuickLinks().some((item) => item.label === "Insights"),
-    false,
-  );
+});
+
+test("Insights joins the quick links only while the public section is enabled", () => {
+  const original = process.env.NEXT_PUBLIC_INSIGHTS_ENABLED;
+  try {
+    delete process.env.NEXT_PUBLIC_INSIGHTS_ENABLED;
+    assert.equal(
+      footerQuickLinks().some((item) => item.label === "Insights"),
+      false,
+    );
+    process.env.NEXT_PUBLIC_INSIGHTS_ENABLED = "true";
+    const enabled = footerQuickLinks();
+    assert.equal(enabled[0].label, "Veterans");
+    assert.equal(enabled[1].label, "Insights");
+    assert.equal(enabled[1].href, "/insights/");
+  } finally {
+    if (original === undefined) delete process.env.NEXT_PUBLIC_INSIGHTS_ENABLED;
+    else process.env.NEXT_PUBLIC_INSIGHTS_ENABLED = original;
+  }
 });
 
 test("hero carries the supplied eyebrow, single H1, copy and on-page CTAs", () => {
