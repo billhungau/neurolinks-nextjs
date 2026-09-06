@@ -10,7 +10,8 @@ Canonical URLs, Open Graph URLs, MedicalClinic JSON-LD, and the sitemap always u
 | --- | --- | --- | --- | --- | --- | --- |
 | Preview / Development | unset | any | noindex, nofollow | noindex, nofollow, noarchive | `Disallow: /` | empty |
 | Vercel production alias (`*.vercel.app`) | `true` | not neurolinks.ca | index,follow (build-time) | **noindex, nofollow, noarchive** (proxy, host-based) | `Disallow: /` | production URLs |
-| Public production | `true` | `neurolinks.ca` | index,follow except ads | absent on public pages | `Allow: /` + sitemap | seven English pages |
+| Public production | `true` | `neurolinks.ca` | index,follow except ads | absent on public pages | `Allow: /` + sitemap | seven English pages, plus published indexable Insights |
+| CMS `/admin/` and `/payload-api/` | any | any | noindex, nofollow | noindex, nofollow, noarchive | `Disallow:` both | excluded |
 | Advertising landing `/neurolinks-psychiatry-nanaimo-bc/` | `true` | `neurolinks.ca` | noindex, follow | noindex, follow | not blocked | excluded |
 
 `VERCEL_ENV=production` is not used as the indexing switch. The Vercel production alias can serve the production deployment before the custom domain is live.
@@ -22,9 +23,16 @@ Canonical URLs, Open Graph URLs, MedicalClinic JSON-LD, and the sitemap always u
 - Do **not** set `ALLOW_SEARCH_INDEXING`
 - `NEXT_PUBLIC_SITE_URL` optional (forms CORS only)
 
+**All environments (Insights CMS)**
+
+- `DATABASE_URL` — PostgreSQL connection string for Payload. Use a managed database; the build runs `payload migrate` before `next build`.
+- `PAYLOAD_SECRET` — signs CMS sessions and preview links. Generate with `openssl rand -hex 32`. Use a different value per environment.
+- `BLOB_READ_WRITE_TOKEN` — created automatically when a Vercel Blob store is connected. Without it, uploads fall back to the local filesystem, which is ephemeral on Vercel.
+
 **Production (set only at DNS cutover)**
 
 - `ALLOW_SEARCH_INDEXING=true`
+- `NEXT_PUBLIC_INSIGHTS_ENABLED=true` once at least one medically reviewed article is published. The `/admin/` CMS works regardless of this flag; the flag only opens the public `/insights/` routes and their sitemap entries.
 - Optional: `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` if Search Console uses an HTML tag (do not invent a token)
 - `NEXT_PUBLIC_TMS_VIDEO_URL` and `NEXT_PUBLIC_KETAMINE_VIDEO_URL` — Vercel Blob (or other CDN) URLs for the two treatment videos **before WordPress is retired**
 

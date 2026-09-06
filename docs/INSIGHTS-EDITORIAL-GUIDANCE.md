@@ -1,6 +1,6 @@
 # NeuroLinks Insights — editorial guidance
 
-The Studio contains the same guidance under **Editorial guidance**. This file is the repository copy.
+The Payload admin at `/admin/` shows a short version of this guidance beside the collection list. This file is the full repository copy.
 
 ## Positioning
 
@@ -49,4 +49,4 @@ Do not enter identifiable patient information into article content, images, capt
 
 ## Publishing
 
-Keep unfinished articles as Sanity drafts. The three initial shells must remain drafts until medical content and references are reviewed. Do not enable `NEXT_PUBLIC_INSIGHTS_ENABLED` on an empty section.
+Keep unfinished articles as Payload drafts. Use **Preview** to read a draft on the real article layout before publishing; drafts are not reachable by the public, are excluded from the sitemap and never appear in related articles. An article needs its medical content and references reviewed before it is published. Do not enable `NEXT_PUBLIC_INSIGHTS_ENABLED` on an empty section.
