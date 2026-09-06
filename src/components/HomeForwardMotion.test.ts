@@ -12,7 +12,7 @@ import {
 
 const root = dirname(fileURLToPath(import.meta.url));
 const source = readFileSync(join(root, "HomeForwardMotion.tsx"), "utf8");
-const css = readFileSync(join(root, "../app/globals.css"), "utf8");
+const css = readFileSync(join(root, "../app/(frontend)/globals.css"), "utf8");
 
 test("pathway motion fails open only when the observer cannot run", () => {
   assert.equal(

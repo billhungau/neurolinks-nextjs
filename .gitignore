@@ -48,3 +48,6 @@ docs/wp-extract/
 # typescript
 *.tsbuildinfo
 
+# Payload local upload directory (production uploads live on Vercel Blob)
+/public/cms-media/
+

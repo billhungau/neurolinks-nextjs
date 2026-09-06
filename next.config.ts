@@ -1,6 +1,12 @@
+import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 import { allAppRedirects } from "./src/lib/redirects";
-import { ADS_LANDING_PATH, CLOSED_ROBOTS_HEADER, isSearchIndexable } from "./src/lib/site";
+import {
+  ADS_LANDING_PATH,
+  CLOSED_ROBOTS_HEADER,
+  CMS_API_PATH,
+  isSearchIndexable,
+} from "./src/lib/site";
 
 const nextConfig: NextConfig = {
   trailingSlash: true,
@@ -10,8 +16,9 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
+        // Payload media uploaded to Vercel Blob.
         protocol: "https",
-        hostname: "cdn.sanity.io",
+        hostname: "*.public.blob.vercel-storage.com",
       },
     ],
   },
@@ -21,22 +28,19 @@ const nextConfig: NextConfig = {
       source,
       headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
     }));
-    const studioHeaders = [
-      {
-        source: "/studio",
+    // The CMS is never indexable, on any host, in any environment.
+    const cmsHeaders = ["/admin", "/admin/:path*", `${CMS_API_PATH}/:path*`].map(
+      (source) => ({
+        source,
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
-      },
-      {
-        source: "/studio/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
-      },
-    ];
+      }),
+    );
 
     if (isSearchIndexable()) {
       // Production HTML is indexable. Host-based noindex for vercel.app is
       // applied at request time in src/proxy.ts so the production alias cannot
       // inherit public indexing before neurolinks.ca DNS cutover.
-      return [...adsHeaders, ...studioHeaders];
+      return [...adsHeaders, ...cmsHeaders];
     }
 
     return [
@@ -54,4 +58,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPayload(nextConfig, { devBundleServerPackages: false });

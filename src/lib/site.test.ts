@@ -71,8 +71,16 @@ test("public production pages omit X-Robots-Tag; ads landing is noindex, follow"
   assert.equal(robotsTagForRequest("neurolinks.ca", ADS_LANDING_PATH), "noindex, follow");
   assert.equal(robotsTagForRequest("neurolinks.ca", "/neurolinks-psychiatry-nanaimo-bc"), "noindex, follow");
   assert.equal(isAdsLandingPath("/neurolinks-psychiatry-nanaimo-bc"), true);
-  assert.equal(robotsTagForRequest("neurolinks.ca", "/studio/"), CLOSED_ROBOTS_HEADER);
-  assert.equal(robotsTagForRequest("neurolinks.ca", "/studio/structure"), CLOSED_ROBOTS_HEADER);
+  assert.equal(robotsTagForRequest("neurolinks.ca", "/admin/"), CLOSED_ROBOTS_HEADER);
+  assert.equal(robotsTagForRequest("neurolinks.ca", "/admin"), CLOSED_ROBOTS_HEADER);
+  assert.equal(
+    robotsTagForRequest("neurolinks.ca", "/admin/collections/insights"),
+    CLOSED_ROBOTS_HEADER,
+  );
+  assert.equal(
+    robotsTagForRequest("neurolinks.ca", "/payload-api/insights"),
+    CLOSED_ROBOTS_HEADER,
+  );
   if (previous === undefined) delete process.env.ALLOW_SEARCH_INDEXING;
   else process.env.ALLOW_SEARCH_INDEXING = previous;
 });

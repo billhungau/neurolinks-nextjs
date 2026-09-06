@@ -27,6 +27,13 @@ export const WWW_HOST = "www.neurolinks.ca";
 
 export const ADS_LANDING_PATH = "/neurolinks-psychiatry-nanaimo-bc/";
 
+/**
+ * Payload CMS mount points. The REST surface is deliberately not `/api` so it
+ * cannot shadow the existing `/api/forms/*` handlers.
+ */
+export const CMS_ADMIN_PATH = "/admin/";
+export const CMS_API_PATH = "/payload-api";
+
 export const CLOSED_ROBOTS_HEADER = "noindex, nofollow, noarchive";
 export const ADS_ROBOTS_HEADER = "noindex, follow";
 
@@ -68,9 +75,14 @@ export function isAdsLandingPath(pathname: string): boolean {
   return normalized === ADS_LANDING_PATH;
 }
 
-export function isStudioPath(pathname: string): boolean {
+/** Payload admin UI and its REST surface. Never indexable, on any host. */
+export function isCmsPath(pathname: string): boolean {
   const normalized = withTrailingSlash(pathname.split("?")[0] ?? pathname);
-  return normalized === "/studio/" || normalized.startsWith("/studio/");
+  return (
+    normalized === CMS_ADMIN_PATH ||
+    normalized.startsWith(CMS_ADMIN_PATH) ||
+    normalized.startsWith(`${CMS_API_PATH}/`)
+  );
 }
 
 /** Absolute URL on the designated production origin. */
@@ -107,7 +119,7 @@ export function googleSiteVerification(): string | undefined {
  */
 export function robotsTagForRequest(host: string | null | undefined, pathname: string): string | null {
   if (!isPublicProductionIndexing(host)) return CLOSED_ROBOTS_HEADER;
-  if (isStudioPath(pathname)) return CLOSED_ROBOTS_HEADER;
+  if (isCmsPath(pathname)) return CLOSED_ROBOTS_HEADER;
   if (isAdsLandingPath(pathname)) return ADS_ROBOTS_HEADER;
   return null;
 }

@@ -26,15 +26,15 @@ import { SITE } from "../lib/site.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const landingPage = readFileSync(
-  join(root, "../app/neurolinks-psychiatry-nanaimo-bc/page.tsx"),
+  join(root, "../app/(frontend)/neurolinks-psychiatry-nanaimo-bc/page.tsx"),
   "utf8",
 );
-const homePage = readFileSync(join(root, "../app/page.tsx"), "utf8");
-const contactPage = readFileSync(join(root, "../app/contact/page.tsx"), "utf8");
+const homePage = readFileSync(join(root, "../app/(frontend)/page.tsx"), "utf8");
+const contactPage = readFileSync(join(root, "../app/(frontend)/contact/page.tsx"), "utf8");
 const landingHeader = readFileSync(join(root, "../components/LandingHeader.tsx"), "utf8");
 const contactForm = readFileSync(join(root, "../components/forms/ContactForm.tsx"), "utf8");
 const revealSource = readFileSync(join(root, "../components/Reveal.tsx"), "utf8");
-const globalsCss = readFileSync(join(root, "../app/globals.css"), "utf8");
+const globalsCss = readFileSync(join(root, "../app/(frontend)/globals.css"), "utf8");
 
 function wordCount(text: string) {
   return text.trim().split(/\s+/).length;

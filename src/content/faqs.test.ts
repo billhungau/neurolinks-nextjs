@@ -320,7 +320,7 @@ test("ECT comparison states that ECT needs anesthesia", () => {
     "utf8",
   );
   const css = readFileSync(
-    join(dirname(fileURLToPath(import.meta.url)), "../app/globals.css"),
+    join(dirname(fileURLToPath(import.meta.url)), "../app/(frontend)/globals.css"),
     "utf8",
   );
   assert.match(source, /tms-faq-compare-wrap/);
@@ -340,7 +340,7 @@ test("evidence-link markup uses a safe new-tab rel", () => {
 
 test("TMS FAQ lists restore disc markers against the global list reset", () => {
   const css = readFileSync(
-    join(dirname(fileURLToPath(import.meta.url)), "../app/globals.css"),
+    join(dirname(fileURLToPath(import.meta.url)), "../app/(frontend)/globals.css"),
     "utf8",
   );
   const listRule = css.match(/\.tms-faq-list \{[\s\S]*?\}/);

@@ -7,7 +7,7 @@ import { shouldRevealImmediately } from "../lib/motion-policy.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const source = readFileSync(join(root, "Reveal.tsx"), "utf8");
-const layout = readFileSync(join(root, "../app/layout.tsx"), "utf8");
+const layout = readFileSync(join(root, "../app/(frontend)/layout.tsx"), "utf8");
 const chrome = readFileSync(join(root, "SiteChrome.tsx"), "utf8");
 
 test("Reveal fails open only when motion or the observer cannot run", () => {
