@@ -21,26 +21,48 @@ function userContext(request: AssistantRequest) {
     goal: request.goal,
     location: request.location,
     articleType: request.articleType,
+    articleLength: request.articleLength || "Concise",
     currentArticle: request.current,
     validTopicSlugs: INSIGHTS_TOPICS.map((topic) => topic.slug),
     approvedInternalDestinations: VALID_LINKS,
   }, null, 2);
 }
 
-function targetLength(articleType?: string) {
-  if (articleType === "Evidence review") return "Aim for about 1,600–2,200 words unless the topic genuinely requires less.";
-  if (articleType === "FAQ") return "Aim for about 900–1,400 words.";
-  if (articleType === "Treatment comparison") return "Aim for about 1,400–2,000 words.";
-  return "Aim for about 1,200–1,800 words.";
+function targetRange(articleType?: string, articleLength = "Concise") {
+  const type = articleType || "Treatment guide";
+  const ranges: Record<string, Record<string, string>> = {
+    Concise: {
+      FAQ: "400–650 words",
+      "Treatment comparison": "800–1,100 words",
+      "Evidence review": "1,000–1,500 words",
+      default: "650–900 words",
+    },
+    Standard: {
+      FAQ: "650–900 words",
+      "Treatment comparison": "1,000–1,300 words",
+      "Evidence review": "1,300–1,700 words",
+      default: "850–1,150 words",
+    },
+    Detailed: {
+      FAQ: "850–1,150 words",
+      "Treatment comparison": "1,250–1,650 words",
+      "Evidence review": "1,600–2,100 words",
+      default: "1,100–1,500 words",
+    },
+  };
+  const profile = ranges[articleLength] || ranges.Concise;
+  return profile[type] || profile.default;
 }
 
 function instructions(request: AssistantRequest) {
+  const length = request.articleLength || "Concise";
+  const range = targetRange(request.articleType, length);
   const task = request.action === "generate"
     ? "Create a complete, high-quality patient-facing draft. Use referenceRequirements for medical claims that need verification. Do not invent citations."
     : request.action === "improve"
-      ? "Rewrite and improve the supplied article while preserving factual meaning and caveats. Do not invent new clinical facts. Return a complete replacement draft plus referenceRequirements."
+      ? `Rewrite and improve the supplied article while preserving factual meaning and caveats. Compress it toward the selected ${length.toLowerCase()} length target when it is longer than necessary. Do not invent new clinical facts. Return a complete replacement draft plus referenceRequirements.`
       : "Audit the supplied article for search intent, information quality, medical evidence hygiene, metadata, structure, local relevance, internal linking and readability. The score is only an editorial heuristic, not a Google score.";
-  return `${NEUROLINKS_EDITORIAL_RULES}\n\nTASK\n${task}\n\nLENGTH AND READABILITY\n${targetLength(request.articleType)} Keep paragraphs concise, avoid repetitive framing, do not restate the same benefit or caveat in multiple sections, and prioritize direct answers over filler. Use H2/H3 sections only when they add navigational value.\n\nOnly suggest internal hrefs from approvedInternalDestinations. Keep SEO title <= 70 characters, meta description <= 170 characters, summary <= 280 characters.`;
+  return `${NEUROLINKS_EDITORIAL_RULES}\n\nTASK\n${task}\n\nLENGTH AND READABILITY\nSelected length: ${length}. Target approximately ${range}. Treat this as a strong editorial constraint, not an invitation to fill space. Lead with the direct answer in the first 100–150 words. Prefer 2–3 sentence paragraphs. Remove repetitive introductions, unnecessary background psychiatry, repeated caveats, and filler. Use bullets for scan-friendly information when appropriate. Keep only headings that improve navigation. Preserve medically important qualifications even when shortening.\n\nOnly suggest internal hrefs from approvedInternalDestinations. Keep SEO title <= 70 characters, meta description <= 170 characters, summary <= 280 characters.`;
 }
 
 export async function runArticleAI(request: AssistantRequest): Promise<unknown> {
@@ -58,7 +80,7 @@ export async function runArticleAI(request: AssistantRequest): Promise<unknown> 
       body: JSON.stringify({
         model: process.env.OPENAI_CONTENT_MODEL || DEFAULT_MODEL,
         reasoning: { effort: "low" },
-        max_output_tokens: isSeo ? 5000 : 7000,
+        max_output_tokens: isSeo ? 5000 : 6000,
         instructions: instructions(request),
         input: userContext(request),
         text: {
