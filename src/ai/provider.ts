@@ -27,13 +27,20 @@ function userContext(request: AssistantRequest) {
   }, null, 2);
 }
 
+function targetLength(articleType?: string) {
+  if (articleType === "Evidence review") return "Aim for about 1,600–2,200 words unless the topic genuinely requires less.";
+  if (articleType === "FAQ") return "Aim for about 900–1,400 words.";
+  if (articleType === "Treatment comparison") return "Aim for about 1,400–2,000 words.";
+  return "Aim for about 1,200–1,800 words.";
+}
+
 function instructions(request: AssistantRequest) {
   const task = request.action === "generate"
-    ? "Create a complete, high-quality draft. Use referenceRequirements for medical claims that need verification. Do not invent citations."
+    ? "Create a complete, high-quality patient-facing draft. Use referenceRequirements for medical claims that need verification. Do not invent citations."
     : request.action === "improve"
       ? "Rewrite and improve the supplied article while preserving factual meaning and caveats. Do not invent new clinical facts. Return a complete replacement draft plus referenceRequirements."
       : "Audit the supplied article for search intent, information quality, medical evidence hygiene, metadata, structure, local relevance, internal linking and readability. The score is only an editorial heuristic, not a Google score.";
-  return `${NEUROLINKS_EDITORIAL_RULES}\n\nTASK\n${task}\n\nOnly suggest internal hrefs from approvedInternalDestinations. Keep SEO title <= 70 characters, meta description <= 170 characters, summary <= 280 characters.`;
+  return `${NEUROLINKS_EDITORIAL_RULES}\n\nTASK\n${task}\n\nLENGTH AND READABILITY\n${targetLength(request.articleType)} Keep paragraphs concise, avoid repetitive framing, do not restate the same benefit or caveat in multiple sections, and prioritize direct answers over filler. Use H2/H3 sections only when they add navigational value.\n\nOnly suggest internal hrefs from approvedInternalDestinations. Keep SEO title <= 70 characters, meta description <= 170 characters, summary <= 280 characters.`;
 }
 
 export async function runArticleAI(request: AssistantRequest): Promise<unknown> {
@@ -42,8 +49,6 @@ export async function runArticleAI(request: AssistantRequest): Promise<unknown> 
   const isSeo = request.action === "seo";
   const schema = isSeo ? seoReviewJsonSchema() : articleDraftJsonSchema();
   const controller = new AbortController();
-  // Leave enough time for a full medical article while still returning before
-  // the Vercel route's 240-second ceiling.
   const timer = setTimeout(() => controller.abort(), 210_000);
   try {
     const response = await fetch(OPENAI_URL, {
@@ -52,11 +57,8 @@ export async function runArticleAI(request: AssistantRequest): Promise<unknown> 
       signal: controller.signal,
       body: JSON.stringify({
         model: process.env.OPENAI_CONTENT_MODEL || DEFAULT_MODEL,
-        // Low reasoning is sufficient for editorial drafting and materially
-        // reduces latency versus letting a long reasoning pass consume most of
-        // the request window.
         reasoning: { effort: "low" },
-        max_output_tokens: isSeo ? 5000 : 8000,
+        max_output_tokens: isSeo ? 5000 : 7000,
         instructions: instructions(request),
         input: userContext(request),
         text: {
