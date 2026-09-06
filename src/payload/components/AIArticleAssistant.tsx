@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useAllFormFields } from "@payloadcms/ui";
-import { ARTICLE_TYPES, type ArticleDraft, type SEOReview } from "@/ai/schemas";
+import { ARTICLE_LENGTHS, ARTICLE_TYPES, type ArticleDraft, type ArticleLength, type SEOReview } from "@/ai/schemas";
 
 function fieldValue(fields: Record<string, { value?: unknown }>, name: string): string {
   const value = fields[name]?.value;
@@ -84,6 +84,12 @@ function estimateWordCount(draft: ArticleDraft) {
   return text.trim() ? text.trim().split(/\s+/).length : 0;
 }
 
+function lengthHint(articleLength: ArticleLength) {
+  if (articleLength === "Concise") return "Recommended for most patient-facing articles · usually 650–900 words";
+  if (articleLength === "Standard") return "More context while staying scannable · usually 850–1,150 words";
+  return "Use for complex topics or evidence reviews · usually 1,100+ words";
+}
+
 export function AIArticleAssistant() {
   const [fields, dispatchFields] = useAllFormFields();
   const [topic, setTopic] = useState("");
@@ -92,6 +98,7 @@ export function AIArticleAssistant() {
   const [goal, setGoal] = useState("");
   const [location, setLocation] = useState("Vancouver Island, British Columbia");
   const [articleType, setArticleType] = useState<(typeof ARTICLE_TYPES)[number]>("Treatment guide");
+  const [articleLength, setArticleLength] = useState<ArticleLength>("Concise");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -175,7 +182,7 @@ export function AIArticleAssistant() {
     try {
       const response = await fetch("/api/admin/ai-article-assistant", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, topic, keyword, audience, goal, location, articleType, current }),
+        body: JSON.stringify({ action, topic, keyword, audience, goal, location, articleType, articleLength, current }),
       });
       const json = await response.json() as { error?: string; result?: ArticleDraft | SEOReview };
       if (!response.ok || !json.result) throw new Error(json.error || "AI request failed.");
@@ -195,6 +202,7 @@ export function AIArticleAssistant() {
       <label>Audience<input style={inputStyle} value={audience} onChange={(e) => setAudience(e.target.value)} /></label>
       <label>Location focus<input style={inputStyle} value={location} onChange={(e) => setLocation(e.target.value)} /></label>
       <label>Article type<select style={inputStyle} value={articleType} onChange={(e) => setArticleType(e.target.value as typeof articleType)}>{ARTICLE_TYPES.map((type) => <option key={type}>{type}</option>)}</select></label>
+      <label>Length<select style={inputStyle} value={articleLength} onChange={(e) => setArticleLength(e.target.value as ArticleLength)}>{ARTICLE_LENGTHS.map((length) => <option key={length}>{length}</option>)}</select><span style={{ display: "block", marginTop: 4, color: "var(--theme-elevation-600)", fontSize: ".72rem" }}>{lengthHint(articleLength)}</span></label>
       <label>Article goal<input style={inputStyle} value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="What should the reader understand or do?" /></label>
     </div>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
