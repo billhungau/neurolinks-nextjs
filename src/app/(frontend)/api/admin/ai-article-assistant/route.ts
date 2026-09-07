@@ -1,30 +1,78 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { parseAssistantRequest } from "@/ai/schemas";
-import { runArticleAI } from "@/ai/provider";
+import { runArticleAI, type ArticleSourceFile } from "@/ai/provider";
 import { getPayloadClient, isCmsConfigured } from "@/lib/payload/client";
 
 export const runtime = "nodejs";
-// Long-form structured generation can exceed one minute. Vercel supports
-// per-route maxDuration for App Router functions; keep this below the provider
-// abort window plus response overhead.
 export const maxDuration = 240;
+
+const MAX_FILES = 5;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_TOTAL_FILE_BYTES = 25 * 1024 * 1024;
+const ALLOWED_FILE_TYPES = new Set([
+  "application/pdf",
+  "text/plain",
+  "text/markdown",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/msword",
+]);
+
+async function parseRequest(request: NextRequest): Promise<{ body: unknown; files: ArticleSourceFile[] }> {
+  const contentType = request.headers.get("content-type") || "";
+  if (!contentType.includes("multipart/form-data")) {
+    return { body: await request.json(), files: [] };
+  }
+
+  const form = await request.formData();
+  const requestJson = form.get("request");
+  if (typeof requestJson !== "string") throw new Error("INVALID_REQUEST");
+  const rawFiles = form.getAll("files").filter((entry): entry is File => entry instanceof File);
+  if (rawFiles.length > MAX_FILES) throw new Error("TOO_MANY_FILES");
+
+  let totalBytes = 0;
+  const files: ArticleSourceFile[] = [];
+  for (const file of rawFiles) {
+    if (file.size > MAX_FILE_BYTES) throw new Error("FILE_TOO_LARGE");
+    totalBytes += file.size;
+    if (totalBytes > MAX_TOTAL_FILE_BYTES) throw new Error("FILES_TOO_LARGE");
+    const mimeType = file.type || "application/octet-stream";
+    if (!ALLOWED_FILE_TYPES.has(mimeType)) throw new Error("UNSUPPORTED_FILE_TYPE");
+    const bytes = Buffer.from(await file.arrayBuffer());
+    files.push({ filename: file.name.slice(0, 180), mimeType, base64: bytes.toString("base64") });
+  }
+
+  const body = JSON.parse(requestJson) as Record<string, unknown>;
+  body.sourceFileNames = files.map((file) => file.filename);
+  return { body, files };
+}
 
 export async function POST(request: NextRequest) {
   if (!isCmsConfigured()) return NextResponse.json({ error: "CMS is not configured." }, { status: 503 });
-  const contentLength = Number(request.headers.get("content-length") || 0);
-  if (contentLength > 50_000) return NextResponse.json({ error: "Article content is too large for this assistant." }, { status: 413 });
 
   const payload = await getPayloadClient();
   const { user } = await payload.auth({ headers: request.headers });
   if (!user) return NextResponse.json({ error: "Sign in to Payload to use the AI Article Assistant." }, { status: 401 });
 
   let body: unknown;
-  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid request." }, { status: 400 }); }
+  let files: ArticleSourceFile[] = [];
+  try {
+    const parsedRequest = await parseRequest(request);
+    body = parsedRequest.body;
+    files = parsedRequest.files;
+  } catch (error) {
+    const code = error instanceof Error ? error.message : "INVALID_REQUEST";
+    if (code === "TOO_MANY_FILES") return NextResponse.json({ error: `Attach up to ${MAX_FILES} source files at a time.` }, { status: 413 });
+    if (code === "FILE_TOO_LARGE") return NextResponse.json({ error: "Each source file must be 10 MB or smaller." }, { status: 413 });
+    if (code === "FILES_TOO_LARGE") return NextResponse.json({ error: "Attached source files must total 25 MB or less." }, { status: 413 });
+    if (code === "UNSUPPORTED_FILE_TYPE") return NextResponse.json({ error: "Supported source files are PDF, TXT, Markdown, DOC and DOCX." }, { status: 415 });
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  }
+
   const parsed = parseAssistantRequest(body);
   if (!parsed) return NextResponse.json({ error: "Please provide the required article information." }, { status: 400 });
 
   try {
-    const result = await runArticleAI(parsed);
+    const result = await runArticleAI(parsed, files);
     return NextResponse.json({ ok: true, result });
   } catch (error) {
     const code = error instanceof Error ? error.message : "AI_PROVIDER_ERROR";
