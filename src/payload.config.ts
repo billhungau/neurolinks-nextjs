@@ -86,6 +86,12 @@ export default buildConfig({
         [Media.slug]: true,
         [AISourceDocuments.slug]: { prefix: "ai-sources" },
       },
+      // The connected Blob store is currently public. Payload still enforces
+      // collection read access on its proxy URLs, and random suffixes make the
+      // backing object names non-guessable. Do not treat this as private
+      // storage or upload PHI; private editorial sources require a private
+      // Vercel Blob store.
+      addRandomSuffix: true,
       token: blobToken ?? "",
     }),
   ],
