@@ -6,7 +6,7 @@ export function ArticleToc({
   if (headings.length < 2) return null;
   return (
     <nav className="insights-toc" aria-label="In this article">
-      <details open>
+      <details>
         <summary>In this article</summary>
         <ol>
           {headings.map((heading) => (

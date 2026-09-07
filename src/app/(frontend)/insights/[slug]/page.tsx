@@ -23,6 +23,7 @@ import {
   insightsArticlePath,
   readingTimeMinutes,
 } from "@/lib/insights";
+import { automaticArticleCta } from "@/lib/insights-editorial";
 import { articleJsonLd, articleMetadataRecord, breadcrumbJsonLd } from "@/lib/insights-seo";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import {
@@ -33,6 +34,7 @@ import {
   isDraftPreview,
 } from "@/lib/payload/insights";
 import type { Metadata } from "next";
+import "../../insights-editorial.css";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -66,6 +68,8 @@ export default async function InsightsArticlePage({ params }: Props) {
   const ctaHref = article.ctaHref || defaultCtaHref(article.topics);
   const hero = article.featuredImage;
   const related = await getRelatedArticles(article);
+  const bodyHasCta = bodyContainsCta(article.body);
+  const ctaKind = automaticArticleCta({ topics: article.topics, bodyHasCta });
 
   const authorLine = [article.author?.name || DEFAULT_AUTHOR.name, article.author?.credentials]
     .filter(Boolean)
@@ -91,41 +95,25 @@ export default async function InsightsArticlePage({ params }: Props) {
         <div className="insights-article-header">
           <nav className="insights-breadcrumb" aria-label="Breadcrumb">
             <ol>
-              <li>
-                <Link href="/">Home</Link>
-              </li>
-              <li>
-                <Link href="/insights/">Insights</Link>
-              </li>
+              <li><Link href="/">Home</Link></li>
+              <li><Link href="/insights/">Insights</Link></li>
               <li aria-current="page">{article.title}</li>
             </ol>
           </nav>
-          {article.category?.title ? (
-            <p className="insights-kicker">{article.category.title}</p>
-          ) : null}
+          {article.category?.title ? <p className="insights-kicker">{article.category.title}</p> : null}
           <h1>{article.title}</h1>
           {article.summary ? <p className="insights-article-summary">{article.summary}</p> : null}
-          <p className="insights-bylines">
-            <span>
-              Written by {authorLine}
-              {article.author?.role ? `, ${article.author.role}` : ""}
-            </span>
-            {reviewerLine ? (
-              <span>
-                Medically reviewed by {reviewerLine}
-                {article.medicalReviewer?.role ? `, ${article.medicalReviewer.role}` : ""}
-              </span>
-            ) : null}
-          </p>
-          <p className="insights-meta">
-            {published ? (
-              <time dateTime={article.publishedAt || undefined}>Published {published}</time>
-            ) : null}
-            {reviewed ? (
-              <time dateTime={article.lastReviewedAt || undefined}>Reviewed {reviewed}</time>
-            ) : null}
-            <span>{minutes} min read</span>
-          </p>
+          <div className="insights-editorial-meta" aria-label="Article details">
+            <p className="insights-editorial-people">
+              <span>Written by <strong>{authorLine}</strong>{article.author?.role ? `, ${article.author.role}` : ""}</span>
+              {reviewerLine ? <span>Medically reviewed by <strong>{reviewerLine}</strong>{article.medicalReviewer?.role ? `, ${article.medicalReviewer.role}` : ""}</span> : null}
+            </p>
+            <p className="insights-editorial-dates">
+              {published ? <time dateTime={article.publishedAt || undefined}>Published {published}</time> : null}
+              {reviewed ? <time dateTime={article.lastReviewedAt || undefined}>Reviewed {reviewed}</time> : null}
+              <span>{minutes} min read</span>
+            </p>
+          </div>
         </div>
 
         {hero ? (
@@ -147,32 +135,30 @@ export default async function InsightsArticlePage({ params }: Props) {
         )}
 
         {article.keyPoints?.length ? (
-          <aside className="insights-keypoints">
-            <p className="insights-box-label">Key points</p>
+          <aside className="insights-keypoints" aria-labelledby="insights-keypoints-heading">
+            <p id="insights-keypoints-heading" className="insights-box-label">Key points</p>
             <ul>
-              {article.keyPoints.map((point) => (
-                <li key={point}>{point}</li>
-              ))}
+              {article.keyPoints.map((point) => <li key={point}>{point}</li>)}
             </ul>
           </aside>
         ) : null}
 
-        <ArticleToc headings={headings} />
-
-        <div className="insights-prose">
-          <ArticleBody article={article} />
-          {bodyContainsCta(article.body) ? null : (
-            <ArticleCta
-              heading={DEFAULT_ARTICLE_CTA.heading}
-              body={DEFAULT_ARTICLE_CTA.body}
-              label={article.ctaLabel || DEFAULT_ARTICLE_CTA.label}
-              href={ctaHref}
-            />
-          )}
+        <div className={`insights-reading-layout${headings.length >= 2 ? " has-toc" : ""}`}>
+          <ArticleToc headings={headings} />
+          <div className="insights-prose">
+            <ArticleBody article={article} />
+            {ctaKind === "generic" ? (
+              <ArticleCta
+                heading={DEFAULT_ARTICLE_CTA.heading}
+                body={DEFAULT_ARTICLE_CTA.body}
+                label={article.ctaLabel || DEFAULT_ARTICLE_CTA.label}
+                href={ctaHref}
+              />
+            ) : null}
+          </div>
         </div>
 
         <ReferencesList sources={article.references} />
-
         <AuthorshipPanel author={article.author} reviewer={article.medicalReviewer} />
 
         <p className="insights-review-statement">
@@ -184,12 +170,12 @@ export default async function InsightsArticlePage({ params }: Props) {
 
         {related.length ? <RelatedInsights articles={related} /> : null}
 
-        {article.topics?.includes("veterans-and-coverage") ? (
+        {ctaKind === "veterans" ? (
           <ArticleCta
             heading="Questions about VAC authorization?"
             body="The NeuroLinks team can help Veterans and referring clinicians understand next steps. Authorization and payment are not guaranteed."
-            label="Contact the Veterans team"
-            href="/veterans/#veterans-contact"
+            label={article.ctaLabel || "Contact the Veterans team"}
+            href={article.ctaHref || "/veterans/#veterans-contact"}
           />
         ) : null}
       </article>

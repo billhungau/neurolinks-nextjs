@@ -11,7 +11,14 @@ import {
   type ArticleLength,
   type ArticleTone,
   type SEOReview,
+  type SectionRewrite,
 } from "@/ai/schemas";
+import {
+  QUICK_IMPROVE_ACTIONS,
+  SECTION_IMPROVE_ACTIONS,
+  extractEditableSections,
+  replaceEditableSection,
+} from "@/ai/editorial-ux";
 import {
   AI_SOURCE_ACCEPT,
   MAX_AI_SOURCE_FILES,
@@ -20,6 +27,7 @@ import {
   uploadProgressPercent,
   validateSourceSelection,
 } from "@/ai/source-files";
+import styles from "./AIArticleAssistant.module.css";
 
 function fieldValue(fields: Record<string, { value?: unknown }>, name: string): string {
   const value = fields[name]?.value;
@@ -67,15 +75,7 @@ function headingNode(text: string, level: 2 | 3 = 2) {
 }
 function bulletListNode(items: string[]) {
   return {
-    children: items.map((text, index) => ({
-      children: [textNode(text)],
-      direction: "ltr",
-      format: "",
-      indent: 0,
-      type: "listitem",
-      version: 1,
-      value: index + 1,
-    })),
+    children: items.map((text, index) => ({ children: [textNode(text)], direction: "ltr", format: "", indent: 0, type: "listitem", version: 1, value: index + 1 })),
     direction: "ltr",
     format: "",
     indent: 0,
@@ -97,7 +97,7 @@ export function draftToLexical(draft: ArticleDraft) {
   return { root: { children, direction: "ltr", format: "", indent: 0, type: "root", version: 1 } };
 }
 function estimateWordCount(draft: ArticleDraft) {
-  const text = [draft.title, draft.summary, ...draft.keyPoints, ...draft.sections.flatMap((s) => [s.heading || "", ...s.paragraphs, ...(s.bullets || [])])].join(" ");
+  const text = [draft.title, draft.summary, ...draft.keyPoints, ...draft.sections.flatMap((section) => [section.heading || "", ...section.paragraphs, ...(section.bullets || [])])].join(" ");
   return text.trim() ? text.trim().split(/\s+/).length : 0;
 }
 function lengthHint(articleLength: ArticleLength) {
@@ -123,25 +123,23 @@ type ReferenceRecord = {
   doi?: string;
 };
 
-type SourceDocument = {
-  id: string | number;
-  filename?: string;
-  mimeType?: string;
-  filesize?: number;
-};
-
+type SourceDocument = { id: string | number; filename?: string; mimeType?: string; filesize?: number };
 type SourceListResponse = { docs?: SourceDocument[] };
 type SourceUploadResponse = { doc?: SourceDocument; error?: string; message?: string };
+
+const DEFAULT_AUDIENCE = "Adults considering specialist treatment";
+const DEFAULT_LOCATION = "Vancouver Island, British Columbia";
 
 export function AIArticleAssistant() {
   const pathname = usePathname();
   const { id: documentId, collectionSlug } = useDocumentInfo();
   const [fields, dispatchFields] = useAllFormFields();
+  const [expanded, setExpanded] = useState(documentId == null);
   const [topic, setTopic] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [audience, setAudience] = useState("Adults considering specialist treatment");
+  const [audience, setAudience] = useState(DEFAULT_AUDIENCE);
   const [goal, setGoal] = useState("");
-  const [location, setLocation] = useState("Vancouver Island, British Columbia");
+  const [location, setLocation] = useState(DEFAULT_LOCATION);
   const [articleType, setArticleType] = useState<(typeof ARTICLE_TYPES)[number]>("Treatment guide");
   const [articleLength, setArticleLength] = useState<ArticleLength>("Concise");
   const [tone, setTone] = useState<ArticleTone>("Expert & confident");
@@ -159,12 +157,29 @@ export function AIArticleAssistant() {
   const [draft, setDraft] = useState<ArticleDraft | null>(null);
   const [review, setReview] = useState<SEOReview | null>(null);
   const [generatedForPath, setGeneratedForPath] = useState("");
+  const [selectedSectionId, setSelectedSectionId] = useState("");
+  const [sectionDirection, setSectionDirection] = useState<string>(SECTION_IMPROVE_ACTIONS[0][1]);
+  const [sectionCustomDirection, setSectionCustomDirection] = useState("");
+  const [sectionResult, setSectionResult] = useState<SectionRewrite | null>(null);
+  const [sectionResultId, setSectionResultId] = useState("");
+  const [sectionResultFingerprint, setSectionResultFingerprint] = useState("");
+  const [sectionGeneratedForPath, setSectionGeneratedForPath] = useState("");
 
   const sourceSession = fieldValue(fields, "aiSourceSession");
   const currentDocumentKey = `${collectionSlug || "insights"}:${documentId ?? "new"}:${pathname}:${sourceSession || "unassigned"}`;
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
+      setExpanded(documentId == null);
+      setTopic("");
+      setKeyword("");
+      setAudience(DEFAULT_AUDIENCE);
+      setGoal("");
+      setLocation(DEFAULT_LOCATION);
+      setArticleType("Treatment guide");
+      setArticleLength("Concise");
+      setTone("Expert & confident");
+      setImprovementDirection("");
       setDraft(null);
       setReview(null);
       setGeneratedForPath("");
@@ -176,6 +191,13 @@ export function AIArticleAssistant() {
       setProgressLabel("");
       setDoi("");
       setAddedReferences([]);
+      setSelectedSectionId("");
+      setSectionDirection(SECTION_IMPROVE_ACTIONS[0][1]);
+      setSectionCustomDirection("");
+      setSectionResult(null);
+      setSectionResultId("");
+      setSectionResultFingerprint("");
+      setSectionGeneratedForPath("");
     }, 0);
     return () => window.clearTimeout(timer);
   }, [pathname, documentId, collectionSlug]);
@@ -195,22 +217,25 @@ export function AIArticleAssistant() {
   }, [currentDocumentKey, generatedForPath]);
 
   useEffect(() => {
+    if (!sectionGeneratedForPath || sectionGeneratedForPath === currentDocumentKey) return;
+    const timer = window.setTimeout(() => {
+      setSectionResult(null);
+      setSectionResultId("");
+      setSectionResultFingerprint("");
+      setSectionGeneratedForPath("");
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [currentDocumentKey, sectionGeneratedForPath]);
+
+  useEffect(() => {
     let cancelled = false;
     if (!sourceSession) {
-      const timer = window.setTimeout(() => {
-        if (!cancelled) setSourceDocuments([]);
-      }, 0);
-      return () => {
-        cancelled = true;
-        window.clearTimeout(timer);
-      };
+      const timer = window.setTimeout(() => { if (!cancelled) setSourceDocuments([]); }, 0);
+      return () => { cancelled = true; window.clearTimeout(timer); };
     }
     const query = encodeURIComponent(sourceSession);
     fetch(`/payload-api/ai-source-documents?where[sessionId][equals]=${query}&limit=${MAX_AI_SOURCE_FILES}&sort=createdAt`)
-      .then(async (response) => {
-        if (!response.ok) return { docs: [] } as SourceListResponse;
-        return response.json() as Promise<SourceListResponse>;
-      })
+      .then(async (response) => response.ok ? response.json() as Promise<SourceListResponse> : { docs: [] } as SourceListResponse)
       .then((json) => { if (!cancelled) setSourceDocuments(Array.isArray(json.docs) ? json.docs : []); })
       .catch(() => { if (!cancelled) setSourceDocuments([]); });
     return () => { cancelled = true; };
@@ -224,11 +249,10 @@ export function AIArticleAssistant() {
     metaDescription: fieldValue(fields, "metaDescription"),
     slug: fieldValue(fields, "slug"),
   };
-
-  const inputStyle = { width: "100%", padding: "0.55rem 0.65rem", border: "1px solid var(--theme-elevation-200)", borderRadius: 4, background: "var(--theme-input-bg)" } as const;
-  const textAreaStyle = { ...inputStyle, minHeight: 88, resize: "vertical" as const };
-  const buttonStyle = { padding: "0.6rem 0.8rem", borderRadius: 4, border: "1px solid var(--theme-elevation-300)", cursor: busy ? "wait" : "pointer" } as const;
-  const primaryButtonStyle = { ...buttonStyle, background: "var(--theme-elevation-900)", color: "var(--theme-elevation-0)", borderColor: "var(--theme-elevation-900)" } as const;
+  const sections = useMemo(() => extractEditableSections(fields.body?.value), [fields.body?.value]);
+  const editableSections = sections.filter((section) => section.editable);
+  const activeSectionId = editableSections.some((section) => section.id === selectedSectionId) ? selectedSectionId : editableSections[0]?.id || "";
+  const activeSection = editableSections.find((section) => section.id === activeSectionId);
 
   function updateField(path: string, value: unknown, remount = false) {
     dispatchFields({ type: "UPDATE", path, value, ...(remount ? { initialValue: value } : {}) });
@@ -301,11 +325,8 @@ export function AIArticleAssistant() {
       xhr.onerror = () => reject(new Error(`Could not upload ${file.name}.`));
       xhr.onload = () => {
         let json: SourceUploadResponse = {};
-        try { json = JSON.parse(xhr.responseText) as SourceUploadResponse; } catch { /* use generic error below */ }
-        if (xhr.status < 200 || xhr.status >= 300 || !json.doc) {
-          reject(new Error(json.error || json.message || `Could not upload ${file.name}.`));
-          return;
-        }
+        try { json = JSON.parse(xhr.responseText) as SourceUploadResponse; } catch { /* generic error below */ }
+        if (xhr.status < 200 || xhr.status >= 300 || !json.doc) { reject(new Error(json.error || json.message || `Could not upload ${file.name}.`)); return; }
         resolve(json.doc);
       };
       xhr.send(form);
@@ -316,14 +337,13 @@ export function AIArticleAssistant() {
     if (busy) return;
     setError("");
     const response = await fetch(`/payload-api/ai-source-documents/${encodeURIComponent(String(doc.id))}`, { method: "DELETE" });
-    if (!response.ok) {
-      setError(`Could not remove ${doc.filename || "source file"}.`);
-      return;
-    }
+    if (!response.ok) { setError(`Could not remove ${doc.filename || "source file"}.`); return; }
     setSourceDocuments((items) => items.filter((item) => String(item.id) !== String(doc.id)));
   }
 
-  async function run(action: "generate" | "improve" | "seo") {
+  async function run(action: "generate" | "improve" | "seo", directionOverride?: string) {
+    const effectiveDirection = directionOverride ?? improvementDirection;
+    if (directionOverride !== undefined) setImprovementDirection(directionOverride);
     setBusy(true); setError(""); setNotice(""); setDraft(null); setReview(null); setProgress(3); setProgressLabel("Preparing request…");
     let ticker: ReturnType<typeof setInterval> | undefined;
     try {
@@ -331,41 +351,84 @@ export function AIArticleAssistant() {
       const existingBytes = sourceDocuments.reduce((sum, doc) => sum + (doc.filesize || 0), 0);
       const selectionError = validateSourceSelection(existingBytes, sourceFiles);
       if (selectionError) throw new Error(selectionError);
-
       const activeSession = ensureSourceSession();
       let uploaded = [...sourceDocuments];
       if (sourceFiles.length) {
-        for (let i = 0; i < sourceFiles.length; i += 1) {
-          const doc = await uploadSourceFile(sourceFiles[i], activeSession, i, sourceFiles.length);
+        for (let index = 0; index < sourceFiles.length; index += 1) {
+          const doc = await uploadSourceFile(sourceFiles[index], activeSession, index, sourceFiles.length);
           uploaded = [...uploaded, doc];
           setSourceDocuments(uploaded);
         }
         setSourceFiles([]);
       }
-
-      setProgress(35);
-      setProgressLabel("Preparing article request…");
+      setProgress(35); setProgressLabel("Preparing article request…");
       await new Promise((resolve) => setTimeout(resolve, 120));
-      setProgress(40);
-      setProgressLabel(uploaded.length ? `Reading ${uploaded.length} source file${uploaded.length === 1 ? "" : "s"} and generating article…` : "Generating article…");
+      setProgress(40); setProgressLabel(uploaded.length ? `Reading ${uploaded.length} source file${uploaded.length === 1 ? "" : "s"} and generating article…` : "Generating article…");
       ticker = setInterval(() => setProgress(nextEstimatedGenerationProgress), 900);
-
-      const requestBody = { action, topic, keyword, audience, goal, location, articleType, articleLength, tone, improvementDirection, current, sourceSession: activeSession || undefined };
+      const requestBody = { action, topic, keyword, audience, goal, location, articleType, articleLength, tone, improvementDirection: effectiveDirection, current, sourceSession: activeSession || undefined };
       const response = await fetch("/api/admin/ai-article-assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(requestBody) });
-      setProgress(95);
-      setProgressLabel("Validating and formatting response…");
+      setProgress(95); setProgressLabel("Validating and formatting response…");
       const json = await response.json() as { error?: string; result?: ArticleDraft | SEOReview };
       if (!response.ok || !json.result) throw new Error(json.error || "AI request failed.");
       if (ticker) clearInterval(ticker);
-      setProgress(100);
-      setProgressLabel("Complete");
+      setProgress(100); setProgressLabel("Complete");
       setGeneratedForPath(`${collectionSlug || "insights"}:${documentId ?? "new"}:${pathname}:${activeSession}`);
       if (action === "seo") setReview(json.result as SEOReview); else setDraft(json.result as ArticleDraft);
-    } catch (e) {
+    } catch (caught) {
       if (ticker) clearInterval(ticker);
       setProgressLabel("Stopped");
-      setError(e instanceof Error ? e.message : "AI request failed.");
+      setError(caught instanceof Error ? caught.message : "AI request failed.");
     } finally { setBusy(false); }
+  }
+
+  async function runSection() {
+    if (!activeSection) return;
+    const direction = sectionCustomDirection.trim() || sectionDirection;
+    setBusy(true); setError(""); setNotice(""); setSectionResult(null); setProgress(40); setProgressLabel(`Improving “${activeSection.heading}”…`);
+    let ticker: ReturnType<typeof setInterval> | undefined;
+    try {
+      ticker = setInterval(() => setProgress(nextEstimatedGenerationProgress), 900);
+      const response = await fetch("/api/admin/ai-article-assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "section",
+          tone,
+          improvementDirection: direction,
+          current: { title: current.title, summary: current.summary },
+          section: { heading: activeSection.heading, level: activeSection.level, text: activeSection.text },
+        }),
+      });
+      setProgress(95); setProgressLabel("Validating section suggestion…");
+      const json = await response.json() as { error?: string; result?: SectionRewrite };
+      if (!response.ok || !json.result) throw new Error(json.error || "Section improvement failed.");
+      if (ticker) clearInterval(ticker);
+      setSectionResult(json.result);
+      setSectionResultId(activeSection.id);
+      setSectionResultFingerprint(activeSection.fingerprint);
+      setSectionGeneratedForPath(currentDocumentKey);
+      setProgress(100); setProgressLabel("Complete");
+    } catch (caught) {
+      if (ticker) clearInterval(ticker);
+      setProgressLabel("Stopped");
+      setError(caught instanceof Error ? caught.message : "Section improvement failed.");
+    } finally { setBusy(false); }
+  }
+
+  function applySectionResult() {
+    if (!sectionResult) return;
+    if (sectionGeneratedForPath !== currentDocumentKey) {
+      setError("This section suggestion belongs to a different Insight. Generate it again on the current article before applying.");
+      return;
+    }
+    const outcome = replaceEditableSection(fields.body?.value, sectionResultId, sectionResult, sectionResultFingerprint);
+    if (outcome.error || !outcome.value) { setError(outcome.error || "The section could not be applied safely."); return; }
+    updateField("body", outcome.value, true);
+    setSectionResult(null);
+    setSectionResultId("");
+    setSectionResultFingerprint("");
+    setSectionGeneratedForPath("");
+    applied("Section replacement applied. The rest of the article body was left unchanged.");
   }
 
   async function addReference() {
@@ -380,81 +443,130 @@ export function AIArticleAssistant() {
       setAddedReferences((items) => items.some((item) => String(item.id) === String(json.reference!.id)) ? items : [...items, json.reference!]);
       setDoi("");
       setNotice(`${json.created ? "Reference created" : "Existing reference found"} and added to this article. Save the Insight to keep the relationship.`);
-    } catch (e) { setError(e instanceof Error ? e.message : "Reference lookup failed."); }
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Reference lookup failed."); }
     finally { setReferenceBusy(false); }
   }
 
-  return <section style={{ margin: "1rem 0 1.5rem", padding: "1rem", border: "1px solid var(--theme-elevation-150)", borderRadius: 6, background: "var(--theme-elevation-50)" }}>
-    <div style={{ marginBottom: 12 }}><strong style={{ fontSize: "1rem" }}>AI Article Assistant</strong><div style={{ color: "var(--theme-elevation-600)", fontSize: ".8rem", marginTop: 3 }}>Generate, improve and review the current Insight. Results are reset when you move to another article and AI never publishes automatically.</div></div>
-    <div style={{ padding: ".65rem .75rem", marginBottom: 12, borderLeft: "3px solid #e8b923", background: "var(--theme-elevation-100)", fontSize: ".78rem" }}>Public editorial material only. Do not upload or enter patient-identifying or confidential clinical information. Source files are stored temporarily for this draft and are deleted automatically after the article is published.</div>
+  return (
+    <section className={styles.shell}>
+      <div className={styles.header}>
+        <div className={styles.headerCopy}>
+          <strong className={styles.title}>AI Writing Assistant</strong>
+          <div className={styles.subtitle}>Create or refine patient-facing content. AI never publishes automatically.</div>
+        </div>
+        <button type="button" className={styles.toggle} aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>{expanded ? "Collapse" : "Open assistant"}</button>
+      </div>
+      {expanded ? (
+        <div className={styles.body}>
+          <div className={styles.warning}>Public editorial material only. Do not upload or enter patient-identifying or confidential clinical information. Source files are temporary and are deleted automatically after publishing or expiry.</div>
 
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 10 }}>
-      <label>Topic *<input style={inputStyle} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. TMS for OCD" /></label>
-      <label>Primary search query<input style={inputStyle} value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="e.g. TMS for OCD BC" /></label>
-      <label>Audience<input style={inputStyle} value={audience} onChange={(e) => setAudience(e.target.value)} /></label>
-      <label>Location focus<input style={inputStyle} value={location} onChange={(e) => setLocation(e.target.value)} /></label>
-      <label>Article type<select style={inputStyle} value={articleType} onChange={(e) => setArticleType(e.target.value as typeof articleType)}>{ARTICLE_TYPES.map((type) => <option key={type}>{type}</option>)}</select></label>
-      <label>Length<select style={inputStyle} value={articleLength} onChange={(e) => setArticleLength(e.target.value as ArticleLength)}>{ARTICLE_LENGTHS.map((length) => <option key={length}>{length}</option>)}</select><span style={{ display: "block", marginTop: 4, color: "var(--theme-elevation-600)", fontSize: ".72rem" }}>{lengthHint(articleLength)}</span></label>
-      <label>Tone<select style={inputStyle} value={tone} onChange={(e) => setTone(e.target.value as ArticleTone)}>{ARTICLE_TONES.map((value) => <option key={value}>{value}</option>)}</select></label>
-    </div>
+          <div className={styles.step}>
+            <div className={styles.stepHeader}><span className={styles.stepNumber}>Step 1</span><span className={styles.stepTitle}>Brief</span></div>
+            <div className={styles.grid}>
+              <label className={styles.label}>Topic *<input className={styles.input} value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="e.g. TMS for OCD" /></label>
+              <label className={styles.label}>Primary search query<input className={styles.input} value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="e.g. TMS for OCD BC" /></label>
+              <label className={styles.label}>Audience<input className={styles.input} value={audience} onChange={(event) => setAudience(event.target.value)} /></label>
+              <label className={styles.label}>Location focus<input className={styles.input} value={location} onChange={(event) => setLocation(event.target.value)} /></label>
+              <label className={styles.label}>Article type<select className={styles.select} value={articleType} onChange={(event) => setArticleType(event.target.value as typeof articleType)}>{ARTICLE_TYPES.map((type) => <option key={type}>{type}</option>)}</select></label>
+              <label className={styles.label}>Length<select className={styles.select} value={articleLength} onChange={(event) => setArticleLength(event.target.value as ArticleLength)}>{ARTICLE_LENGTHS.map((length) => <option key={length}>{length}</option>)}</select><span className={styles.hint}>{lengthHint(articleLength)}</span></label>
+              <label className={styles.label}>Tone<select className={styles.select} value={tone} onChange={(event) => setTone(event.target.value as ArticleTone)}>{ARTICLE_TONES.map((value) => <option key={value}>{value}</option>)}</select></label>
+            </div>
+            <label className={`${styles.label} ${styles.fieldGap}`}>Article goal / detailed instructions<textarea className={styles.textarea} value={goal} onChange={(event) => setGoal(event.target.value)} placeholder="Describe what the reader should understand, what to emphasize, what to leave out, and any specific clinical framing." /></label>
+          </div>
 
-    <label style={{ display: "block", marginTop: 10 }}>Article goal<textarea style={textAreaStyle} value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Describe what the reader should understand, what to emphasize, what to leave out, and any specific clinical framing." /></label>
-    <label style={{ display: "block", marginTop: 10 }}>Direction for “Improve article”<textarea style={textAreaStyle} value={improvementDirection} onChange={(e) => setImprovementDirection(e.target.value)} placeholder="e.g. Make the opening more decisive, focus on OCD evidence, shorten contraindication discussion, and remove repetitive caveats." /></label>
+          <div className={styles.step}>
+            <div className={styles.stepHeader}><span className={styles.stepNumber}>Step 2</span><span className={styles.stepTitle}>Evidence</span></div>
+            <div className={styles.evidenceGrid}>
+              <div className={styles.evidenceCard}>
+                <strong className={styles.evidenceTitle}>Source files</strong>
+                <input type="file" multiple accept={AI_SOURCE_ACCEPT} disabled={busy} onChange={(event) => {
+                  const incoming = Array.from(event.target.files || []);
+                  setSourceFiles((currentFiles) => [...currentFiles, ...incoming].slice(0, Math.max(0, MAX_AI_SOURCE_FILES - sourceDocuments.length)));
+                  event.currentTarget.value = "";
+                }} />
+                <span className={styles.hint}>Up to {MAX_AI_SOURCE_FILES} PDF/TXT/MD/DOC/DOCX files. Files upload sequentially when AI runs. Limit: 4 MB each and 20 MB combined.</span>
+                {sourceFiles.length > 0 ? <div><strong className={styles.hint}>Waiting to upload</strong><ul className={styles.fileList}>{sourceFiles.map((file, index) => <li key={`${file.name}-${file.size}-${index}`}>{file.name} · {readableBytes(file.size)} <button type="button" disabled={busy} onClick={() => setSourceFiles((items) => items.filter((_, itemIndex) => itemIndex !== index))} className={styles.linkButton}>remove</button></li>)}</ul></div> : null}
+                {sourceDocuments.length > 0 ? <div><strong className={styles.hint}>Uploaded for this draft</strong><ul className={styles.fileList}>{sourceDocuments.map((doc) => <li key={String(doc.id)}>{doc.filename || "Source document"}{doc.filesize ? ` · ${readableBytes(doc.filesize)}` : ""} <button type="button" disabled={busy} onClick={() => removeSourceDocument(doc)} className={styles.linkButton}>delete</button></li>)}</ul></div> : null}
+              </div>
+              <div className={styles.evidenceCard}>
+                <strong className={styles.evidenceTitle}>Add reference by DOI</strong>
+                <span className={styles.hint}>Citation fields come from Crossref. An existing DOI is reused; otherwise a Reference record is created and linked only after you explicitly add it.</span>
+                <div className={styles.actions} style={{ marginTop: ".55rem" }}><input className={styles.input} style={{ flex: "1 1 300px", marginTop: 0 }} value={doi} onChange={(event) => setDoi(event.target.value)} placeholder="https://doi.org/10.xxxx/xxxxx" /><button type="button" className={styles.button} disabled={referenceBusy || !doi.trim()} onClick={addReference}>{referenceBusy ? "Looking up…" : "Add reference"}</button></div>
+                {addedReferences.length > 0 ? <ul className={styles.fileList}>{addedReferences.map((reference) => <li key={String(reference.id)}><strong>{reference.title}</strong>{reference.authors ? ` — ${reference.authors}` : ""}{reference.publisher ? `, ${reference.publisher}` : ""}{reference.year ? ` (${reference.year})` : ""}{reference.doi ? ` · ${reference.doi}` : ""}</li>)}</ul> : null}
+              </div>
+            </div>
+          </div>
 
-    <div style={{ marginTop: 12, padding: ".75rem", border: "1px solid var(--theme-elevation-150)", borderRadius: 4 }}>
-      <strong style={{ display: "block", marginBottom: 5 }}>Source files</strong>
-      <input type="file" multiple accept={AI_SOURCE_ACCEPT} disabled={busy} onChange={(e) => {
-        const incoming = Array.from(e.target.files || []);
-        setSourceFiles((currentFiles) => [...currentFiles, ...incoming].slice(0, Math.max(0, MAX_AI_SOURCE_FILES - sourceDocuments.length)));
-        e.currentTarget.value = "";
-      }} />
-      <div style={{ fontSize: ".75rem", color: "var(--theme-elevation-600)", marginTop: 5 }}>Select up to {MAX_AI_SOURCE_FILES} PDF/TXT/MD/DOC/DOCX files. Files upload one at a time when you run the AI. Limit: 4 MB per file and 20 MB combined.</div>
-      {sourceFiles.length > 0 && <div style={{ marginTop: 7, fontSize: ".76rem" }}><strong>Waiting to upload:</strong><ul style={{ margin: "4px 0 0", paddingLeft: "1.2rem" }}>{sourceFiles.map((file, index) => <li key={`${file.name}-${file.size}-${index}`}>{file.name} · {readableBytes(file.size)} <button type="button" disabled={busy} onClick={() => setSourceFiles((items) => items.filter((_, itemIndex) => itemIndex !== index))} style={{ marginLeft: 5, border: 0, background: "transparent", textDecoration: "underline", cursor: "pointer" }}>remove</button></li>)}</ul></div>}
-      {sourceDocuments.length > 0 && <div style={{ marginTop: 7, fontSize: ".76rem" }}><strong>Uploaded for this draft:</strong><ul style={{ margin: "4px 0 0", paddingLeft: "1.2rem" }}>{sourceDocuments.map((doc) => <li key={String(doc.id)}>{doc.filename || "Source document"}{doc.filesize ? ` · ${readableBytes(doc.filesize)}` : ""} <button type="button" disabled={busy} onClick={() => removeSourceDocument(doc)} style={{ marginLeft: 5, border: 0, background: "transparent", textDecoration: "underline", cursor: "pointer" }}>delete</button></li>)}</ul></div>}
-    </div>
+          <div className={styles.step}>
+            <div className={styles.stepHeader}><span className={styles.stepNumber}>Step 3</span><span className={styles.stepTitle}>Generate / Improve</span></div>
+            <label className={styles.label}>Direction for “Improve article”<textarea className={styles.textarea} value={improvementDirection} onChange={(event) => setImprovementDirection(event.target.value)} placeholder="e.g. Make the opening more decisive, focus on OCD evidence, shorten contraindication discussion, and remove repetitive caveats." /></label>
+            <div className={`${styles.actions} ${styles.fieldGap}`}>
+              <button type="button" className={`${styles.button} ${styles.primary}`} disabled={busy || !topic.trim()} onClick={() => run("generate")}>{busy ? "Working…" : "Generate article draft"}</button>
+              <button type="button" className={styles.button} disabled={busy || (!current.title && !current.bodyText)} onClick={() => run("improve")}>Improve article</button>
+              <button type="button" className={styles.button} disabled={busy || (!current.title && !current.bodyText)} onClick={() => run("seo")}>Improve SEO</button>
+            </div>
+            <div className={styles.quickWrap}>
+              <p className={styles.quickLabel}>Quick improve</p>
+              <div className={styles.quickActions}>{QUICK_IMPROVE_ACTIONS.map(([label, instruction]) => <button key={label} type="button" className={styles.quickButton} disabled={busy || (!current.title && !current.bodyText)} onClick={() => run("improve", instruction)}>{label}</button>)}</div>
+            </div>
 
-    <div style={{ marginTop: 12, padding: ".75rem", border: "1px solid var(--theme-elevation-150)", borderRadius: 4 }}>
-      <strong style={{ display: "block" }}>Add reference by DOI</strong>
-      <div style={{ color: "var(--theme-elevation-600)", fontSize: ".75rem", margin: "3px 0 7px" }}>Paste a DOI or doi.org link. Citation fields are fetched from Crossref, a Reference record is created or reused, and it is added to this Insight.</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}><input style={{ ...inputStyle, flex: "1 1 320px" }} value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="https://doi.org/10.xxxx/xxxxx" /><button type="button" style={buttonStyle} disabled={referenceBusy || !doi.trim()} onClick={addReference}>{referenceBusy ? "Looking up…" : "Add reference"}</button></div>
-      {addedReferences.length > 0 && <ul style={{ margin: "8px 0 0", paddingLeft: "1.2rem", fontSize: ".78rem" }}>{addedReferences.map((ref) => <li key={String(ref.id)}><strong>{ref.title}</strong>{ref.authors ? ` — ${ref.authors}` : ""}{ref.publisher ? `, ${ref.publisher}` : ""}{ref.year ? ` (${ref.year})` : ""}{ref.doi ? ` · ${ref.doi}` : ""}</li>)}</ul>}
-    </div>
+            <div className={styles.sectionEdit}>
+              <strong className={styles.evidenceTitle}>Improve one article section</strong>
+              <p className={styles.sectionNote}>Safer section mode operates only on simple H2/H3 sections made of plain paragraphs or lists. Sections containing links, rich formatting, callouts, media, or structured citation nodes are deliberately excluded instead of being flattened.</p>
+              {editableSections.length ? (
+                <>
+                  <div className={`${styles.sectionGrid} ${styles.fieldGap}`}>
+                    <label className={styles.label}>Section<select className={styles.select} value={activeSectionId} onChange={(event) => { setSelectedSectionId(event.target.value); setSectionResult(null); }}>
+                      {editableSections.map((section) => <option value={section.id} key={section.id}>{section.level === 3 ? "H3" : "H2"} · {section.heading}</option>)}
+                    </select></label>
+                    <label className={styles.label}>Action<select className={styles.select} value={sectionDirection} onChange={(event) => setSectionDirection(event.target.value)}>{SECTION_IMPROVE_ACTIONS.map(([label, instruction]) => <option key={label} value={instruction}>{label}</option>)}</select></label>
+                  </div>
+                  <label className={`${styles.label} ${styles.fieldGap}`}>Custom section instruction (optional)<textarea className={styles.textarea} value={sectionCustomDirection} onChange={(event) => setSectionCustomDirection(event.target.value)} placeholder="Overrides the selected section action. Keep this specific to the selected section." /></label>
+                  <div className={`${styles.actions} ${styles.fieldGap}`}><button type="button" className={styles.button} disabled={busy || !current.title || !activeSection} onClick={runSection}>Generate section suggestion</button></div>
+                  {activeSection ? <div className={styles.sectionPreview}><strong>Current section · {activeSection.heading}</strong><p>{activeSection.text}</p></div> : null}
+                </>
+              ) : <p className={styles.sectionNote}>No safely editable plain-text H2/H3 section is available. Edit structured sections manually in the article body.</p>}
+            </div>
+          </div>
 
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
-      <button type="button" style={buttonStyle} disabled={busy || !topic.trim()} onClick={() => run("generate")}>{busy ? "Working…" : "Generate draft"}</button>
-      <button type="button" style={buttonStyle} disabled={busy || (!current.title && !current.bodyText)} onClick={() => run("improve")}>Improve article</button>
-      <button type="button" style={buttonStyle} disabled={busy || (!current.title && !current.bodyText)} onClick={() => run("seo")}>Improve SEO</button>
-    </div>
-    {(busy || progress > 0) && <div style={{ marginTop: 12 }} role="status" aria-live="polite">
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: ".76rem", marginBottom: 5 }}><span>{progressLabel || "Working…"}</span><strong>{Math.round(progress)}%</strong></div>
-      <div style={{ height: 9, borderRadius: 999, overflow: "hidden", background: "var(--theme-elevation-150)" }}><div style={{ width: `${Math.max(0, Math.min(100, progress))}%`, height: "100%", transition: "width 350ms ease", background: "var(--theme-elevation-800)" }} /></div>
-      {busy && progress >= 40 && <div style={{ marginTop: 4, fontSize: ".7rem", color: "var(--theme-elevation-600)" }}>The upload percentage is measured; the model-generation portion is an estimate until the response completes.</div>}
-    </div>}
-    {error && <p style={{ marginTop: 12, color: "var(--theme-error-500)" }}>{error}</p>}
-    {notice && <p style={{ marginTop: 12, padding: ".6rem .7rem", background: "var(--theme-success-100)", borderRadius: 4 }}>{notice}</p>}
-    {draft && <DraftResult draft={draft} onApplyFull={applyFullDraft} onApplyTitle={applyTitle} onApplySummary={applySummary} onApplyBody={applyBody} onApplySeo={applySeo} primaryButtonStyle={primaryButtonStyle} buttonStyle={buttonStyle} />}
-    {review && <SEOResult review={review} onApply={applySeoReview} primaryButtonStyle={primaryButtonStyle} />}
-  </section>;
+          {(busy || progress > 0) ? <div className={styles.progress} role="status" aria-live="polite"><div className={styles.progressMeta}><span>{progressLabel || "Working…"}</span><strong>{Math.round(progress)}%</strong></div><div className={styles.progressTrack}><div className={styles.progressFill} style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} /></div>{busy && progress >= 40 ? <div className={styles.progressHint}>Upload progress is measured. Model-generation progress is estimated until the response completes.</div> : null}</div> : null}
+          {error ? <p className={styles.error}>{error}</p> : null}
+          {notice ? <p className={styles.notice}>{notice}</p> : null}
+          {draft ? <DraftResult draft={draft} onApplyFull={applyFullDraft} onApplyTitle={applyTitle} onApplySummary={applySummary} onApplyBody={applyBody} onApplySeo={applySeo} /> : null}
+          {review ? <SEOResult review={review} onApply={applySeoReview} /> : null}
+          {sectionResult ? <SectionResult rewrite={sectionResult} onApply={applySectionResult} /> : null}
+        </div>
+      ) : null}
+    </section>
+  );
 }
 
-function DraftResult({ draft, onApplyFull, onApplyTitle, onApplySummary, onApplyBody, onApplySeo, primaryButtonStyle, buttonStyle }: { draft: ArticleDraft; onApplyFull: () => void; onApplyTitle: () => void; onApplySummary: () => void; onApplyBody: () => void; onApplySeo: () => void; primaryButtonStyle: React.CSSProperties; buttonStyle: React.CSSProperties; }) {
+function DraftResult({ draft, onApplyFull, onApplyTitle, onApplySummary, onApplyBody, onApplySeo }: { draft: ArticleDraft; onApplyFull: () => void; onApplyTitle: () => void; onApplySummary: () => void; onApplyBody: () => void; onApplySeo: () => void }) {
   const wordCount = useMemo(() => estimateWordCount(draft), [draft]);
-  return <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--theme-elevation-150)" }}>
-    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 10, alignItems: "center" }}><div><strong>Proposed draft</strong><div style={{ fontSize: ".78rem", color: "var(--theme-elevation-600)", marginTop: 2 }}>About {wordCount.toLocaleString()} words · review before applying</div></div><div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}><button type="button" style={primaryButtonStyle} onClick={onApplyFull}>Apply full draft</button><button type="button" style={buttonStyle} onClick={onApplyTitle}>Apply title</button><button type="button" style={buttonStyle} onClick={onApplySummary}>Apply summary</button><button type="button" style={buttonStyle} onClick={onApplyBody}>Apply body</button><button type="button" style={buttonStyle} onClick={onApplySeo}>Apply SEO</button></div></div>
-    <details open style={{ marginTop: 12 }}><summary style={{ cursor: "pointer", fontWeight: 600 }}>Article preview</summary><div style={{ paddingTop: 8 }}><h3 style={{ margin: "4px 0" }}>{draft.title}</h3><p>{draft.summary}</p>{draft.keyPoints.length > 0 && <><strong>Key points</strong><ul>{draft.keyPoints.map((x) => <li key={x}>{x}</li>)}</ul></>}{draft.sections.map((section, i) => <div key={`${section.heading}-${i}`}><h4>{section.heading}</h4>{section.paragraphs.map((p) => <p key={p}>{p}</p>)}{(section.bullets?.length ?? 0) > 0 && <ul>{section.bullets?.map((b) => <li key={b}>{b}</li>)}</ul>}</div>)}</div></details>
-    <details style={{ marginTop: 10 }}><summary style={{ cursor: "pointer", fontWeight: 600 }}>SEO & social metadata</summary><div style={{ paddingTop: 8 }}><p><strong>Slug:</strong> {draft.slug}<br/><strong>SEO title:</strong> {draft.seoTitle}<br/><strong>Meta:</strong> {draft.metaDescription}<br/><strong>Social title:</strong> {draft.socialTitle}<br/><strong>Social description:</strong> {draft.socialDescription}</p><p><strong>Image concept:</strong> {draft.imageConcept}<br/><strong>Suggested image alt:</strong> {draft.imageAlt}</p></div></details>
-    <details style={{ marginTop: 10 }}><summary style={{ cursor: "pointer", fontWeight: 600 }}>References to verify ({draft.referenceRequirements.length})</summary><div style={{ paddingTop: 8 }}>{draft.referenceRequirements.length > 0 ? <ul>{draft.referenceRequirements.map((x) => <li key={x}>{x}</li>)}</ul> : <p>No reference requirements were returned.</p>}</div></details>
-    <details style={{ marginTop: 10 }}><summary style={{ cursor: "pointer", fontWeight: 600 }}>Internal-link suggestions ({draft.suggestedInternalLinks.length})</summary><div style={{ paddingTop: 8 }}>{draft.suggestedInternalLinks.length > 0 ? <ul>{draft.suggestedInternalLinks.map((x) => <li key={`${x.href}-${x.anchor}`}><code>{x.anchor}</code> → {x.href} — {x.reason}</li>)}</ul> : <p>No internal-link suggestions were returned.</p>}</div></details>
-    <p style={{ fontSize: ".78rem", color: "var(--theme-elevation-600)", marginTop: 12 }}>Applying changes populates the current edit form only. It does not publish the Insight.</p>
+  return <div className={styles.result}>
+    <div className={styles.resultHeader}><div><strong>Proposed draft</strong><div className={styles.resultMeta}>About {wordCount.toLocaleString()} words · review before applying</div></div><div className={styles.resultActions}><button type="button" className={`${styles.button} ${styles.primary}`} onClick={onApplyFull}>Apply full draft</button><button type="button" className={styles.button} onClick={onApplyTitle}>Apply title</button><button type="button" className={styles.button} onClick={onApplySummary}>Apply summary</button><button type="button" className={styles.button} onClick={onApplyBody}>Apply body</button><button type="button" className={styles.button} onClick={onApplySeo}>Apply SEO</button></div></div>
+    <details open className={styles.details}><summary>Article preview</summary><div className={styles.preview}><h3>{draft.title}</h3><p>{draft.summary}</p>{draft.keyPoints.length ? <><strong>Key points</strong><ul>{draft.keyPoints.map((point) => <li key={point}>{point}</li>)}</ul></> : null}{draft.sections.map((section, index) => <div key={`${section.heading}-${index}`}><h4>{section.heading}</h4>{section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{section.bullets?.length ? <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul> : null}</div>)}</div></details>
+    <details className={styles.details}><summary>SEO & social metadata</summary><div className={styles.preview}><p><strong>Slug:</strong> {draft.slug}<br/><strong>SEO title:</strong> {draft.seoTitle}<br/><strong>Meta:</strong> {draft.metaDescription}<br/><strong>Social title:</strong> {draft.socialTitle}<br/><strong>Social description:</strong> {draft.socialDescription}</p><p><strong>Image concept:</strong> {draft.imageConcept}<br/><strong>Suggested image alt:</strong> {draft.imageAlt}</p></div></details>
+    <details className={styles.details}><summary>References to verify ({draft.referenceRequirements.length})</summary><div className={styles.preview}>{draft.referenceRequirements.length ? <ul>{draft.referenceRequirements.map((item) => <li key={item}>{item}</li>)}</ul> : <p>No reference requirements were returned.</p>}</div></details>
+    <details className={styles.details}><summary>Internal-link suggestions ({draft.suggestedInternalLinks.length})</summary><div className={styles.preview}>{draft.suggestedInternalLinks.length ? <ul>{draft.suggestedInternalLinks.map((item) => <li key={`${item.href}-${item.anchor}`}><code>{item.anchor}</code> → {item.href} — {item.reason}</li>)}</ul> : <p>No internal-link suggestions were returned.</p>}</div></details>
+    <p className={styles.resultMeta}>Applying changes populates the current edit form only. It does not save or publish the Insight.</p>
   </div>;
 }
 
-function SEOResult({ review, onApply, primaryButtonStyle }: { review: SEOReview; onApply: () => void; primaryButtonStyle: React.CSSProperties }) {
-  return <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--theme-elevation-150)" }}>
-    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 10, alignItems: "center" }}><strong>SEO & Content Review — {review.score}/100 · {review.readiness}</strong><button type="button" style={primaryButtonStyle} onClick={onApply}>Apply SEO suggestions</button></div>
-    <details open style={{ marginTop: 10 }}><summary style={{ cursor: "pointer", fontWeight: 600 }}>Review checks</summary><ul>{review.checks.map((c) => <li key={c.label}><strong>{c.label}:</strong> {c.status} — {c.note}</li>)}</ul></details>
-    <details style={{ marginTop: 10 }}><summary style={{ cursor: "pointer", fontWeight: 600 }}>Recommendations</summary><ul>{review.recommendations.map((x) => <li key={x}>{x}</li>)}</ul></details>
-    <details style={{ marginTop: 10 }}><summary style={{ cursor: "pointer", fontWeight: 600 }}>Suggested metadata</summary><p><strong>Suggested SEO title:</strong> {review.suggestedSeoTitle}<br/><strong>Suggested meta description:</strong> {review.suggestedMetaDescription}<br/><strong>Suggested slug:</strong> {review.suggestedSlug}</p></details>
-    {review.referenceRequirements.length > 0 && <details style={{ marginTop: 10 }}><summary style={{ cursor: "pointer", fontWeight: 600 }}>Claims needing verified references ({review.referenceRequirements.length})</summary><ul>{review.referenceRequirements.map((x) => <li key={x}>{x}</li>)}</ul></details>}
+function SEOResult({ review, onApply }: { review: SEOReview; onApply: () => void }) {
+  return <div className={styles.result}>
+    <div className={styles.resultHeader}><strong>SEO & Content Review — {review.score}/100 · {review.readiness}</strong><button type="button" className={`${styles.button} ${styles.primary}`} onClick={onApply}>Apply SEO suggestions</button></div>
+    <details open className={styles.details}><summary>Review checks</summary><ul className={styles.preview}>{review.checks.map((check) => <li key={check.label}><strong>{check.label}:</strong> {check.status} — {check.note}</li>)}</ul></details>
+    <details className={styles.details}><summary>Recommendations</summary><ul className={styles.preview}>{review.recommendations.map((item) => <li key={item}>{item}</li>)}</ul></details>
+    <details className={styles.details}><summary>Suggested metadata</summary><p className={styles.preview}><strong>Suggested SEO title:</strong> {review.suggestedSeoTitle}<br/><strong>Suggested meta description:</strong> {review.suggestedMetaDescription}<br/><strong>Suggested slug:</strong> {review.suggestedSlug}</p></details>
+    {review.referenceRequirements.length ? <details className={styles.details}><summary>Claims needing verified references ({review.referenceRequirements.length})</summary><ul className={styles.preview}>{review.referenceRequirements.map((item) => <li key={item}>{item}</li>)}</ul></details> : null}
+  </div>;
+}
+
+function SectionResult({ rewrite, onApply }: { rewrite: SectionRewrite; onApply: () => void }) {
+  return <div className={styles.result}>
+    <div className={styles.resultHeader}><div><strong>Proposed section replacement</strong><div className={styles.resultMeta}>Only the selected H2/H3 section will change.</div></div><button type="button" className={`${styles.button} ${styles.primary}`} onClick={onApply}>Apply section</button></div>
+    <div className={styles.preview}><h3>{rewrite.heading}</h3>{rewrite.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{rewrite.bullets.length ? <ul>{rewrite.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul> : null}</div>
+    <p className={styles.resultMeta}>Citation markers are checked again before apply. If the section changed after generation, the replacement is refused.</p>
   </div>;
 }
