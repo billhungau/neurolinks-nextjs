@@ -22,7 +22,7 @@ export const ARTICLE_TONES = [
 export type ArticleType = (typeof ARTICLE_TYPES)[number];
 export type ArticleLength = (typeof ARTICLE_LENGTHS)[number];
 export type ArticleTone = (typeof ARTICLE_TONES)[number];
-export type AIAction = "generate" | "improve" | "seo";
+export type AIAction = "generate" | "improve" | "seo" | "section";
 
 export type ArticleSection = {
   heading?: string;
@@ -46,6 +46,12 @@ export type ArticleDraft = {
   referenceRequirements: string[];
   imageConcept: string;
   imageAlt: string;
+};
+
+export type SectionRewrite = {
+  heading: string;
+  paragraphs: string[];
+  bullets: string[];
 };
 
 export type SEOReview = {
@@ -72,6 +78,11 @@ export type AssistantRequest = {
   tone?: ArticleTone;
   improvementDirection?: string;
   sourceFileNames?: string[];
+  section?: {
+    heading: string;
+    level: 2 | 3;
+    text: string;
+  };
   current?: {
     title?: string;
     summary?: string;
@@ -91,13 +102,17 @@ function text(value: unknown, max = 20000): string | undefined {
 export function parseAssistantRequest(value: unknown): AssistantRequest | null {
   if (!value || typeof value !== "object") return null;
   const input = value as Record<string, unknown>;
-  if (input.action !== "generate" && input.action !== "improve" && input.action !== "seo") return null;
+  if (input.action !== "generate" && input.action !== "improve" && input.action !== "seo" && input.action !== "section") return null;
   const currentRaw = input.current && typeof input.current === "object" ? (input.current as Record<string, unknown>) : undefined;
+  const sectionRaw = input.section && typeof input.section === "object" ? (input.section as Record<string, unknown>) : undefined;
   const articleLength = ARTICLE_LENGTHS.includes(input.articleLength as ArticleLength) ? input.articleLength as ArticleLength : "Concise";
   const tone = ARTICLE_TONES.includes(input.tone as ArticleTone) ? input.tone as ArticleTone : "Expert & confident";
   const sourceFileNames = Array.isArray(input.sourceFileNames)
-    ? input.sourceFileNames.map((entry) => text(entry, 180)).filter((entry): entry is string => Boolean(entry)).slice(0, 5)
+    ? input.sourceFileNames.map((entry) => text(entry, 180)).filter((entry): entry is string => Boolean(entry)).slice(0, 10)
     : undefined;
+  const sectionLevel = sectionRaw?.level === 3 ? 3 : 2;
+  const sectionHeading = text(sectionRaw?.heading, 300);
+  const sectionText = text(sectionRaw?.text, 12000);
   const result: AssistantRequest = {
     action: input.action,
     topic: text(input.topic, 300),
@@ -110,6 +125,7 @@ export function parseAssistantRequest(value: unknown): AssistantRequest | null {
     tone,
     improvementDirection: text(input.improvementDirection, 2500),
     sourceFileNames,
+    section: sectionHeading && sectionText ? { heading: sectionHeading, level: sectionLevel, text: sectionText } : undefined,
     current: currentRaw
       ? {
           title: text(currentRaw.title, 300),
@@ -122,7 +138,8 @@ export function parseAssistantRequest(value: unknown): AssistantRequest | null {
       : undefined,
   };
   if (result.action === "generate" && !result.topic) return null;
-  if (result.action !== "generate" && !result.current?.title && !result.current?.bodyText) return null;
+  if ((result.action === "improve" || result.action === "seo") && !result.current?.title && !result.current?.bodyText) return null;
+  if (result.action === "section" && (!result.section?.text || !result.current?.title)) return null;
   return result;
 }
 
@@ -139,6 +156,19 @@ export function articleDraftJsonSchema() {
       suggestedTopics: { type: "array", items: { type: "string" } },
       suggestedInternalLinks: { type: "array", items: { type: "object", additionalProperties: false, required: ["anchor", "href", "reason"], properties: { anchor: { type: "string" }, href: { type: "string" }, reason: { type: "string" } } } },
       referenceRequirements: { type: "array", items: { type: "string" } }, imageConcept: { type: "string" }, imageAlt: { type: "string" },
+    },
+  } as const;
+}
+
+export function sectionRewriteJsonSchema() {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["heading", "paragraphs", "bullets"],
+    properties: {
+      heading: { type: "string" },
+      paragraphs: { type: "array", items: { type: "string" } },
+      bullets: { type: "array", items: { type: "string" } },
     },
   } as const;
 }
