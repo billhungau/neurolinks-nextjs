@@ -394,6 +394,7 @@ export interface Category {
 export interface AiSourceDocument {
   id: number;
   sessionId: string;
+  expiresAt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -591,6 +592,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface AiSourceDocumentsSelect<T extends boolean = true> {
   sessionId?: T;
+  expiresAt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
