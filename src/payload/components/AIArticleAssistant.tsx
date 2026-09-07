@@ -161,7 +161,7 @@ export function AIArticleAssistant() {
   const [generatedForPath, setGeneratedForPath] = useState("");
 
   const sourceSession = fieldValue(fields, "aiSourceSession");
-  const currentDocumentKey = `${collectionSlug || "insights"}:${documentId ?? "new"}:${pathname}`;
+  const currentDocumentKey = `${collectionSlug || "insights"}:${documentId ?? "new"}:${pathname}:${sourceSession || "unassigned"}`;
 
   useEffect(() => {
     setDraft(null);
@@ -176,6 +176,18 @@ export function AIArticleAssistant() {
     setDoi("");
     setAddedReferences([]);
   }, [pathname, documentId, collectionSlug]);
+
+  useEffect(() => {
+    if (generatedForPath && generatedForPath !== currentDocumentKey) {
+      setDraft(null);
+      setReview(null);
+      setGeneratedForPath("");
+      setError("");
+      setNotice("");
+      setProgress(0);
+      setProgressLabel("");
+    }
+  }, [currentDocumentKey, generatedForPath]);
 
   useEffect(() => {
     let cancelled = false;
@@ -310,10 +322,9 @@ export function AIArticleAssistant() {
       const selectionError = validateSourceSelection(existingBytes, sourceFiles);
       if (selectionError) throw new Error(selectionError);
 
-      let activeSession = sourceSession;
+      const activeSession = ensureSourceSession();
       let uploaded = [...sourceDocuments];
       if (sourceFiles.length) {
-        activeSession = ensureSourceSession();
         for (let i = 0; i < sourceFiles.length; i += 1) {
           const doc = await uploadSourceFile(sourceFiles[i], activeSession, i, sourceFiles.length);
           uploaded = [...uploaded, doc];
@@ -338,7 +349,7 @@ export function AIArticleAssistant() {
       if (ticker) clearInterval(ticker);
       setProgress(100);
       setProgressLabel("Complete");
-      setGeneratedForPath(currentDocumentKey);
+      setGeneratedForPath(`${collectionSlug || "insights"}:${documentId ?? "new"}:${pathname}:${activeSession}`);
       if (action === "seo") setReview(json.result as SEOReview); else setDraft(json.result as ArticleDraft);
     } catch (e) {
       if (ticker) clearInterval(ticker);
