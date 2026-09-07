@@ -21,7 +21,7 @@ jobs:
           s = p.read_text()
           s = s.replace('import { useAllFormFields } from "@payloadcms/ui";', 'import { useAllFormFields, useDocumentInfo } from "@payloadcms/ui";')
           marker = '} from "@/ai/schemas";\n\nconst MAX_SOURCE_FILES = 10;\nconst MAX_SOURCE_FILE_BYTES = 4 * 1024 * 1024;'
-          replacement = '''} from "@/ai/schemas";\nimport {\n  AI_SOURCE_ACCEPT,\n  MAX_AI_SOURCE_FILES,\n  MAX_AI_SOURCE_FILE_BYTES,\n  normalizedSourceMimeType,\n  nextEstimatedGenerationProgress,\n  uploadProgressPercent,\n  validateSourceSelection,\n} from "@/ai/source-files";'''
+          replacement = '''} from "@/ai/schemas";\nimport {\n  AI_SOURCE_ACCEPT,\n  MAX_AI_SOURCE_FILES,\n  normalizedSourceMimeType,\n  nextEstimatedGenerationProgress,\n  uploadProgressPercent,\n  validateSourceSelection,\n} from "@/ai/source-files";'''
           s = s.replace(marker, replacement)
 
           old = '''function paragraphNode(text: string) {\n  return { children: text ? [textNode(text)] : [], direction: "ltr", format: "", indent: 0, type: "paragraph", version: 1, textFormat: 0, textStyle: "" };\n}\nfunction headingNode(text: string, level: 2 | 3 = 2) {\n  return { children: [textNode(text)], direction: "ltr", format: "", indent: 0, tag: level === 3 ? "h3" : "h2", type: "heading", version: 1 };\n}\nfunction draftToLexical(draft: ArticleDraft) {\n  const children: unknown[] = [];\n  for (const section of draft.sections) {\n    if (section.heading?.trim()) children.push(headingNode(section.heading.trim(), section.level === 3 ? 3 : 2));\n    for (const paragraph of section.paragraphs) if (paragraph.trim()) children.push(paragraphNode(paragraph.trim()));\n    for (const bullet of section.bullets || []) if (bullet.trim()) children.push(paragraphNode(`• ${bullet.trim()}`));\n  }\n  return { root: { children, direction: "ltr", format: "", indent: 0, type: "root", version: 1 } };\n}'''
@@ -50,12 +50,23 @@ jobs:
           s = s.replace('''      setGeneratedForPath(pathname);''', '''      setGeneratedForPath(currentDocumentKey);''')
 
           s = s.replace('''accept=".pdf,.txt,.md,.doc,.docx,application/pdf,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"''', '''accept={AI_SOURCE_ACCEPT}''')
-          s = s.replace('''MAX_SOURCE_FILES - sourceDocuments.length''', '''MAX_AI_SOURCE_FILES - sourceDocuments.length''')
-          s = s.replace('''Select up to {MAX_SOURCE_FILES} PDF/TXT/MD/DOC/DOCX files. Files are uploaded one at a time when you run the AI, avoiding the combined-request size limit. Current per-file limit: 4 MB.''', '''Select up to {MAX_AI_SOURCE_FILES} PDF/TXT/MD/DOC/DOCX files. Files upload one at a time when you run the AI. Limit: 4 MB per file and 20 MB combined.''')
+          # Remaining occurrences include the source-list limit and UI labels.
+          s = s.replace('MAX_SOURCE_FILES', 'MAX_AI_SOURCE_FILES')
+          s = s.replace('MAX_SOURCE_FILE_BYTES', 'MAX_AI_SOURCE_FILE_BYTES')
+          s = s.replace('''Select up to {MAX_AI_SOURCE_FILES} PDF/TXT/MD/DOC/DOCX files. Files are uploaded one at a time when you run the AI, avoiding the combined-request size limit. Current per-file limit: 4 MB.''', '''Select up to {MAX_AI_SOURCE_FILES} PDF/TXT/MD/DOC/DOCX files. Files upload one at a time when you run the AI. Limit: 4 MB per file and 20 MB combined.''')
           s = s.replace('''{busy && progress >= 55 &&''', '''{busy && progress >= 40 &&''')
 
-          if 'MAX_SOURCE_FILES' in s or 'MAX_SOURCE_FILE_BYTES' in s:
-            raise SystemExit('old source constants remain')
+          required = [
+            'useDocumentInfo',
+            'currentDocumentKey',
+            'type: "list"',
+            'uploadProgressPercent',
+            'Validating and formatting response',
+            'accept={AI_SOURCE_ACCEPT}',
+          ]
+          missing = [item for item in required if item not in s]
+          if missing:
+            raise SystemExit(f'missing expected refactor markers: {missing}')
           p.write_text(s)
           PY
       - name: Commit refactor
