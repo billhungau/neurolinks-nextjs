@@ -7,8 +7,11 @@ export const runtime = "nodejs";
 export const maxDuration = 240;
 
 const MAX_FILES = 5;
-const MAX_FILE_BYTES = 10 * 1024 * 1024;
-const MAX_TOTAL_FILE_BYTES = 25 * 1024 * 1024;
+// Vercel Functions have a 4.5 MB request-body ceiling. Leave headroom for
+// multipart boundaries and the JSON request so uploads fail clearly here
+// rather than as an opaque platform 413.
+const MAX_FILE_BYTES = 4 * 1024 * 1024;
+const MAX_TOTAL_FILE_BYTES = 4 * 1024 * 1024;
 const ALLOWED_FILE_TYPES = new Set([
   "application/pdf",
   "text/plain",
@@ -62,8 +65,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const code = error instanceof Error ? error.message : "INVALID_REQUEST";
     if (code === "TOO_MANY_FILES") return NextResponse.json({ error: `Attach up to ${MAX_FILES} source files at a time.` }, { status: 413 });
-    if (code === "FILE_TOO_LARGE") return NextResponse.json({ error: "Each source file must be 10 MB or smaller." }, { status: 413 });
-    if (code === "FILES_TOO_LARGE") return NextResponse.json({ error: "Attached source files must total 25 MB or less." }, { status: 413 });
+    if (code === "FILE_TOO_LARGE") return NextResponse.json({ error: "Each source file must be smaller than 4 MB in the current uploader." }, { status: 413 });
+    if (code === "FILES_TOO_LARGE") return NextResponse.json({ error: "Source files must total less than 4 MB in the current uploader. Add fewer or smaller files and try again." }, { status: 413 });
     if (code === "UNSUPPORTED_FILE_TYPE") return NextResponse.json({ error: "Supported source files are PDF, TXT, Markdown, DOC and DOCX." }, { status: 415 });
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
@@ -78,6 +81,8 @@ export async function POST(request: NextRequest) {
     const code = error instanceof Error ? error.message : "AI_PROVIDER_ERROR";
     if (code === "AI_NOT_CONFIGURED") return NextResponse.json({ error: "AI Article Assistant is not configured. Add OPENAI_API_KEY on Vercel." }, { status: 503 });
     if (code === "AI_TIMEOUT") return NextResponse.json({ error: "AI generation timed out. Your article was not changed." }, { status: 504 });
+    if (code === "AI_FILE_UPLOAD_ERROR") return NextResponse.json({ error: "The source file could not be uploaded to the AI provider. Your article was not changed." }, { status: 502 });
+    if (code === "AI_INVALID_OUTPUT") return NextResponse.json({ error: "The AI returned an invalid article response. Your article was not changed; please try again." }, { status: 502 });
     console.error("[ai-article-assistant] generation failed", error);
     return NextResponse.json({ error: "AI generation could not be completed. Your existing article has not been changed." }, { status: 502 });
   }
