@@ -6,6 +6,7 @@ import test from "node:test";
 import { FOOTER_QUICK_LINKS, footerQuickLinks, PRIMARY_NAV } from "../../../lib/nav.ts";
 import { SITEMAP_ROUTES } from "../../../content/manifest.ts";
 import { isInsightsPublicEnabled } from "../../../lib/insights.ts";
+import { automaticArticleCta, selectInsightsLead } from "../../../lib/insights-editorial.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const read = (relative: string) => readFileSync(join(root, relative), "utf8");
@@ -14,7 +15,9 @@ const articlePage = read("[slug]/page.tsx");
 const globalsCss = read("../globals.css");
 const insightsCss = read("../insights.css");
 const indexCss = read("../insights-index.css");
+const articleEditorialCss = read("../insights-editorial.css");
 const articleBody = read("../../../components/insights/ArticleBody.tsx");
+const articleToc = read("../../../components/insights/ArticleToc.tsx");
 const comparison = read("../../../components/insights/EvidenceSummary.tsx");
 const sitemap = read("../../sitemap.ts");
 const robots = read("../../robots.ts");
@@ -28,12 +31,35 @@ const payloadConfig = read("../../../payload.config.ts");
 const previewRoute = read("../api/insights-preview/route.ts");
 
 test("the public Insights index is gated and uses the compact editorial layout", () => {
-  assert.match(indexPage, /shouldExposeInsightsPublicly/); assert.match(indexPage, /notFound\(\)/); assert.match(indexPage, /generateMetadata/); assert.match(indexPage, /insightsIndexMetadata/); assert.equal(/\bBlog\b/.test(indexPage), false); assert.match(indexPage, /TopicFilters/); assert.match(indexPage, /insights-editorial-grid/); assert.equal(indexPage.includes("FeaturedArticle"), false); assert.equal(indexPage.includes("Medical authorship"), false); assert.equal(indexPage.includes("InsightsHero"), false); assert.match(indexPage, /searchParams/); assert.equal(indexPage.includes("placeholder"), false);
+  assert.match(indexPage, /shouldExposeInsightsPublicly/); assert.match(indexPage, /notFound\(\)/); assert.match(indexPage, /generateMetadata/); assert.match(indexPage, /insightsIndexMetadata/); assert.equal(/\bBlog\b/.test(indexPage), false); assert.match(indexPage, /TopicFilters/); assert.match(indexPage, /insights-editorial-grid/); assert.match(indexPage, /FeaturedArticle/); assert.match(indexPage, /selectInsightsLead/); assert.equal(indexPage.includes("Medical authorship"), false); assert.equal(indexPage.includes("InsightsHero"), false); assert.match(indexPage, /searchParams/); assert.equal(indexPage.includes("placeholder"), false);
+});
+
+test("lead article prefers featured content, falls back to newest, and never duplicates", () => {
+  const articles = [
+    { id: 1, title: "Newest", slug: "newest", category: null, featuredImage: null, featured: false },
+    { id: 2, title: "Featured", slug: "featured", category: null, featuredImage: null, featured: true },
+    { id: 3, title: "Third", slug: "third", category: null, featuredImage: null },
+  ];
+  const selected = selectInsightsLead(articles, null);
+  assert.equal(selected.lead?.id, 2);
+  assert.equal(selected.remaining.some((article) => article.id === 2), false);
+  assert.deepEqual(selectInsightsLead(articles, "tms").remaining.map((article) => article.id), [1, 2, 3]);
+  assert.equal(selectInsightsLead(articles, "tms").lead, null);
+  assert.equal(selectInsightsLead([articles[0]], null).lead?.id, 1);
+});
+
+test("automatic article CTA selection prevents redundant Veterans and embedded CTAs", () => {
+  assert.equal(automaticArticleCta({ topics: ["veterans-and-coverage"], bodyHasCta: false }), "veterans");
+  assert.equal(automaticArticleCta({ topics: ["veterans-and-coverage"], bodyHasCta: true }), "none");
+  assert.equal(automaticArticleCta({ topics: ["tms"], bodyHasCta: false }), "generic");
+  assert.equal(automaticArticleCta({ topics: ["tms"], bodyHasCta: true }), "none");
 });
 
 test("the index reads only through the data layer", () => { assert.match(indexPage, /from "@\/lib\/payload\/insights"/); assert.equal(indexPage.includes("getPayload"), false); assert.equal(indexPage.includes("payload.find"), false); });
-test("the premium index styling stays restrained and two-column", () => { assert.match(indexCss, /\.insights-editorial-grid/); assert.match(indexCss, /repeat\(2,minmax\(0,1fr\)\)/); assert.match(indexCss, /\.insights-index-intro/); assert.match(indexCss, /\.insights-index-cta/); });
+test("the premium index styling stays restrained with a lead story and two-column journal grid", () => { assert.match(indexCss, /\.insights-index-lead/); assert.match(indexCss, /\.insights-editorial-grid/); assert.match(indexCss, /repeat\(2,\s*minmax\(0,\s*1fr\)\)/); assert.match(indexCss, /\.insights-index-intro/); assert.match(indexCss, /\.insights-index-cta/); });
 test("article routes 404 for unpublished, unknown or disabled URLs and keep draft preview", () => { assert.match(articlePage, /isDraftPreview/); assert.match(articlePage, /canShowArticle/); assert.match(articlePage, /notFound\(\)/); assert.match(articlePage, /generateMetadata/); assert.match(articlePage, /articleJsonLd/); assert.match(articlePage, /breadcrumbJsonLd/); assert.match(articlePage, /<h1>\{article\.title\}<\/h1>/); assert.match(articlePage, /ArticleToc/); assert.equal((articlePage.match(/<h1/g) ?? []).length, 1); });
+test("article header uses compact editorial metadata without changing semantic dates or JSON-LD", () => { assert.match(articlePage, /insights-editorial-meta/); assert.match(articlePage, /Written by/); assert.match(articlePage, /Medically reviewed by/); assert.match(articlePage, /<time dateTime=\{article\.publishedAt/); assert.match(articlePage, /<time dateTime=\{article\.lastReviewedAt/); assert.match(articleEditorialCss, /\.insights-editorial-meta/); });
+test("key points remain accessible and the TOC is sticky on desktop but collapsible on mobile", () => { assert.match(articlePage, /aria-labelledby="insights-keypoints-heading"/); assert.match(articleToc, /<details>/); assert.equal(articleToc.includes("<details open>"), false); assert.match(articleEditorialCss, /position:\s*sticky/); assert.match(articleEditorialCss, /@media \(max-width: 939px\)/); assert.match(articleEditorialCss, /details:not\(\[open\]\) ol \{ display: none/); });
 test("every public query is constrained to published documents in the database", () => { assert.match(dataLayer, /_status: \{ equals: "published" \}/); assert.match(dataLayer, /publishedAt: \{ exists: true \}/); assert.equal((dataLayer.match(/draft: true/g) ?? []).length, 1); assert.match(dataLayer, /if \(!preview\) return cachedArticleBySlug\(slug\)/); assert.match(dataLayer, /unstable_cache/); assert.match(dataLayer, /INSIGHTS_CACHE_TAG/); });
 test("Insights use Payload drafts and only editors may write or read versions", () => { assert.match(insightsCollection, /versions: \{/); assert.match(insightsCollection, /drafts: \{/); assert.match(insightsCollection, /read: publishedOrAuthenticated/); assert.match(insightsCollection, /create: authenticated/); assert.match(insightsCollection, /update: authenticated/); assert.match(insightsCollection, /delete: authenticated/); assert.match(insightsCollection, /readVersions: authenticated/); assert.match(insightsCollection, /preview: previewUrl/); });
 test("the preview route requires a signed link and a Payload session", () => { assert.match(previewRoute, /isValidPreviewToken/); assert.match(previewRoute, /payload\.auth/); assert.match(previewRoute, /if \(!user\)/); assert.match(previewRoute, /draft\.enable\(\)/); assert.match(previewRoute, /overrideAccess: false/); });
