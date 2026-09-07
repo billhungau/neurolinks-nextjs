@@ -1,17 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { normalizeDoi, isValidDoi } from "@/lib/doi";
 import { getPayloadClient, isCmsConfigured } from "@/lib/payload/client";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
-
-function normalizeDoi(value: unknown) {
-  if (typeof value !== "string") return "";
-  return value
-    .trim()
-    .replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, "")
-    .replace(/^doi:\s*/i, "")
-    .trim();
-}
 
 type CrossrefAuthor = { given?: string; family?: string; name?: string };
 type CrossrefMessage = {
@@ -54,17 +46,22 @@ export async function POST(request: NextRequest) {
   let raw: unknown;
   try { raw = await request.json(); } catch { return NextResponse.json({ error: "Invalid request." }, { status: 400 }); }
   const doi = normalizeDoi((raw as { doi?: unknown })?.doi);
-  if (!doi || !/^10\.\d{4,9}\/.+/i.test(doi)) return NextResponse.json({ error: "Enter a valid DOI or doi.org link." }, { status: 400 });
+  if (!doi || !isValidDoi(doi)) return NextResponse.json({ error: "Enter a valid DOI or doi.org link." }, { status: 400 });
 
-  const existing = await payload.find({
+  // Older manually entered references may not have normalized DOI casing. The
+  // reference collection is intentionally small, so compare normalized values
+  // rather than creating a second record for the same DOI.
+  const possibleExisting = await payload.find({
     collection: "references",
-    where: { doi: { equals: doi } },
-    limit: 1,
+    where: { doi: { exists: true } },
+    limit: 500,
     depth: 0,
     overrideAccess: true,
+    pagination: false,
   });
-  if (existing.docs[0]) {
-    return NextResponse.json({ ok: true, created: false, reference: existing.docs[0] });
+  const existing = possibleExisting.docs.find((reference) => normalizeDoi(reference.doi) === doi);
+  if (existing) {
+    return NextResponse.json({ ok: true, created: false, reference: existing });
   }
 
   const crossrefResponse = await fetch(`https://api.crossref.org/works/${encodeURIComponent(doi)}`, {
@@ -78,6 +75,7 @@ export async function POST(request: NextRequest) {
   const title = message?.title?.[0]?.trim();
   if (!message || !title) return NextResponse.json({ error: "The DOI record did not contain enough citation information." }, { status: 422 });
 
+  const canonicalDoi = normalizeDoi(message.DOI) || doi;
   const data = {
     title,
     authors: authorsFrom(message) || undefined,
@@ -86,8 +84,8 @@ export async function POST(request: NextRequest) {
     volume: message.volume || undefined,
     issue: message.issue || undefined,
     pages: message.page || undefined,
-    doi,
-    url: message.URL || `https://doi.org/${doi}`,
+    doi: canonicalDoi,
+    url: message.URL || `https://doi.org/${canonicalDoi}`,
   };
 
   const reference = await payload.create({
