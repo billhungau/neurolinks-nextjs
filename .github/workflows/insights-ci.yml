@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 
-# Full regression gate for the Insights CMS and AI Article Assistant.
+# Full regression gate for the Insights CMS, references, and AI Article Assistant.
 jobs:
   verify:
     runs-on: ubuntu-latest
