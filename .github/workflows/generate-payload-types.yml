@@ -1,16 +1,17 @@
-name: Generate Payload Types Audit
+name: Verify Payload Types
 
 on:
+  pull_request:
   push:
     branches:
-      - chatgpt/ai-progress-multi-source
+      - main
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  generate-types:
+  payload-types:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,20 +20,10 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Generate Payload types from config
+      - name: Regenerate Payload types from schema
         run: npx payload generate:types
-      - name: Verify generated types contain current Insights schema
+      - name: Fail when committed Payload types are stale
         run: |
+          git diff --exit-code -- src/payload-types.ts
           grep -q "'ai-source-documents': AiSourceDocument" src/payload-types.ts
           grep -q "aiSourceSession?: string | null" src/payload-types.ts
-      - name: Commit regenerated types when changed
-        run: |
-          if git diff --quiet -- src/payload-types.ts; then
-            echo "Payload types already match the config."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/payload-types.ts
-          git commit -m "Regenerate Payload types for AI sources"
-          git push
