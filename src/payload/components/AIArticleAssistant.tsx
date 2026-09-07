@@ -18,7 +18,6 @@ import {
   SECTION_IMPROVE_ACTIONS,
   extractEditableSections,
   replaceEditableSection,
-  sectionRewriteText,
 } from "@/ai/editorial-ux";
 import {
   AI_SOURCE_ACCEPT,
@@ -159,7 +158,7 @@ export function AIArticleAssistant() {
   const [review, setReview] = useState<SEOReview | null>(null);
   const [generatedForPath, setGeneratedForPath] = useState("");
   const [selectedSectionId, setSelectedSectionId] = useState("");
-  const [sectionDirection, setSectionDirection] = useState(SECTION_IMPROVE_ACTIONS[0][1]);
+  const [sectionDirection, setSectionDirection] = useState<string>(SECTION_IMPROVE_ACTIONS[0][1]);
   const [sectionCustomDirection, setSectionCustomDirection] = useState("");
   const [sectionResult, setSectionResult] = useState<SectionRewrite | null>(null);
   const [sectionResultId, setSectionResultId] = useState("");
@@ -569,6 +568,5 @@ function SectionResult({ rewrite, onApply }: { rewrite: SectionRewrite; onApply:
     <div className={styles.resultHeader}><div><strong>Proposed section replacement</strong><div className={styles.resultMeta}>Only the selected H2/H3 section will change.</div></div><button type="button" className={`${styles.button} ${styles.primary}`} onClick={onApply}>Apply section</button></div>
     <div className={styles.preview}><h3>{rewrite.heading}</h3>{rewrite.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{rewrite.bullets.length ? <ul>{rewrite.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul> : null}</div>
     <p className={styles.resultMeta}>Citation markers are checked again before apply. If the section changed after generation, the replacement is refused.</p>
-    <span hidden>{sectionRewriteText(rewrite)}</span>
   </div>;
 }
