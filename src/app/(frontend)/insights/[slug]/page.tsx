@@ -34,6 +34,7 @@ import {
   isDraftPreview,
 } from "@/lib/payload/insights";
 import type { Metadata } from "next";
+import "../../insights-editorial.css";
 
 type Props = {
   params: Promise<{ slug: string }>;
