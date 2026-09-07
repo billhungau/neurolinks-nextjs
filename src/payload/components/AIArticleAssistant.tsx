@@ -164,21 +164,25 @@ export function AIArticleAssistant() {
   const currentDocumentKey = `${collectionSlug || "insights"}:${documentId ?? "new"}:${pathname}:${sourceSession || "unassigned"}`;
 
   useEffect(() => {
-    setDraft(null);
-    setReview(null);
-    setGeneratedForPath("");
-    setError("");
-    setNotice("");
-    setSourceFiles([]);
-    setSourceDocuments([]);
-    setProgress(0);
-    setProgressLabel("");
-    setDoi("");
-    setAddedReferences([]);
+    const timer = window.setTimeout(() => {
+      setDraft(null);
+      setReview(null);
+      setGeneratedForPath("");
+      setError("");
+      setNotice("");
+      setSourceFiles([]);
+      setSourceDocuments([]);
+      setProgress(0);
+      setProgressLabel("");
+      setDoi("");
+      setAddedReferences([]);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [pathname, documentId, collectionSlug]);
 
   useEffect(() => {
-    if (generatedForPath && generatedForPath !== currentDocumentKey) {
+    if (!generatedForPath || generatedForPath === currentDocumentKey) return;
+    const timer = window.setTimeout(() => {
       setDraft(null);
       setReview(null);
       setGeneratedForPath("");
@@ -186,14 +190,20 @@ export function AIArticleAssistant() {
       setNotice("");
       setProgress(0);
       setProgressLabel("");
-    }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [currentDocumentKey, generatedForPath]);
 
   useEffect(() => {
     let cancelled = false;
     if (!sourceSession) {
-      setSourceDocuments([]);
-      return;
+      const timer = window.setTimeout(() => {
+        if (!cancelled) setSourceDocuments([]);
+      }, 0);
+      return () => {
+        cancelled = true;
+        window.clearTimeout(timer);
+      };
     }
     const query = encodeURIComponent(sourceSession);
     fetch(`/payload-api/ai-source-documents?where[sessionId][equals]=${query}&limit=${MAX_AI_SOURCE_FILES}&sort=createdAt`)
