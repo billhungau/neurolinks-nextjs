@@ -1,8 +1,8 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from "payload";
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Payload } from "payload";
 
 const SKIP_FLAG = "skipAISourceCleanup";
 
-async function deleteSessionDocuments(payload: Parameters<CollectionAfterChangeHook>[0]["req"]["payload"], sessionId: string) {
+async function deleteSessionDocuments(payload: Payload, sessionId: string) {
   const docs = await payload.find({
     collection: "ai-source-documents",
     depth: 0,
