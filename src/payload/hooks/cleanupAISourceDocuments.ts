@@ -2,8 +2,22 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Payload } fr
 
 const SKIP_FLAG = "skipAISourceCleanup";
 
+type CleanupPayload = {
+  find: (args: Record<string, unknown>) => Promise<{ docs: Array<{ id: string | number }> }>;
+  delete: (args: Record<string, unknown>) => Promise<unknown>;
+  update: (args: Record<string, unknown>) => Promise<unknown>;
+};
+
+function temporarySourcePayload(payload: Payload): CleanupPayload {
+  // The temporary collection is new in this migration. Keep the type escape
+  // isolated here so preview builds do not require a live database merely to
+  // regenerate Payload's collection union before TypeScript can run.
+  return payload as unknown as CleanupPayload;
+}
+
 async function deleteSessionDocuments(payload: Payload, sessionId: string) {
-  const docs = await payload.find({
+  const sourcePayload = temporarySourcePayload(payload);
+  const docs = await sourcePayload.find({
     collection: "ai-source-documents",
     depth: 0,
     limit: 100,
@@ -13,7 +27,7 @@ async function deleteSessionDocuments(payload: Payload, sessionId: string) {
 
   await Promise.all(
     docs.docs.map((doc) =>
-      payload.delete({
+      sourcePayload.delete({
         collection: "ai-source-documents",
         id: doc.id,
         overrideAccess: true,
@@ -29,7 +43,7 @@ export const cleanupAISourcesAfterPublish: CollectionAfterChangeHook = async ({ 
   if (!sessionId) return doc;
 
   await deleteSessionDocuments(req.payload, sessionId);
-  await req.payload.update({
+  await temporarySourcePayload(req.payload).update({
     collection: "insights",
     id: doc.id,
     data: { aiSourceSession: null },
