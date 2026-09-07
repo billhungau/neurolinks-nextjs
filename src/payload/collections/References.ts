@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { normalizeDoi } from "../../lib/doi";
 import { anyone, authenticated, authenticatedFieldAccess } from "../access";
 import { revalidateSupportingContent } from "../hooks/revalidateInsights";
 
@@ -68,6 +69,9 @@ export const References: CollectionConfig = {
       name: "doi",
       label: "DOI",
       type: "text",
+      hooks: {
+        beforeValidate: [({ value }) => normalizeDoi(value) || null],
+      },
       admin: {
         description: "DOI only, without https://doi.org/.",
       },
