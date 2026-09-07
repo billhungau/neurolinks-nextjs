@@ -26,7 +26,25 @@ jobs:
         run: npm run lint
       - name: Tests
         run: npm test
-      - name: SEO verification
-        run: npm run verify:seo
       - name: Next.js build
         run: npm run build
+      - name: Start built app
+        run: |
+          npm start > /tmp/neurolinks-next.log 2>&1 &
+          echo $! > /tmp/neurolinks-next.pid
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:3000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/neurolinks-next.log
+          exit 1
+      - name: SEO verification
+        run: npm run verify:seo
+      - name: Stop built app
+        if: always()
+        run: |
+          if [ -f /tmp/neurolinks-next.pid ]; then
+            kill "$(cat /tmp/neurolinks-next.pid)" 2>/dev/null || true
+          fi
