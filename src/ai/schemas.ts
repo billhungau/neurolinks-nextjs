@@ -11,8 +11,17 @@ export const ARTICLE_TYPES = [
 
 export const ARTICLE_LENGTHS = ["Concise", "Standard", "Detailed"] as const;
 
+export const ARTICLE_TONES = [
+  "Expert & confident",
+  "Clear & reassuring",
+  "Academic & evidence-led",
+  "Warm & approachable",
+  "Concise & direct",
+] as const;
+
 export type ArticleType = (typeof ARTICLE_TYPES)[number];
 export type ArticleLength = (typeof ARTICLE_LENGTHS)[number];
+export type ArticleTone = (typeof ARTICLE_TONES)[number];
 export type AIAction = "generate" | "improve" | "seo";
 
 export type ArticleSection = {
@@ -60,6 +69,9 @@ export type AssistantRequest = {
   location?: string;
   articleType?: string;
   articleLength?: ArticleLength;
+  tone?: ArticleTone;
+  improvementDirection?: string;
+  sourceFileNames?: string[];
   current?: {
     title?: string;
     summary?: string;
@@ -82,15 +94,22 @@ export function parseAssistantRequest(value: unknown): AssistantRequest | null {
   if (input.action !== "generate" && input.action !== "improve" && input.action !== "seo") return null;
   const currentRaw = input.current && typeof input.current === "object" ? (input.current as Record<string, unknown>) : undefined;
   const articleLength = ARTICLE_LENGTHS.includes(input.articleLength as ArticleLength) ? input.articleLength as ArticleLength : "Concise";
+  const tone = ARTICLE_TONES.includes(input.tone as ArticleTone) ? input.tone as ArticleTone : "Expert & confident";
+  const sourceFileNames = Array.isArray(input.sourceFileNames)
+    ? input.sourceFileNames.map((entry) => text(entry, 180)).filter((entry): entry is string => Boolean(entry)).slice(0, 5)
+    : undefined;
   const result: AssistantRequest = {
     action: input.action,
     topic: text(input.topic, 300),
     keyword: text(input.keyword, 200),
     audience: text(input.audience, 300),
-    goal: text(input.goal, 500),
+    goal: text(input.goal, 2500),
     location: text(input.location, 200),
     articleType: text(input.articleType, 100),
     articleLength,
+    tone,
+    improvementDirection: text(input.improvementDirection, 2500),
+    sourceFileNames,
     current: currentRaw
       ? {
           title: text(currentRaw.title, 300),
@@ -131,7 +150,7 @@ export function seoReviewJsonSchema() {
     properties: {
       score: { type: "integer", minimum: 0, maximum: 100 }, readiness: { type: "string", enum: ["Needs work", "Good", "Strong"] },
       checks: { type: "array", items: { type: "object", additionalProperties: false, required: ["label", "status", "note"], properties: { label: { type: "string" }, status: { type: "string", enum: ["good", "warning", "missing"] }, note: { type: "string" } } } },
-      recommendations: { type: "array", items: { type: "string" } }, suggestedSeoTitle: { type: "string" }, suggestedMetaDescription: { type: "string" }, suggestedSlug: { type: "string" },
+      recommendations: { type: "array", items: { type: "string" }, suggestedSeoTitle: { type: "string" }, suggestedMetaDescription: { type: "string" }, suggestedSlug: { type: "string" },
       suggestedInternalLinks: { type: "array", items: { type: "object", additionalProperties: false, required: ["anchor", "href", "reason"], properties: { anchor: { type: "string" }, href: { type: "string" }, reason: { type: "string" } } } },
       referenceRequirements: { type: "array", items: { type: "string" } },
     },
