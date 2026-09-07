@@ -13,6 +13,9 @@ import {
   type SEOReview,
 } from "@/ai/schemas";
 
+const MAX_SOURCE_FILES = 10;
+const MAX_SOURCE_FILE_BYTES = 4 * 1024 * 1024;
+
 function fieldValue(fields: Record<string, { value?: unknown }>, name: string): string {
   const value = fields[name]?.value;
   return typeof value === "string" ? value : "";
@@ -75,6 +78,11 @@ function lengthHint(articleLength: ArticleLength) {
   if (articleLength === "Standard") return "More context while staying scannable · usually 850–1,150 words";
   return "Use for complex topics or evidence reviews · usually 1,100+ words";
 }
+function readableBytes(value?: number) {
+  if (!value || value < 1024) return `${value || 0} B`;
+  if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 type ReferenceRecord = {
   id: string | number;
@@ -87,6 +95,16 @@ type ReferenceRecord = {
   pages?: string;
   doi?: string;
 };
+
+type SourceDocument = {
+  id: string | number;
+  filename?: string;
+  mimeType?: string;
+  filesize?: number;
+};
+
+type SourceListResponse = { docs?: SourceDocument[] };
+type SourceUploadResponse = { doc?: SourceDocument; error?: string; message?: string };
 
 export function AIArticleAssistant() {
   const pathname = usePathname();
@@ -101,15 +119,20 @@ export function AIArticleAssistant() {
   const [tone, setTone] = useState<ArticleTone>("Expert & confident");
   const [improvementDirection, setImprovementDirection] = useState("");
   const [sourceFiles, setSourceFiles] = useState<File[]>([]);
+  const [sourceDocuments, setSourceDocuments] = useState<SourceDocument[]>([]);
   const [doi, setDoi] = useState("");
   const [referenceBusy, setReferenceBusy] = useState(false);
   const [addedReferences, setAddedReferences] = useState<ReferenceRecord[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [progressLabel, setProgressLabel] = useState("");
   const [draft, setDraft] = useState<ArticleDraft | null>(null);
   const [review, setReview] = useState<SEOReview | null>(null);
   const [generatedForPath, setGeneratedForPath] = useState("");
+
+  const sourceSession = fieldValue(fields, "aiSourceSession");
 
   useEffect(() => {
     setDraft(null);
@@ -118,9 +141,29 @@ export function AIArticleAssistant() {
     setError("");
     setNotice("");
     setSourceFiles([]);
+    setSourceDocuments([]);
+    setProgress(0);
+    setProgressLabel("");
     setDoi("");
     setAddedReferences([]);
   }, [pathname]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!sourceSession) {
+      setSourceDocuments([]);
+      return;
+    }
+    const query = encodeURIComponent(sourceSession);
+    fetch(`/payload-api/ai-source-documents?where[sessionId][equals]=${query}&limit=${MAX_SOURCE_FILES}&sort=createdAt`)
+      .then(async (response) => {
+        if (!response.ok) return { docs: [] } as SourceListResponse;
+        return response.json() as Promise<SourceListResponse>;
+      })
+      .then((json) => { if (!cancelled) setSourceDocuments(Array.isArray(json.docs) ? json.docs : []); })
+      .catch(() => { if (!cancelled) setSourceDocuments([]); });
+    return () => { cancelled = true; };
+  }, [pathname, sourceSession]);
 
   const current = {
     title: fieldValue(fields, "title"),
@@ -149,6 +192,13 @@ export function AIArticleAssistant() {
       return false;
     }
     return true;
+  }
+  function ensureSourceSession() {
+    const existing = fieldValue(fields, "aiSourceSession");
+    if (existing) return existing;
+    const created = crypto.randomUUID();
+    updateField("aiSourceSession", created);
+    return created;
   }
   function applyTitle() {
     if (!draft || !ensureCurrentDocument()) return;
@@ -181,25 +231,83 @@ export function AIArticleAssistant() {
     updateField("seoTitle", review.suggestedSeoTitle); updateField("metaDescription", review.suggestedMetaDescription); updateField("slug", review.suggestedSlug); applied("SEO review suggestions applied.");
   }
 
+  function uploadSourceFile(file: File, sessionId: string, index: number, total: number): Promise<SourceDocument> {
+    return new Promise((resolve, reject) => {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("_payload", JSON.stringify({ sessionId }));
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/payload-api/ai-source-documents");
+      xhr.withCredentials = true;
+      xhr.upload.onprogress = (event) => {
+        const fraction = event.lengthComputable && event.total > 0 ? event.loaded / event.total : 0;
+        const percent = 5 + ((index + fraction) / Math.max(total, 1)) * 45;
+        setProgress(Math.min(50, Math.round(percent)));
+        setProgressLabel(`Uploading source ${index + 1} of ${total}: ${file.name}`);
+      };
+      xhr.onerror = () => reject(new Error(`Could not upload ${file.name}.`));
+      xhr.onload = () => {
+        let json: SourceUploadResponse = {};
+        try { json = JSON.parse(xhr.responseText) as SourceUploadResponse; } catch { /* use generic error below */ }
+        if (xhr.status < 200 || xhr.status >= 300 || !json.doc) {
+          reject(new Error(json.error || json.message || `Could not upload ${file.name}.`));
+          return;
+        }
+        resolve(json.doc);
+      };
+      xhr.send(form);
+    });
+  }
+
+  async function removeSourceDocument(doc: SourceDocument) {
+    if (busy) return;
+    setError("");
+    const response = await fetch(`/payload-api/ai-source-documents/${encodeURIComponent(String(doc.id))}`, { method: "DELETE" });
+    if (!response.ok) {
+      setError(`Could not remove ${doc.filename || "source file"}.`);
+      return;
+    }
+    setSourceDocuments((items) => items.filter((item) => String(item.id) !== String(doc.id)));
+  }
+
   async function run(action: "generate" | "improve" | "seo") {
-    setBusy(true); setError(""); setNotice(""); setDraft(null); setReview(null);
+    setBusy(true); setError(""); setNotice(""); setDraft(null); setReview(null); setProgress(3); setProgressLabel("Preparing request…");
+    let ticker: ReturnType<typeof setInterval> | undefined;
     try {
-      const requestBody = { action, topic, keyword, audience, goal, location, articleType, articleLength, tone, improvementDirection, current };
-      let response: Response;
+      if (sourceDocuments.length + sourceFiles.length > MAX_SOURCE_FILES) throw new Error(`Use up to ${MAX_SOURCE_FILES} source files for one article.`);
+      const oversized = sourceFiles.find((file) => file.size > MAX_SOURCE_FILE_BYTES);
+      if (oversized) throw new Error(`${oversized.name} is larger than 4 MB. Split or compress that source file before uploading.`);
+
+      let activeSession = sourceSession;
+      let uploaded = [...sourceDocuments];
       if (sourceFiles.length) {
-        const form = new FormData();
-        form.append("request", JSON.stringify(requestBody));
-        sourceFiles.forEach((file) => form.append("files", file));
-        response = await fetch("/api/admin/ai-article-assistant", { method: "POST", body: form });
-      } else {
-        response = await fetch("/api/admin/ai-article-assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(requestBody) });
+        activeSession = ensureSourceSession();
+        for (let i = 0; i < sourceFiles.length; i += 1) {
+          const doc = await uploadSourceFile(sourceFiles[i], activeSession, i, sourceFiles.length);
+          uploaded = [...uploaded, doc];
+          setSourceDocuments(uploaded);
+        }
+        setSourceFiles([]);
       }
+
+      setProgress(55);
+      setProgressLabel(uploaded.length ? `Reading ${uploaded.length} source file${uploaded.length === 1 ? "" : "s"} and generating article…` : "Generating article…");
+      ticker = setInterval(() => setProgress((value) => (value < 94 ? Math.min(94, value + (value < 75 ? 2 : 1)) : value)), 900);
+
+      const requestBody = { action, topic, keyword, audience, goal, location, articleType, articleLength, tone, improvementDirection, current, sourceSession: activeSession || undefined };
+      const response = await fetch("/api/admin/ai-article-assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(requestBody) });
       const json = await response.json() as { error?: string; result?: ArticleDraft | SEOReview };
       if (!response.ok || !json.result) throw new Error(json.error || "AI request failed.");
+      if (ticker) clearInterval(ticker);
+      setProgress(100);
+      setProgressLabel("Complete");
       setGeneratedForPath(pathname);
       if (action === "seo") setReview(json.result as SEOReview); else setDraft(json.result as ArticleDraft);
-    } catch (e) { setError(e instanceof Error ? e.message : "AI request failed."); }
-    finally { setBusy(false); }
+    } catch (e) {
+      if (ticker) clearInterval(ticker);
+      setProgressLabel("Stopped");
+      setError(e instanceof Error ? e.message : "AI request failed.");
+    } finally { setBusy(false); }
   }
 
   async function addReference() {
@@ -220,7 +328,7 @@ export function AIArticleAssistant() {
 
   return <section style={{ margin: "1rem 0 1.5rem", padding: "1rem", border: "1px solid var(--theme-elevation-150)", borderRadius: 6, background: "var(--theme-elevation-50)" }}>
     <div style={{ marginBottom: 12 }}><strong style={{ fontSize: "1rem" }}>AI Article Assistant</strong><div style={{ color: "var(--theme-elevation-600)", fontSize: ".8rem", marginTop: 3 }}>Generate, improve and review the current Insight. Results are reset when you move to another article and AI never publishes automatically.</div></div>
-    <div style={{ padding: ".65rem .75rem", marginBottom: 12, borderLeft: "3px solid #e8b923", background: "var(--theme-elevation-100)", fontSize: ".78rem" }}>Public editorial material only. Do not upload or enter patient-identifying or confidential clinical information. Attached files are sent to the configured OpenAI API only for this request.</div>
+    <div style={{ padding: ".65rem .75rem", marginBottom: 12, borderLeft: "3px solid #e8b923", background: "var(--theme-elevation-100)", fontSize: ".78rem" }}>Public editorial material only. Do not upload or enter patient-identifying or confidential clinical information. Source files are stored temporarily for this draft and are deleted automatically after the article is published.</div>
 
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 10 }}>
       <label>Topic *<input style={inputStyle} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. TMS for OCD" /></label>
@@ -237,8 +345,14 @@ export function AIArticleAssistant() {
 
     <div style={{ marginTop: 12, padding: ".75rem", border: "1px solid var(--theme-elevation-150)", borderRadius: 4 }}>
       <strong style={{ display: "block", marginBottom: 5 }}>Source files</strong>
-      <input type="file" multiple accept=".pdf,.txt,.md,.doc,.docx,application/pdf,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(e) => setSourceFiles(Array.from(e.target.files || []).slice(0, 5))} />
-      <div style={{ fontSize: ".75rem", color: "var(--theme-elevation-600)", marginTop: 5 }}>{sourceFiles.length ? `${sourceFiles.length} file(s): ${sourceFiles.map((file) => file.name).join(", ")}` : "Optional. Up to 5 PDF/TXT/MD/DOC/DOCX files; 10 MB each, 25 MB total."}</div>
+      <input type="file" multiple accept=".pdf,.txt,.md,.doc,.docx,application/pdf,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" disabled={busy} onChange={(e) => {
+        const incoming = Array.from(e.target.files || []);
+        setSourceFiles((currentFiles) => [...currentFiles, ...incoming].slice(0, Math.max(0, MAX_SOURCE_FILES - sourceDocuments.length)));
+        e.currentTarget.value = "";
+      }} />
+      <div style={{ fontSize: ".75rem", color: "var(--theme-elevation-600)", marginTop: 5 }}>Select up to {MAX_SOURCE_FILES} PDF/TXT/MD/DOC/DOCX files. Files are uploaded one at a time when you run the AI, avoiding the combined-request size limit. Current per-file limit: 4 MB.</div>
+      {sourceFiles.length > 0 && <div style={{ marginTop: 7, fontSize: ".76rem" }}><strong>Waiting to upload:</strong><ul style={{ margin: "4px 0 0", paddingLeft: "1.2rem" }}>{sourceFiles.map((file, index) => <li key={`${file.name}-${file.size}-${index}`}>{file.name} · {readableBytes(file.size)} <button type="button" disabled={busy} onClick={() => setSourceFiles((items) => items.filter((_, itemIndex) => itemIndex !== index))} style={{ marginLeft: 5, border: 0, background: "transparent", textDecoration: "underline", cursor: "pointer" }}>remove</button></li>)}</ul></div>}
+      {sourceDocuments.length > 0 && <div style={{ marginTop: 7, fontSize: ".76rem" }}><strong>Uploaded for this draft:</strong><ul style={{ margin: "4px 0 0", paddingLeft: "1.2rem" }}>{sourceDocuments.map((doc) => <li key={String(doc.id)}>{doc.filename || "Source document"}{doc.filesize ? ` · ${readableBytes(doc.filesize)}` : ""} <button type="button" disabled={busy} onClick={() => removeSourceDocument(doc)} style={{ marginLeft: 5, border: 0, background: "transparent", textDecoration: "underline", cursor: "pointer" }}>delete</button></li>)}</ul></div>}
     </div>
 
     <div style={{ marginTop: 12, padding: ".75rem", border: "1px solid var(--theme-elevation-150)", borderRadius: 4 }}>
@@ -253,6 +367,11 @@ export function AIArticleAssistant() {
       <button type="button" style={buttonStyle} disabled={busy || (!current.title && !current.bodyText)} onClick={() => run("improve")}>Improve article</button>
       <button type="button" style={buttonStyle} disabled={busy || (!current.title && !current.bodyText)} onClick={() => run("seo")}>Improve SEO</button>
     </div>
+    {(busy || progress > 0) && <div style={{ marginTop: 12 }} role="status" aria-live="polite">
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: ".76rem", marginBottom: 5 }}><span>{progressLabel || "Working…"}</span><strong>{Math.round(progress)}%</strong></div>
+      <div style={{ height: 9, borderRadius: 999, overflow: "hidden", background: "var(--theme-elevation-150)" }}><div style={{ width: `${Math.max(0, Math.min(100, progress))}%`, height: "100%", transition: "width 350ms ease", background: "var(--theme-elevation-800)" }} /></div>
+      {busy && progress >= 55 && <div style={{ marginTop: 4, fontSize: ".7rem", color: "var(--theme-elevation-600)" }}>The upload percentage is measured; the model-generation portion is an estimate until the response completes.</div>}
+    </div>}
     {error && <p style={{ marginTop: 12, color: "var(--theme-error-500)" }}>{error}</p>}
     {notice && <p style={{ marginTop: 12, padding: ".6rem .7rem", background: "var(--theme-success-100)", borderRadius: 4 }}>{notice}</p>}
     {draft && <DraftResult draft={draft} onApplyFull={applyFullDraft} onApplyTitle={applyTitle} onApplySummary={applySummary} onApplyBody={applyBody} onApplySeo={applySeo} primaryButtonStyle={primaryButtonStyle} buttonStyle={buttonStyle} />}
