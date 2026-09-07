@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate-types:
@@ -21,10 +21,18 @@ jobs:
       - run: npm ci
       - name: Generate Payload types from config
         run: npx payload generate:types
-      - name: Show generated diff
-        run: git diff -- src/payload-types.ts
-      - uses: actions/upload-artifact@v4
-        with:
-          name: payload-types-generated
-          path: src/payload-types.ts
-          if-no-files-found: error
+      - name: Verify generated types contain current Insights schema
+        run: |
+          grep -q "'ai-source-documents': AiSourceDocument" src/payload-types.ts
+          grep -q "aiSourceSession?: string | null" src/payload-types.ts
+      - name: Commit regenerated types when changed
+        run: |
+          if git diff --quiet -- src/payload-types.ts; then
+            echo "Payload types already match the config."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/payload-types.ts
+          git commit -m "Regenerate Payload types for AI sources"
+          git push
