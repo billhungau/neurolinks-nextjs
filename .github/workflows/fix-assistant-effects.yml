@@ -1,0 +1,43 @@
+name: One-off AI Assistant Effect Cleanup
+
+on:
+  push:
+    branches:
+      - chatgpt/ai-progress-multi-source
+    paths:
+      - .github/workflows/fix-assistant-effects.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make navigation resets asynchronous and cancellation-safe
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/payload/components/AIArticleAssistant.tsx')
+          s = p.read_text()
+          old1 = '''  useEffect(() => {\n    setDraft(null);\n    setReview(null);\n    setGeneratedForPath("");\n    setError("");\n    setNotice("");\n    setSourceFiles([]);\n    setSourceDocuments([]);\n    setProgress(0);\n    setProgressLabel("");\n    setDoi("");\n    setAddedReferences([]);\n  }, [pathname, documentId, collectionSlug]);'''
+          new1 = '''  useEffect(() => {\n    const timer = window.setTimeout(() => {\n      setDraft(null);\n      setReview(null);\n      setGeneratedForPath("");\n      setError("");\n      setNotice("");\n      setSourceFiles([]);\n      setSourceDocuments([]);\n      setProgress(0);\n      setProgressLabel("");\n      setDoi("");\n      setAddedReferences([]);\n    }, 0);\n    return () => window.clearTimeout(timer);\n  }, [pathname, documentId, collectionSlug]);'''
+          old2 = '''  useEffect(() => {\n    if (generatedForPath && generatedForPath !== currentDocumentKey) {\n      setDraft(null);\n      setReview(null);\n      setGeneratedForPath("");\n      setError("");\n      setNotice("");\n      setProgress(0);\n      setProgressLabel("");\n    }\n  }, [currentDocumentKey, generatedForPath]);'''
+          new2 = '''  useEffect(() => {\n    if (!generatedForPath || generatedForPath === currentDocumentKey) return;\n    const timer = window.setTimeout(() => {\n      setDraft(null);\n      setReview(null);\n      setGeneratedForPath("");\n      setError("");\n      setNotice("");\n      setProgress(0);\n      setProgressLabel("");\n    }, 0);\n    return () => window.clearTimeout(timer);\n  }, [currentDocumentKey, generatedForPath]);'''
+          old3 = '''    if (!sourceSession) {\n      setSourceDocuments([]);\n      return;\n    }'''
+          new3 = '''    if (!sourceSession) {\n      const timer = window.setTimeout(() => {\n        if (!cancelled) setSourceDocuments([]);\n      }, 0);\n      return () => {\n        cancelled = true;\n        window.clearTimeout(timer);\n      };\n    }'''
+          for old, new in [(old1,new1),(old2,new2),(old3,new3)]:
+            if old not in s:
+              raise SystemExit('expected effect block not found')
+            s = s.replace(old,new,1)
+          p.write_text(s)
+          PY
+      - name: Commit and remove one-off workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/fix-assistant-effects.yml
+          git add src/payload/components/AIArticleAssistant.tsx
+          git commit -m "Make AI assistant navigation resets lint-safe"
+          git push
