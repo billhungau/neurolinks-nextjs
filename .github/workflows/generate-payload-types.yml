@@ -1,0 +1,30 @@
+name: Generate Payload Types Audit
+
+on:
+  push:
+    branches:
+      - chatgpt/ai-progress-multi-source
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Generate Payload types from config
+        run: npx payload generate:types
+      - name: Show generated diff
+        run: git diff -- src/payload-types.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: payload-types-generated
+          path: src/payload-types.ts
+          if-no-files-found: error
