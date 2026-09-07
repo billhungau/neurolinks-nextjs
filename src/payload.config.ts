@@ -4,6 +4,7 @@ import { postgresAdapter } from "@payloadcms/db-postgres";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { buildConfig } from "payload";
 import { CMS_ADMIN_PATH, CMS_API_PATH, cmsTrustedOrigins, siteOrigin } from "./lib/site";
+import { AISourceDocuments } from "./payload/collections/AISourceDocuments";
 import { Authors } from "./payload/collections/Authors";
 import { Categories } from "./payload/collections/Categories";
 import { Insights } from "./payload/collections/Insights";
@@ -50,7 +51,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Insights, Media, Categories, Authors, References, Users],
+  collections: [Insights, Media, AISourceDocuments, Categories, Authors, References, Users],
   globals: [InsightsSettings],
   editor: insightsBodyEditor,
   secret: process.env.PAYLOAD_SECRET || "",
@@ -83,6 +84,7 @@ export default buildConfig({
       enabled: Boolean(blobToken),
       collections: {
         [Media.slug]: true,
+        [AISourceDocuments.slug]: { prefix: "ai-sources" },
       },
       token: blobToken ?? "",
     }),
