@@ -19,7 +19,9 @@ if (isVercel && isProduction) {
   console.log(`[vercel-build] ${isVercel ? process.env.VERCEL_ENV || "non-production" : "local"} build: skipping database migrations.`);
 }
 
-// Payload type generation reads the config and can initialize the DB adapter in
-// environments without DATABASE_URL. Generated types are committed to the repo,
-// so Vercel builds should not regenerate them. CI/typecheck will catch stale types.
+// Type generation is config-only and does not require a database connection.
+// Run it in every environment so a schema/type mismatch cannot be hidden by a
+// stale committed payload-types.ts. Preview still never runs a DB migration.
+console.log("[vercel-build] Regenerating Payload types from the current config.");
+run("npx", ["payload", "generate:types"]);
 run("npx", ["next", "build"]);
