@@ -13,6 +13,7 @@ const MAX_TOTAL_SOURCE_BYTES = 20 * 1024 * 1024;
 async function loadSessionFiles(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
   sessionId: string,
+  requestHeaders: Headers,
 ): Promise<ArticleSourceFile[]> {
   const found = await payload.find({
     collection: "ai-source-documents",
@@ -25,6 +26,7 @@ async function loadSessionFiles(
 
   let totalBytes = 0;
   const files: ArticleSourceFile[] = [];
+  const cookie = requestHeaders.get("cookie") || "";
   for (const doc of found.docs) {
     const url = typeof doc.url === "string" ? doc.url : "";
     const filename = typeof doc.filename === "string" ? doc.filename : "source-document";
@@ -32,7 +34,10 @@ async function loadSessionFiles(
     if (!url) continue;
 
     const sourceUrl = url.startsWith("http://") || url.startsWith("https://") ? url : new URL(url, siteOrigin()).toString();
-    const response = await fetch(sourceUrl, { cache: "no-store", headers: { cookie: "" } });
+    const response = await fetch(sourceUrl, {
+      cache: "no-store",
+      headers: cookie ? { cookie } : undefined,
+    });
     if (!response.ok) {
       console.error("[ai-article-assistant] could not read temporary source", response.status, filename);
       throw new Error("AI_SOURCE_READ_ERROR");
@@ -63,7 +68,7 @@ export async function POST(request: NextRequest) {
   let files: ArticleSourceFile[] = [];
   try {
     if (sourceSession) {
-      files = await loadSessionFiles(payload, sourceSession);
+      files = await loadSessionFiles(payload, sourceSession, request.headers);
       body.sourceFileNames = files.map((file) => file.filename);
     }
   } catch (error) {
