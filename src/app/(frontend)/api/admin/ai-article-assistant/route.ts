@@ -10,11 +10,26 @@ export const maxDuration = 240;
 const MAX_FILES = 10;
 const MAX_TOTAL_SOURCE_BYTES = 40 * 1024 * 1024;
 
+type TemporarySourceDocument = {
+  id: string | number;
+  url?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+};
+
+type TemporarySourcePayload = {
+  find: (args: Record<string, unknown>) => Promise<{ docs: TemporarySourceDocument[] }>;
+};
+
 async function loadSessionFiles(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
   sessionId: string,
 ): Promise<ArticleSourceFile[]> {
-  const found = await payload.find({
+  // Payload's generated collection union is committed separately from the config.
+  // Keep this narrow adapter at the boundary so preview builds do not depend on
+  // regenerating types against a database just to read the temporary collection.
+  const sourcePayload = payload as unknown as TemporarySourcePayload;
+  const found = await sourcePayload.find({
     collection: "ai-source-documents",
     depth: 0,
     limit: MAX_FILES,
