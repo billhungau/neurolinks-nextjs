@@ -1,0 +1,51 @@
+name: One-off AI Assistant State Safety Fix
+
+on:
+  push:
+    branches:
+      - chatgpt/ai-progress-multi-source
+    paths:
+      - .github/workflows/state-safety-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tie generated results to the source session as well as the Payload document
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/payload/components/AIArticleAssistant.tsx')
+          s = p.read_text()
+          s = s.replace(
+            'const currentDocumentKey = `${collectionSlug || "insights"}:${documentId ?? "new"}:${pathname}`;',
+            'const currentDocumentKey = `${collectionSlug || "insights"}:${documentId ?? "new"}:${pathname}:${sourceSession || "unassigned"}`;'
+          )
+          s = s.replace(
+            '      let activeSession = sourceSession;\n      let uploaded = [...sourceDocuments];\n      if (sourceFiles.length) {\n        activeSession = ensureSourceSession();',
+            '      const activeSession = ensureSourceSession();\n      let uploaded = [...sourceDocuments];\n      if (sourceFiles.length) {'
+          )
+          s = s.replace(
+            '      setGeneratedForPath(currentDocumentKey);',
+            '      setGeneratedForPath(`${collectionSlug || "insights"}:${documentId ?? "new"}:${pathname}:${activeSession}`);'
+          )
+          marker = '''  useEffect(() => {\n    let cancelled = false;'''
+          guard = '''  useEffect(() => {\n    if (generatedForPath && generatedForPath !== currentDocumentKey) {\n      setDraft(null);\n      setReview(null);\n      setGeneratedForPath("");\n      setError("");\n      setNotice("");\n      setProgress(0);\n      setProgressLabel("");\n    }\n  }, [currentDocumentKey, generatedForPath]);\n\n  useEffect(() => {\n    let cancelled = false;'''
+          s = s.replace(marker, guard, 1)
+          for required in ['sourceSession || "unassigned"', 'const activeSession = ensureSourceSession();', '[currentDocumentKey, generatedForPath]']:
+            if required not in s:
+              raise SystemExit(f'missing state-safety marker: {required}')
+          p.write_text(s)
+          PY
+      - name: Commit and remove one-off workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/state-safety-fix.yml
+          git add src/payload/components/AIArticleAssistant.tsx
+          git commit -m "Bind AI results to Payload document and source session"
+          git push
