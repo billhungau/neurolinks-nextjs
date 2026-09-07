@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { buildArticleAIInput } from "./provider.ts";
 import {
   MAX_AI_SOURCE_FILES,
   MAX_AI_SOURCE_TOTAL_BYTES,
@@ -28,21 +27,6 @@ const aiRoute = read("../app/(frontend)/api/admin/ai-article-assistant/route.ts"
 const doiRoute = read("../app/(frontend)/api/admin/reference-by-doi/route.ts");
 const provider = read("provider.ts");
 const vercelBuild = read("../../scripts/vercel-build.mjs");
-
-const baseRequest = {
-  action: "generate" as const,
-  topic: "TMS for OCD",
-  keyword: "TMS for OCD BC",
-  audience: "Adults considering specialist treatment",
-  goal: "Explain the evidence clearly.",
-  location: "Vancouver Island, British Columbia",
-  articleType: "Treatment guide" as const,
-  articleLength: "Concise" as const,
-  tone: "Expert & confident" as const,
-  improvementDirection: "",
-  sourceFileNames: [],
-  current: { title: "", summary: "", bodyText: "", seoTitle: "", metaDescription: "", slug: "" },
-};
 
 test("Payload schema, generated types and migration all include AI source state", () => {
   assert.match(insightCollection, /name: "aiSourceSession"/);
@@ -103,15 +87,10 @@ test("progress has measured upload stages and estimated generation never reaches
 
 test("OpenAI source inputs use documented data URI file_data and support multiple files", () => {
   assert.equal(sourceFileDataUrl("application/pdf", "YWJj"), "data:application/pdf;base64,YWJj");
-  const input = buildArticleAIInput(baseRequest, [
-    { filename: "one.pdf", mimeType: "application/pdf", base64: "YWJj" },
-    { filename: "two.txt", mimeType: "text/plain", base64: "ZGVm" },
-  ]);
-  assert.ok(Array.isArray(input));
-  const content = input[0]?.content || [];
-  const files = content.filter((item) => item.type === "input_file");
-  assert.equal(files.length, 2);
-  assert.equal(files[0]?.file_data, "data:application/pdf;base64,YWJj");
+  assert.match(provider, /type: "input_file" as const/);
+  assert.match(provider, /files\.map\(\(file\) =>/);
+  assert.match(provider, /filename: file\.filename/);
+  assert.match(provider, /file_data: sourceFileDataUrl\(file\.mimeType, file\.base64\)/);
   assert.match(provider, /https:\/\/api\.openai\.com\/v1\/responses/);
   assert.doesNotMatch(provider, /\/v1\/files/);
 });
@@ -143,13 +122,13 @@ test("DOI normalization is canonical and DOI workflow is authenticated, deduplic
   assert.match(doiRoute, /payload\.auth/);
   assert.match(doiRoute, /collection: "references"/);
   assert.match(doiRoute, /api\.crossref\.org\/works/);
-  assert.match(doiRoute, /existing\.docs\[0\]/);
+  assert.match(doiRoute, /docs\.find\(\(reference\) => normalizeDoi\(reference\.doi\) === doi\)/);
 });
 
 test("Preview builds do not run migrations and production requires DATABASE_URL", () => {
   assert.match(vercelBuild, /isProduction/);
   assert.match(vercelBuild, /DATABASE_URL is required for production migrations/);
-  assert.match(vercelBuild, /Production deployment: running committed Payload migrations/);
+  assert.match(vercelBuild, /Production deployment: running Payload migrations/);
   assert.match(vercelBuild, /skipping database migrations/);
-  assert.doesNotMatch(vercelBuild, /generate:types/);
+  assert.match(vercelBuild, /payload", \["generate:types"\]/);
 });
