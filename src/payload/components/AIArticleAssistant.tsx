@@ -24,6 +24,7 @@ import {
   MAX_AI_SOURCE_FILES,
   normalizedSourceMimeType,
   nextEstimatedGenerationProgress,
+  sourceUploadFailureMessage,
   uploadProgressPercent,
   validateSourceSelection,
 } from "@/ai/source-files";
@@ -125,7 +126,7 @@ type ReferenceRecord = {
 
 type SourceDocument = { id: string | number; filename?: string; mimeType?: string; filesize?: number };
 type SourceListResponse = { docs?: SourceDocument[] };
-type SourceUploadResponse = { doc?: SourceDocument; error?: string; message?: string };
+type SourceUploadResponse = { doc?: SourceDocument };
 
 const DEFAULT_AUDIENCE = "Adults considering specialist treatment";
 const DEFAULT_LOCATION = "Vancouver Island, British Columbia";
@@ -317,16 +318,23 @@ export function AIArticleAssistant() {
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/payload-api/ai-source-documents");
       xhr.withCredentials = true;
+      xhr.timeout = 45_000;
+      xhr.setRequestHeader("Accept", "application/json");
       xhr.upload.onprogress = (event) => {
         const fraction = event.lengthComputable && event.total > 0 ? event.loaded / event.total : 0;
         setProgress(uploadProgressPercent(index, fraction, total));
         setProgressLabel(`Uploading source ${index + 1} of ${total}: ${file.name}`);
       };
-      xhr.onerror = () => reject(new Error(`Could not upload ${file.name}.`));
+      xhr.onerror = () => reject(new Error(sourceUploadFailureMessage(file.name, 0, xhr.responseText)));
+      xhr.ontimeout = () => reject(new Error(`Could not upload ${file.name} (upload timed out after 45 seconds).`));
+      xhr.onabort = () => reject(new Error(`Could not upload ${file.name} (upload was cancelled).`));
       xhr.onload = () => {
         let json: SourceUploadResponse = {};
-        try { json = JSON.parse(xhr.responseText) as SourceUploadResponse; } catch { /* generic error below */ }
-        if (xhr.status < 200 || xhr.status >= 300 || !json.doc) { reject(new Error(json.error || json.message || `Could not upload ${file.name}.`)); return; }
+        try { json = JSON.parse(xhr.responseText) as SourceUploadResponse; } catch { /* diagnostics use raw response below */ }
+        if (xhr.status < 200 || xhr.status >= 300 || !json.doc) {
+          reject(new Error(sourceUploadFailureMessage(file.name, xhr.status, xhr.responseText)));
+          return;
+        }
         resolve(json.doc);
       };
       xhr.send(form);
