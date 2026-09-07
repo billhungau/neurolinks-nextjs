@@ -89,7 +89,7 @@ test("structured sections are excluded rather than flattened", () => {
   } as never);
   const section = extractEditableSections(state)[0];
   assert.equal(section.editable, false);
-  assert.match(section.reason || "", /structured content/i);
+  assert.match(section.reason || "", /structured nodes|rich content/i);
 });
 
 test("citation markers must survive section replacement exactly", () => {
