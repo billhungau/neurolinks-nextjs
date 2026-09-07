@@ -145,12 +145,17 @@ export function articleDraftJsonSchema() {
 
 export function seoReviewJsonSchema() {
   return {
-    type: "object", additionalProperties: false,
+    type: "object",
+    additionalProperties: false,
     required: ["score", "readiness", "checks", "recommendations", "suggestedSeoTitle", "suggestedMetaDescription", "suggestedSlug", "suggestedInternalLinks", "referenceRequirements"],
     properties: {
-      score: { type: "integer", minimum: 0, maximum: 100 }, readiness: { type: "string", enum: ["Needs work", "Good", "Strong"] },
+      score: { type: "integer", minimum: 0, maximum: 100 },
+      readiness: { type: "string", enum: ["Needs work", "Good", "Strong"] },
       checks: { type: "array", items: { type: "object", additionalProperties: false, required: ["label", "status", "note"], properties: { label: { type: "string" }, status: { type: "string", enum: ["good", "warning", "missing"] }, note: { type: "string" } } } },
-      recommendations: { type: "array", items: { type: "string" }, suggestedSeoTitle: { type: "string" }, suggestedMetaDescription: { type: "string" }, suggestedSlug: { type: "string" },
+      recommendations: { type: "array", items: { type: "string" } },
+      suggestedSeoTitle: { type: "string" },
+      suggestedMetaDescription: { type: "string" },
+      suggestedSlug: { type: "string" },
       suggestedInternalLinks: { type: "array", items: { type: "object", additionalProperties: false, required: ["anchor", "href", "reason"], properties: { anchor: { type: "string" }, href: { type: "string" }, reason: { type: "string" } } } },
       referenceRequirements: { type: "array", items: { type: "string" } },
     },
