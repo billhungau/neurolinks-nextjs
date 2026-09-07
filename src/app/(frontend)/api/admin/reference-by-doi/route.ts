@@ -64,8 +64,7 @@ export async function POST(request: NextRequest) {
     overrideAccess: true,
   });
   if (existing.docs[0]) {
-    const ref = existing.docs[0] as Record<string, unknown>;
-    return NextResponse.json({ ok: true, created: false, reference: ref });
+    return NextResponse.json({ ok: true, created: false, reference: existing.docs[0] });
   }
 
   const crossrefResponse = await fetch(`https://api.crossref.org/works/${encodeURIComponent(doi)}`, {
