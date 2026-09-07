@@ -45,7 +45,7 @@ test("Payload schema, generated types and migration all include AI source state"
 
 test("AI source cleanup is scoped to temporary source documents", () => {
   assert.match(cleanupHooks, /collection: "ai-source-documents"/);
-  assert.match(cleanupHooks, /doc\?_status !== "published"/);
+  assert.match(cleanupHooks, /doc\?\._status !== "published"/);
   assert.match(cleanupHooks, /cleanupAISourcesAfterDelete/);
   assert.match(cleanupHooks, /expiresAt: \{ less_than_equal:/);
   assert.doesNotMatch(cleanupHooks, /collection: "media"/);
@@ -54,7 +54,7 @@ test("AI source cleanup is scoped to temporary source documents", () => {
 test("draft saves do not trigger source deletion but publish and delete hooks are registered", () => {
   assert.match(insightCollection, /afterChange: \[revalidateInsight, cleanupAISourcesAfterPublish\]/);
   assert.match(insightCollection, /afterDelete: \[revalidateInsightAfterDelete, cleanupAISourcesAfterDelete\]/);
-  assert.match(cleanupHooks, /if \(doc\?_status !== "published"\) return doc/);
+  assert.match(cleanupHooks, /if \(doc\?\._status !== "published"\) return doc/);
 });
 
 test("source MIME normalization accepts supported extensions despite blank or generic browser types", () => {
@@ -128,7 +128,7 @@ test("DOI normalization is canonical and DOI workflow is authenticated, deduplic
 test("Preview builds do not run migrations and production requires DATABASE_URL", () => {
   assert.match(vercelBuild, /isProduction/);
   assert.match(vercelBuild, /DATABASE_URL is required for production migrations/);
-  assert.match(vercelBuild, /Production deployment: running Payload migrations/);
+  assert.match(vercelBuild, /Production deployment: running committed Payload migrations/);
   assert.match(vercelBuild, /skipping database migrations/);
-  assert.match(vercelBuild, /payload", \["generate:types"\]/);
+  assert.doesNotMatch(vercelBuild, /generate:types/);
 });
