@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     insights: Insight;
     media: Media;
+    'ai-source-documents': AiSourceDocument;
     categories: Category;
     authors: Author;
     references: Reference;
@@ -82,6 +83,7 @@ export interface Config {
   collectionsSelect: {
     insights: InsightsSelect<false> | InsightsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'ai-source-documents': AiSourceDocumentsSelect<false> | AiSourceDocumentsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     references: ReferencesSelect<false> | ReferencesSelect<true>;
@@ -137,6 +139,7 @@ export interface UserAuthOperations {
  */
 export interface Insight {
   id: number;
+  aiSourceSession?: string | null;
   /**
    * The headline readers see. Also the default SEO title.
    */
@@ -385,6 +388,24 @@ export interface Category {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-source-documents".
+ */
+export interface AiSourceDocument {
+  id: number;
+  sessionId: string;
+  expiresAt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+}
+/**
  * People who can sign in to edit NeuroLinks Insights. Keep this list short.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -510,6 +531,7 @@ export interface PayloadMigration {
  * via the `definition` "insights_select".
  */
 export interface InsightsSelect<T extends boolean = true> {
+  aiSourceSession?: T;
   title?: T;
   summary?: T;
   keyPoints?:
@@ -554,6 +576,23 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
   credit?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-source-documents_select".
+ */
+export interface AiSourceDocumentsSelect<T extends boolean = true> {
+  sessionId?: T;
+  expiresAt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

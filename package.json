@@ -6,17 +6,18 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "payload migrate && next build",
+    "vercel-build": "node scripts/vercel-build.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "payload": "payload",
     "generate:types": "payload generate:types",
+    "check:payload-types": "payload generate:types && git diff --exit-code -- src/payload-types.ts",
     "generate:importmap": "payload generate:importmap",
     "migrate": "payload migrate",
     "migrate:create": "payload migrate:create",
     "migrate:status": "payload migrate:status",
-    "test": "node --experimental-strip-types --test src/content/faqs.test.ts src/content/home-reviews.test.ts src/content/landing.test.ts src/content/veterans.test.ts src/content/insights-briefs.test.ts src/lib/contact-form.test.ts src/lib/referral-form.test.ts src/lib/site.test.ts src/lib/redirects.test.ts src/lib/seo.test.ts src/lib/insights.test.ts src/lib/insights-seo.test.ts src/lib/insights-content.test.ts src/lib/anchor-offset.test.ts src/lib/anchor-target.test.ts src/lib/motion-policy.test.ts src/payload/access.test.ts src/payload/insights-collection.test.ts 'src/app/(frontend)/api/forms/contact/route.test.ts' 'src/app/(frontend)/api/forms/referral/route.test.ts' 'src/app/(frontend)/services-psychiatric-tms-ketamine-treatment/page.test.ts' 'src/app/(frontend)/veterans/page.test.ts' 'src/app/(frontend)/insights/page.test.ts' 'src/app/(frontend)/page.test.ts' src/components/HomeForwardMotion.test.ts src/components/Reveal.test.ts",
+    "test": "node --experimental-strip-types --test src/content/faqs.test.ts src/content/home-reviews.test.ts src/content/landing.test.ts src/content/veterans.test.ts src/content/insights-briefs.test.ts src/lib/contact-form.test.ts src/lib/referral-form.test.ts src/lib/site.test.ts src/lib/redirects.test.ts src/lib/seo.test.ts src/lib/insights.test.ts src/lib/insights-seo.test.ts src/lib/insights-content.test.ts src/lib/anchor-offset.test.ts src/lib/anchor-target.test.ts src/lib/motion-policy.test.ts src/ai/insights-regression.test.ts src/payload/access.test.ts src/payload/insights-collection.test.ts 'src/app/(frontend)/api/forms/contact/route.test.ts' 'src/app/(frontend)/api/forms/referral/route.test.ts' 'src/app/(frontend)/services-psychiatric-tms-ketamine-treatment/page.test.ts' 'src/app/(frontend)/veterans/page.test.ts' 'src/app/(frontend)/insights/page.test.ts' 'src/app/(frontend)/page.test.ts' src/components/HomeForwardMotion.test.ts src/components/Reveal.test.ts",
     "verify:seo": "node --experimental-strip-types scripts/verify-seo.mjs"
   },
   "dependencies": {

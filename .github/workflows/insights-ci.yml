@@ -1,0 +1,33 @@
+name: Insights CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Full regression gate for the Insights CMS, references, and AI Article Assistant.
+# The HTTP SEO verifier intentionally stays outside this DB-less CI job because
+# its CMS security checks require a configured Payload database. SEO behaviour
+# continues to be covered by the repository's unit tests and deployment checks.
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Verify Payload generated types are current
+        run: npm run check:payload-types
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Tests
+        run: npm test
+      - name: Next.js build
+        run: npm run build

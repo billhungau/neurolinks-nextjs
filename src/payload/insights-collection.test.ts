@@ -19,6 +19,7 @@ const read = (relative: string) => readFileSync(join(root, relative), "utf8");
 
 const insights = read("collections/Insights.ts");
 const references = read("collections/References.ts");
+const aiSourceDocuments = read("collections/AISourceDocuments.ts");
 const users = read("collections/Users.ts");
 const settings = read("globals/InsightsSettings.ts");
 const config = read("../payload.config.ts");
@@ -129,8 +130,8 @@ test("topic options come from the one authoritative taxonomy", () => {
 });
 
 test("publishing revalidates the public routes instead of needing a deployment", () => {
-  assert.match(insights, /afterChange: \[revalidateInsight\]/);
-  assert.match(insights, /afterDelete: \[revalidateInsightAfterDelete\]/);
+  assert.match(insights, /afterChange: \[revalidateInsight, cleanupAISourcesAfterPublish\]/);
+  assert.match(insights, /afterDelete: \[revalidateInsightAfterDelete, cleanupAISourcesAfterDelete\]/);
   assert.match(revalidate, /revalidateTag\(INSIGHTS_CACHE_TAG, "max"\)/);
   assert.match(revalidate, /revalidatePath\(INSIGHTS_PATH\)/);
   assert.match(revalidate, /revalidatePath\("\/sitemap\.xml"\)/);
@@ -193,12 +194,13 @@ test("preview links stay on the host serving the admin", () => {
   else process.env.PAYLOAD_SECRET = previous;
 });
 
-test("the admin navigation is limited to the six editorial areas", () => {
+test("the admin navigation remains limited to the six visible editorial areas", () => {
   const collections = config.match(/collections: \[([^\]]+)\]/)?.[1] ?? "";
   assert.deepEqual(
     collections.split(",").map((entry) => entry.trim()),
-    ["Insights", "Media", "Categories", "Authors", "References", "Users"],
+    ["Insights", "Media", "AISourceDocuments", "Categories", "Authors", "References", "Users"],
   );
+  assert.match(aiSourceDocuments, /admin:\s*\{[\s\S]*hidden: true/);
   assert.match(config, /globals: \[InsightsSettings\]/);
   assert.match(users, /group: "Administration"/);
 });

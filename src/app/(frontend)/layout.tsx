@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import Script from "next/script";
+import type { ReactNode } from "react";
 import { AnchorOffset } from "@/components/AnchorOffset";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
 import { MotionReady } from "@/components/MotionReady";
@@ -42,6 +43,10 @@ const defaultImage = {
   type: "image/jpeg",
 };
 
+type RootLayoutProps = {
+  children: ReactNode;
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(PRODUCTION_ORIGIN),
   title: {
@@ -65,7 +70,7 @@ export const metadata: Metadata = {
     : undefined,
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en-CA" className={`${display.variable} ${body.variable} h-full`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col font-sans antialiased text-[#111111]">

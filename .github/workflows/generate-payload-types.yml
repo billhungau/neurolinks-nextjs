@@ -1,0 +1,29 @@
+name: Verify Payload Types
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  payload-types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Regenerate Payload types from schema
+        run: npx payload generate:types
+      - name: Fail when committed Payload types are stale
+        run: |
+          git diff --exit-code -- src/payload-types.ts
+          grep -q "'ai-source-documents': AiSourceDocument" src/payload-types.ts
+          grep -q "aiSourceSession?: string | null" src/payload-types.ts
