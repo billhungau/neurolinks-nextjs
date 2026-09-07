@@ -8,28 +8,13 @@ export const runtime = "nodejs";
 export const maxDuration = 240;
 
 const MAX_FILES = 10;
-const MAX_TOTAL_SOURCE_BYTES = 40 * 1024 * 1024;
-
-type TemporarySourceDocument = {
-  id: string | number;
-  url?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-};
-
-type TemporarySourcePayload = {
-  find: (args: Record<string, unknown>) => Promise<{ docs: TemporarySourceDocument[] }>;
-};
+const MAX_TOTAL_SOURCE_BYTES = 20 * 1024 * 1024;
 
 async function loadSessionFiles(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
   sessionId: string,
 ): Promise<ArticleSourceFile[]> {
-  // Payload's generated collection union is committed separately from the config.
-  // Keep this narrow adapter at the boundary so preview builds do not depend on
-  // regenerating types against a database just to read the temporary collection.
-  const sourcePayload = payload as unknown as TemporarySourcePayload;
-  const found = await sourcePayload.find({
+  const found = await payload.find({
     collection: "ai-source-documents",
     depth: 0,
     limit: MAX_FILES,
@@ -47,7 +32,7 @@ async function loadSessionFiles(
     if (!url) continue;
 
     const sourceUrl = url.startsWith("http://") || url.startsWith("https://") ? url : new URL(url, siteOrigin()).toString();
-    const response = await fetch(sourceUrl, { cache: "no-store" });
+    const response = await fetch(sourceUrl, { cache: "no-store", headers: { cookie: "" } });
     if (!response.ok) {
       console.error("[ai-article-assistant] could not read temporary source", response.status, filename);
       throw new Error("AI_SOURCE_READ_ERROR");
@@ -83,7 +68,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     const code = error instanceof Error ? error.message : "AI_SOURCE_READ_ERROR";
-    if (code === "AI_SOURCES_TOO_LARGE") return NextResponse.json({ error: "The attached source files are too large to process together. Remove one or more files and try again." }, { status: 413 });
+    if (code === "AI_SOURCES_TOO_LARGE") return NextResponse.json({ error: "The attached source files are too large to process together. Keep the combined source set under 20 MB and try again." }, { status: 413 });
     return NextResponse.json({ error: "One or more temporary source files could not be read. Remove the affected file and upload it again." }, { status: 502 });
   }
 
