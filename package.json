@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "vercel-build": "payload migrate && next build",
+    "build": "payload generate:types && next build",
+    "vercel-build": "payload migrate && payload generate:types && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
