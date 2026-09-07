@@ -1,0 +1,46 @@
+name: Clean up merged preview branch
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  delete-merged-branch:
+    # Neon-managed Vercel previews are keyed to the Git branch. Removing the
+    # merged same-repository branch gives Neon a reliable cleanup signal for
+    # the matching preview/<git-branch> database branch.
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref != github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged Git branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+
+          if gh api --method DELETE \
+            "repos/${GITHUB_REPOSITORY}/git/refs/heads/${BRANCH}" \
+            --silent; then
+            echo "Deleted merged branch: ${BRANCH}"
+            exit 0
+          fi
+
+          # Treat an already-deleted branch as success. This keeps the workflow
+          # compatible with manual branch deletion or GitHub's repository-level
+          # auto-delete setting if either is enabled later.
+          if ! gh api \
+            "repos/${GITHUB_REPOSITORY}/git/ref/heads/${BRANCH}" \
+            --silent >/dev/null 2>&1; then
+            echo "Branch already absent: ${BRANCH}"
+            exit 0
+          fi
+
+          echo "Could not delete merged branch: ${BRANCH}" >&2
+          exit 1
