@@ -1,4 +1,4 @@
-export type SourceFetchKind = "relative" | "same-origin" | "vercel-blob" | "unsupported-absolute";
+export type SourceFetchKind = "relative" | "same-origin" | "payload-proxy" | "vercel-blob" | "unsupported-absolute";
 
 export type SourceFetchPlan = {
   url: string;
@@ -12,6 +12,8 @@ export type BuildSourceFetchPlanArgs = {
   cmsCookie?: string;
   blobToken?: string;
 };
+
+const AI_SOURCE_PROXY_PREFIX = "/payload-api/ai-source-documents/file/";
 
 export function isTrustedVercelBlobHostname(hostname: string): boolean {
   const normalized = hostname.trim().toLowerCase().replace(/\.$/, "");
@@ -38,13 +40,25 @@ export function buildSourceFetchPlan({
 
   const parsed = new URL(sourceUrl);
 
-  // Payload/Vercel Blob can surface a stored relative proxy URL as an absolute
-  // URL on the current deployment. Treat that as the same authenticated CMS
-  // origin, not as an arbitrary external source.
   if (parsed.origin === origin.origin) {
     return {
       url: parsed.toString(),
       kind: "same-origin",
+      headers: cmsCookie ? { cookie: cmsCookie } : undefined,
+    };
+  }
+
+  // Payload may expand the relative source proxy URL using its configured
+  // serverURL, which can be the stable staging host while the editor is running
+  // on a unique PR Preview host. The browser session cookie belongs to the PR
+  // host, so do not fetch the configured host. Rebase only the known internal
+  // AI-source proxy pathname onto the current request origin instead. This also
+  // prevents credentials from ever being sent to the hostname in doc.url.
+  if (parsed.pathname.startsWith(AI_SOURCE_PROXY_PREFIX)) {
+    const rebased = new URL(`${parsed.pathname}${parsed.search}`, origin);
+    return {
+      url: rebased.toString(),
+      kind: "payload-proxy",
       headers: cmsCookie ? { cookie: cmsCookie } : undefined,
     };
   }
