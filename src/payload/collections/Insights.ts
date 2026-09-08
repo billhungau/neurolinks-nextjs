@@ -3,7 +3,7 @@ import { INSIGHTS_TOPICS, PATIENT_INFORMATION_WARNING } from "../../lib/insights
 import { authenticated, publishedOrAuthenticated } from "../access";
 import { slugField } from "../fields/slug";
 import { insightsBodyEditor } from "../lexical";
-import { cleanupAISourcesAfterDelete, cleanupAISourcesAfterPublish } from "../hooks/cleanupAISourceDocuments";
+import { cleanupAISourcesAfterDelete, clearAISourceSessionBeforePublish } from "../hooks/cleanupAISourceDocuments";
 import { revalidateInsight, revalidateInsightAfterDelete } from "../hooks/revalidateInsights";
 import { previewUrl } from "../preview";
 
@@ -20,7 +20,8 @@ export const Insights: CollectionConfig = {
   access: { read: publishedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated, readVersions: authenticated },
   versions: { maxPerDoc: 30, drafts: { autosave: { interval: 800 }, schedulePublish: false } },
   hooks: {
-    afterChange: [revalidateInsight, cleanupAISourcesAfterPublish],
+    beforeChange: [clearAISourceSessionBeforePublish],
+    afterChange: [revalidateInsight],
     afterDelete: [revalidateInsightAfterDelete, cleanupAISourcesAfterDelete],
   },
   defaultSort: "-publishedAt",
