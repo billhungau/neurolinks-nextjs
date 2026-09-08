@@ -1,6 +1,5 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Payload } from "payload";
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionBeforeChangeHook, Payload } from "payload";
 
-const SKIP_FLAG = "skipAISourceCleanup";
 const EXPIRED_CLEANUP_LIMIT = 50;
 
 export async function deleteAISourceSession(payload: Payload, sessionId: string) {
@@ -51,34 +50,18 @@ export const cleanupExpiredAISourcesAfterUpload: CollectionAfterChangeHook = asy
   return doc;
 };
 
-export const cleanupAISourcesAfterPublish: CollectionAfterChangeHook = async ({ doc, req, context }) => {
-  if (context?.[SKIP_FLAG]) return doc;
-  if (doc?._status !== "published") return doc;
-  const sessionId = typeof doc?.aiSourceSession === "string" ? doc.aiSourceSession.trim() : "";
-  if (!sessionId) return doc;
-
-  try {
-    await deleteAISourceSession(req.payload, sessionId);
-    await req.payload.update({
-      collection: "insights",
-      id: doc.id,
-      data: { aiSourceSession: null },
-      depth: 0,
-      overrideAccess: true,
-      context: { [SKIP_FLAG]: true },
-    });
-  } catch (error) {
-    // Publishing has already written the Insight by the time this afterChange
-    // hook runs. Temporary source cleanup must never make the publish request
-    // look like it failed. Any orphan is still covered by the seven-day expiry.
-    console.error("[ai-source-documents] post-publish source cleanup failed", {
-      insightId: doc?.id,
-      sessionId,
-      error: error instanceof Error ? error.message : "Unknown cleanup error",
-    });
-  }
-
-  return doc;
+/**
+ * Publishing must not wait for Blob deletion. Clear the hidden session pointer
+ * inside the same Insight write and let the existing seven-day expiry remove
+ * the temporary source documents independently.
+ */
+export const clearAISourceSessionBeforePublish: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
+  if (data?._status !== "published") return data;
+  const sessionId = typeof (data?.aiSourceSession ?? originalDoc?.aiSourceSession) === "string"
+    ? String(data?.aiSourceSession ?? originalDoc?.aiSourceSession).trim()
+    : "";
+  if (!sessionId) return data;
+  return { ...data, aiSourceSession: null };
 };
 
 export const cleanupAISourcesAfterDelete: CollectionAfterDeleteHook = async ({ doc, req }) => {
