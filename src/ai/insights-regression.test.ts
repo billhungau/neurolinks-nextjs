@@ -58,6 +58,13 @@ test("draft saves do not trigger source deletion but publish and delete hooks ar
   assert.match(cleanupHooks, /if \(doc\?\._status !== "published"\) return doc/);
 });
 
+test("post-publish source cleanup is fail-open and leaves expiry as the fallback", () => {
+  assert.match(cleanupHooks, /try \{\s*await deleteAISourceSession/);
+  assert.match(cleanupHooks, /post-publish source cleanup failed/);
+  assert.match(cleanupHooks, /seven-day expiry/);
+  assert.match(cleanupHooks, /return doc;/);
+});
+
 test("source MIME normalization accepts supported extensions despite blank or generic browser types", () => {
   assert.equal(normalizedSourceMimeType("paper.pdf", ""), "application/pdf");
   assert.equal(normalizedSourceMimeType("paper.PDF", "application/octet-stream"), "application/pdf");
