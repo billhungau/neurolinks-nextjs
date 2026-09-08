@@ -7,12 +7,15 @@ import test from "node:test";
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (relative: string) => readFileSync(join(here, relative), "utf8");
 
+const proxy = read("../proxy.ts");
 const assistant = read("../payload/components/AIArticleAssistant.tsx");
-const sourceRoute = read("../app/(payload)/payload-api/ai-source-documents/route.ts");
-const sourceDeleteRoute = read("../app/(payload)/payload-api/ai-source-documents/[id]/route.ts");
+const sourceRoute = read("../app/(frontend)/api/admin/ai-source-documents/route.ts");
+const sourceDeleteRoute = read("../app/(frontend)/api/admin/ai-source-documents/[id]/route.ts");
 
-test("AI source assistant still targets the dedicated Payload-mounted source route", () => {
+test("AI source collection requests are rewritten into the authenticated admin API family", () => {
   assert.match(assistant, /\/payload-api\/ai-source-documents/);
+  assert.match(proxy, /rewriteAISourceDocuments/);
+  assert.match(proxy, /destination\.pathname = `\/api\/admin\/ai-source-documents\$\{suffix\}`/);
 });
 
 test("dedicated source handler authenticates before privileged Local API writes", () => {
