@@ -130,7 +130,8 @@ test("topic options come from the one authoritative taxonomy", () => {
 });
 
 test("publishing revalidates the public routes instead of needing a deployment", () => {
-  assert.match(insights, /afterChange: \[revalidateInsight, cleanupAISourcesAfterPublish\]/);
+  assert.match(insights, /beforeChange: \[clearAISourceSessionBeforePublish\]/);
+  assert.match(insights, /afterChange: \[revalidateInsight\]/);
   assert.match(insights, /afterDelete: \[revalidateInsightAfterDelete, cleanupAISourcesAfterDelete\]/);
   assert.match(revalidate, /revalidateTag\(INSIGHTS_CACHE_TAG, "max"\)/);
   assert.match(revalidate, /revalidatePath\(INSIGHTS_PATH\)/);
@@ -139,13 +140,10 @@ test("publishing revalidates the public routes instead of needing a deployment",
 });
 
 test("private CMS data is not readable anonymously", () => {
-  // CMS accounts are readable only to signed-in users.
   assert.match(users, /read: authenticated/);
   assert.equal(users.includes("read: anyone"), false);
-  // Editorial notes on references are hidden field-by-field.
   assert.match(references, /name: "editorialNote"/);
   assert.match(references, /read: authenticatedFieldAccess/);
-  // Version history everywhere requires a session.
   for (const source of [insights, references, settings]) {
     assert.match(source, /readVersions: authenticated/);
   }
@@ -161,28 +159,21 @@ test("the CMS is mounted off /api and GraphQL is not exposed", () => {
 });
 
 test("Payload derives its absolute URL from the one authoritative site URL", () => {
-  // serverURL follows NEXT_PUBLIC_SITE_URL via siteOrigin(), so staging and
-  // production differ by that variable alone.
   assert.match(config, /serverURL: siteOrigin\(\)/);
-  // No hostname literal anywhere in the executable config (comments aside).
   const configCode = config.replace(/^\s*\/\/.*$/gm, "");
   assert.doesNotMatch(configCode, /neurolinks-nextjs\.vercel\.app/);
   assert.doesNotMatch(configCode, /https:\/\/neurolinks\.ca/);
-  // The database and the signing key stay on the variables Vercel provisioned.
   assert.match(config, /connectionString: process\.env\.DATABASE_URL/);
   assert.match(config, /secret: process\.env\.PAYLOAD_SECRET/);
   assert.equal(config.includes("NEXT_PUBLIC_PAYLOAD_SECRET"), false);
 });
 
 test("the CMS API stays same-origin and session cookies are origin-checked", () => {
-  // Admin and REST share one origin, so no Access-Control-Allow-Origin is needed.
   assert.match(config, /cors: \[\]/);
   assert.match(config, /csrf: cmsTrustedOrigins\(\)/);
 });
 
 test("preview links stay on the host serving the admin", () => {
-  // Relative preview paths resolve against whichever deployment the editor is
-  // signed in to, so a staging preview never opens neurolinks.ca.
   const previous = process.env.PAYLOAD_SECRET;
   process.env.PAYLOAD_SECRET = "test-secret";
   for (const value of [previewPath("tms-and-vac"), previewUrl({ slug: "tms-and-vac" }), previewUrl(null)]) {
