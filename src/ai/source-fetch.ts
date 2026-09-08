@@ -20,6 +20,11 @@ export function isTrustedVercelBlobHostname(hostname: string): boolean {
   return normalized === "blob.vercel-storage.com" || normalized.endsWith(".blob.vercel-storage.com");
 }
 
+export function isPublicVercelBlobHostname(hostname: string): boolean {
+  const normalized = hostname.trim().toLowerCase().replace(/\.$/, "");
+  return normalized.endsWith(".public.blob.vercel-storage.com");
+}
+
 export function buildSourceFetchPlan({
   sourceUrl,
   requestOrigin,
@@ -67,6 +72,19 @@ export function buildSourceFetchPlan({
     return { url: parsed.toString(), kind: "unsupported-absolute" };
   }
 
+  // Payload 3.88's Vercel Blob adapter only supports public Blob stores.
+  // Public CDN reads must not receive the read/write API token; the URL itself
+  // is the read capability. Keep the token server-side for Blob API operations
+  // such as `head()`, but do not forward it to the public CDN.
+  if (isPublicVercelBlobHostname(parsed.hostname)) {
+    return {
+      url: parsed.toString(),
+      kind: "vercel-blob",
+    };
+  }
+
+  // Defensive support for a future/private Blob URL. Payload 3.88 itself only
+  // emits public Blob URLs, but never send a CMS cookie to Blob storage.
   if (!blobToken) throw new Error("AI_BLOB_NOT_CONFIGURED");
 
   return {
