@@ -127,6 +127,15 @@ test("OpenAI source inputs use documented data URI file_data and support multipl
   assert.doesNotMatch(provider, /\/v1\/files/);
 });
 
+test("source retrieval resolves backing Blob objects without exposing credentials", () => {
+  assert.match(aiRoute, /import \{ head \} from "@vercel\/blob"/);
+  assert.match(aiRoute, /head\(filename, \{ token \}\)/);
+  assert.match(aiRoute, /blobBackedPlan/);
+  assert.match(aiRoute, /plan\.kind === "vercel-blob"/);
+  assert.doesNotMatch(aiRoute, /console\.log\([^\n]*BLOB_READ_WRITE_TOKEN/);
+  assert.doesNotMatch(aiRoute, /NextResponse\.json\([^\n]*BLOB_READ_WRITE_TOKEN/);
+});
+
 test("source retrieval failures and timeout/invalid-output errors remain explicit and non-mutating", () => {
   assert.match(aiRoute, /AI_SOURCE_READ_ERROR/);
   assert.match(aiRoute, /AI_SOURCES_TOO_LARGE/);
