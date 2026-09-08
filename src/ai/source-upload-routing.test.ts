@@ -18,17 +18,22 @@ test("AI source collection requests are rewritten into the authenticated admin A
   assert.match(proxy, /destination\.pathname = `\/api\/admin\/ai-source-documents\$\{suffix\}`/);
 });
 
-test("dedicated source handler authenticates before privileged Local API writes", () => {
+test("dedicated source handler authenticates before access-controlled Local API writes", () => {
   assert.match(sourceRoute, /payload\.auth\(\{ headers: request\.headers \}\)/);
   assert.match(sourceRoute, /if \(!user\)/);
+  assert.match(sourceRoute, /createLocalReq/);
   assert.match(sourceRoute, /payload\.create/);
-  assert.match(sourceRoute, /overrideAccess: true/);
+  assert.match(sourceRoute, /overrideAccess: false/);
+  assert.match(sourceRoute, /req: auth\.req/);
+  assert.match(sourceRoute, /user: auth\.req\.user/);
   assert.match(sourceRoute, /form\.get\("_payload"\)/);
 });
 
-test("source listing and deletion stay behind the same explicit authentication gate", () => {
+test("source listing and deletion stay behind explicit authentication gates", () => {
   assert.match(sourceRoute, /export async function GET/);
-  assert.match(sourceRoute, /overrideAccess: true/);
+  assert.match(sourceRoute, /overrideAccess: false/);
+  assert.match(sourceRoute, /req: auth\.req/);
+  assert.match(sourceRoute, /user: auth\.req\.user/);
   assert.match(sourceDeleteRoute, /payload\.auth\(\{ headers: request\.headers \}\)/);
   assert.match(sourceDeleteRoute, /if \(!user\)/);
   assert.match(sourceDeleteRoute, /payload\.delete/);
