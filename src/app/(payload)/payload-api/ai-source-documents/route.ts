@@ -4,6 +4,8 @@ import { getPayloadClient, isCmsConfigured } from "@/lib/payload/client";
 
 export const runtime = "nodejs";
 
+const SOURCE_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
 function sourceDoc(doc: { id: string | number; filename?: string | null; mimeType?: string | null; filesize?: number | null }) {
   return { id: doc.id, filename: doc.filename ?? undefined, mimeType: doc.mimeType ?? undefined, filesize: doc.filesize ?? undefined };
 }
@@ -69,21 +71,21 @@ export async function POST(request: NextRequest) {
   if (!mimeType) return NextResponse.json({ error: "Unsupported source file type." }, { status: 415 });
 
   try {
-    // Payload Local API expects its UploadedFile shape rather than the Web File
-    // returned by request.formData(). Convert once after validation so storage
-    // adapters receive the same buffer/mimetype metadata as Payload REST uploads.
-    const bytes = Buffer.from(await file.arrayBuffer());
-    const uploadedFile = {
-      data: bytes,
-      mimetype: mimeType,
-      name: file.name,
-      size: bytes.length,
-    };
-
+    const data = Buffer.from(await file.arrayBuffer());
     const created = await auth.payload.create({
       collection: "ai-source-documents",
-      data: { sessionId },
-      file: uploadedFile,
+      data: {
+        sessionId,
+        // Although the collection has a runtime defaultValue, Payload's generated
+        // create type correctly treats this required field as required input.
+        expiresAt: new Date(Date.now() + SOURCE_RETENTION_MS).toISOString(),
+      },
+      file: {
+        data,
+        mimetype: mimeType,
+        name: file.name,
+        size: data.length,
+      },
       overrideAccess: true,
     });
     return NextResponse.json({ doc: sourceDoc(created) }, { status: 201 });
