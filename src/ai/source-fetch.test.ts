@@ -29,16 +29,34 @@ test("absolute same-origin Payload source forwards CMS cookie but not Blob crede
   assert.equal(plan.headers?.Authorization, undefined);
 });
 
-test("same hostname on a different port is not treated as same-origin", () => {
+test("Payload source proxy on configured staging origin is rebased to the active Preview origin", () => {
   const plan = buildSourceFetchPlan({
-    sourceUrl: "https://preview.example.vercel.app:444/payload-api/ai-source-documents/file/test.txt",
+    sourceUrl: "https://neurolinks-nextjs.vercel.app/payload-api/ai-source-documents/file/test%201.txt?download=1",
+    requestOrigin: "https://neurolinks-nextjs-git-chatgpt-debug-billhungau.vercel.app",
+    cmsCookie: "payload-token=abc",
+    blobToken: "blob-secret",
+  });
+
+  assert.equal(plan.kind, "payload-proxy");
+  assert.equal(
+    plan.url,
+    "https://neurolinks-nextjs-git-chatgpt-debug-billhungau.vercel.app/payload-api/ai-source-documents/file/test%201.txt?download=1",
+  );
+  assert.deepEqual(plan.headers, { cookie: "payload-token=abc" });
+  assert.equal(plan.headers?.Authorization, undefined);
+});
+
+test("Payload proxy-looking URL never receives credentials on its supplied external host", () => {
+  const plan = buildSourceFetchPlan({
+    sourceUrl: "https://evil.example/payload-api/ai-source-documents/file/test.txt",
     requestOrigin: "https://preview.example.vercel.app",
     cmsCookie: "payload-token=abc",
     blobToken: "blob-secret",
   });
 
-  assert.equal(plan.kind, "unsupported-absolute");
-  assert.equal(plan.headers, undefined);
+  assert.equal(plan.kind, "payload-proxy");
+  assert.equal(plan.url, "https://preview.example.vercel.app/payload-api/ai-source-documents/file/test.txt");
+  assert.deepEqual(plan.headers, { cookie: "payload-token=abc" });
 });
 
 test("trusted Vercel Blob source gets bearer token but no CMS cookie", () => {
