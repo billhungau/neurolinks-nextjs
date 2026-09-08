@@ -84,7 +84,11 @@ export default buildConfig({
       enabled: Boolean(blobToken),
       collections: {
         [Media.slug]: true,
-        [AISourceDocuments.slug]: { prefix: "ai-sources" },
+        // Keep temporary AI source objects on the default Blob namespace while
+        // debugging the upload adapter. Older Payload/Vercel Blob combinations
+        // have had prefix-related upload failures, and the prefix is not part of
+        // the source-document lifecycle or security model.
+        [AISourceDocuments.slug]: true,
       },
       // The connected Blob store is currently public. Payload still enforces
       // collection read access on its proxy URLs, and random suffixes make the

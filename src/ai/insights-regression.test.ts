@@ -9,6 +9,7 @@ import {
   nextEstimatedGenerationProgress,
   normalizedSourceMimeType,
   sourceFileDataUrl,
+  sourceUploadFailureMessage,
   uploadProgressPercent,
   validateSourceSelection,
 } from "./source-files.ts";
@@ -74,6 +75,37 @@ test("source selection supports 1, 3 and 10 files and rejects the 11th or excess
   assert.match(validateSourceSelection(MAX_AI_SOURCE_TOTAL_BYTES, [source("extra.pdf")]) || "", /under 20 MB/);
 });
 
+test("Payload source-upload failures expose HTTP status and nested validation/storage messages", () => {
+  const validation = sourceUploadFailureMessage(
+    "paper.pdf",
+    400,
+    JSON.stringify({ errors: [{ name: "ValidationError", data: [{ field: "sessionId", message: "This field is required." }] }] }),
+  );
+  assert.match(validation, /HTTP 400/);
+  assert.match(validation, /sessionId/);
+  assert.match(validation, /This field is required/);
+
+  const storage = sourceUploadFailureMessage(
+    "paper.pdf",
+    500,
+    JSON.stringify({ error: { name: "BlobError", message: "Vercel Blob: token is missing" } }),
+  );
+  assert.match(storage, /HTTP 500/);
+  assert.match(storage, /Vercel Blob: token is missing/);
+
+  assert.equal(sourceUploadFailureMessage("paper.pdf", 0, ""), "Could not upload paper.pdf (network error).");
+  assert.match(sourceUploadFailureMessage("paper.pdf", 500, "<html>Internal Server Error</html>"), /HTTP 500/);
+});
+
+test("source uploader preserves Payload multipart conventions and has bounded failure handling", () => {
+  assert.match(assistantComponent, /form\.append\("file", normalizedFile\)/);
+  assert.match(assistantComponent, /form\.append\("_payload", JSON\.stringify\(\{ sessionId \}\)\)/);
+  assert.match(assistantComponent, /xhr\.withCredentials = true/);
+  assert.match(assistantComponent, /xhr\.timeout = 45_000/);
+  assert.match(assistantComponent, /sourceUploadFailureMessage\(file\.name, xhr\.status, xhr\.responseText\)/);
+  assert.doesNotMatch(assistantComponent, /updateField\("_status"/);
+});
+
 test("progress has measured upload stages and estimated generation never reaches completion", () => {
   assert.equal(uploadProgressPercent(0, 0, 3), 0);
   assert.equal(uploadProgressPercent(2, 1, 3), 30);
@@ -93,6 +125,15 @@ test("OpenAI source inputs use documented data URI file_data and support multipl
   assert.match(provider, /file_data: sourceFileDataUrl\(file\.mimeType, file\.base64\)/);
   assert.match(provider, /https:\/\/api\.openai\.com\/v1\/responses/);
   assert.doesNotMatch(provider, /\/v1\/files/);
+});
+
+test("source retrieval resolves backing Blob objects without exposing credentials", () => {
+  assert.match(aiRoute, /import \{ head \} from "@vercel\/blob"/);
+  assert.match(aiRoute, /head\(filename, \{ token \}\)/);
+  assert.match(aiRoute, /blobBackedPlan/);
+  assert.match(aiRoute, /plan\.kind === "vercel-blob"/);
+  assert.doesNotMatch(aiRoute, /console\.log\([^\n]*BLOB_READ_WRITE_TOKEN/);
+  assert.doesNotMatch(aiRoute, /NextResponse\.json\([^\n]*BLOB_READ_WRITE_TOKEN/);
 });
 
 test("source retrieval failures and timeout/invalid-output errors remain explicit and non-mutating", () => {
