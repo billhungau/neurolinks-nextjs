@@ -18,6 +18,12 @@ test("AI source collection requests are rewritten into the authenticated admin A
   assert.match(proxy, /destination\.pathname = `\/api\/admin\/ai-source-documents\$\{suffix\}`/);
 });
 
+test("Payload keeps ownership of the AI source binary file endpoint", () => {
+  assert.match(proxy, /suffix === "\/file" \|\| suffix\.startsWith\("\/file\/"\)/);
+  assert.match(proxy, /if \(suffix === "\/file" \|\| suffix\.startsWith\("\/file\/"\)\) return null/);
+  assert.match(proxy, /if \(suffix && !\/\^\\\/\[\^\/\]\+\$\/\.test\(suffix\)\) return null/);
+});
+
 test("dedicated source handler authenticates before access-controlled Local API writes", () => {
   assert.match(sourceRoute, /payload\.auth\(\{ headers: request\.headers \}\)/);
   assert.match(sourceRoute, /if \(!user\)/);
