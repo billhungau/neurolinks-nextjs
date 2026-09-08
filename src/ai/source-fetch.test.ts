@@ -16,6 +16,31 @@ test("relative Payload source forwards CMS cookie but not Blob credentials", () 
   assert.equal(plan.headers?.Authorization, undefined);
 });
 
+test("absolute same-origin Payload source forwards CMS cookie but not Blob credentials", () => {
+  const plan = buildSourceFetchPlan({
+    sourceUrl: "https://preview.example.vercel.app/payload-api/ai-source-documents/file/test.txt",
+    requestOrigin: "https://preview.example.vercel.app",
+    cmsCookie: "payload-token=abc",
+    blobToken: "blob-secret",
+  });
+
+  assert.equal(plan.kind, "same-origin");
+  assert.deepEqual(plan.headers, { cookie: "payload-token=abc" });
+  assert.equal(plan.headers?.Authorization, undefined);
+});
+
+test("same hostname on a different port is not treated as same-origin", () => {
+  const plan = buildSourceFetchPlan({
+    sourceUrl: "https://preview.example.vercel.app:444/payload-api/ai-source-documents/file/test.txt",
+    requestOrigin: "https://preview.example.vercel.app",
+    cmsCookie: "payload-token=abc",
+    blobToken: "blob-secret",
+  });
+
+  assert.equal(plan.kind, "unsupported-absolute");
+  assert.equal(plan.headers, undefined);
+});
+
 test("trusted Vercel Blob source gets bearer token but no CMS cookie", () => {
   const plan = buildSourceFetchPlan({
     sourceUrl: "https://abc123.public.blob.vercel-storage.com/test.txt",
