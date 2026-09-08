@@ -1,11 +1,9 @@
 import Image from "next/image";
 import { SiteChrome } from "@/components/SiteChrome";
-import { PhysicianReferralForm } from "@/components/forms/PhysicianReferralForm";
+import { PhysicianReferralExperience } from "@/components/forms/PhysicianReferralExperience";
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
-import { REFERRAL_PDF_URL } from "@/lib/referral-form";
 import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
-import { SITE } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Refer a Patient for TMS or Ketamine | NeuroLinks",
@@ -50,16 +48,7 @@ export default function ReferralPage() {
       </section>
 
       <section className="ref-body">
-        <p className="ref-instruction">
-          Please fill out the online referral form below. Alternatively, you may download the{" "}
-          <a href={REFERRAL_PDF_URL} rel="noopener noreferrer" target="_blank">
-            PDF referral form
-          </a>{" "}
-          and fax it to <a href={SITE.faxHref}>{SITE.fax}</a>.
-        </p>
-        <div className="ref-form-frame">
-          <PhysicianReferralForm />
-        </div>
+        <PhysicianReferralExperience />
       </section>
     </SiteChrome>
   );
