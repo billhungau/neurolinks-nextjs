@@ -35,6 +35,17 @@ function preserveSearch(url: URL, search: string) {
   return url;
 }
 
+function rewriteAISourceDocuments(request: NextRequest) {
+  const base = `${CMS_API_PATH}/ai-source-documents`;
+  const pathname = request.nextUrl.pathname;
+  if (pathname !== base && !pathname.startsWith(`${base}/`)) return null;
+
+  const suffix = pathname.slice(base.length);
+  const destination = request.nextUrl.clone();
+  destination.pathname = `/api/admin/ai-source-documents${suffix}`;
+  return applyRobots(request, NextResponse.rewrite(destination));
+}
+
 /**
  * Page-only trailing slashes, host-aware robots, www → apex, and one-hop
  * legacy redirects. Query strings (UTM and ad click identifiers) are kept.
@@ -54,6 +65,9 @@ export function proxy(request: NextRequest) {
     preserveSearch(destination, search);
     return NextResponse.redirect(destination, 301);
   }
+
+  const aiSourceRewrite = rewriteAISourceDocuments(request);
+  if (aiSourceRewrite) return aiSourceRewrite;
 
   if (
     pathname.startsWith("/_next/") ||
