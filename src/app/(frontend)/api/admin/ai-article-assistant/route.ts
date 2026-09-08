@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { parseAssistantRequest } from "@/ai/schemas";
 import { runArticleAI, type ArticleSourceFile } from "@/ai/provider";
+import { buildSourceFetchPlan, type SourceFetchKind } from "@/ai/source-fetch";
 import { getPayloadClient, isCmsConfigured } from "@/lib/payload/client";
 
 export const runtime = "nodejs";
@@ -11,7 +12,7 @@ const MAX_TOTAL_SOURCE_BYTES = 20 * 1024 * 1024;
 
 type SourceReadError = Error & {
   status?: number;
-  sourceKind?: "absolute" | "relative";
+  sourceKind?: SourceFetchKind;
   contentType?: string;
 };
 
@@ -33,40 +34,65 @@ async function loadSessionFiles(
   let totalBytes = 0;
   const files: ArticleSourceFile[] = [];
   const cookie = requestHeaders.get("cookie") || "";
+
   for (const doc of found.docs) {
     const url = typeof doc.url === "string" ? doc.url : "";
     const filename = typeof doc.filename === "string" ? doc.filename : "source-document";
     const mimeType = typeof doc.mimeType === "string" ? doc.mimeType : "application/octet-stream";
     if (!url) continue;
 
-    // Payload may return a relative proxy URL for an uploaded source. Resolve
-    // that URL against the host handling this exact admin request, not the
-    // configured siteOrigin. Preview deployments have unique Vercel hosts and
-    // their auth cookie/source proxy must stay on that same origin.
-    const sourceKind = url.startsWith("http://") || url.startsWith("https://") ? "absolute" : "relative";
-    const sourceUrl = sourceKind === "absolute" ? url : new URL(url, requestOrigin).toString();
-    const response = await fetch(sourceUrl, {
-      cache: "no-store",
-      headers: cookie ? { cookie } : undefined,
+    const plan = buildSourceFetchPlan({
+      sourceUrl: url,
+      requestOrigin,
+      cmsCookie: cookie,
+      blobToken: process.env.BLOB_READ_WRITE_TOKEN,
     });
+
+    if (plan.kind === "unsupported-absolute") {
+      const readError = new Error("AI_SOURCE_UNTRUSTED_URL") as SourceReadError;
+      readError.sourceKind = plan.kind;
+      throw readError;
+    }
+
+    const response = await fetch(plan.url, {
+      cache: "no-store",
+      headers: plan.headers,
+      redirect: "manual",
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      const readError = new Error("AI_SOURCE_REDIRECT_BLOCKED") as SourceReadError;
+      readError.status = response.status;
+      readError.sourceKind = plan.kind;
+      readError.contentType = response.headers.get("content-type") || undefined;
+      console.error("[ai-article-assistant] blocked temporary source redirect", {
+        status: response.status,
+        filename,
+        sourceKind: plan.kind,
+      });
+      throw readError;
+    }
+
     if (!response.ok) {
       const readError = new Error("AI_SOURCE_READ_ERROR") as SourceReadError;
       readError.status = response.status;
-      readError.sourceKind = sourceKind;
+      readError.sourceKind = plan.kind;
       readError.contentType = response.headers.get("content-type") || undefined;
       console.error("[ai-article-assistant] could not read temporary source", {
         status: response.status,
         filename,
-        sourceKind,
+        sourceKind: plan.kind,
         contentType: readError.contentType,
       });
       throw readError;
     }
+
     const bytes = Buffer.from(await response.arrayBuffer());
     totalBytes += bytes.length;
     if (totalBytes > MAX_TOTAL_SOURCE_BYTES) throw new Error("AI_SOURCES_TOO_LARGE");
     files.push({ filename, mimeType, base64: bytes.toString("base64") });
   }
+
   return files;
 }
 
@@ -93,13 +119,23 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     const code = error instanceof Error ? error.message : "AI_SOURCE_READ_ERROR";
-    if (code === "AI_SOURCES_TOO_LARGE") return NextResponse.json({ error: "The attached source files are too large to process together. Keep the combined source set under 20 MB and try again." }, { status: 413 });
+    if (code === "AI_SOURCES_TOO_LARGE") {
+      return NextResponse.json({ error: "The attached source files are too large to process together. Keep the combined source set under 20 MB and try again." }, { status: 413 });
+    }
+    if (code === "AI_BLOB_NOT_CONFIGURED") {
+      return NextResponse.json({ error: "Temporary source storage is not configured correctly." }, { status: 503 });
+    }
+    if (code === "AI_SOURCE_UNTRUSTED_URL") {
+      return NextResponse.json({ error: "A temporary source file points to an unsupported storage location. Remove it and upload it again." }, { status: 502 });
+    }
+
     const readError = error as SourceReadError;
     const diagnostics = [
       typeof readError.status === "number" ? `HTTP ${readError.status}` : null,
       readError.sourceKind ? `source:${readError.sourceKind}` : null,
       readError.contentType ? `content-type:${readError.contentType.split(";")[0]}` : null,
     ].filter(Boolean).join(" · ");
+
     return NextResponse.json({
       error: `One or more temporary source files could not be read.${diagnostics ? ` ${diagnostics}` : ""}`,
     }, { status: 502 });
