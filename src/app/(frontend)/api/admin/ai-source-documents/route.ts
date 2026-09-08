@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { createLocalReq } from "payload";
 import { MAX_AI_SOURCE_FILE_BYTES, MAX_AI_SOURCE_FILES, normalizedSourceMimeType } from "@/ai/source-files";
 import { getPayloadClient, isCmsConfigured } from "@/lib/payload/client";
 
@@ -40,7 +41,20 @@ async function authenticate(request: NextRequest) {
   const payload = await getPayloadClient();
   const { user } = await payload.auth({ headers: request.headers });
   if (!user) return { error: NextResponse.json({ error: "Sign in to Payload to manage AI source documents." }, { status: 401 }) } as const;
-  return { payload } as const;
+
+  // Local API upload operations need a PayloadRequest so upload/storage hooks,
+  // request context, and authenticated user state are threaded exactly as they
+  // are for normal Payload REST operations. A bare payload.create() is not
+  // equivalent for upload collections backed by cloud-storage adapters.
+  const req = await createLocalReq({
+    user,
+    req: {
+      headers: request.headers,
+      url: request.url,
+    },
+  }, payload);
+
+  return { payload, req } as const;
 }
 
 function sessionFromPayload(value: FormDataEntryValue | null): string {
@@ -67,8 +81,10 @@ export async function GET(request: NextRequest) {
     collection: "ai-source-documents",
     depth: 0,
     limit: MAX_AI_SOURCE_FILES,
-    overrideAccess: true,
+    overrideAccess: false,
+    req: auth.req,
     sort: "createdAt",
+    user: auth.req.user,
     where: { sessionId: { equals: sessionId } },
   });
   return NextResponse.json({ docs: found.docs.map(sourceDoc) });
@@ -105,7 +121,9 @@ export async function POST(request: NextRequest) {
         name: file.name,
         size: data.length,
       },
-      overrideAccess: true,
+      overrideAccess: false,
+      req: auth.req,
+      user: auth.req.user,
     });
     return NextResponse.json({ doc: sourceDoc(created) }, { status: 201 });
   } catch (error) {
