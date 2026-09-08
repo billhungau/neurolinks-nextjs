@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { parseAssistantRequest } from "@/ai/schemas";
 import { runArticleAI, type ArticleSourceFile } from "@/ai/provider";
 import { getPayloadClient, isCmsConfigured } from "@/lib/payload/client";
-import { siteOrigin } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const maxDuration = 240;
@@ -14,6 +13,7 @@ async function loadSessionFiles(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
   sessionId: string,
   requestHeaders: Headers,
+  requestOrigin: string,
 ): Promise<ArticleSourceFile[]> {
   const found = await payload.find({
     collection: "ai-source-documents",
@@ -33,13 +33,23 @@ async function loadSessionFiles(
     const mimeType = typeof doc.mimeType === "string" ? doc.mimeType : "application/octet-stream";
     if (!url) continue;
 
-    const sourceUrl = url.startsWith("http://") || url.startsWith("https://") ? url : new URL(url, siteOrigin()).toString();
+    // Payload may return a relative proxy URL for an uploaded source. Resolve
+    // that URL against the host handling this exact admin request, not the
+    // configured siteOrigin. Preview deployments have unique Vercel hosts and
+    // their auth cookie/source proxy must stay on that same origin.
+    const sourceUrl = url.startsWith("http://") || url.startsWith("https://")
+      ? url
+      : new URL(url, requestOrigin).toString();
     const response = await fetch(sourceUrl, {
       cache: "no-store",
       headers: cookie ? { cookie } : undefined,
     });
     if (!response.ok) {
-      console.error("[ai-article-assistant] could not read temporary source", response.status, filename);
+      console.error("[ai-article-assistant] could not read temporary source", {
+        status: response.status,
+        filename,
+        sourceKind: url.startsWith("http://") || url.startsWith("https://") ? "absolute" : "relative",
+      });
       throw new Error("AI_SOURCE_READ_ERROR");
     }
     const bytes = Buffer.from(await response.arrayBuffer());
@@ -68,7 +78,7 @@ export async function POST(request: NextRequest) {
   let files: ArticleSourceFile[] = [];
   try {
     if (sourceSession) {
-      files = await loadSessionFiles(payload, sourceSession, request.headers);
+      files = await loadSessionFiles(payload, sourceSession, request.headers, request.nextUrl.origin);
       body.sourceFileNames = files.map((file) => file.filename);
     }
   } catch (error) {
