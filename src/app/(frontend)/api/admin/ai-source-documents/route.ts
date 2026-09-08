@@ -10,6 +10,31 @@ function sourceDoc(doc: { id: string | number; filename?: string | null; mimeTyp
   return { id: doc.id, filename: doc.filename ?? undefined, mimeType: doc.mimeType ?? undefined, filesize: doc.filesize ?? undefined };
 }
 
+function sanitizedUploadError(error: unknown) {
+  const details: string[] = [];
+  const visit = (value: unknown, depth = 0) => {
+    if (depth > 4 || value == null) return;
+    if (typeof value === "string") {
+      const text = value.trim();
+      if (text && text.length <= 300) details.push(text);
+      return;
+    }
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item, depth + 1);
+      return;
+    }
+    if (typeof value !== "object") return;
+    const record = value as Record<string, unknown>;
+    for (const key of ["name", "message", "cause", "code", "status", "statusCode", "data", "errors"]) {
+      if (key in record) visit(record[key], depth + 1);
+    }
+  };
+  visit(error);
+  return [...new Set(details)]
+    .filter((text) => !/^(Error|APIError|FileUploadError)$/i.test(text))
+    .slice(0, 4);
+}
+
 async function authenticate(request: NextRequest) {
   if (!isCmsConfigured()) return { error: NextResponse.json({ error: "CMS is not configured." }, { status: 503 }) } as const;
   const payload = await getPayloadClient();
@@ -84,8 +109,16 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json({ doc: sourceDoc(created) }, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Source upload failed.";
-    console.error("[ai-source-documents] upload failed", { filename: file.name, mimeType, size: file.size, message });
+    const details = sanitizedUploadError(error);
+    const message = details.join(" · ") || "Source upload failed.";
+    console.error("[ai-source-documents] upload failed", {
+      filename: file.name,
+      mimeType,
+      size: file.size,
+      errorName: error instanceof Error ? error.name : typeof error,
+      message: error instanceof Error ? error.message : undefined,
+      cause: error instanceof Error && error.cause instanceof Error ? error.cause.message : undefined,
+    });
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
