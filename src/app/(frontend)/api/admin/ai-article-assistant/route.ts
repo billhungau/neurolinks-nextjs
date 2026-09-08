@@ -9,6 +9,12 @@ export const maxDuration = 240;
 const MAX_FILES = 10;
 const MAX_TOTAL_SOURCE_BYTES = 20 * 1024 * 1024;
 
+type SourceReadError = Error & {
+  status?: number;
+  sourceKind?: "absolute" | "relative";
+  contentType?: string;
+};
+
 async function loadSessionFiles(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
   sessionId: string,
@@ -37,20 +43,24 @@ async function loadSessionFiles(
     // that URL against the host handling this exact admin request, not the
     // configured siteOrigin. Preview deployments have unique Vercel hosts and
     // their auth cookie/source proxy must stay on that same origin.
-    const sourceUrl = url.startsWith("http://") || url.startsWith("https://")
-      ? url
-      : new URL(url, requestOrigin).toString();
+    const sourceKind = url.startsWith("http://") || url.startsWith("https://") ? "absolute" : "relative";
+    const sourceUrl = sourceKind === "absolute" ? url : new URL(url, requestOrigin).toString();
     const response = await fetch(sourceUrl, {
       cache: "no-store",
       headers: cookie ? { cookie } : undefined,
     });
     if (!response.ok) {
+      const readError = new Error("AI_SOURCE_READ_ERROR") as SourceReadError;
+      readError.status = response.status;
+      readError.sourceKind = sourceKind;
+      readError.contentType = response.headers.get("content-type") || undefined;
       console.error("[ai-article-assistant] could not read temporary source", {
         status: response.status,
         filename,
-        sourceKind: url.startsWith("http://") || url.startsWith("https://") ? "absolute" : "relative",
+        sourceKind,
+        contentType: readError.contentType,
       });
-      throw new Error("AI_SOURCE_READ_ERROR");
+      throw readError;
     }
     const bytes = Buffer.from(await response.arrayBuffer());
     totalBytes += bytes.length;
@@ -84,7 +94,15 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const code = error instanceof Error ? error.message : "AI_SOURCE_READ_ERROR";
     if (code === "AI_SOURCES_TOO_LARGE") return NextResponse.json({ error: "The attached source files are too large to process together. Keep the combined source set under 20 MB and try again." }, { status: 413 });
-    return NextResponse.json({ error: "One or more temporary source files could not be read. Remove the affected file and upload it again." }, { status: 502 });
+    const readError = error as SourceReadError;
+    const diagnostics = [
+      typeof readError.status === "number" ? `HTTP ${readError.status}` : null,
+      readError.sourceKind ? `source:${readError.sourceKind}` : null,
+      readError.contentType ? `content-type:${readError.contentType.split(";")[0]}` : null,
+    ].filter(Boolean).join(" · ");
+    return NextResponse.json({
+      error: `One or more temporary source files could not be read.${diagnostics ? ` ${diagnostics}` : ""}`,
+    }, { status: 502 });
   }
 
   const parsed = parseAssistantRequest(body);
