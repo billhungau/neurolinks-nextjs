@@ -67,13 +67,23 @@ export async function POST(request: NextRequest) {
 
   const mimeType = normalizedSourceMimeType(file.name, file.type);
   if (!mimeType) return NextResponse.json({ error: "Unsupported source file type." }, { status: 415 });
-  const normalizedFile = file.type === mimeType ? file : new File([file], file.name, { type: mimeType, lastModified: file.lastModified });
 
   try {
+    // Payload Local API expects its UploadedFile shape rather than the Web File
+    // returned by request.formData(). Convert once after validation so storage
+    // adapters receive the same buffer/mimetype metadata as Payload REST uploads.
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const uploadedFile = {
+      data: bytes,
+      mimetype: mimeType,
+      name: file.name,
+      size: bytes.length,
+    };
+
     const created = await auth.payload.create({
       collection: "ai-source-documents",
       data: { sessionId },
-      file: normalizedFile,
+      file: uploadedFile,
       overrideAccess: true,
     });
     return NextResponse.json({ doc: sourceDoc(created) }, { status: 201 });
