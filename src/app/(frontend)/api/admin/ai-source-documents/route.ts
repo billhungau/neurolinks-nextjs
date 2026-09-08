@@ -110,15 +110,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ doc: sourceDoc(created) }, { status: 201 });
   } catch (error) {
     const details = sanitizedUploadError(error);
+    const blobConfigured = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
     const message = details.join(" · ") || "Source upload failed.";
     console.error("[ai-source-documents] upload failed", {
       filename: file.name,
       mimeType,
       size: file.size,
+      blobConfigured,
       errorName: error instanceof Error ? error.name : typeof error,
       message: error instanceof Error ? error.message : undefined,
       cause: error instanceof Error && error.cause instanceof Error ? error.cause.message : undefined,
     });
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({
+      error: `${message} · storage:${blobConfigured ? "blob" : "local-fallback"}`,
+    }, { status: 500 });
   }
 }
