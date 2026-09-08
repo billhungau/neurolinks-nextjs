@@ -15,7 +15,7 @@ export type BuildSourceFetchPlanArgs = {
 
 export function isTrustedVercelBlobHostname(hostname: string): boolean {
   const normalized = hostname.trim().toLowerCase().replace(/\.$/, "");
-  return normalized.endsWith(".blob.vercel-storage.com") && normalized !== "blob.vercel-storage.com";
+  return normalized === "blob.vercel-storage.com" || normalized.endsWith(".blob.vercel-storage.com");
 }
 
 export function buildSourceFetchPlan({
