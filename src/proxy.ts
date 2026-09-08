@@ -36,6 +36,25 @@ function preserveSearch(url: URL, search: string) {
 }
 
 /**
+ * The AI assistant historically calls Payload's collection REST URL directly.
+ * On Vercel, authenticated multipart creates to that generic catch-all route
+ * can lose the CMS user before collection access is evaluated and return 403.
+ * Keep the public/admin client contract stable, but route this one private
+ * collection through the dedicated handler which authenticates first and then
+ * calls Payload Local API with the resolved user and overrideAccess=false.
+ */
+function rewriteAISourceDocuments(request: NextRequest) {
+  const base = `${CMS_API_PATH}/ai-source-documents`;
+  const pathname = request.nextUrl.pathname;
+  if (pathname !== base && !pathname.startsWith(`${base}/`)) return null;
+
+  const suffix = pathname.slice(base.length);
+  const destination = request.nextUrl.clone();
+  destination.pathname = `/api/admin/ai-source-documents${suffix}`;
+  return applyRobots(request, NextResponse.rewrite(destination));
+}
+
+/**
  * Page-only trailing slashes, host-aware robots, www → apex, and one-hop
  * legacy redirects. Query strings (UTM and ad click identifiers) are kept.
  *
@@ -54,6 +73,9 @@ export function proxy(request: NextRequest) {
     preserveSearch(destination, search);
     return NextResponse.redirect(destination, 301);
   }
+
+  const aiSourceRewrite = rewriteAISourceDocuments(request);
+  if (aiSourceRewrite) return aiSourceRewrite;
 
   if (
     pathname.startsWith("/_next/") ||
