@@ -29,6 +29,18 @@ test("trusted Vercel Blob source gets bearer token but no CMS cookie", () => {
   assert.equal(plan.headers?.cookie, undefined);
 });
 
+test("Vercel Blob root hostname is trusted", () => {
+  const plan = buildSourceFetchPlan({
+    sourceUrl: "https://blob.vercel-storage.com/test.txt",
+    requestOrigin: "https://preview.example.vercel.app",
+    cmsCookie: "payload-token=abc",
+    blobToken: "blob-secret",
+  });
+
+  assert.equal(plan.kind, "vercel-blob");
+  assert.deepEqual(plan.headers, { Authorization: "Bearer blob-secret" });
+});
+
 test("missing Blob token fails closed for a Vercel Blob source", () => {
   assert.throws(() => buildSourceFetchPlan({
     sourceUrl: "https://abc123.private.blob.vercel-storage.com/test.pdf",
@@ -59,7 +71,7 @@ test("malformed absolute URL fails safely", () => {
 test("Vercel Blob hostname check is suffix-safe", () => {
   assert.equal(isTrustedVercelBlobHostname("abc.blob.vercel-storage.com"), true);
   assert.equal(isTrustedVercelBlobHostname("ABC.BLOB.VERCEL-STORAGE.COM."), true);
-  assert.equal(isTrustedVercelBlobHostname("blob.vercel-storage.com"), false);
+  assert.equal(isTrustedVercelBlobHostname("blob.vercel-storage.com"), true);
   assert.equal(isTrustedVercelBlobHostname("abc.blob.vercel-storage.com.evil.example"), false);
   assert.equal(isTrustedVercelBlobHostname("evilblob.vercel-storage.com"), false);
 });
