@@ -46,16 +46,24 @@ test("Payload schema, generated types and migration all include AI source state"
 
 test("AI source cleanup is scoped to temporary source documents", () => {
   assert.match(cleanupHooks, /collection: "ai-source-documents"/);
-  assert.match(cleanupHooks, /doc\?\._status !== "published"/);
   assert.match(cleanupHooks, /cleanupAISourcesAfterDelete/);
   assert.match(cleanupHooks, /expiresAt: \{ less_than_equal:/);
   assert.doesNotMatch(cleanupHooks, /collection: "media"/);
 });
 
-test("draft saves do not trigger source deletion but publish and delete hooks are registered", () => {
-  assert.match(insightCollection, /afterChange: \[revalidateInsight, cleanupAISourcesAfterPublish\]/);
-  assert.match(insightCollection, /afterDelete: \[revalidateInsightAfterDelete, cleanupAISourcesAfterDelete\]/);
-  assert.match(cleanupHooks, /if \(doc\?\._status !== "published"\) return doc/);
+test("publishing does not wait for Blob deletion", () => {
+  assert.match(insightCollection, /beforeChange: \[clearAISourceSessionBeforePublish\]/);
+  assert.match(insightCollection, /afterChange: \[revalidateInsight\]/);
+  assert.doesNotMatch(insightCollection, /cleanupAISourcesAfterPublish/);
+  assert.match(cleanupHooks, /clearAISourceSessionBeforePublish/);
+  assert.match(cleanupHooks, /aiSourceSession: null/);
+  assert.doesNotMatch(cleanupHooks, /post-publish source cleanup failed/);
+});
+
+test("expired temporary sources remain the independent publish-cleanup fallback", () => {
+  assert.match(cleanupHooks, /seven-day expiry/);
+  assert.match(cleanupHooks, /deleteExpiredAISources/);
+  assert.match(cleanupHooks, /cleanupExpiredAISourcesAfterUpload/);
 });
 
 test("source MIME normalization accepts supported extensions despite blank or generic browser types", () => {
