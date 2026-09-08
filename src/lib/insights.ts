@@ -57,9 +57,13 @@ export const TOPIC_PAGE_HREFS: Record<InsightsTopicSlug, string> = {
 
 export const WORDS_PER_MINUTE = 220;
 
-/** Public Insights listing and article URLs. The Payload admin is independent of this flag. */
+/**
+ * Public Insights listing and article URLs are launched by default.
+ * Set NEXT_PUBLIC_INSIGHTS_ENABLED=false as an explicit emergency kill switch.
+ * The Payload admin remains independent of this public-site switch.
+ */
 export function isInsightsPublicEnabled() {
-  return process.env.NEXT_PUBLIC_INSIGHTS_ENABLED === "true";
+  return process.env.NEXT_PUBLIC_INSIGHTS_ENABLED !== "false";
 }
 
 export function isInsightsPath(pathname: string) {

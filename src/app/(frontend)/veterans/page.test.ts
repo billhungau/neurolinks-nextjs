@@ -82,19 +82,19 @@ test("Veterans appears under footer quick links", () => {
   assert.match(footer, /Quick links/);
 });
 
-test("Insights joins the quick links only while the public section is enabled", () => {
+test("Insights joins the quick links by default and the explicit false kill switch hides it", () => {
   const original = process.env.NEXT_PUBLIC_INSIGHTS_ENABLED;
   try {
     delete process.env.NEXT_PUBLIC_INSIGHTS_ENABLED;
-    assert.equal(
-      footerQuickLinks().some((item) => item.label === "Insights"),
-      false,
-    );
-    process.env.NEXT_PUBLIC_INSIGHTS_ENABLED = "true";
     const enabled = footerQuickLinks();
     assert.equal(enabled[0].label, "Veterans");
     assert.equal(enabled[1].label, "Insights");
     assert.equal(enabled[1].href, "/insights/");
+    process.env.NEXT_PUBLIC_INSIGHTS_ENABLED = "false";
+    assert.equal(
+      footerQuickLinks().some((item) => item.label === "Insights"),
+      false,
+    );
   } finally {
     if (original === undefined) delete process.env.NEXT_PUBLIC_INSIGHTS_ENABLED;
     else process.env.NEXT_PUBLIC_INSIGHTS_ENABLED = original;

@@ -14,11 +14,11 @@ import {
   uniqueHeadingIds,
 } from "./insights.ts";
 
-test("Insights stays disabled unless the launch flag is exactly true", () => {
+test("Insights is public by default with an explicit false kill switch", () => {
   const previous = process.env.NEXT_PUBLIC_INSIGHTS_ENABLED;
   delete process.env.NEXT_PUBLIC_INSIGHTS_ENABLED;
-  assert.equal(isInsightsPublicEnabled(), false);
-  process.env.NEXT_PUBLIC_INSIGHTS_ENABLED = "1";
+  assert.equal(isInsightsPublicEnabled(), true);
+  process.env.NEXT_PUBLIC_INSIGHTS_ENABLED = "false";
   assert.equal(isInsightsPublicEnabled(), false);
   process.env.NEXT_PUBLIC_INSIGHTS_ENABLED = "true";
   assert.equal(isInsightsPublicEnabled(), true);

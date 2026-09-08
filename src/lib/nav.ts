@@ -1,3 +1,5 @@
+import { isInsightsPublicEnabled } from "./insights.ts";
+
 export type NavItem = {
   href: string;
   label: string;
@@ -43,10 +45,10 @@ export const INSIGHTS_NAV = {
   label: "Insights",
 } as const satisfies NavItem;
 
-/** Quick links, with Insights inserted after Veterans when the public section is enabled. */
+/** Quick links, with Insights inserted after Veterans while the public section is enabled. */
 export function footerQuickLinks(): NavItem[] {
   const links: NavItem[] = [...FOOTER_QUICK_LINKS];
-  if (process.env.NEXT_PUBLIC_INSIGHTS_ENABLED === "true") {
+  if (isInsightsPublicEnabled()) {
     links.splice(1, 0, INSIGHTS_NAV);
   }
   return links;
