@@ -35,13 +35,17 @@ export async function GET(request: NextRequest) {
   if ("error" in auth) return auth.error;
   const sessionId = sessionFromWhere(request);
   if (!sessionId) return NextResponse.json({ docs: [] });
+
+  // Authentication above is the security gate for this dedicated private route.
+  // Using Local API with overrideAccess=true avoids re-running collection access
+  // without the original REST request context, which caused authenticated users
+  // to receive 403 from the temporary source collection.
   const found = await auth.payload.find({
     collection: "ai-source-documents",
     depth: 0,
     limit: MAX_AI_SOURCE_FILES,
-    overrideAccess: false,
+    overrideAccess: true,
     sort: "createdAt",
-    user: auth.user,
     where: { sessionId: { equals: sessionId } },
   });
   return NextResponse.json({ docs: found.docs.map(sourceDoc) });
@@ -70,8 +74,7 @@ export async function POST(request: NextRequest) {
       collection: "ai-source-documents",
       data: { sessionId },
       file: normalizedFile,
-      overrideAccess: false,
-      user: auth.user,
+      overrideAccess: true,
     });
     return NextResponse.json({ doc: sourceDoc(created) }, { status: 201 });
   } catch (error) {
