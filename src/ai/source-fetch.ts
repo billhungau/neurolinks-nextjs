@@ -1,4 +1,4 @@
-export type SourceFetchKind = "relative" | "vercel-blob" | "unsupported-absolute";
+export type SourceFetchKind = "relative" | "same-origin" | "vercel-blob" | "unsupported-absolute";
 
 export type SourceFetchPlan = {
   url: string;
@@ -24,10 +24,11 @@ export function buildSourceFetchPlan({
   cmsCookie = "",
   blobToken = "",
 }: BuildSourceFetchPlanArgs): SourceFetchPlan {
+  const origin = new URL(requestOrigin);
   const isAbsolute = sourceUrl.startsWith("http://") || sourceUrl.startsWith("https://");
 
   if (!isAbsolute) {
-    const resolved = new URL(sourceUrl, requestOrigin);
+    const resolved = new URL(sourceUrl, origin);
     return {
       url: resolved.toString(),
       kind: "relative",
@@ -36,6 +37,18 @@ export function buildSourceFetchPlan({
   }
 
   const parsed = new URL(sourceUrl);
+
+  // Payload/Vercel Blob can surface a stored relative proxy URL as an absolute
+  // URL on the current deployment. Treat that as the same authenticated CMS
+  // origin, not as an arbitrary external source.
+  if (parsed.origin === origin.origin) {
+    return {
+      url: parsed.toString(),
+      kind: "same-origin",
+      headers: cmsCookie ? { cookie: cmsCookie } : undefined,
+    };
+  }
+
   if (!isTrustedVercelBlobHostname(parsed.hostname)) {
     return { url: parsed.toString(), kind: "unsupported-absolute" };
   }
