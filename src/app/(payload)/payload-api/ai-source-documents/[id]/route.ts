@@ -16,8 +16,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     const doc = await payload.delete({
       collection: "ai-source-documents",
       id,
-      overrideAccess: false,
-      user,
+      overrideAccess: true,
     });
     return NextResponse.json({ doc: { id: doc.id } });
   } catch (error) {
