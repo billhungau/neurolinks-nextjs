@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { head } from "@vercel/blob";
 import { parseAssistantRequest } from "@/ai/schemas";
 import { runArticleAI, type ArticleSourceFile } from "@/ai/provider";
 import { buildSourceFetchPlan, type SourceFetchKind } from "@/ai/source-fetch";
@@ -15,6 +16,40 @@ type SourceReadError = Error & {
   sourceKind?: SourceFetchKind;
   contentType?: string;
 };
+
+async function blobBackedPlan(
+  filename: string,
+  fallbackPlan: ReturnType<typeof buildSourceFetchPlan>,
+  requestOrigin: string,
+): Promise<ReturnType<typeof buildSourceFetchPlan>> {
+  const token = process.env.BLOB_READ_WRITE_TOKEN || "";
+  if (!token || fallbackPlan.kind === "vercel-blob" || fallbackPlan.kind === "unsupported-absolute") return fallbackPlan;
+
+  try {
+    // Payload 3.88's Vercel Blob adapter stores the final Blob filename back on
+    // the upload document after addRandomSuffix is applied. Resolve that exact
+    // backing object through the Blob SDK instead of performing a second HTTP
+    // request through Payload's authenticated file proxy. The latter can reject
+    // a server-to-server replay of the browser session even though the outer AI
+    // request is already authenticated.
+    const blob = await head(filename, { token });
+    if (!blob?.url) return fallbackPlan;
+
+    const plan = buildSourceFetchPlan({
+      sourceUrl: blob.url,
+      requestOrigin,
+      blobToken: token,
+    });
+    return plan.kind === "vercel-blob" ? plan : fallbackPlan;
+  } catch (error) {
+    console.error("[ai-article-assistant] could not resolve backing Blob source", {
+      filename,
+      errorName: error instanceof Error ? error.name : typeof error,
+      message: error instanceof Error ? error.message : undefined,
+    });
+    return fallbackPlan;
+  }
+}
 
 async function loadSessionFiles(
   payload: Awaited<ReturnType<typeof getPayloadClient>>,
@@ -41,12 +76,13 @@ async function loadSessionFiles(
     const mimeType = typeof doc.mimeType === "string" ? doc.mimeType : "application/octet-stream";
     if (!url) continue;
 
-    const plan = buildSourceFetchPlan({
+    const fallbackPlan = buildSourceFetchPlan({
       sourceUrl: url,
       requestOrigin,
       cmsCookie: cookie,
       blobToken: process.env.BLOB_READ_WRITE_TOKEN,
     });
+    const plan = await blobBackedPlan(filename, fallbackPlan, requestOrigin);
 
     if (plan.kind === "unsupported-absolute") {
       const readError = new Error("AI_SOURCE_UNTRUSTED_URL") as SourceReadError;
