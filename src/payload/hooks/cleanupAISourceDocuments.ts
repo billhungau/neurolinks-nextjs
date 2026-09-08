@@ -57,15 +57,26 @@ export const cleanupAISourcesAfterPublish: CollectionAfterChangeHook = async ({ 
   const sessionId = typeof doc?.aiSourceSession === "string" ? doc.aiSourceSession.trim() : "";
   if (!sessionId) return doc;
 
-  await deleteAISourceSession(req.payload, sessionId);
-  await req.payload.update({
-    collection: "insights",
-    id: doc.id,
-    data: { aiSourceSession: null },
-    depth: 0,
-    overrideAccess: true,
-    context: { [SKIP_FLAG]: true },
-  });
+  try {
+    await deleteAISourceSession(req.payload, sessionId);
+    await req.payload.update({
+      collection: "insights",
+      id: doc.id,
+      data: { aiSourceSession: null },
+      depth: 0,
+      overrideAccess: true,
+      context: { [SKIP_FLAG]: true },
+    });
+  } catch (error) {
+    // Publishing has already written the Insight by the time this afterChange
+    // hook runs. Temporary source cleanup must never make the publish request
+    // look like it failed. Any orphan is still covered by the seven-day expiry.
+    console.error("[ai-source-documents] post-publish source cleanup failed", {
+      insightId: doc?.id,
+      sessionId,
+      error: error instanceof Error ? error.message : "Unknown cleanup error",
+    });
+  }
 
   return doc;
 };
