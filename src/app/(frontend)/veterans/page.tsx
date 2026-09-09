@@ -13,7 +13,6 @@ import { VeteransCarePathway } from "@/components/veterans/VeteransCarePathway";
 import {
   VAC_MENTAL_HEALTH_BENEFITS_URL,
   VETERAN_CONDITIONS,
-  VETERAN_CONDITIONS_INTRO,
   VETERAN_CONTACT,
   VETERAN_COORDINATION_PRIMARY_CTA,
   VETERAN_COORDINATION_SECONDARY_CTA,
@@ -125,10 +124,6 @@ export default function VeteransPage() {
               <div id="conditions" className="vet-conditions-editorial">
                 <Reveal>
                   <Eyebrow>Conditions commonly assessed in Veterans</Eyebrow>
-                  <h2 className="tms-h2 mt-3">
-                    Mental health difficulties do not always occur one at a time
-                  </h2>
-                  <p className="tms-lede mt-4">{VETERAN_CONDITIONS_INTRO}</p>
                 </Reveal>
                 <Reveal className="vet-condition-panels">
                   {VETERAN_CONDITIONS.map((condition) => (
