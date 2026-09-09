@@ -17,8 +17,6 @@ import {
   VETERAN_COORDINATION_PRIMARY_CTA,
   VETERAN_COORDINATION_SECONDARY_CTA,
   VETERAN_COVERAGE,
-  VETERAN_EXPERIENCE,
-  VETERAN_EXPERIENCE_POINTS,
   VETERAN_FAQS,
   VETERAN_HERO_PRIMARY_CTA,
   VETERAN_HERO_SECONDARY_CTA,
@@ -59,6 +57,21 @@ const VETERAN_SECTIONS = [
   { id: "veteran-pathway", label: "How care works" },
   { id: "coverage", label: "VAC coverage" },
   { id: "faqs", label: "FAQs" },
+] as const;
+
+const APPROACH_POINTS = [
+  {
+    title: "Experience treating Veterans",
+    body: "Specialist mental health care informed by direct work with Veterans.",
+  },
+  {
+    title: "Specialist psychiatric oversight",
+    body: "Assessment and treatment planning led by a psychiatrist.",
+  },
+  {
+    title: "More than one treatment option",
+    body: "TMS, Spravato and IM ketamine are available when clinically appropriate.",
+  },
 ] as const;
 
 export default function VeteransPage() {
@@ -196,24 +209,34 @@ export default function VeteransPage() {
                 />
               </div>
               <div className="vet-experience-editorial-copy">
-                <Eyebrow>{VETERAN_EXPERIENCE.eyebrow}</Eyebrow>
-                <h2 className="tms-h2 mt-3">{VETERAN_EXPERIENCE.heading}</h2>
-                <p>{VETERAN_EXPERIENCE.opening}</p>
-                <p>{VETERAN_EXPERIENCE.closing}</p>
-                <blockquote className="vet-overview-emphasis">
-                  <p>{VETERAN_EXPERIENCE.quote}</p>
-                </blockquote>
+                <Eyebrow>Our approach</Eyebrow>
+                <h2 className="tms-h2 mt-3">Psychiatrist-led care, tailored to the individual</h2>
+                <p>
+                  We take the time to understand your experience and goals. Treatment is selected
+                  after a psychiatric assessment that considers your symptoms, previous treatment
+                  and what you hope to regain.
+                </p>
+                <div className="mt-6 grid gap-0 border-t border-[var(--nl-border)]">
+                  {APPROACH_POINTS.map((point) => (
+                    <div
+                      key={point.title}
+                      className="relative border-b border-[var(--nl-border)] py-4 pl-5"
+                    >
+                      <span
+                        className="absolute left-0 top-[1.35rem] h-2 w-2 rounded-full bg-[var(--nl-yellow)]"
+                        aria-hidden="true"
+                      />
+                      <h3 className="font-semibold text-[var(--nl-navy)]">{point.title}</h3>
+                      <p className="mt-1 text-[0.94rem] leading-relaxed text-[var(--nl-muted)]">
+                        {point.body}
+                      </p>
+                    </div>
+                  ))}
+                </div>
                 <div className="mt-5">
                   <TextLink href="/psychiatrist-tms-nanaimo/">Meet the team providing care</TextLink>
                 </div>
               </div>
-            </Reveal>
-            <Reveal>
-              <ul className="vet-experience-list">
-                {VETERAN_EXPERIENCE_POINTS.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
             </Reveal>
           </div>
         </section>
