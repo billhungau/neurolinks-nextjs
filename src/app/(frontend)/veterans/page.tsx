@@ -5,6 +5,7 @@ import { Eyebrow } from "@/components/Eyebrow";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { FaqJsonLd } from "@/components/FaqJsonLd";
 import { VeteransContactForm } from "@/components/forms/VeteransContactForm";
+import { VeteransRelatedInsights } from "@/components/insights/VeteransRelatedInsights";
 import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
 import { TextLink } from "@/components/TextLink";
@@ -36,7 +37,6 @@ import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
-import { VeteransRelatedInsights } from "@/components/insights/VeteransRelatedInsights";
 
 export const metadata = pageMetadata({
   title: "Mental Health Treatment for Veterans in BC | NeuroLinks",
@@ -90,11 +90,9 @@ export default function VeteransPage() {
             </h1>
             <p className="hero-enter hero-enter-2 vet-hero-lede">
               When depression, anxiety or trauma-related symptoms have not improved enough with
-              medication or therapy, there may still be options.
-            </p>
-            <p className="hero-enter hero-enter-2 vet-hero-lede">
-              NeuroLinks provides psychiatrist-led assessment and treatment in Nanaimo, with
-              experience helping Veterans navigate treatment planning and VAC preauthorization.
+              medication or therapy, NeuroLinks provides psychiatrist-led assessment and treatment
+              in Nanaimo, with experience helping Veterans navigate treatment planning and VAC
+              preauthorization.
             </p>
             <div className="hero-enter hero-enter-3 vet-hero-actions">
               <div className="vet-hero-buttons">
@@ -297,11 +295,39 @@ export default function VeteransPage() {
               </div>
             </div>
             <div className="vet-coverage-copy">
-              {VETERAN_COVERAGE.body.map((paragraph) => (
-                <p key={paragraph} className="vet-coverage-text">
-                  {paragraph}
-                </p>
-              ))}
+              <div className="grid gap-3" aria-label="VAC treatment coverage overview">
+                {VETERAN_COVERAGE.options.map((option) => (
+                  <article
+                    key={option.treatment}
+                    className="rounded-[var(--nl-radius-lg)] border border-[var(--nl-border)] bg-white px-5 py-4 shadow-[0_1px_2px_rgb(26_39_68_/_0.04)]"
+                  >
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-5">
+                      <h3 className="font-serif text-[1.2rem] font-semibold text-[var(--nl-navy)]">
+                        {option.treatment}
+                      </h3>
+                      <p
+                        className={`text-sm font-semibold ${
+                          option.tone === "not-covered"
+                            ? "text-[var(--nl-muted)]"
+                            : "text-[var(--nl-blue)]"
+                        }`}
+                      >
+                        {option.status}
+                      </p>
+                    </div>
+                    <p className="mt-2 text-[0.95rem] leading-6 text-[var(--nl-muted)]">
+                      {option.detail}
+                    </p>
+                  </article>
+                ))}
+              </div>
+              <div className="mt-6">
+                {VETERAN_COVERAGE.body.map((paragraph) => (
+                  <p key={paragraph} className="vet-coverage-text">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
               <aside id="coordination" className="vet-anchor-target vet-coord">
                 <h3>{VETERAN_COVERAGE.coordinationHeading}</h3>
                 <p>{VETERAN_COVERAGE.coordination}</p>
@@ -318,8 +344,6 @@ export default function VeteransPage() {
           </Reveal>
         </div>
       </section>
-
-      <VeteransRelatedInsights />
 
       <section id="faqs" className="tms-section vet-anchor-target bg-white">
         <div className="tms-wrap">
@@ -359,6 +383,8 @@ export default function VeteransPage() {
           </Reveal>
         </div>
       </section>
+
+      <VeteransRelatedInsights />
     </SiteChrome>
   );
 }
