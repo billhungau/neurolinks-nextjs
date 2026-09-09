@@ -7,18 +7,18 @@ export const VAC_MENTAL_HEALTH_BENEFITS_URL =
 export const VETERAN_TRUST = [
   "Psychiatrist-led care",
   "Experience treating Veterans",
-  "TMS and ketamine options",
+  "TMS, Spravato and IM ketamine",
   "VAC authorization support",
 ] as const;
 
 export const VETERAN_IMPACT = {
   heading: "The impact of service can continue long after service ends",
   opening:
-    "Depression, anxiety and trauma-related symptoms can remain present for years. Sleep, relationships, motivation and everyday functioning may all be affected—even after medication or therapy.",
+    "Depression, anxiety and trauma-related symptoms can continue to affect sleep, relationships, motivation and everyday functioning—even after medication or therapy.",
   emphasis:
     "Continuing to struggle does not mean that you have failed treatment. It may mean that a different assessment or treatment approach is worth considering.",
   closing:
-    "We begin by understanding what you have experienced, what you have already tried and what you most want to regain.",
+    "We focus on what you have already tried, what is still getting in the way and what you most want to regain.",
 } as const;
 
 export type VeteranCondition = {
@@ -34,19 +34,19 @@ export const VETERAN_CONDITIONS = [
     tone: "teal",
     label: "01 · Depression",
     title: "Depression",
-    body: "Depression can drain energy, motivation, interest and hope, making even ordinary responsibilities feel difficult. We assess what has already been tried and whether another treatment approach may be appropriate.",
+    body: "Low energy, motivation, interest and hope can persist even after several treatment attempts.",
   },
   {
     tone: "sage",
     label: "02 · PTSD",
     title: "PTSD and trauma-related symptoms",
-    body: "Hypervigilance, disrupted sleep, irritability, avoidance and emotional detachment can continue long after the immediate danger has passed. Assessment considers these symptoms alongside depression, anxiety, pain and sleep.",
+    body: "Hypervigilance, sleep disruption, irritability, avoidance and emotional detachment may continue long after the immediate danger has passed.",
   },
   {
     tone: "gold",
     label: "03 · Anxiety",
     title: "Anxiety",
-    body: "Persistent anxiety can leave the mind and body in a constant state of readiness. We consider the underlying diagnosis, symptom pattern and previous treatment response before recommending care.",
+    body: "Persistent anxiety can keep the mind and body in a constant state of readiness and interfere with daily functioning.",
   },
 ] as const satisfies readonly VeteranCondition[];
 
@@ -72,7 +72,6 @@ export const VETERAN_TREATMENTS = [
     points: [
       "Strongest established role in depression",
       "Non-invasive, without sedation",
-      "Delivered through repeated clinic visits",
       "Protocol selected following assessment",
     ],
     linkLabel: "Learn more about TMS",
@@ -85,7 +84,6 @@ export const VETERAN_TREATMENTS = [
     body: "IM ketamine works through different brain pathways than conventional antidepressants. For some people with treatment-resistant depression, improvement can begin within hours or days—even after several previous treatments have not provided enough relief.",
     points: [
       "Can act more quickly than conventional antidepressants",
-      "Works through a different brain pathway",
       "May help when several treatments have not worked",
       "Individualized treatment with psychiatrist-led monitoring",
     ],
@@ -179,9 +177,29 @@ export const VETERAN_EXPERIENCE_POINTS = [
 
 export const VETERAN_COVERAGE = {
   heading: "Clear information before treatment begins",
+  options: [
+    {
+      treatment: "TMS",
+      status: "May be authorized by VAC",
+      detail: "Written authorization is confirmed before treatment begins.",
+      tone: "covered",
+    },
+    {
+      treatment: "Spravato®",
+      status: "May be authorized with preauthorization",
+      detail: "VAC and Medavie Blue Cross review eligibility and supporting documentation.",
+      tone: "covered",
+    },
+    {
+      treatment: "IM ketamine",
+      status: "Not included in the current VAC benefit schedule",
+      detail: "NeuroLinks offers IM ketamine separately when clinically appropriate.",
+      tone: "not-covered",
+    },
+  ],
   body: [
-    "Veterans Affairs Canada may authorize TMS or Spravato® treatment in eligible cases. The IM ketamine treatment offered by NeuroLinks is not included in the current VAC benefit schedule.",
-    "Coverage is not automatic. Spravato requires written preauthorization through VAC and Medavie Blue Cross, and you must be taking an antidepressant when the application is submitted. Treatment begins only after authorization has been confirmed.",
+    "Coverage is not automatic. Spravato requires written preauthorization through VAC and Medavie Blue Cross, and you must be taking an antidepressant when the application is submitted.",
+    "NeuroLinks can prepare the clinical rationale, proposed protocol, schedule and estimated cost when authorization is required.",
   ],
   coordinationHeading: "Already working with a clinician or case manager?",
   coordination:
