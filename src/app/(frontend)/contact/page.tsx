@@ -42,7 +42,7 @@ export default function ContactPage() {
         <div className="ct-layout">
           <div className="ct-form-col">
             <div className="ct-form-frame">
-              <ContactForm />
+              <ContactForm showReferralNote={false} />
             </div>
           </div>
 
