@@ -103,10 +103,17 @@
   opacity: 0.94;
 }
 
+/* High-contrast secondary hero CTA: white surface with navy text. */
 .vet-page .vet-redesign-hero-actions > a:nth-child(2) {
-  border-color: rgb(255 255 255 / 0.58) !important;
-  background: rgb(255 255 255 / 0.06) !important;
-  color: #fff !important;
+  border-color: #fff !important;
+  background: #fff !important;
+  color: var(--nl-navy) !important;
+}
+
+.vet-page .vet-redesign-hero-actions > a:nth-child(2):hover,
+.vet-page .vet-redesign-hero-actions > a:nth-child(2):focus-visible {
+  background: var(--nl-surface) !important;
+  color: var(--nl-navy) !important;
 }
 
 /* Support band uses nl-wrap, so it automatically inherits the site's normal gutter. */
@@ -313,6 +320,15 @@
 
 .vet-page .vet-contact-redesign::after {
   display: none;
+}
+
+/* Explicit contact contrast so the heading cannot inherit the default navy .tms-h2 colour. */
+.vet-page .vet-contact-redesign .tms-h2 {
+  color: #fff !important;
+}
+
+.vet-page .vet-contact-redesign .tms-lede {
+  color: rgb(255 255 255 / 0.84) !important;
 }
 
 /* Mobile follows the same 1.25rem inline padding used by .tms-section. */
