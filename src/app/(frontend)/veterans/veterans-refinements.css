@@ -1,0 +1,338 @@
+/* Refinements layered after veterans.css: keep the approved content and structure,
+   while restoring the established NeuroLinks image-overlay hero and tightening mobile rhythm. */
+
+/* Hero: full-bleed image with content layered over it, matching the TMS/Ketamine family. */
+.vet-redesign-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--nl-navy);
+  color: #fff;
+}
+
+.vet-redesign-hero-grid {
+  position: relative;
+  display: block;
+  min-height: clamp(32rem, 62svh, 38rem);
+}
+
+.vet-redesign-hero-media {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  overflow: hidden;
+  clip-path: none;
+}
+
+.vet-redesign-hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgb(13 29 47 / 0.88) 0%, rgb(19 39 58 / 0.70) 38%, rgb(19 39 58 / 0.18) 72%, rgb(19 39 58 / 0.10) 100%),
+    linear-gradient(180deg, rgb(12 27 43 / 0.24), transparent 38%, rgb(12 27 43 / 0.18));
+  pointer-events: none;
+}
+
+.vet-redesign-hero-photo {
+  object-fit: cover;
+  object-position: 58% 38%;
+}
+
+.vet-redesign-hero-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: clamp(32rem, 62svh, 38rem);
+  max-width: 49rem;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5.25rem 2rem 4.5rem max(2rem, calc((100vw - 1180px) / 2));
+  color: #fff;
+}
+
+.vet-redesign-hero-copy .eyebrow,
+.vet-redesign-hero-copy h1,
+.vet-redesign-hero-lede,
+.vet-redesign-clinician {
+  color: #fff;
+}
+
+.vet-redesign-hero-copy .eyebrow {
+  opacity: 0.82;
+}
+
+.vet-redesign-hero-copy h1 {
+  max-width: 15ch;
+  text-shadow: 0 1px 18px rgb(0 0 0 / 0.12);
+}
+
+.vet-redesign-hero-lede {
+  max-width: 39rem;
+  opacity: 0.92;
+}
+
+.vet-redesign-clinician {
+  width: fit-content;
+  opacity: 0.94;
+}
+
+.vet-redesign-hero-actions > a:nth-child(2) {
+  border-color: rgb(255 255 255 / 0.58) !important;
+  background: rgb(255 255 255 / 0.06) !important;
+  color: #fff !important;
+}
+
+.vet-redesign-hero-actions > a:nth-child(2):hover {
+  background: rgb(255 255 255 / 0.13) !important;
+}
+
+/* Explicit contrast correction for the experience heading. */
+.vet-experience-redesign,
+.vet-experience-editorial-copy {
+  color: var(--nl-ink);
+}
+
+.vet-experience-editorial-copy .tms-h2 {
+  color: var(--nl-navy) !important;
+}
+
+/* Mobile rhythm: the first redesign pass inherited desktop-sized vertical spacing. */
+@media (max-width: 767px) {
+  .vet-redesign-hero-grid,
+  .vet-redesign-hero-copy {
+    min-height: clamp(31rem, 68svh, 36rem);
+  }
+
+  .vet-redesign-hero-photo {
+    object-position: 60% 36%;
+  }
+
+  .vet-redesign-hero-media::after {
+    background:
+      linear-gradient(180deg, rgb(12 27 43 / 0.18) 0%, rgb(12 27 43 / 0.20) 28%, rgb(12 27 43 / 0.78) 69%, rgb(12 27 43 / 0.94) 100%),
+      linear-gradient(90deg, rgb(12 27 43 / 0.38), transparent 72%);
+  }
+
+  .vet-redesign-hero-copy {
+    justify-content: flex-end;
+    padding: 5rem 1.25rem 1.9rem;
+  }
+
+  .vet-redesign-hero-copy h1 {
+    max-width: 14ch;
+    margin-top: 0.55rem;
+    font-size: clamp(2.15rem, 10.2vw, 3rem);
+    line-height: 1.04;
+  }
+
+  .vet-redesign-hero-lede {
+    margin-top: 0.9rem;
+    font-size: 0.96rem;
+    line-height: 1.55;
+  }
+
+  .vet-redesign-hero-actions {
+    gap: 0.55rem;
+    margin-top: 1.15rem;
+  }
+
+  .vet-redesign-hero-actions > a {
+    min-height: 2.85rem;
+  }
+
+  .vet-redesign-clinician {
+    margin-top: 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  .vet-support-band-list li {
+    padding-top: 0.78rem;
+    padding-bottom: 0.78rem;
+    font-size: 0.87rem;
+  }
+
+  .vet-support-band-list li::before {
+    top: 1.08rem;
+  }
+
+  .vet-overview-section,
+  .vet-treatment-section,
+  .vet-experience-redesign,
+  .vet-journey,
+  .vet-coverage-redesign,
+  .vet-contact-redesign {
+    padding-block: 3rem;
+  }
+
+  .vet-overview-grid {
+    gap: 2.15rem;
+  }
+
+  .vet-overview-impact-copy {
+    margin-top: 1.1rem;
+    font-size: 0.98rem;
+    line-height: 1.65;
+  }
+
+  .vet-overview-impact-copy > * + * {
+    margin-top: 0.95rem;
+  }
+
+  .vet-overview-emphasis {
+    margin-top: 1.2rem;
+    padding: 0.9rem 0 0.9rem 1rem;
+    font-size: 1.08rem;
+    line-height: 1.48;
+  }
+
+  .vet-conditions-editorial {
+    padding-top: 0;
+  }
+
+  .vet-condition-panels {
+    gap: 0.8rem;
+    margin-top: 1.25rem;
+  }
+
+  .vet-condition-panel {
+    min-height: 0;
+    padding: 1.1rem 1.15rem 1.2rem;
+  }
+
+  .vet-condition-panel h3 {
+    margin-top: 0.45rem;
+    font-size: 1.3rem;
+  }
+
+  .vet-condition-panel p:last-child {
+    margin-top: 0.65rem;
+    line-height: 1.55;
+  }
+
+  .vet-treatment-grid {
+    gap: 0.95rem;
+    margin-top: 1.55rem;
+  }
+
+  .vet-treatment-card-head {
+    padding: 1.15rem 1.15rem 1rem;
+  }
+
+  .vet-treatment-card-head h3 {
+    margin-top: 0.45rem;
+    font-size: 1.4rem;
+  }
+
+  .vet-treatment-card-body {
+    padding: 1.05rem 1.15rem 1.2rem;
+  }
+
+  .vet-treatment-card-body > p {
+    line-height: 1.58;
+  }
+
+  .vet-treatment-points {
+    margin-top: 0.95rem;
+  }
+
+  .vet-treatment-points li {
+    padding-top: 0.58rem;
+    padding-bottom: 0.58rem;
+    line-height: 1.42;
+  }
+
+  .vet-treatment-points li::before {
+    top: 0.94rem;
+  }
+
+  .vet-treatment-action {
+    padding-top: 1rem;
+  }
+
+  .vet-treatment-foot {
+    margin-top: 1.25rem;
+  }
+
+  .vet-experience-editorial {
+    gap: 1.55rem;
+  }
+
+  .vet-experience-editorial-photo {
+    min-height: 16.5rem;
+    border-radius: 0.8rem;
+  }
+
+  .vet-experience-editorial-copy > p {
+    margin-top: 0.75rem;
+    line-height: 1.58;
+  }
+
+  .vet-experience-list {
+    margin-top: 1.4rem;
+  }
+
+  .vet-experience-list li {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+    line-height: 1.45;
+  }
+
+  .vet-experience-list li::before {
+    top: 1rem;
+  }
+
+  .vet-journey-map {
+    margin-top: 1.9rem;
+  }
+
+  .vet-journey-steps {
+    gap: 1.1rem;
+  }
+
+  .vet-journey-copy {
+    padding-bottom: 0.35rem;
+  }
+
+  .vet-journey-copy p {
+    margin-top: 0.4rem;
+    line-height: 1.52;
+  }
+
+  .vet-journey-cta {
+    margin-top: 1.4rem;
+  }
+
+  .vet-coverage-layout {
+    gap: 1.55rem;
+  }
+
+  .vet-coverage-matrix {
+    gap: 0.7rem;
+  }
+
+  .vet-coverage-option {
+    padding: 1rem 1.05rem 1.05rem;
+  }
+
+  .vet-coverage-detail {
+    margin-top: 0.55rem;
+    line-height: 1.5;
+  }
+
+  .vet-coverage-body {
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+  }
+
+  .vet-coverage-body p {
+    line-height: 1.58;
+  }
+
+  .vet-coverage-redesign .vet-coord {
+    margin-top: 1.2rem;
+  }
+
+  .vet-contact-redesign .vet-contact {
+    gap: 1.5rem;
+  }
+}
