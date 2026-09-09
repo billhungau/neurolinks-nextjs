@@ -131,7 +131,6 @@ export default function VeteransPage() {
                       key={condition.title}
                       className={`vet-condition-panel vet-condition-panel--${condition.tone}`}
                     >
-                      <p className="vet-condition-panel-label">{condition.label}</p>
                       <h3>{condition.title}</h3>
                       <p>{condition.body}</p>
                     </article>
