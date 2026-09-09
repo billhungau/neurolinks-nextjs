@@ -309,11 +309,6 @@
     align-items: start;
   }
 
-  .vet-overview-impact {
-    position: sticky;
-    top: calc(var(--nl-anchor-offset) + 2rem);
-  }
-
   .vet-condition-panels {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
