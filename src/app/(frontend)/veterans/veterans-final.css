@@ -1,0 +1,504 @@
+/* Authoritative visual alignment for /veterans/.
+   This pass intentionally uses the existing NeuroLinks spacing and colour system
+   instead of a Veterans-only gutter or section scale. */
+
+.vet-page {
+  --vet-surface: var(--nl-cream);
+  --vet-surface-cool: #eef3f8;
+  --vet-border-soft: var(--nl-border);
+  --vet-section-y: 3.75rem;
+}
+
+@media (min-width: 768px) {
+  .vet-page {
+    --vet-section-y: 4.75rem;
+  }
+}
+
+/*
+ * IMPORTANT: do not add padding to .tms-wrap or .nl-wrap here.
+ * .nl-wrap already owns the site's responsive --nl-gutter.
+ * .tms-wrap is intentionally width-only; sections using it own their inline padding,
+ * exactly like .tms-section on the TMS/Ketamine pages.
+ */
+
+/* Hero: keep the established full-bleed image-overlay language. */
+.vet-page .vet-redesign-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--nl-navy);
+  color: #fff;
+}
+
+.vet-page .vet-redesign-hero-grid {
+  position: relative;
+  display: block;
+  min-height: clamp(34rem, 64svh, 39rem);
+}
+
+.vet-page .vet-redesign-hero-media {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  clip-path: none;
+}
+
+.vet-page .vet-redesign-hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      100deg,
+      rgb(var(--nl-hero-navy) / 0.94) 0%,
+      rgb(var(--nl-hero-navy) / 0.86) 30%,
+      rgb(var(--nl-hero-navy) / 0.60) 52%,
+      rgb(var(--nl-hero-navy) / 0.24) 74%,
+      rgb(var(--nl-hero-navy) / 0.08) 90%
+    );
+  pointer-events: none;
+}
+
+.vet-page .vet-redesign-hero-photo {
+  object-fit: cover;
+  object-position: 58% 38%;
+}
+
+.vet-page .vet-redesign-hero-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: clamp(34rem, 64svh, 39rem);
+  max-width: 48rem;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: 5rem 4rem;
+  padding-inline: var(--nl-gutter);
+  color: #fff;
+}
+
+.vet-page .vet-redesign-hero-copy .eyebrow,
+.vet-page .vet-redesign-hero-copy h1,
+.vet-page .vet-redesign-hero-lede,
+.vet-page .vet-redesign-clinician {
+  color: #fff;
+}
+
+.vet-page .vet-redesign-hero-copy .eyebrow {
+  opacity: 0.82;
+}
+
+.vet-page .vet-redesign-hero-copy h1 {
+  max-width: 15ch;
+  text-shadow: 0 1px 18px rgb(0 0 0 / 0.14);
+}
+
+.vet-page .vet-redesign-hero-lede {
+  max-width: 38rem;
+  opacity: 0.92;
+}
+
+.vet-page .vet-redesign-clinician {
+  width: fit-content;
+  opacity: 0.94;
+}
+
+/* High-contrast secondary hero CTA: white surface with navy text. */
+.vet-page .vet-redesign-hero-actions > a:nth-child(2) {
+  border-color: #fff !important;
+  background: #fff !important;
+  color: var(--nl-navy) !important;
+}
+
+.vet-page .vet-redesign-hero-actions > a:nth-child(2):hover,
+.vet-page .vet-redesign-hero-actions > a:nth-child(2):focus-visible {
+  background: var(--nl-surface) !important;
+  color: var(--nl-navy) !important;
+}
+
+/* Support band uses nl-wrap, so it automatically inherits the site's normal gutter. */
+.vet-page .vet-support-band {
+  border-color: var(--vet-border-soft);
+  background: #fff;
+}
+
+.vet-page .vet-support-band-list li {
+  color: var(--nl-navy);
+}
+
+.vet-page .vet-support-band-list li::before {
+  border-color: var(--nl-yellow);
+  background: var(--nl-yellow);
+}
+
+/* Custom sections using tms-wrap reproduce .tms-section's inline spacing exactly. */
+.vet-page .vet-overview-section,
+.vet-page .vet-treatment-section,
+.vet-page .vet-experience-redesign,
+.vet-page .vet-journey,
+.vet-page .vet-coverage-redesign,
+.vet-page .vet-contact-redesign {
+  padding: var(--vet-section-y) 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .vet-page .vet-overview-section,
+  .vet-page .vet-treatment-section,
+  .vet-page .vet-experience-redesign,
+  .vet-page .vet-journey,
+  .vet-page .vet-coverage-redesign,
+  .vet-page .vet-contact-redesign {
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .vet-page .vet-overview-section,
+  .vet-page .vet-treatment-section,
+  .vet-page .vet-experience-redesign,
+  .vet-page .vet-journey,
+  .vet-page .vet-coverage-redesign,
+  .vet-page .vet-contact-redesign {
+    padding-inline: 2rem;
+  }
+}
+
+.vet-page .vet-overview-section {
+  background: #fff;
+}
+
+.vet-page .vet-condition-panel {
+  border: 1px solid var(--vet-border-soft);
+  border-radius: var(--nl-radius-lg);
+  background: var(--nl-surface);
+  box-shadow: none;
+}
+
+.vet-page .vet-condition-panel::after {
+  display: none;
+}
+
+.vet-page .vet-condition-panel-label {
+  color: var(--nl-blue);
+}
+
+.vet-page .vet-condition-panel h3 {
+  color: var(--nl-navy);
+}
+
+.vet-page .vet-treatment-section {
+  background: var(--nl-navy);
+}
+
+.vet-page .vet-treatment-section .eyebrow {
+  color: rgb(255 255 255 / 0.70);
+}
+
+.vet-page .vet-treatment-section .tms-h2 {
+  color: #fff;
+}
+
+.vet-page .vet-treatment-section .tms-lede {
+  color: rgb(255 255 255 / 0.80);
+  opacity: 1;
+}
+
+.vet-page .vet-treatment-card {
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: var(--nl-radius-lg);
+  box-shadow: none;
+}
+
+.vet-page .vet-treatment-card-head,
+.vet-page .vet-treatment-card--ketamine .vet-treatment-card-head {
+  background: var(--nl-cream);
+}
+
+.vet-page .vet-treatment-card-head .eyebrow {
+  color: var(--nl-blue);
+}
+
+.vet-page .vet-treatment-points li::before,
+.vet-page .vet-treatment-card--ketamine .vet-treatment-points li::before {
+  background: var(--nl-yellow);
+}
+
+.vet-page .vet-experience-redesign {
+  background: var(--nl-cream);
+  color: var(--nl-ink);
+}
+
+.vet-page .vet-experience-editorial-photo {
+  border-radius: var(--nl-radius-lg);
+  box-shadow: none;
+}
+
+.vet-page .vet-experience-editorial-copy .tms-h2 {
+  color: var(--nl-navy) !important;
+}
+
+.vet-page .vet-experience-editorial-copy > p {
+  color: var(--nl-muted);
+}
+
+.vet-page .vet-experience-list,
+.vet-page .vet-experience-list li {
+  border-color: var(--vet-border-soft);
+}
+
+.vet-page .vet-experience-list li::before {
+  background: var(--nl-yellow);
+}
+
+.vet-page .vet-journey {
+  background: #fff;
+}
+
+.vet-page .vet-journey::after {
+  display: none;
+}
+
+.vet-page .vet-journey-line {
+  background: rgb(26 39 68 / 0.20);
+}
+
+.vet-page .vet-journey-icon {
+  border-color: var(--vet-border-soft);
+  background: var(--nl-surface);
+  box-shadow: none;
+}
+
+.vet-page .vet-journey-icon svg {
+  stroke: var(--nl-blue);
+}
+
+.vet-page .vet-journey-index {
+  background: var(--nl-navy);
+}
+
+.vet-page .vet-journey-copy h3 {
+  color: var(--nl-navy);
+}
+
+.vet-page .vet-coverage-redesign {
+  background: var(--vet-surface-cool);
+}
+
+.vet-page .vet-coverage-option {
+  border: 1px solid var(--vet-border-soft);
+  border-radius: var(--nl-radius-lg);
+  background: #fff;
+}
+
+.vet-page .vet-coverage-option::before {
+  background: var(--nl-blue);
+}
+
+.vet-page .vet-coverage-option--not-covered::before {
+  background: rgb(26 39 68 / 0.35);
+}
+
+.vet-page .vet-coverage-status {
+  color: var(--nl-blue);
+}
+
+.vet-page .vet-coverage-option--not-covered .vet-coverage-status {
+  color: var(--nl-muted);
+}
+
+.vet-page .vet-coverage-redesign .vet-coord {
+  background: #fff;
+}
+
+.vet-page #faqs {
+  background: #fff;
+}
+
+.vet-page .vet-contact-redesign {
+  background: var(--nl-navy);
+}
+
+.vet-page .vet-contact-redesign::after {
+  display: none;
+}
+
+/* Explicit contact contrast so the heading cannot inherit the default navy .tms-h2 colour. */
+.vet-page .vet-contact-redesign .tms-h2 {
+  color: #fff !important;
+}
+
+.vet-page .vet-contact-redesign .tms-lede {
+  color: rgb(255 255 255 / 0.84) !important;
+}
+
+/* Mobile follows the same 1.25rem inline padding used by .tms-section. */
+@media (max-width: 767px) {
+  .vet-page .vet-redesign-hero-grid,
+  .vet-page .vet-redesign-hero-copy {
+    min-height: clamp(35rem, 72svh, 40rem);
+  }
+
+  .vet-page .vet-redesign-hero-photo {
+    object-position: 61% 34%;
+  }
+
+  .vet-page .vet-redesign-hero-media::after {
+    background: linear-gradient(
+      to bottom,
+      rgb(var(--nl-hero-navy) / 0.14) 0%,
+      rgb(var(--nl-hero-navy) / 0.30) 32%,
+      rgb(var(--nl-hero-navy) / 0.66) 55%,
+      rgb(var(--nl-hero-navy) / 0.92) 76%,
+      rgb(var(--nl-hero-navy)) 100%
+    );
+  }
+
+  .vet-page .vet-redesign-hero-copy {
+    justify-content: flex-end;
+    max-width: none;
+    padding: 5.5rem 1.25rem 2.25rem;
+  }
+
+  .vet-page .vet-redesign-hero-copy h1 {
+    max-width: 15ch;
+    margin-top: 0.55rem;
+    font-size: clamp(2.1rem, 9.8vw, 2.75rem);
+    line-height: 1.05;
+  }
+
+  .vet-page .vet-redesign-hero-lede {
+    margin-top: 0.9rem;
+    font-size: 0.96rem;
+    line-height: 1.55;
+  }
+
+  .vet-page .vet-redesign-hero-actions {
+    gap: 0.65rem;
+    margin-top: 1.2rem;
+  }
+
+  .vet-page .vet-redesign-hero-actions > a {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .vet-page .vet-redesign-clinician {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .vet-page .vet-support-band {
+    padding-block: 0.4rem;
+  }
+
+  .vet-page .vet-support-band-list li {
+    padding-block: 0.82rem;
+    font-size: 0.88rem;
+  }
+
+  .vet-page .vet-overview-grid {
+    gap: 2.5rem;
+  }
+
+  .vet-page .vet-overview-impact-copy {
+    margin-top: 1.15rem;
+    font-size: 0.98rem;
+    line-height: 1.65;
+  }
+
+  .vet-page .vet-overview-emphasis {
+    margin-top: 1.25rem;
+    padding: 0.95rem 0 0.95rem 1rem;
+    font-size: 1.08rem;
+    line-height: 1.5;
+  }
+
+  .vet-page .vet-condition-panels {
+    gap: 0.9rem;
+    margin-top: 1.4rem;
+  }
+
+  .vet-page .vet-condition-panel {
+    min-height: 0;
+    padding: 1.2rem;
+  }
+
+  .vet-page .vet-treatment-grid {
+    gap: 1rem;
+    margin-top: 1.6rem;
+  }
+
+  .vet-page .vet-treatment-card-head {
+    padding: 1.2rem 1.2rem 1.05rem;
+  }
+
+  .vet-page .vet-treatment-card-body {
+    padding: 1.1rem 1.2rem 1.25rem;
+  }
+
+  .vet-page .vet-treatment-foot {
+    margin-top: 1.35rem;
+  }
+
+  .vet-page .vet-treatment-foot > a,
+  .vet-page .vet-journey-cta > a,
+  .vet-page .vet-coord-actions > a {
+    width: 100%;
+  }
+
+  .vet-page .vet-experience-editorial {
+    gap: 1.75rem;
+  }
+
+  .vet-page .vet-experience-editorial-photo {
+    min-height: 17rem;
+  }
+
+  .vet-page .vet-experience-editorial-copy .tms-h2 {
+    max-width: none;
+    color: var(--nl-navy) !important;
+  }
+
+  .vet-page .vet-experience-list {
+    margin-top: 1.5rem;
+  }
+
+  .vet-page .vet-journey-map {
+    margin-top: 2rem;
+  }
+
+  .vet-page .vet-journey-step {
+    grid-template-columns: 3.25rem minmax(0, 1fr);
+    gap: 0.9rem;
+  }
+
+  .vet-page .vet-journey-icon {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+
+  .vet-page .vet-journey-line {
+    left: 1.625rem;
+  }
+
+  .vet-page .vet-coverage-layout {
+    gap: 1.75rem;
+  }
+
+  .vet-page .vet-coverage-matrix {
+    gap: 0.85rem;
+  }
+
+  .vet-page .vet-coverage-option {
+    padding: 1.1rem 1.15rem 1.15rem;
+  }
+
+  .vet-page .vet-contact-redesign .vet-contact {
+    gap: 1.75rem;
+  }
+
+  .vet-page .vet-contact-form {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
