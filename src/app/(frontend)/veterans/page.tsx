@@ -92,10 +92,6 @@ export default function VeteransPage() {
                   {VETERAN_HERO_SECONDARY_CTA.label}
                 </ButtonLink>
               </div>
-              <a className="hero-enter hero-enter-3 vet-redesign-clinician" href="#coordination">
-                <span>For clinicians and case managers</span>
-                <span aria-hidden="true">→</span>
-              </a>
             </div>
           </div>
         </section>
