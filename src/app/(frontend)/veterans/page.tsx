@@ -82,10 +82,7 @@ export default function VeteransPage() {
               <p className="hero-enter eyebrow">Care for Veterans</p>
               <h1 className="hero-enter">Specialist mental health treatment for Veterans</h1>
               <p className="hero-enter hero-enter-2 vet-redesign-hero-lede">
-                When depression, anxiety or trauma-related symptoms have not improved enough with
-                medication or therapy, NeuroLinks provides psychiatrist-led assessment and treatment
-                in Nanaimo, with experience helping Veterans navigate treatment planning and VAC
-                preauthorization.
+                Specialist care for Veterans with depression, anxiety or trauma-related symptoms.
               </p>
               <div className="hero-enter hero-enter-3 vet-redesign-hero-actions">
                 <ButtonLink href={VETERAN_HERO_PRIMARY_CTA.href} variant="accent">
