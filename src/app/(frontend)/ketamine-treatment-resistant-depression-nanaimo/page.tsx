@@ -246,8 +246,8 @@ export default function KetaminePage() {
               monitored alongside your comfort and wellbeing.
             </p>
             <p className="ket-admin">
-              Ketamine is administered intramuscularly or subcutaneously by a registered nurse
-              under the supervision of a psychiatrist.
+              Ketamine is administered intramuscularly by a registered nurse under the supervision
+              of a psychiatrist.
             </p>
             <div className="ket-support-block">
               <div className="ket-support-rule" aria-hidden="true" />
