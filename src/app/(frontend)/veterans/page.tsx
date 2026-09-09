@@ -40,6 +40,7 @@ import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 import "./veterans.css";
 import "./veterans-refinements.css";
+import "./veterans-final.css";
 
 export const metadata = pageMetadata({
   title: "Mental Health Treatment for Veterans in BC | NeuroLinks",
