@@ -124,7 +124,7 @@ export function defaultCtaHref(topics: readonly string[] | null | undefined) {
   if (topics?.includes("ketamine-and-spravato")) {
     return "/ketamine-treatment-resistant-depression-nanaimo/";
   }
-  if (topics?.includes("tms")) return "/about-tms-treatment-on-psychiatric-illness/";
+  if (topics?.includes("tms")) return "/contact/";
   if (topics?.includes("treatment-resistant-depression")) {
     return "/services-psychiatric-tms-ketamine-treatment/#assessment";
   }
