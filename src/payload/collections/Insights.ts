@@ -15,7 +15,6 @@ export const Insights: CollectionConfig = {
     defaultColumns: ["title", "category", "_status", "publishedAt", "featured"],
     description: PATIENT_INFORMATION_WARNING,
     preview: previewUrl,
-    livePreview: { url: previewUrl },
   },
   access: { read: publishedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated, readVersions: authenticated },
   versions: { maxPerDoc: 30, drafts: { autosave: { interval: 800 }, schedulePublish: false } },
