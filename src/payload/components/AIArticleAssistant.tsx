@@ -28,6 +28,7 @@ import {
   uploadProgressPercent,
   validateSourceSelection,
 } from "@/ai/source-files";
+import { relationshipOptions } from "@/payload/relationship-values";
 import styles from "./AIArticleAssistant.module.css";
 
 function fieldValue(fields: Record<string, { value?: unknown }>, name: string): string {
@@ -46,23 +47,6 @@ function lexicalText(value: unknown): string {
   };
   visit(value);
   return out.join(" ").replace(/\s+/g, " ").trim();
-}
-
-function relationshipIds(value: unknown): Array<string | number> {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((entry) => {
-    if (typeof entry === "string" || typeof entry === "number") return [entry];
-    if (entry && typeof entry === "object") {
-      const item = entry as { id?: unknown; value?: unknown };
-      if (typeof item.id === "string" || typeof item.id === "number") return [item.id];
-      if (typeof item.value === "string" || typeof item.value === "number") return [item.value];
-      if (item.value && typeof item.value === "object") {
-        const nested = item.value as { id?: unknown };
-        if (typeof nested.id === "string" || typeof nested.id === "number") return [nested.id];
-      }
-    }
-    return [];
-  });
 }
 
 function textNode(text: string) {
@@ -446,8 +430,13 @@ export function AIArticleAssistant() {
       const response = await fetch("/api/admin/reference-by-doi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ doi }) });
       const json = await response.json() as { error?: string; reference?: ReferenceRecord; created?: boolean };
       if (!response.ok || !json.reference) throw new Error(json.error || "Reference lookup failed.");
-      const existingIds = relationshipIds(fields.references?.value);
-      if (!existingIds.some((id) => String(id) === String(json.reference!.id))) updateField("references", [...existingIds, json.reference.id]);
+      const existingReferences = relationshipOptions(fields.references?.value, "references");
+      if (!existingReferences.some((option) => String(option.value) === String(json.reference!.id))) {
+        updateField("references", [
+          ...existingReferences,
+          { relationTo: "references", value: json.reference.id },
+        ]);
+      }
       setAddedReferences((items) => items.some((item) => String(item.id) === String(json.reference!.id)) ? items : [...items, json.reference!]);
       setDoi("");
       setNotice(`${json.created ? "Reference created" : "Existing reference found"} and added to this article. Save the Insight to keep the relationship.`);

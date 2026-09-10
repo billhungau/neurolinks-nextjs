@@ -14,6 +14,7 @@ import {
   validateSourceSelection,
 } from "./source-files.ts";
 import { isValidDoi, normalizeDoi } from "../lib/doi.ts";
+import { relationshipOptions } from "../payload/relationship-values.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (relative: string) => readFileSync(join(here, relative), "utf8");
@@ -172,6 +173,28 @@ test("DOI normalization is canonical and DOI workflow is authenticated, deduplic
   assert.match(doiRoute, /collection: "references"/);
   assert.match(doiRoute, /api\.crossref\.org\/works/);
   assert.match(doiRoute, /docs\.find\(\(reference\) => normalizeDoi\(reference\.doi\) === doi\)/);
+});
+
+
+test("DOI helper writes Payload relationship options instead of raw IDs", () => {
+  assert.deepEqual(relationshipOptions([1], "references"), [
+    { relationTo: "references", value: 1 },
+  ]);
+  assert.deepEqual(
+    relationshipOptions(
+      [
+        { relationTo: "references", value: 1 },
+        { value: { id: 2 } },
+      ],
+      "references",
+    ),
+    [
+      { relationTo: "references", value: 1 },
+      { relationTo: "references", value: 2 },
+    ],
+  );
+  assert.match(assistantComponent, /relationshipOptions\(fields\.references\?\.value, "references"\)/);
+  assert.match(assistantComponent, /relationTo: "references", value: json\.reference\.id/);
 });
 
 test("Preview builds do not run migrations and production requires DATABASE_URL", () => {
