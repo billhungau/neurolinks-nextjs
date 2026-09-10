@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useAllFormFields, useDocumentInfo } from "@payloadcms/ui";
+import { useAllFormFields, useDocumentInfo, useField } from "@payloadcms/ui";
 import {
   ARTICLE_LENGTHS,
   ARTICLE_TONES,
@@ -28,7 +28,10 @@ import {
   uploadProgressPercent,
   validateSourceSelection,
 } from "@/ai/source-files";
-import { relationshipOptions } from "@/payload/relationship-values";
+import {
+  relationshipOptions,
+  type RelationshipOption,
+} from "@/payload/relationship-values";
 import styles from "./AIArticleAssistant.module.css";
 
 function fieldValue(fields: Record<string, { value?: unknown }>, name: string): string {
@@ -119,6 +122,10 @@ export function AIArticleAssistant() {
   const pathname = usePathname();
   const { id: documentId, collectionSlug } = useDocumentInfo();
   const [fields, dispatchFields] = useAllFormFields();
+  const {
+    value: referenceValue,
+    setValue: setReferenceValue,
+  } = useField<RelationshipOption[]>({ path: "references" });
   const [expanded, setExpanded] = useState(documentId == null);
   const [topic, setTopic] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -430,16 +437,16 @@ export function AIArticleAssistant() {
       const response = await fetch("/api/admin/reference-by-doi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ doi }) });
       const json = await response.json() as { error?: string; reference?: ReferenceRecord; created?: boolean };
       if (!response.ok || !json.reference) throw new Error(json.error || "Reference lookup failed.");
-      const existingReferences = relationshipOptions(fields.references?.value, "references");
+      const existingReferences = relationshipOptions(referenceValue, "references");
       if (!existingReferences.some((option) => String(option.value) === String(json.reference!.id))) {
-        updateField("references", [
+        setReferenceValue([
           ...existingReferences,
           { relationTo: "references", value: json.reference.id },
         ]);
       }
       setAddedReferences((items) => items.some((item) => String(item.id) === String(json.reference!.id)) ? items : [...items, json.reference!]);
       setDoi("");
-      setNotice(`${json.created ? "Reference created" : "Existing reference found"} and added to this article. Save the Insight to keep the relationship.`);
+      setNotice(`${json.created ? "Reference created" : "Existing reference found"} and attached to this Insight. Publish the Insight to make the reference public.`);
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Reference lookup failed."); }
     finally { setReferenceBusy(false); }
   }
