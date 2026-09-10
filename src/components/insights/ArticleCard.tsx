@@ -7,9 +7,11 @@ export function ArticleCard({ article }: { article: InsightsArticleCard }) {
   const date = formatInsightsDate(article.lastReviewedAt || article.publishedAt);
   const href = insightsArticlePath(article.slug);
   const minutes = readingTimeMinutes(article.bodyWordCount ?? 0, article.readingTime);
+  const tone = article.category?.tone || "blue";
+  const hasEditorialImage = Boolean(article.featuredImage);
   return (
-    <article className="insights-card">
-      <InsightsCardImage article={article} />
+    <article className={`insights-card tone-${tone} ${hasEditorialImage ? "has-image" : "is-text-only"}`}>
+      {hasEditorialImage ? <InsightsCardImage article={article} /> : null}
       <div className="insights-card-copy">
         {article.category?.title ? <p className="insights-kicker">{article.category.title}</p> : null}
         <h3 className="insights-card-title">
