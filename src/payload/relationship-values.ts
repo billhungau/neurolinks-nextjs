@@ -1,23 +1,16 @@
-export type RelationshipOption = {
-  relationTo: string;
-  value: string | number;
-};
+export type RelationshipID = string | number;
 
 /**
- * Payload's admin relationship inputs use `{ relationTo, value }` options in
- * form state, including monomorphic relationships. Normalize legacy/raw IDs
- * so custom UI fields can safely append a relationship without it being
- * discarded during form serialization.
+ * Payload stores monomorphic relationship values as raw IDs in form state.
+ * The relationship input only wraps them as `{ relationTo, value }` options
+ * for display. Normalize any option-shaped legacy values before appending.
  */
-export function relationshipOptions(
-  value: unknown,
-  relationTo: string,
-): RelationshipOption[] {
+export function relationshipIds(value: unknown): RelationshipID[] {
   if (!Array.isArray(value)) return [];
 
-  return value.flatMap((entry): RelationshipOption[] => {
+  return value.flatMap((entry): RelationshipID[] => {
     if (typeof entry === "string" || typeof entry === "number") {
-      return [{ relationTo, value: entry }];
+      return [entry];
     }
     if (!entry || typeof entry !== "object") return [];
 
@@ -26,20 +19,17 @@ export function relationshipOptions(
       relationTo?: unknown;
       value?: unknown;
     };
-    const itemRelation =
-      typeof item.relationTo === "string" ? item.relationTo : relationTo;
-
     if (typeof item.value === "string" || typeof item.value === "number") {
-      return [{ relationTo: itemRelation, value: item.value }];
+      return [item.value];
     }
     if (item.value && typeof item.value === "object") {
       const nested = item.value as { id?: unknown };
       if (typeof nested.id === "string" || typeof nested.id === "number") {
-        return [{ relationTo: itemRelation, value: nested.id }];
+        return [nested.id];
       }
     }
     if (typeof item.id === "string" || typeof item.id === "number") {
-      return [{ relationTo: itemRelation, value: item.id }];
+      return [item.id];
     }
     return [];
   });
