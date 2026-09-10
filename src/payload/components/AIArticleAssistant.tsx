@@ -29,8 +29,8 @@ import {
   validateSourceSelection,
 } from "@/ai/source-files";
 import {
-  relationshipOptions,
-  type RelationshipOption,
+  relationshipIds,
+  type RelationshipID,
 } from "@/payload/relationship-values";
 import styles from "./AIArticleAssistant.module.css";
 
@@ -125,7 +125,7 @@ export function AIArticleAssistant() {
   const {
     value: referenceValue,
     setValue: setReferenceValue,
-  } = useField<RelationshipOption[]>({ path: "references" });
+  } = useField<RelationshipID[]>({ path: "references" });
   const [expanded, setExpanded] = useState(documentId == null);
   const [topic, setTopic] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -437,11 +437,11 @@ export function AIArticleAssistant() {
       const response = await fetch("/api/admin/reference-by-doi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ doi }) });
       const json = await response.json() as { error?: string; reference?: ReferenceRecord; created?: boolean };
       if (!response.ok || !json.reference) throw new Error(json.error || "Reference lookup failed.");
-      const existingReferences = relationshipOptions(referenceValue, "references");
-      if (!existingReferences.some((option) => String(option.value) === String(json.reference!.id))) {
+      const existingReferences = relationshipIds(referenceValue);
+      if (!existingReferences.some((id) => String(id) === String(json.reference!.id))) {
         setReferenceValue([
           ...existingReferences,
-          { relationTo: "references", value: json.reference.id },
+          json.reference.id,
         ]);
       }
       setAddedReferences((items) => items.some((item) => String(item.id) === String(json.reference!.id)) ? items : [...items, json.reference!]);
