@@ -193,8 +193,11 @@ test("DOI helper writes Payload relationship options instead of raw IDs", () => 
       { relationTo: "references", value: 2 },
     ],
   );
-  assert.match(assistantComponent, /relationshipOptions\(fields\.references\?\.value, "references"\)/);
+  assert.match(assistantComponent, /useField<RelationshipOption\[\]>\(\{ path: "references" \}\)/);
+  assert.match(assistantComponent, /relationshipOptions\(referenceValue, "references"\)/);
+  assert.match(assistantComponent, /setReferenceValue\(\[/);
   assert.match(assistantComponent, /relationTo: "references", value: json\.reference\.id/);
+  assert.doesNotMatch(assistantComponent, /updateField\("references"/);
 });
 
 test("Preview builds do not run migrations and production requires DATABASE_URL", () => {
