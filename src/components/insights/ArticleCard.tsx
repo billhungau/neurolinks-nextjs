@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { TextLink } from "@/components/TextLink";
 import { formatInsightsDate, insightsArticlePath, readingTimeMinutes } from "@/lib/insights";
 import type { InsightsArticleCard } from "@/lib/payload/types";
 import { InsightsCardImage } from "./InsightsCardImage";
@@ -21,7 +20,7 @@ export function ArticleCard({ article }: { article: InsightsArticleCard }) {
           {date ? <time dateTime={article.lastReviewedAt || article.publishedAt || undefined}>{date}</time> : null}
           <span>{minutes} min read</span>
         </p>
-        <TextLink href={href}>Read article</TextLink>
+        <span className="insights-card-action" aria-hidden="true">Read article <span>→</span></span>
       </div>
     </article>
   );

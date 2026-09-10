@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { ButtonLink } from "@/components/ButtonLink";
-import { Reveal } from "@/components/Reveal";
 import { SiteChrome } from "@/components/SiteChrome";
-import { ArticleCard } from "@/components/insights/ArticleCard";
+import { ArticleCollection } from "@/components/insights/ArticleCollection";
 import { FeaturedArticle } from "@/components/insights/FeaturedArticle";
 import { TopicFilters } from "@/components/insights/TopicFilters";
 import { isInsightsTopicSlug, topicBySlug } from "@/lib/insights";
@@ -56,9 +55,7 @@ export default async function InsightsIndexPage({ searchParams }: { searchParams
               <div><p className="insights-index-label">{topic ? "Topic" : "Journal"}</p><h2 id="insights-list-heading">{topic ? topicBySlug(topic)?.title || "Insights" : "Latest articles"}</h2></div>
             </div>
             {remaining.length ? (
-              <div className="insights-editorial-grid">
-                {remaining.map((article, index) => <Reveal key={article.id} delayMs={Math.min(index, 4) * 55}><ArticleCard article={article} /></Reveal>)}
-              </div>
+              <ArticleCollection articles={remaining} />
             ) : lead ? null : <p className="insights-empty">No published articles in this topic yet.</p>}
           </section>
         </div>
