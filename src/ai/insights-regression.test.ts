@@ -14,7 +14,7 @@ import {
   validateSourceSelection,
 } from "./source-files.ts";
 import { isValidDoi, normalizeDoi } from "../lib/doi.ts";
-import { relationshipOptions } from "../payload/relationship-values.ts";
+import { relationshipIds } from "../payload/relationship-values.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (relative: string) => readFileSync(join(here, relative), "utf8");
@@ -176,27 +176,22 @@ test("DOI normalization is canonical and DOI workflow is authenticated, deduplic
 });
 
 
-test("DOI helper writes Payload relationship options instead of raw IDs", () => {
-  assert.deepEqual(relationshipOptions([1], "references"), [
-    { relationTo: "references", value: 1 },
-  ]);
+test("DOI helper writes raw IDs for Payload's monomorphic relationship field", () => {
+  assert.deepEqual(relationshipIds([1]), [1]);
   assert.deepEqual(
-    relationshipOptions(
+    relationshipIds(
       [
         { relationTo: "references", value: 1 },
         { value: { id: 2 } },
       ],
-      "references",
     ),
-    [
-      { relationTo: "references", value: 1 },
-      { relationTo: "references", value: 2 },
-    ],
+    [1, 2],
   );
-  assert.match(assistantComponent, /useField<RelationshipOption\[\]>\(\{ path: "references" \}\)/);
-  assert.match(assistantComponent, /relationshipOptions\(referenceValue, "references"\)/);
+  assert.match(assistantComponent, /useField<RelationshipID\[\]>\(\{ path: "references" \}\)/);
+  assert.match(assistantComponent, /relationshipIds\(referenceValue\)/);
   assert.match(assistantComponent, /setReferenceValue\(\[/);
-  assert.match(assistantComponent, /relationTo: "references", value: json\.reference\.id/);
+  assert.match(assistantComponent, /\.\.\.existingReferences,\s*json\.reference\.id/);
+  assert.doesNotMatch(assistantComponent, /relationTo: "references", value: json\.reference\.id/);
   assert.doesNotMatch(assistantComponent, /updateField\("references"/);
 });
 
