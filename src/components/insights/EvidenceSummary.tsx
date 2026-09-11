@@ -1,4 +1,4 @@
-import { doiHref, formatReference } from "@/lib/insights";
+import { doiHref } from "@/lib/insights";
 
 type EvidenceValue = {
   studyType?: string;
@@ -191,6 +191,45 @@ type Source = {
   url?: string | null;
 };
 
+function compactAuthors(authors?: string | null) {
+  const value = authors?.trim();
+  if (!value) return null;
+
+  const separator = value.includes(";") ? ";" : ",";
+  const names = value
+    .split(separator)
+    .map((name) => name.trim())
+    .filter(Boolean);
+
+  if (names.length <= 6) return value;
+  return `${names.slice(0, 6).join(", ")}, et al.`;
+}
+
+function referenceLocation(source: Source) {
+  return [
+    source.volume,
+    source.issue ? `(${source.issue})` : null,
+    source.pages ? `:${source.pages}` : null,
+  ]
+    .filter(Boolean)
+    .join("");
+}
+
+function referenceLinks(source: Source) {
+  const links: { href: string; label: string }[] = [];
+  const seen = new Set<string>();
+  const add = (href: string | null | undefined, label: string) => {
+    if (!href || seen.has(href)) return;
+    seen.add(href);
+    links.push({ href, label });
+  };
+
+  add(source.pubmedUrl, "PubMed ↗");
+  add(doiHref(source.doi), "DOI ↗");
+  add(source.url, "View publication ↗");
+  return links;
+}
+
 export function ReferencesList({
   heading = "References",
   sources,
@@ -206,17 +245,33 @@ export function ReferencesList({
       </h2>
       <ol>
         {sources.map((source, index) => {
-          const href = source.pubmedUrl || doiHref(source.doi) || source.url;
+          const authors = compactAuthors(source.authors);
+          const location = referenceLocation(source);
+          const links = referenceLinks(source);
           return (
             <li key={`${source.title}-${index}`} id={`reference-${index + 1}`}>
-              <cite>{formatReference(source)}</cite>
-              {href ? (
-                <>
-                  {" "}
-                  <a href={href} rel="noopener noreferrer" target="_blank">
-                    Source
-                  </a>
-                </>
+              <cite className="insights-reference-citation">
+                {authors ? <span className="insights-reference-authors">{authors}. </span> : null}
+                <span className="insights-reference-title">
+                  {source.title.endsWith(".") ? source.title : `${source.title}.`}
+                </span>
+                {source.publisher ? (
+                  <>
+                    {" "}
+                    <span className="insights-reference-journal">{source.publisher}</span>
+                  </>
+                ) : null}
+                {location ? ` ${location}` : ""}
+                {source.year ? ` (${source.year})` : ""}
+              </cite>
+              {links.length ? (
+                <div className="insights-reference-links" aria-label={`Links for reference ${index + 1}`}>
+                  {links.map((link) => (
+                    <a key={`${link.label}-${link.href}`} href={link.href} rel="noopener noreferrer" target="_blank">
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
               ) : null}
             </li>
           );
