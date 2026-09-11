@@ -147,7 +147,8 @@ function convertersFor(article: InsightsArticle): JSXConvertersFunction<Insights
     headingIds.set(heading.text, heading.id);
   }
 
-  const ctaFallbackHref = article.ctaHref || defaultCtaHref(article.topics);
+  const ctaFallbackHref =
+    article.ctaHref || defaultCtaHref(article.topics, article.category?.slug);
 
   return ({ defaultConverters }) => ({
     ...defaultConverters,

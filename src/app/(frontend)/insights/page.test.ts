@@ -53,6 +53,7 @@ test("lead article prefers featured content, falls back to newest, and never dup
 test("automatic article CTA selection prevents redundant Veterans and embedded CTAs", () => {
   assert.equal(automaticArticleCta({ topics: ["veterans-and-coverage"], bodyHasCta: false }), "veterans");
   assert.equal(automaticArticleCta({ topics: ["veterans-and-coverage"], bodyHasCta: true }), "none");
+  assert.equal(automaticArticleCta({ topics: ["ptsd-and-anxiety", "ketamine-and-spravato"], categorySlug: "veterans", bodyHasCta: false }), "veterans");
   assert.equal(automaticArticleCta({ topics: ["tms"], bodyHasCta: false }), "generic");
   assert.equal(automaticArticleCta({ topics: ["tms"], bodyHasCta: true }), "none");
 });

@@ -16,8 +16,11 @@ export type AutomaticArticleCta = "none" | "generic" | "veterans";
 
 export function automaticArticleCta(input: {
   topics?: readonly string[] | null;
+  categorySlug?: string | null;
   bodyHasCta: boolean;
 }): AutomaticArticleCta {
   if (input.bodyHasCta) return "none";
-  return input.topics?.includes("veterans-and-coverage") ? "veterans" : "generic";
+  return input.categorySlug === "veterans" || input.topics?.includes("veterans-and-coverage")
+    ? "veterans"
+    : "generic";
 }
