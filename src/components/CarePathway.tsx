@@ -171,11 +171,10 @@ export function CarePathway({
                 />
                 <div className="relative z-10 flex min-h-[20rem] flex-col justify-end px-5 pb-6 pt-20 text-white sm:min-h-[21rem] sm:px-7 sm:pb-7">
                   <h3 className="max-w-[31rem] font-serif text-[1.68rem] font-semibold leading-[1.07] text-white sm:text-[1.85rem]">
-                    Improvement that matters in everyday life
+                    Improvement in everyday life
                   </h3>
                   <p className="mt-2.5 max-w-[31rem] text-[0.97rem] leading-[1.6] text-white/88 sm:text-[1rem]">
-                    Meaningful improvement can also mean being more able to engage with work,
-                    relationships, routines and the parts of life that matter to you.
+                    Greater engagement with family, work, daily routines and the parts of life that matter to you.
                   </p>
                 </div>
               </div>
@@ -194,11 +193,10 @@ export function CarePathway({
                 />
                 <div className="relative z-10 flex min-h-[22rem] max-w-[42rem] flex-col justify-center px-12 py-10 lg:min-h-[23rem] lg:px-14">
                   <h3 className="max-w-[34rem] font-serif text-[2.55rem] font-semibold leading-[1.08] text-[var(--nl-navy)] lg:text-[2.75rem]">
-                    Improvement that matters in everyday life
+                    Improvement in everyday life
                   </h3>
                   <p className="mt-5 max-w-[31rem] text-[1.05rem] leading-relaxed text-[var(--nl-muted)]">
-                    Meaningful improvement can also mean being more able to engage with work,
-                    relationships, routines and the parts of life that matter to you.
+                    Greater engagement with family, work, daily routines and the parts of life that matter to you.
                   </p>
                 </div>
               </div>
