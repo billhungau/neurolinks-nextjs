@@ -74,7 +74,10 @@ export function trimContactFields(input: Partial<Record<string, unknown>>): Cont
   };
 }
 
-export function validateContactFields(fields: ContactFields): ContactFieldErrors {
+export function validateContactFields(
+  fields: ContactFields,
+  { phoneRequired = true }: { phoneRequired?: boolean } = {},
+): ContactFieldErrors {
   const errors: ContactFieldErrors = {};
 
   if (!fields.firstName) {
@@ -95,7 +98,7 @@ export function validateContactFields(fields: ContactFields): ContactFieldErrors
     errors.email = "Enter a valid email address.";
   }
 
-  if (!fields.phone) {
+  if (phoneRequired && !fields.phone) {
     errors.phone = "Enter your phone number.";
   } else if (fields.phone.length > CONTACT_LIMITS.phone) {
     errors.phone = `Phone number must be ${CONTACT_LIMITS.phone} characters or fewer.`;
@@ -183,12 +186,15 @@ export function parseContactPayload(raw: unknown): ValidatedContact {
 
   const record = raw as Record<string, unknown>;
   const honeypot = asString(record[HONEYPOT_FIELD]).trim().length > 0;
-  if (parseContactSource(record.source) === VETERANS_SOURCE) {
+  const source = parseContactSource(record.source);
+  if (source === VETERANS_SOURCE) {
     return parseVeteransContactPayload(record, honeypot);
   }
 
   const fields = trimContactFields(record);
-  const errors = validateContactFields(fields);
+  const errors = validateContactFields(fields, {
+    phoneRequired: source !== ADVERTISING_LANDING_SOURCE,
+  });
   if (Object.keys(errors).length > 0) {
     return { ok: false, errors };
   }
