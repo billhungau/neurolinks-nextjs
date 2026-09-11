@@ -65,11 +65,15 @@ export default async function InsightsArticlePage({ params }: Props) {
   const published = formatInsightsDate(article.publishedAt);
   const reviewed = formatInsightsDate(article.lastReviewedAt);
   const headings = extractHeadings(article.body);
-  const ctaHref = article.ctaHref || defaultCtaHref(article.topics);
+  const ctaHref = article.ctaHref || defaultCtaHref(article.topics, article.category?.slug);
   const hero = article.featuredImage;
   const related = await getRelatedArticles(article);
   const bodyHasCta = bodyContainsCta(article.body);
-  const ctaKind = automaticArticleCta({ topics: article.topics, bodyHasCta });
+  const ctaKind = automaticArticleCta({
+    topics: article.topics,
+    categorySlug: article.category?.slug,
+    bodyHasCta,
+  });
 
   const authorLine = [article.author?.name || DEFAULT_AUTHOR.name, article.author?.credentials]
     .filter(Boolean)
