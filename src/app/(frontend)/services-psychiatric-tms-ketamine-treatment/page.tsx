@@ -10,6 +10,7 @@ import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
+import "./services-refinements.css";
 
 export const metadata = pageMetadata({
   title: "Psychiatric Assessment & Treatment in Nanaimo | NeuroLinks",
@@ -31,11 +32,32 @@ const SVC_SECTIONS = [
 ] as const;
 
 const PATHWAY = [
-  { index: "01", title: "Initial contact" },
-  { index: "02", title: "Psychiatric assessment" },
-  { index: "03", title: "Treatment recommendation" },
-  { index: "04", title: "TMS or ketamine treatment" },
-  { index: "05", title: "Response and safety monitoring" },
+  {
+    index: "01",
+    title: "Start with a conversation",
+    body: "Tell us what you have been experiencing and what treatments you have already tried.",
+  },
+  {
+    index: "02",
+    title: "Psychiatric assessment",
+    body: "We review your diagnosis, treatment history, symptoms and relevant medical factors.",
+  },
+  {
+    index: "03",
+    title: "Personalized treatment plan",
+    body: "We discuss which options may be appropriate for your individual situation.",
+  },
+  {
+    index: "04",
+    title: "Begin treatment",
+    body: "Treatment may include TMS or ketamine when clinically appropriate.",
+    options: ["TMS", "Ketamine"],
+  },
+  {
+    index: "05",
+    title: "Review progress",
+    body: "Symptoms, response, tolerability and next steps are monitored throughout care.",
+  },
 ] as const;
 
 const ASSESSMENT_MARKERS = [
@@ -243,20 +265,29 @@ export default function ServicesPage() {
       <section id="care-pathway" className="tms-section ket-ivory">
         <div className="tms-wrap">
           <Reveal className="svc-path">
-            <Eyebrow>Your care pathway</Eyebrow>
-            <h2 className="tms-h2 mt-3">From assessment to treatment</h2>
-            <div className="svc-path-track" aria-hidden="true">
-              <span className="svc-path-line" />
+            <div className="svc-path-intro">
+              <Eyebrow>What to expect</Eyebrow>
+              <h2 className="tms-h2 mt-3">From assessment to treatment</h2>
             </div>
             <ol className="svc-path-grid">
               {PATHWAY.map((item) => (
                 <li key={item.index} className="svc-path-step">
-                  <p>{item.index}</p>
-                  <h3>{item.title}</h3>
+                  <span className="svc-path-node" aria-hidden="true">{item.index}</span>
+                  <div className="svc-path-card">
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                    {"options" in item ? (
+                      <div className="svc-path-options" aria-label="Treatment options">
+                        {item.options.map((option) => (
+                          <span key={option} className="svc-path-option">{option}</span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 </li>
               ))}
             </ol>
-            <p className="tms-note">
+            <p className="tms-note svc-path-note">
               Treatment is recommended only when clinically appropriate following psychiatric
               assessment.
             </p>
@@ -273,8 +304,8 @@ export default function ServicesPage() {
               position="center 40%"
             />
             <div>
-              <Eyebrow>Initial Assessment</Eyebrow>
-              <h2 className="tms-h2 mt-3">Comprehensive Assessment by Psychiatrists</h2>
+              <Eyebrow>Psychiatrist-led care</Eyebrow>
+              <h2 className="tms-h2 mt-3">A comprehensive psychiatric assessment</h2>
               <p className="tms-lede mt-4">
                 Living with a mental health condition can feel isolating and discouraging. You
                 are not alone. A NeuroLinks psychiatrist can review your diagnosis and treatment
@@ -299,8 +330,8 @@ export default function ServicesPage() {
         <div className="tms-wrap">
           <Reveal className="svc-split svc-split-rev">
             <div>
-              <Eyebrow>Psychometric Assessment</Eyebrow>
-              <h2 className="tms-h2 mt-3">Evaluate Severity</h2>
+              <Eyebrow>Measurement-based care</Eyebrow>
+              <h2 className="tms-h2 mt-3">Measuring symptoms and tracking progress</h2>
               <p className="tms-lede mt-4">
                 Standardized questionnaires help evaluate symptom severity and establish a
                 baseline before treatment. Additional measures may be selected according to
@@ -335,7 +366,7 @@ export default function ServicesPage() {
                 position="center 45%"
               />
               <div>
-                <Eyebrow>TMS</Eyebrow>
+                <Eyebrow>Non-invasive neuromodulation</Eyebrow>
                 <h2 className="tms-h2 mt-3">Transcranial Magnetic Stimulation</h2>
                 <h3 className="svc-group-label">Treatment schedule</h3>
                 <p className="tms-lede mt-2">{TMS_OVERVIEW}</p>
@@ -366,7 +397,7 @@ export default function ServicesPage() {
           <Reveal>
             <div className="svc-split svc-split-rev svc-ket">
               <div>
-                <Eyebrow>Ketamine</Eyebrow>
+                <Eyebrow>Rapid-acting treatment option</Eyebrow>
                 <h2 className="tms-h2 mt-3">Ketamine Therapy</h2>
                 <h3 className="svc-group-label svc-group-label-gold">Treatment schedule</h3>
                 <p className="tms-lede mt-2">{KETAMINE_GROUPS[0].body}</p>
@@ -403,7 +434,7 @@ export default function ServicesPage() {
       <section id="coverage" className="tms-section bg-white">
         <div className="tms-wrap">
           <Reveal>
-            <Eyebrow>Coverage</Eyebrow>
+            <Eyebrow>Accessing treatment</Eyebrow>
             <h2 className="tms-h2 mt-3">Coverage and financial considerations</h2>
             <p className="tms-lede mt-4">
               Our mission is to improve the mental well-being and functioning of as many
