@@ -35,28 +35,28 @@ const PATHWAY = [
   {
     index: "01",
     title: "Start with a conversation",
-    body: "Tell us what you have been experiencing and what treatments you have already tried.",
+    body: "Tell us about your concerns and previous treatments.",
   },
   {
     index: "02",
     title: "Psychiatric assessment",
-    body: "We review your diagnosis, treatment history, symptoms and relevant medical factors.",
+    body: "We review your symptoms, diagnosis and treatment history.",
   },
   {
     index: "03",
     title: "Personalized treatment plan",
-    body: "We discuss which options may be appropriate for your individual situation.",
+    body: "We discuss options suited to your clinical needs.",
   },
   {
     index: "04",
     title: "Begin treatment",
-    body: "Treatment may include TMS or ketamine when clinically appropriate.",
+    body: "TMS or ketamine may be recommended when appropriate.",
     options: ["TMS", "Ketamine"],
   },
   {
     index: "05",
     title: "Review progress",
-    body: "Symptoms, response, tolerability and next steps are monitored throughout care.",
+    body: "We monitor response, tolerability and next steps.",
   },
 ] as const;
 
