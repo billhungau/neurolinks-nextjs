@@ -2,7 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
-import { buildConfig } from "payload";
+import { buildConfig, type PayloadRequest } from "payload";
 import { CMS_ADMIN_PATH, CMS_API_PATH, cmsTrustedOrigins, siteOrigin } from "./lib/site";
 import { AISourceDocuments } from "./payload/collections/AISourceDocuments";
 import { Authors } from "./payload/collections/Authors";
@@ -67,6 +67,16 @@ export default buildConfig({
     push: false,
     migrationDir: path.resolve(dirname, "payload/migrations"),
   }),
+  jobs: {
+    access: {
+      run: ({ req }: { req: PayloadRequest }): boolean => {
+        if (req.user) return true;
+        const secret = process.env.CRON_SECRET?.trim();
+        if (!secret) return false;
+        return req.headers.get("authorization") === `Bearer ${secret}`;
+      },
+    },
+  },
   // Nothing in NeuroLinks consumes GraphQL, and disabling it keeps the public
   // API surface as small as possible.
   graphQL: {
