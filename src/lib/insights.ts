@@ -119,8 +119,13 @@ export function countWords(text: string) {
   return matches?.length ?? 0;
 }
 
-export function defaultCtaHref(topics: readonly string[] | null | undefined) {
-  if (topics?.includes("veterans-and-coverage")) return "/veterans/#veterans-contact";
+export function defaultCtaHref(
+  topics: readonly string[] | null | undefined,
+  categorySlug?: string | null,
+) {
+  if (categorySlug === "veterans" || topics?.includes("veterans-and-coverage")) {
+    return "/veterans/#veterans-contact";
+  }
   if (topics?.includes("ketamine-and-spravato")) {
     return "/ketamine-treatment-resistant-depression-nanaimo/";
   }
