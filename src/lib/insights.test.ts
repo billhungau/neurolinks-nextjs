@@ -59,6 +59,10 @@ test("article paths keep trailing slashes and topic slugs are known", () => {
   assert.equal(isInsightsTopicSlug("tms"), true);
   assert.equal(isInsightsTopicSlug("blog"), false);
   assert.equal(defaultCtaHref(["veterans-and-coverage"]), "/veterans/#veterans-contact");
+  assert.equal(
+    defaultCtaHref(["ptsd-and-anxiety", "ketamine-and-spravato", "tms"], "veterans"),
+    "/veterans/#veterans-contact",
+  );
   assert.equal(defaultCtaHref(["tms"]), "/contact/");
   assert.equal(defaultCtaHref(["ketamine-and-spravato"]), "/ketamine-treatment-resistant-depression-nanaimo/");
   assert.equal(defaultCtaHref([]), "/contact/");
