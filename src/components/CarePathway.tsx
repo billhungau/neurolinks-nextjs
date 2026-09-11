@@ -192,7 +192,7 @@ export function CarePathway({
                   aria-hidden="true"
                 />
                 <div className="relative z-10 flex min-h-[22rem] max-w-[42rem] flex-col justify-center px-12 py-10 lg:min-h-[23rem] lg:px-14">
-                  <h3 className="max-w-[34rem] font-serif text-[2.55rem] font-semibold leading-[1.08] text-[var(--nl-navy)] lg:text-[2.75rem]">
+                  <h3 className="whitespace-nowrap font-serif text-[2.25rem] font-semibold leading-[1.08] text-[var(--nl-navy)] lg:text-[2.4rem]">
                     Improvement in everyday life
                   </h3>
                   <p className="mt-5 max-w-[31rem] text-[1.05rem] leading-relaxed text-[var(--nl-muted)]">
