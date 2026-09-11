@@ -17,7 +17,7 @@ export const Insights: CollectionConfig = {
     preview: previewUrl,
   },
   access: { read: publishedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated, readVersions: authenticated },
-  versions: { maxPerDoc: 30, drafts: { autosave: { interval: 800 }, schedulePublish: false } },
+  versions: { maxPerDoc: 30, drafts: { autosave: { interval: 800 }, schedulePublish: true } },
   hooks: {
     beforeChange: [clearAISourceSessionBeforePublish],
     afterChange: [revalidateInsight],
