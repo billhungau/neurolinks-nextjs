@@ -2,6 +2,7 @@ import { ButtonLink } from "@/components/ButtonLink";
 import { Eyebrow } from "@/components/Eyebrow";
 import { HomeForwardMotion } from "@/components/HomeForwardMotion";
 import { Reveal } from "@/components/Reveal";
+import { EVERYDAY_LIFE_IMAGE_DATA } from "@/lib/everyday-life-image";
 
 export type CarePathwayIcon = "talk" | "assess" | "path" | "authorize" | "follow";
 
@@ -157,13 +158,11 @@ export function CarePathway({
         {showEverydayLifePanel ? (
           <Reveal>
             <aside className="mt-10 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white text-[var(--nl-navy)] shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-              {/* Mobile: explicit image block so the local asset renders directly. */}
               <div className="h-[12rem] w-full overflow-hidden sm:h-[14rem] md:hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/media/images/everyday-life-vancouver-island.webp"
+                  src={EVERYDAY_LIFE_IMAGE_DATA}
                   alt="Calm mountain lake landscape on Vancouver Island"
-                  loading="lazy"
                   className="h-full w-full object-cover object-center"
                 />
               </div>
@@ -177,13 +176,11 @@ export function CarePathway({
                 </p>
               </div>
 
-              {/* Desktop: direct local image with a white readability gradient over the left side. */}
               <div className="relative hidden min-h-[22rem] md:block lg:min-h-[23rem]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/media/images/everyday-life-vancouver-island.webp"
+                  src={EVERYDAY_LIFE_IMAGE_DATA}
                   alt=""
-                  loading="lazy"
                   aria-hidden="true"
                   className="absolute inset-0 h-full w-full object-cover object-center"
                 />
