@@ -46,7 +46,7 @@
 .insights-keypoints {
   position: relative;
   margin-block: 1.5rem 2rem;
-  padding: 1.35rem 1.45rem 1.25rem 1.6rem;
+  padding: 1.35rem 1.45rem 1.25rem 1.4rem;
   border: 1px solid color-mix(in srgb, var(--nl-blue) 20%, var(--nl-border));
   border-left: 4px solid var(--nl-blue);
   border-radius: var(--nl-radius-lg);
@@ -62,18 +62,30 @@
 
 .insights-keypoints ul {
   display: grid;
-  gap: .62rem;
+  gap: .7rem;
   margin: 0;
-  padding-left: 1.2rem;
+  padding-left: 0;
+  list-style: none;
 }
 
 .insights-keypoints li {
-  padding-left: .18rem;
+  position: relative;
+  padding-left: 1.15rem;
   line-height: 1.55;
   color: var(--nl-ink);
 }
 
-.insights-keypoints li::marker { color: var(--nl-blue); }
+.insights-keypoints li::before {
+  content: "";
+  position: absolute;
+  top: .66em;
+  left: .08rem;
+  width: .4rem;
+  height: .4rem;
+  border-radius: .08rem;
+  background: var(--nl-blue);
+  transform: rotate(45deg);
+}
 
 .insights-reading-layout {
   max-width: 48rem;
@@ -260,7 +272,10 @@
   .insights-editorial-dates { display: grid; gap: .22rem; }
   .insights-editorial-dates > *:not(:last-child)::after { content: none; }
   .insights-article-hero { margin-block: 1.5rem 1.6rem; }
-  .insights-keypoints { margin-block: 1.25rem 1.5rem; padding: 1.05rem 1rem 1.05rem 1.2rem; }
+  .insights-keypoints { margin-block: 1.25rem 1.5rem; padding: .95rem .9rem 1rem 1.05rem; }
+  .insights-keypoints .insights-box-label { margin-bottom: .7rem; letter-spacing: .12em; }
+  .insights-keypoints li { padding-left: 1rem; }
+  .insights-keypoints li::before { width: .36rem; height: .36rem; }
   .insights-toc { margin-bottom: 1.35rem; }
   .insights-references li { font-size: .92rem; line-height: 1.55; margin-bottom: 1.05rem; }
   .insights-reference-links { margin-top: .3rem; }
