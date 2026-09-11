@@ -170,10 +170,10 @@ export function CarePathway({
                   aria-hidden="true"
                 />
                 <div className="relative z-10 flex min-h-[20rem] flex-col justify-end px-5 pb-6 pt-20 text-white sm:min-h-[21rem] sm:px-7 sm:pb-7">
-                  <h3 className="max-w-[31rem] font-serif text-[1.75rem] font-semibold leading-[1.08] text-white sm:text-[1.95rem]">
+                  <h3 className="max-w-[31rem] font-serif text-[1.68rem] font-semibold leading-[1.07] text-white sm:text-[1.85rem]">
                     Improvement that matters in everyday life
                   </h3>
-                  <p className="mt-3 max-w-[31rem] text-[0.97rem] leading-[1.6] text-white/88 sm:text-[1rem]">
+                  <p className="mt-2.5 max-w-[31rem] text-[0.97rem] leading-[1.6] text-white/88 sm:text-[1rem]">
                     Meaningful improvement can also mean being more able to engage with work,
                     relationships, routines and the parts of life that matter to you.
                   </p>
