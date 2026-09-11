@@ -157,8 +157,8 @@ export function CarePathway({
 
         {showEverydayLifePanel ? (
           <Reveal>
-            <aside className="mt-10 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white text-[var(--nl-navy)] shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-              <div className="h-[12rem] w-full overflow-hidden sm:h-[14rem] md:hidden">
+            <aside className="mt-7 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white text-[var(--nl-navy)] shadow-[0_18px_50px_rgba(0,0,0,0.18)] sm:mt-8 md:mt-10">
+              <div className="h-[10rem] w-full overflow-hidden sm:h-[11.5rem] md:hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={EVERYDAY_LIFE_IMAGE_DATA}
@@ -166,11 +166,11 @@ export function CarePathway({
                   className="h-full w-full object-cover object-center"
                 />
               </div>
-              <div className="px-6 py-8 sm:px-8 sm:py-9 md:hidden">
-                <h3 className="max-w-[34rem] font-serif text-[2rem] font-semibold leading-[1.08] text-[var(--nl-navy)] sm:text-[2.25rem]">
+              <div className="px-5 py-6 sm:px-7 sm:py-7 md:hidden">
+                <h3 className="max-w-[31rem] font-serif text-[1.75rem] font-semibold leading-[1.08] text-[var(--nl-navy)] sm:text-[1.95rem]">
                   Improvement that matters in everyday life
                 </h3>
-                <p className="mt-4 max-w-[32rem] text-[1rem] leading-relaxed text-[var(--nl-muted)] sm:text-[1.05rem]">
+                <p className="mt-3 max-w-[31rem] text-[0.97rem] leading-[1.65] text-[var(--nl-muted)] sm:text-[1rem]">
                   Meaningful improvement can also mean being more able to engage with work,
                   relationships, routines and the parts of life that matter to you.
                 </p>
