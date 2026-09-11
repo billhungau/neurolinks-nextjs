@@ -157,30 +157,52 @@ export function CarePathway({
 
         {showEverydayLifePanel ? (
           <Reveal>
-            <aside className="relative mt-10 min-h-[22rem] overflow-hidden rounded-[1.5rem] border border-white/10 bg-white text-[var(--nl-navy)] shadow-[0_18px_50px_rgba(0,0,0,0.18)] md:min-h-[24rem]">
-              <Image
-                src="/media/images/everyday-life-vancouver-island.webp"
-                alt="Calm mountain lake landscape on Vancouver Island"
-                fill
-                sizes="(max-width: 768px) 100vw, 1200px"
-                loading="lazy"
-                className="object-cover object-center"
-              />
-              <div
-                className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/10 md:via-white/80"
-                aria-hidden="true"
-              />
-              <div className="relative z-10 flex min-h-[22rem] max-w-[43rem] flex-col justify-center px-6 py-10 sm:px-8 md:min-h-[24rem] md:px-12 lg:px-14">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--nl-blue-bright)] sm:text-sm">
-                  Improvement in everyday life
-                </p>
-                <h3 className="mt-4 max-w-[34rem] font-serif text-[2rem] font-semibold leading-[1.08] text-[var(--nl-navy)] sm:text-[2.35rem] md:text-[2.75rem]">
+            <aside className="mt-10 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white text-[var(--nl-navy)] shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+              {/* Mobile: make the landscape an explicit visual block rather than hiding it behind copy. */}
+              <div className="relative h-[12rem] w-full sm:h-[14rem] md:hidden">
+                <Image
+                  src="/media/images/everyday-life-vancouver-island.webp"
+                  alt="Calm mountain lake landscape on Vancouver Island"
+                  fill
+                  sizes="100vw"
+                  loading="lazy"
+                  className="object-cover object-center"
+                />
+              </div>
+              <div className="px-6 py-8 sm:px-8 sm:py-9 md:hidden">
+                <h3 className="max-w-[34rem] font-serif text-[2rem] font-semibold leading-[1.08] text-[var(--nl-navy)] sm:text-[2.25rem]">
                   Improvement that matters in everyday life
                 </h3>
-                <p className="mt-5 max-w-[32rem] text-[1rem] leading-relaxed text-[var(--nl-muted)] sm:text-[1.05rem]">
+                <p className="mt-4 max-w-[32rem] text-[1rem] leading-relaxed text-[var(--nl-muted)] sm:text-[1.05rem]">
                   Meaningful improvement can also mean being more able to engage with work,
                   relationships, routines and the parts of life that matter to you.
                 </p>
+              </div>
+
+              {/* Desktop: preserve the wide visual pause, with the image clearly visible on the right. */}
+              <div className="relative hidden min-h-[22rem] md:block lg:min-h-[23rem]">
+                <Image
+                  src="/media/images/everyday-life-vancouver-island.webp"
+                  alt=""
+                  fill
+                  sizes="1200px"
+                  loading="lazy"
+                  className="object-cover object-center"
+                  aria-hidden="true"
+                />
+                <div
+                  className="absolute inset-0 bg-gradient-to-r from-white from-[0%] via-white/95 via-[42%] to-transparent to-[76%]"
+                  aria-hidden="true"
+                />
+                <div className="relative z-10 flex min-h-[22rem] max-w-[42rem] flex-col justify-center px-12 py-10 lg:min-h-[23rem] lg:px-14">
+                  <h3 className="max-w-[34rem] font-serif text-[2.55rem] font-semibold leading-[1.08] text-[var(--nl-navy)] lg:text-[2.75rem]">
+                    Improvement that matters in everyday life
+                  </h3>
+                  <p className="mt-5 max-w-[31rem] text-[1.05rem] leading-relaxed text-[var(--nl-muted)]">
+                    Meaningful improvement can also mean being more able to engage with work,
+                    relationships, routines and the parts of life that matter to you.
+                  </p>
+                </div>
               </div>
             </aside>
           </Reveal>
