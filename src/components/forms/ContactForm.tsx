@@ -9,6 +9,7 @@ import {
   type RefObject,
 } from "react";
 import {
+  ADVERTISING_LANDING_SOURCE,
   CONTACT_ERROR_WITH_PHONE,
   CONTACT_LIMITS,
   CONTACT_SUCCESS_MESSAGE,
@@ -61,6 +62,7 @@ export function ContactForm({
   const emailRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
+  const phoneRequired = source !== ADVERTISING_LANDING_SOURCE;
 
   function updateField(name: ContactFieldName, value: string) {
     setValues((current) => ({ ...current, [name]: value }));
@@ -99,7 +101,7 @@ export function ContactForm({
 
     const trimmed = trimContactFields(values);
     setValues(trimmed);
-    const nextErrors = validateContactFields(trimmed);
+    const nextErrors = validateContactFields(trimmed, { phoneRequired });
     if (Object.keys(nextErrors).length > 0) {
       lockRef.current.release();
       setErrors(nextErrors);
@@ -234,6 +236,7 @@ export function ContactForm({
             inputRef={phoneRef}
             disabled={submitting}
             onChange={updateField}
+            required={phoneRequired}
           />
         </div>
         <Field
@@ -267,6 +270,7 @@ function Field({
   type = "text",
   autoComplete,
   multiline = false,
+  required = true,
 }: {
   name: ContactFieldName;
   value: string;
@@ -278,6 +282,7 @@ function Field({
   type?: "text" | "email" | "tel";
   autoComplete?: string;
   multiline?: boolean;
+  required?: boolean;
 }) {
   const id = `contact-${name}`;
   const errorId = `${id}-error`;
@@ -286,8 +291,8 @@ function Field({
     id,
     name,
     value,
-    required: true,
-    "aria-required": true as const,
+    required,
+    "aria-required": required,
     "aria-invalid": invalid,
     "aria-describedby": invalid ? errorId : undefined,
     maxLength,
@@ -300,9 +305,11 @@ function Field({
     <div className={`ct-field${invalid ? " is-invalid" : ""}`}>
       <label htmlFor={id}>
         {FIELD_LABELS[name]}{" "}
-        <span className="ct-req" aria-hidden="true">
-          *
-        </span>
+        {required ? (
+          <span className="ct-req" aria-hidden="true">
+            *
+          </span>
+        ) : null}
       </label>
       {multiline ? (
         <textarea
