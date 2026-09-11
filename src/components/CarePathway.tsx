@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
 import { Eyebrow } from "@/components/Eyebrow";
 import { HomeForwardMotion } from "@/components/HomeForwardMotion";
@@ -158,15 +157,14 @@ export function CarePathway({
         {showEverydayLifePanel ? (
           <Reveal>
             <aside className="mt-10 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white text-[var(--nl-navy)] shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-              {/* Mobile: make the landscape an explicit visual block rather than hiding it behind copy. */}
-              <div className="relative h-[12rem] w-full sm:h-[14rem] md:hidden">
-                <Image
+              {/* Mobile: explicit image block so the local asset renders directly. */}
+              <div className="h-[12rem] w-full overflow-hidden sm:h-[14rem] md:hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src="/media/images/everyday-life-vancouver-island.webp"
                   alt="Calm mountain lake landscape on Vancouver Island"
-                  fill
-                  sizes="100vw"
                   loading="lazy"
-                  className="object-cover object-center"
+                  className="h-full w-full object-cover object-center"
                 />
               </div>
               <div className="px-6 py-8 sm:px-8 sm:py-9 md:hidden">
@@ -179,16 +177,15 @@ export function CarePathway({
                 </p>
               </div>
 
-              {/* Desktop: preserve the wide visual pause, with the image clearly visible on the right. */}
+              {/* Desktop: direct local image with a white readability gradient over the left side. */}
               <div className="relative hidden min-h-[22rem] md:block lg:min-h-[23rem]">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src="/media/images/everyday-life-vancouver-island.webp"
                   alt=""
-                  fill
-                  sizes="1200px"
                   loading="lazy"
-                  className="object-cover object-center"
                   aria-hidden="true"
+                  className="absolute inset-0 h-full w-full object-cover object-center"
                 />
                 <div
                   className="absolute inset-0 bg-gradient-to-r from-white from-[0%] via-white/95 via-[42%] to-transparent to-[76%]"
