@@ -2,7 +2,6 @@ import { ButtonLink } from "@/components/ButtonLink";
 import { Eyebrow } from "@/components/Eyebrow";
 import { HomeForwardMotion } from "@/components/HomeForwardMotion";
 import { Reveal } from "@/components/Reveal";
-import { EVERYDAY_LIFE_IMAGE_DATA } from "@/lib/everyday-life-image";
 
 export type CarePathwayIcon = "talk" | "assess" | "path" | "authorize" | "follow";
 
@@ -161,7 +160,7 @@ export function CarePathway({
               <div className="relative min-h-[20rem] overflow-hidden sm:min-h-[21rem] md:hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={EVERYDAY_LIFE_IMAGE_DATA}
+                  src="/media/images/20250910_141837.jpg"
                   alt="Calm mountain lake landscape on Vancouver Island"
                   className="absolute inset-0 h-full w-full object-cover object-center"
                 />
@@ -179,19 +178,19 @@ export function CarePathway({
                 </div>
               </div>
 
-              <div className="relative hidden min-h-[22rem] md:block lg:min-h-[23rem]">
+              <div className="relative hidden min-h-[20rem] md:block lg:min-h-[21rem]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={EVERYDAY_LIFE_IMAGE_DATA}
+                  src="/media/images/20250910_141837.jpg"
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 h-full w-full object-cover object-center"
                 />
                 <div
-                  className="absolute inset-0 bg-gradient-to-r from-white from-[0%] via-white/95 via-[42%] to-transparent to-[76%]"
+                  className="absolute inset-0 bg-gradient-to-r from-white from-[0%] via-white/92 via-[34%] to-transparent to-[65%]"
                   aria-hidden="true"
                 />
-                <div className="relative z-10 flex min-h-[22rem] max-w-[42rem] flex-col justify-center px-12 py-10 lg:min-h-[23rem] lg:px-14">
+                <div className="relative z-10 flex min-h-[20rem] max-w-[42rem] flex-col justify-center px-12 py-10 lg:min-h-[21rem] lg:px-14">
                   <h3 className="whitespace-nowrap font-serif text-[2.25rem] font-semibold leading-[1.08] text-[var(--nl-navy)] lg:text-[2.4rem]">
                     Improvement in everyday life
                   </h3>
