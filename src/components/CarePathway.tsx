@@ -2,7 +2,6 @@ import { ButtonLink } from "@/components/ButtonLink";
 import { Eyebrow } from "@/components/Eyebrow";
 import { HomeForwardMotion } from "@/components/HomeForwardMotion";
 import { Reveal } from "@/components/Reveal";
-import { EVERYDAY_LIFE_IMAGE_DATA } from "@/lib/everyday-life-image";
 
 export type CarePathwayIcon = "talk" | "assess" | "path" | "authorize" | "follow";
 
@@ -161,7 +160,7 @@ export function CarePathway({
               <div className="relative min-h-[20rem] overflow-hidden sm:min-h-[21rem] md:hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={EVERYDAY_LIFE_IMAGE_DATA}
+                  src="/media/images/20250910_141837.jpg"
                   alt="Calm mountain lake landscape on Vancouver Island"
                   className="absolute inset-0 h-full w-full object-cover object-center"
                 />
@@ -182,7 +181,7 @@ export function CarePathway({
               <div className="relative hidden min-h-[22rem] md:block lg:min-h-[23rem]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={EVERYDAY_LIFE_IMAGE_DATA}
+                  src="/media/images/20250910_141837.jpg"
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 h-full w-full object-cover object-center"
