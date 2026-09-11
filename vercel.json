@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/payload-api/payload-jobs/run?limit=25",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
