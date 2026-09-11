@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ButtonLink } from "@/components/ButtonLink";
 import { Eyebrow } from "@/components/Eyebrow";
 import { HomeForwardMotion } from "@/components/HomeForwardMotion";
@@ -94,6 +95,8 @@ export function CarePathway({
   eyebrow?: string;
   sectionId?: string;
 }) {
+  const showEverydayLifePanel = headingId === "pathway-heading";
+
   return (
     <section
       id={sectionId}
@@ -151,6 +154,37 @@ export function CarePathway({
             <span aria-hidden="true">→</span>
           </ButtonLink>
         </div>
+
+        {showEverydayLifePanel ? (
+          <Reveal>
+            <aside className="relative mt-10 min-h-[22rem] overflow-hidden rounded-[1.5rem] border border-white/10 bg-white text-[var(--nl-navy)] shadow-[0_18px_50px_rgba(0,0,0,0.18)] md:min-h-[24rem]">
+              <Image
+                src="/media/images/everyday-life-vancouver-island.webp"
+                alt="Calm mountain lake landscape on Vancouver Island"
+                fill
+                sizes="(max-width: 768px) 100vw, 1200px"
+                loading="lazy"
+                className="object-cover object-center"
+              />
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/10 md:via-white/80"
+                aria-hidden="true"
+              />
+              <div className="relative z-10 flex min-h-[22rem] max-w-[43rem] flex-col justify-center px-6 py-10 sm:px-8 md:min-h-[24rem] md:px-12 lg:px-14">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--nl-blue-bright)] sm:text-sm">
+                  Improvement in everyday life
+                </p>
+                <h3 className="mt-4 max-w-[34rem] font-serif text-[2rem] font-semibold leading-[1.08] text-[var(--nl-navy)] sm:text-[2.35rem] md:text-[2.75rem]">
+                  Improvement that matters in everyday life
+                </h3>
+                <p className="mt-5 max-w-[32rem] text-[1rem] leading-relaxed text-[var(--nl-muted)] sm:text-[1.05rem]">
+                  Meaningful improvement can also mean being more able to engage with work,
+                  relationships, routines and the parts of life that matter to you.
+                </p>
+              </div>
+            </aside>
+          </Reveal>
+        ) : null}
       </div>
     </section>
   );
