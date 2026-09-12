@@ -12,6 +12,7 @@ export type ContactAcknowledgementResult = {
 };
 
 const DEFAULT_RESEND_FROM = "NeuroLinks Website <notifications@neurolinks.ca>";
+const CONTACT_SUBJECT = "Your message to NeuroLinks";
 
 function acknowledgementText(fields: ContactFields) {
   return [
@@ -64,7 +65,7 @@ export async function sendContactAcknowledgement(
         from,
         to: [context.fields.email],
         reply_to: SITE.email,
-        subject: "We received your message | NeuroLinks",
+        subject: CONTACT_SUBJECT,
         text: acknowledgementText(context.fields),
       }),
       cache: "no-store",
