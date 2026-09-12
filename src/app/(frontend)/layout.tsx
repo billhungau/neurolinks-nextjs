@@ -52,7 +52,10 @@ export const metadata: Metadata = {
   applicationName: SITE.name,
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png" }],
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png", sizes: "300x300" },
+    ],
     apple: [{ url: "/apple-icon.png", type: "image/png" }],
   },
   title: {
