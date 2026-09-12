@@ -49,6 +49,12 @@ type RootLayoutProps = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(PRODUCTION_ORIGIN),
+  applicationName: SITE.name,
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+  },
   title: {
     default: `${SITE.name} – ${SITE.tagline}`,
     template: `%s | ${SITE.shortName}`,
