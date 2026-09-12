@@ -24,18 +24,26 @@ export const CONTACT_NAV = {
 /** Desktop text links (Contact is the yellow button, not this list). */
 export const DESKTOP_NAV = PRIMARY_NAV;
 
+/**
+ * Footer links deliberately use descriptive anchor text. The primary header
+ * stays compact for navigation, while these labels give users and search
+ * engines clearer context about the destination pages.
+ */
 export const FOOTER_TREATMENTS = [
-  { href: "/about-tms-treatment-on-psychiatric-illness/", label: "About TMS" },
+  { href: "/about-tms-treatment-on-psychiatric-illness/", label: "TMS Treatment" },
   {
     href: "/ketamine-treatment-resistant-depression-nanaimo/",
-    label: "About Ketamine",
+    label: "Ketamine Treatment",
   },
-  { href: "/services-psychiatric-tms-ketamine-treatment/", label: "Assessment & Treatment" },
+  {
+    href: "/services-psychiatric-tms-ketamine-treatment/",
+    label: "Assessment & Treatment",
+  },
 ] as const satisfies readonly NavItem[];
 
 export const FOOTER_QUICK_LINKS = [
   { href: "/veterans/", label: "Veterans" },
-  { href: "/psychiatrist-tms-nanaimo/", label: "About Us" },
+  { href: "/psychiatrist-tms-nanaimo/", label: "About NeuroLinks" },
   { href: "/contact/", label: "Contact" },
   { href: "/physician-referral/", label: "Physician Referral" },
 ] as const satisfies readonly NavItem[];
