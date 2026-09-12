@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { ButtonLink } from "@/components/ButtonLink";
 import { Eyebrow } from "@/components/Eyebrow";
 import { HomeForwardMotion } from "@/components/HomeForwardMotion";
@@ -17,6 +19,8 @@ export type CarePathwayStep = {
  * because a page carries at most one pathway.
  */
 const RAIL_GRADIENT_ID = "home-forward-line";
+const EVERYDAY_LIFE_IMAGE = "/media/images/20250910_141837.jpg";
+const EVERYDAY_LIFE_SIZES = "(max-width: 767px) 100vw, 1200px";
 
 function PathwayIcon({ name }: { name: CarePathwayIcon }) {
   const common = {
@@ -158,11 +162,12 @@ export function CarePathway({
           <Reveal>
             <aside className="mt-7 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white text-[var(--nl-navy)] shadow-[0_18px_50px_rgba(0,0,0,0.18)] sm:mt-8 md:mt-10">
               <div className="relative min-h-[20rem] overflow-hidden sm:min-h-[21rem] md:hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/media/images/20250910_141837.jpg"
+                <Image
+                  src={EVERYDAY_LIFE_IMAGE}
                   alt="Calm mountain lake landscape on Vancouver Island"
-                  className="absolute inset-0 h-full w-full object-cover object-center"
+                  fill
+                  sizes={EVERYDAY_LIFE_SIZES}
+                  className="object-cover object-center"
                 />
                 <div
                   className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,27,54,0.02)_18%,rgba(7,27,54,0.28)_48%,rgba(7,27,54,0.9)_100%)]"
@@ -179,12 +184,13 @@ export function CarePathway({
               </div>
 
               <div className="relative hidden min-h-[20rem] md:block lg:min-h-[21rem]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/media/images/20250910_141837.jpg"
+                <Image
+                  src={EVERYDAY_LIFE_IMAGE}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 h-full w-full object-cover object-center"
+                  fill
+                  sizes={EVERYDAY_LIFE_SIZES}
+                  className="object-cover object-center"
                 />
                 <div
                   className="absolute inset-0 bg-gradient-to-r from-white from-[0%] via-white/92 via-[34%] to-transparent to-[65%]"
