@@ -4,11 +4,13 @@ import {
   MAX_CONTACT_BODY_BYTES,
   isJotformSuccessPayload,
   jotformSubmissionBody,
+  jotformSubmissionId,
   jotformTimeoutMs,
   originIsAllowed,
   parseContactPayload,
   parseContactSource,
 } from "./contact-form.ts";
+import { sendContactNotification } from "./contact-notification.ts";
 
 type JsonResult = {
   success: boolean;
@@ -116,6 +118,18 @@ export async function handleContactPost(request: Request, fetcher?: typeof fetch
     if (!upstream.ok || !isJotformSuccessPayload(data)) {
       console.error("Contact submission upstream request failed");
       return genericError(502);
+    }
+
+    const submissionId = jotformSubmissionId(data);
+    if (submissionId) {
+      await sendContactNotification(
+        {
+          fields: parsed.fields,
+          source,
+          jotformSubmissionId: submissionId,
+        },
+        send,
+      );
     }
 
     return json({ success: true, message: CONTACT_SUCCESS_MESSAGE }, 200);
