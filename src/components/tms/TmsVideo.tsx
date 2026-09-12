@@ -113,11 +113,14 @@ export function TmsVideo({
             ref={modalVideoRef}
             className="block aspect-video max-h-[80svh] w-full bg-black object-contain"
             controls
+            controlsList="nodownload"
+            disablePictureInPicture
             autoPlay
             preload="metadata"
             poster={poster}
             src={src}
             playsInline
+            onContextMenu={(event) => event.preventDefault()}
           >
             {label}
           </video>
@@ -132,10 +135,13 @@ export function TmsVideo({
         <video
           className="h-full w-full object-cover"
           controls
+          controlsList="nodownload"
+          disablePictureInPicture
           preload="none"
           poster={poster}
           src={src}
           playsInline
+          onContextMenu={(event) => event.preventDefault()}
         >
           {label}
         </video>
