@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { SiteChrome } from "@/components/SiteChrome";
 import { PhysicianReferralExperience } from "@/components/forms/PhysicianReferralExperience";
+import { ReferralScrollReset } from "@/components/forms/ReferralScrollReset";
 import { MEDIA } from "@/lib/media";
 import { IMG_SIZES } from "@/lib/image-sizes";
 import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
@@ -16,6 +17,7 @@ export const metadata = pageMetadata({
 export default function ReferralPage() {
   return (
     <SiteChrome>
+      <ReferralScrollReset />
       <section id="referral-hero" className="ref-hero relative overflow-hidden bg-[var(--nl-navy)]">
         <div className="absolute inset-0">
           <Image
