@@ -1,4 +1,4 @@
-import { productionUrl, withTrailingSlash } from "./site.ts";
+import { PRODUCTION_ORIGIN, productionUrl, withTrailingSlash } from "./site.ts";
 
 export const INSIGHTS_PATH = "/insights/";
 export const ADMIN_PATH = "/admin/";
@@ -73,6 +73,30 @@ export function isInsightsPath(pathname: string) {
 
 export function insightsArticlePath(slug: string) {
   return withTrailingSlash(`/insights/${slug.replace(/^\/+|\/+$/g, "")}`);
+}
+
+/**
+ * Resolve an Insights canonical override safely.
+ *
+ * Canonical overrides are only honored when they remain on the designated
+ * production origin. This prevents an accidental Vercel preview/staging URL,
+ * foreign domain, http URL, credentials, query string, or fragment from
+ * becoming the public canonical. Invalid overrides fall back to the article's
+ * normal https://neurolinks.ca/insights/[slug]/ URL.
+ */
+export function resolveInsightCanonical(path: string, override?: string | null) {
+  const fallback = productionUrl(path);
+  const candidate = override?.trim();
+  if (!candidate) return fallback;
+
+  try {
+    const url = new URL(candidate);
+    if (url.origin !== PRODUCTION_ORIGIN) return fallback;
+    if (url.username || url.password || url.search || url.hash) return fallback;
+    return `${PRODUCTION_ORIGIN}${withTrailingSlash(url.pathname)}`;
+  } catch {
+    return fallback;
+  }
 }
 
 export function topicFilterHref(slug?: string | null) {
@@ -261,7 +285,7 @@ export function articleJsonLd(article: {
   topics?: readonly string[] | null;
 }) {
   const path = insightsArticlePath(article.slug);
-  const canonical = article.canonicalUrl || productionUrl(path);
+  const canonical = resolveInsightCanonical(path, article.canonicalUrl);
   const reviewer = personJsonLd(article.medicalReviewer);
   // `reviewedBy` and `lastReviewed` belong to WebPage, so they are only
   // emitted when the article is also typed as a MedicalWebPage.
