@@ -10,6 +10,7 @@ import {
   parseContactPayload,
   parseContactSource,
 } from "./contact-form.ts";
+import { sendContactAcknowledgement } from "./contact-acknowledgement.ts";
 import { sendContactNotification } from "./contact-notification.ts";
 
 type JsonResult = {
@@ -122,10 +123,16 @@ export async function handleContactPost(request: Request, fetcher?: typeof fetch
 
     const submissionId = jotformSubmissionId(data);
     if (submissionId) {
-      await sendContactNotification(
+      const notificationContext = {
+        fields: parsed.fields,
+        source,
+        jotformSubmissionId: submissionId,
+      };
+
+      await sendContactNotification(notificationContext, send);
+      await sendContactAcknowledgement(
         {
           fields: parsed.fields,
-          source,
           jotformSubmissionId: submissionId,
         },
         send,
