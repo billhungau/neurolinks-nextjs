@@ -102,6 +102,17 @@ function ogImage(image: SeoImage) {
   };
 }
 
+/**
+ * Keep the preferred Google site name consistent in page titles without
+ * forcing every caller to repeat the longer brand form. Titles that already
+ * use "NeuroLinks Clinic" are left untouched.
+ */
+function normalizeBrandTitle(title: string): string {
+  return title
+    .replace(/\s+\|\s+NeuroLinks$/, ` | ${SITE.name}`)
+    .replace(/\s+\|\s+NeuroLinks Nanaimo$/, ` | ${SITE.name}`);
+}
+
 export function pageRobots(override?: Metadata["robots"]): Metadata["robots"] {
   if (!isSearchIndexable()) return closedRobots;
   return override ?? openRobots;
@@ -116,15 +127,16 @@ export function pageMetadata({
 }: SeoInput): Metadata {
   const url = productionUrl(path);
   const desc = description || SITE.tagline;
+  const resolvedTitle = normalizeBrandTitle(title);
   const shareImage = ogImage(image);
   return {
     metadataBase: new URL(PRODUCTION_ORIGIN),
-    title: { absolute: title },
+    title: { absolute: resolvedTitle },
     description: desc,
     alternates: { canonical: url },
     robots: pageRobots(robots),
     openGraph: {
-      title,
+      title: resolvedTitle,
       description: desc,
       url,
       siteName: SITE.name,
@@ -134,7 +146,7 @@ export function pageMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: resolvedTitle,
       description: desc,
       images: [shareImage.url],
     },
