@@ -1,7 +1,7 @@
 export const SITE = {
   name: "NeuroLinks Clinic",
   shortName: "NeuroLinks",
-  tagline: "TMS & Ketamine Treatments in BC, Canada",
+  tagline: "Psychiatrist-led TMS & ketamine treatment in Nanaimo, BC",
   phone: "250-739-5530",
   phoneHref: "tel:2507395530",
   // Voice and fax use the same clinic number in every migrated source.
