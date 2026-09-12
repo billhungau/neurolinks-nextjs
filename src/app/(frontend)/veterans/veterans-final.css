@@ -68,8 +68,10 @@
   position: relative;
   z-index: 2;
   display: flex;
+  width: 100%;
   min-height: clamp(34rem, 64svh, 39rem);
-  max-width: 48rem;
+  max-width: var(--site-max);
+  margin-inline: auto;
   flex-direction: column;
   justify-content: center;
   padding-block: 5rem 4rem;
