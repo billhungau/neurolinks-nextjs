@@ -5,6 +5,7 @@ import {
   INSIGHTS_SUPPORTING,
   articleJsonLd as articleJsonLdBase,
   insightsArticlePath,
+  resolveInsightCanonical,
 } from "@/lib/insights";
 import {
   resolveMetaDescription,
@@ -42,7 +43,7 @@ export function articleShareImage(article: InsightsArticle): SeoImage {
 
 export function articleMetadataRecord(article: InsightsArticle): Metadata {
   const path = insightsArticlePath(article.slug);
-  const canonical = article.canonicalUrl || productionUrl(path);
+  const canonical = resolveInsightCanonical(path, article.canonicalUrl);
   const title = resolveSeoTitle(article, INSIGHTS_NAME);
   const description = resolveMetaDescription(article, INSIGHTS_INDEX_DESCRIPTION);
   const ogTitle = resolveSocialTitle(article, title);
