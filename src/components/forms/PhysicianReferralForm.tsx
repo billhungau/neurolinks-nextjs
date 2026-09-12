@@ -167,7 +167,10 @@ export function PhysicianReferralForm() {
         setValues(EMPTY_REFERRAL_FIELDS);
         setHoneypot("");
         setStatus("success");
-        requestAnimationFrame(() => successRef.current?.focus());
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: "auto" });
+          successRef.current?.focus({ preventScroll: true });
+        });
         return;
       }
       setStatus("error");
