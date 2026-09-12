@@ -300,11 +300,7 @@ export function articleJsonLd(article: {
     url: canonical,
     datePublished: article.publishedAt || undefined,
     dateModified: article.lastReviewedAt || article.publishedAt || undefined,
-    publisher: {
-      "@type": "MedicalClinic",
-      name: "NeuroLinks",
-      url: productionUrl("/"),
-    },
+    publisher: { "@id": `${PRODUCTION_ORIGIN}/#clinic` },
   };
   if (article.image) data.image = article.image;
   const author = personJsonLd(article.author);
