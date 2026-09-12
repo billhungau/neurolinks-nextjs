@@ -1,5 +1,5 @@
 export const SITE = {
-  name: "Neurolinks Clinic | TMS & Ketamine treatments",
+  name: "NeuroLinks Clinic",
   shortName: "NeuroLinks",
   tagline: "TMS & Ketamine Treatments in BC, Canada",
   phone: "250-739-5530",
