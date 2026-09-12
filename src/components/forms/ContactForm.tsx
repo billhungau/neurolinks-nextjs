@@ -126,7 +126,10 @@ export function ContactForm({
         setValues(EMPTY_FIELDS);
         setHoneypot("");
         setStatus("success");
-        requestAnimationFrame(() => successRef.current?.focus());
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: "auto" });
+          successRef.current?.focus({ preventScroll: true });
+        });
         return;
       }
       setStatus("error");
