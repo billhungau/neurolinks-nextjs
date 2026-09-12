@@ -12,6 +12,7 @@ import {
   resolveReferralJotformConfig,
   sanitizeJotformResponseCode,
 } from "./referral-form.ts";
+import { sendReferralNotification } from "./referral-notification.ts";
 
 type SuccessResult = {
   ok: true;
@@ -52,6 +53,16 @@ function isAbortError(error: unknown) {
       "name" in error &&
       (error as { name?: string }).name === "AbortError")
   );
+}
+
+function jotformSubmissionId(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const content = (data as Record<string, unknown>).content;
+  if (!content || typeof content !== "object") return null;
+  const value = (content as Record<string, unknown>).submissionID;
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) return String(value);
+  return null;
 }
 
 export async function handleReferralPost(request: Request, fetcher?: typeof fetch) {
@@ -144,6 +155,17 @@ export async function handleReferralPost(request: Request, fetcher?: typeof fetc
         apiHost: config.apiHost,
       });
       return genericError(502);
+    }
+
+    const submissionId = jotformSubmissionId(data);
+    if (submissionId) {
+      await sendReferralNotification(
+        {
+          fields: parsed.fields,
+          jotformSubmissionId: submissionId,
+        },
+        send,
+      );
     }
 
     return json({ ok: true, success: true, message: REFERRAL_SUCCESS_MESSAGE }, 200);
