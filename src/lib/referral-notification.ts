@@ -47,14 +47,42 @@ function patientName(fields: ReferralFields) {
   return `${fields.patientFirstName} ${fields.patientLastName}`.trim();
 }
 
+function displayValue(value: string) {
+  return value || "Not provided";
+}
+
+function displayList(values: readonly string[]) {
+  return values.length > 0 ? values.join("; ") : "None selected";
+}
+
 function referralNotificationText(context: ReferralNotificationContext) {
+  const { fields } = context;
   return [
     "A new physician referral has been received through neurolinks.ca.",
     "",
-    `Patient: ${patientName(context.fields)}`,
-    `Referrer: ${context.fields.referrerName}`,
+    "PATIENT INFORMATION",
+    `Patient name: ${patientName(fields)}`,
+    `PHN: ${displayValue(fields.phn)}`,
+    `Patient phone: ${displayValue(fields.patientPhone)}`,
     "",
-    "The complete referral has been saved in Jotform. Please review the Jotform record for PHN and clinical information.",
+    "REFERRER INFORMATION",
+    `Referrer name: ${displayValue(fields.referrerName)}`,
+    `MSP number: ${displayValue(fields.mspNumber)}`,
+    `Referrer phone: ${displayValue(fields.referrerPhone)}`,
+    `Fax number: ${displayValue(fields.faxNumber)}`,
+    "",
+    "CLINICAL INFORMATION",
+    `Diagnosis: ${displayList(fields.diagnoses)}`,
+    "Clinical details:",
+    displayValue(fields.clinicalDetails),
+    "",
+    "TREATMENT CONSIDERATIONS",
+    `Treatment options: ${displayList(fields.treatments)}`,
+    `Potential contraindications to TMS: ${displayList(fields.tmsContraindications)}`,
+    `Potential contraindications to ketamine therapy: ${displayList(fields.ketamineContraindications)}`,
+    "",
+    "OTHER INFORMATION",
+    displayValue(fields.otherInformation),
     "",
     `Jotform submission ID: ${context.jotformSubmissionId}`,
   ].join("\n");
@@ -123,7 +151,7 @@ async function sendWithResend(
       body: JSON.stringify({
         from,
         to: [to],
-        subject: "New physician referral received",
+        subject: `New physician referral - ${patientName(context.fields)}`,
         text: referralNotificationText(context),
       }),
       cache: "no-store",
@@ -305,7 +333,7 @@ async function sendFallback(
   try {
     await smtpSender({
       to,
-      subject: "New physician referral received",
+      subject: `New physician referral - ${patientName(context.fields)}`,
       text: referralNotificationText(context),
     });
     referral = "sent";
