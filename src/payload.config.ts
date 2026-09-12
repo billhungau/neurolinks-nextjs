@@ -40,6 +40,9 @@ export default buildConfig({
   csrf: cmsTrustedOrigins(),
   admin: {
     user: Users.slug,
+    timezones: {
+      defaultTimezone: "America/Vancouver",
+    },
     meta: {
       titleSuffix: " — NeuroLinks Insights",
       robots: "noindex, nofollow",
