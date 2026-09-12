@@ -13,6 +13,11 @@ function isScrolledPast(node: Element) {
   return node.getBoundingClientRect().bottom < 0;
 }
 
+function isInInitialViewport(node: Element) {
+  const rect = node.getBoundingClientRect();
+  return rect.bottom > 0 && rect.top < window.innerHeight;
+}
+
 function targetsReveal(node: Element) {
   const id = window.location.hash.replace("#", "");
   if (!id) return false;
@@ -56,7 +61,7 @@ export function Reveal({
       return undefined;
     }
 
-    if (targetsReveal(node) || isScrolledPast(node)) {
+    if (targetsReveal(node) || isScrolledPast(node) || isInInitialViewport(node)) {
       reveal();
       return undefined;
     }
