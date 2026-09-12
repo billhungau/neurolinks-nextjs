@@ -230,15 +230,19 @@ export function jotformSubmissionBody(
   return submission;
 }
 
-export function isJotformSuccessPayload(data: unknown): boolean {
-  if (!data || typeof data !== "object") return false;
+export function jotformSubmissionId(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
   const record = data as Record<string, unknown>;
   const code = record.responseCode;
-  if (code !== 200 && code !== "200") return false;
+  if (code !== 200 && code !== "200") return null;
   const content = record.content;
-  if (!content || typeof content !== "object") return false;
+  if (!content || typeof content !== "object") return null;
   const id = (content as Record<string, unknown>).submissionID;
-  return typeof id === "string" && id.length > 0;
+  return typeof id === "string" && id.length > 0 ? id : null;
+}
+
+export function isJotformSuccessPayload(data: unknown): boolean {
+  return jotformSubmissionId(data) !== null;
 }
 
 export function originIsAllowed(request: Request): boolean {
