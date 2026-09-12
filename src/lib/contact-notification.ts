@@ -23,6 +23,15 @@ type ResendFailure = {
   message: string;
 };
 
+type SmtpMessage = {
+  to: string;
+  replyTo?: string;
+  subject: string;
+  text: string;
+};
+
+type SmtpSender = (message: SmtpMessage) => Promise<void>;
+
 const DEFAULT_NOTIFICATION_TO = "contact@neurolinks.ca";
 const DEFAULT_RESEND_FROM = "NeuroLinks Website <notifications@neurolinks.ca>";
 const DEFAULT_SMTP_PORT = 465;
@@ -198,12 +207,7 @@ async function smtpCommand(socket: TLSSocket, iterator: AsyncIterator<string>, c
   assertSmtp(reply, expected);
 }
 
-async function sendSiteGroundSmtp(args: {
-  to: string;
-  replyTo?: string;
-  subject: string;
-  text: string;
-}) {
+async function sendSiteGroundSmtp(args: SmtpMessage) {
   const host = process.env.SITEGROUND_SMTP_HOST?.trim();
   const user = process.env.SITEGROUND_SMTP_USER?.trim();
   const pass = process.env.SITEGROUND_SMTP_PASS;
@@ -251,7 +255,11 @@ async function sendSiteGroundSmtp(args: {
   }
 }
 
-async function sendFallback(context: NotificationContext, failure: ResendFailure) {
+async function sendFallback(
+  context: NotificationContext,
+  failure: ResendFailure,
+  smtpSender: SmtpSender,
+) {
   if (!smtpConfigured()) {
     return { contact: "not-configured" as const, alert: "not-configured" as const };
   }
@@ -261,7 +269,7 @@ async function sendFallback(context: NotificationContext, failure: ResendFailure
   let alert: "sent" | "failed" = "failed";
 
   try {
-    await sendSiteGroundSmtp({
+    await smtpSender({
       to,
       replyTo: context.fields.email,
       subject: `New website contact - ${fullName(context.fields)}`,
@@ -276,7 +284,7 @@ async function sendFallback(context: NotificationContext, failure: ResendFailure
   }
 
   try {
-    await sendSiteGroundSmtp({
+    await smtpSender({
       to,
       subject: `Website notification fallback activated - Jotform ${context.jotformSubmissionId}`,
       text: fallbackAlertText(context, failure),
@@ -295,6 +303,7 @@ async function sendFallback(context: NotificationContext, failure: ResendFailure
 export async function sendContactNotification(
   context: NotificationContext,
   fetcher: typeof fetch = globalThis.fetch,
+  smtpSender: SmtpSender = sendSiteGroundSmtp,
 ): Promise<NotificationResult> {
   const resend = await sendWithResend(context, fetcher);
 
@@ -310,7 +319,11 @@ export async function sendContactNotification(
     console.error("Contact Resend notification is not configured", {
       jotformSubmissionId: context.jotformSubmissionId,
     });
-    const fallback = await sendFallback(context, { message: "Resend is not configured" });
+    const fallback = await sendFallback(
+      context,
+      { message: "Resend is not configured" },
+      smtpSender,
+    );
     return {
       primary: "not-configured",
       fallbackContact: fallback.contact,
@@ -324,7 +337,7 @@ export async function sendContactNotification(
     code: resend.failure.code,
     error: resend.failure.message,
   });
-  const fallback = await sendFallback(context, resend.failure);
+  const fallback = await sendFallback(context, resend.failure, smtpSender);
   return {
     primary: "failed",
     fallbackContact: fallback.contact,
