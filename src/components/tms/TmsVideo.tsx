@@ -151,7 +151,7 @@ export function TmsVideo({
 
   return (
     <>
-      <div className="tms-video">
+      <div className="tms-video cursor-pointer">
         <video
           className="pointer-events-none h-full w-full object-cover"
           preload="none"
@@ -162,13 +162,12 @@ export function TmsVideo({
         <button
           ref={triggerRef}
           type="button"
-          className="tms-video-play"
+          className="tms-video-play cursor-pointer"
           onClick={openVideo}
           aria-label={`Play ${label}`}
           aria-haspopup="dialog"
         >
           <span className="tms-video-play-mark" aria-hidden="true" />
-          <span>Play video</span>
         </button>
       </div>
       {typeof document !== "undefined" && modal ? createPortal(modal, document.body) : null}
