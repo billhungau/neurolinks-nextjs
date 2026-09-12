@@ -19,12 +19,12 @@ const ENV_KEYS = [
   "RESEND_API_KEY",
   "RESEND_FROM_EMAIL",
   "CONTACT_NOTIFICATION_EMAIL",
-  "SITEGROUND_SMTP_HOST",
-  "SITEGROUND_SMTP_PORT",
-  "SITEGROUND_SMTP_USER",
-  "SITEGROUND_SMTP_PASS",
-  "SITEGROUND_SMTP_FROM_EMAIL",
-  "SITEGROUND_SMTP_FROM_NAME",
+  "SMTP_HOST",
+  "SMTP_PORT",
+  "SMTP_USER",
+  "SMTP_PASS",
+  "SMTP_FROM_EMAIL",
+  "SMTP_FROM_NAME",
 ] as const;
 
 const originalEnv = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
@@ -42,9 +42,9 @@ function clearNotificationEnv() {
 }
 
 function configureSmtp() {
-  process.env.SITEGROUND_SMTP_HOST = "mail.example.test";
-  process.env.SITEGROUND_SMTP_USER = "contact@neurolinks.ca";
-  process.env.SITEGROUND_SMTP_PASS = "test-password";
+  process.env.SMTP_HOST = "mail.example.test";
+  process.env.SMTP_USER = "contact@example.test";
+  process.env.SMTP_PASS = "placeholder";
 }
 
 afterEach(() => {
@@ -136,7 +136,7 @@ test("Resend failure sends a clean SMTP contact email plus a separate technical 
   assert.equal(alert.text.includes(context.fields.message), false);
 });
 
-test("missing Resend configuration falls back to SiteGround SMTP without failing the inquiry", async () => {
+test("missing Resend configuration falls back to SMTP without failing the inquiry", async () => {
   clearNotificationEnv();
   configureSmtp();
 
