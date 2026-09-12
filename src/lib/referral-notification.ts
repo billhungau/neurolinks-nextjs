@@ -43,13 +43,19 @@ function notificationRecipient() {
   );
 }
 
+function patientName(fields: ReferralFields) {
+  return `${fields.patientFirstName} ${fields.patientLastName}`.trim();
+}
+
 function referralNotificationText(context: ReferralNotificationContext) {
   return [
     "A new physician referral has been received through neurolinks.ca.",
     "",
-    "The complete referral has been saved in Jotform. Please review the Jotform record for patient and clinical information.",
-    "",
+    `Patient: ${patientName(context.fields)}`,
     `Referrer: ${context.fields.referrerName}`,
+    "",
+    "The complete referral has been saved in Jotform. Please review the Jotform record for PHN and clinical information.",
+    "",
     `Jotform submission ID: ${context.jotformSubmissionId}`,
   ].join("\n");
 }
