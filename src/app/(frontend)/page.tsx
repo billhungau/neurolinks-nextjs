@@ -14,9 +14,9 @@ import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
 export const metadata = pageMetadata({
-  title: "TMS & Ketamine Therapy in Nanaimo, BC | NeuroLinks",
+  title: "TMS & Ketamine Treatment in Nanaimo, BC | NeuroLinks Clinic",
   description:
-    "NeuroLinks Clinic in Nanaimo, BC offers Transcranial Magnetic Stimulation (TMS) and Ketamine therapy for treatment-resistant depression, OCD, and PTSD.",
+    "Psychiatrist-led TMS and ketamine treatment in Nanaimo, BC for depression and other complex mental health conditions, with individualized assessment and monitoring.",
   path: "/",
   image: PAGE_OG_IMAGES.home,
 });
