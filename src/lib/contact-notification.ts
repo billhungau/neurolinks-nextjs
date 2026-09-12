@@ -62,7 +62,7 @@ function fallbackAlertText(context: NotificationContext, failure: ResendFailure)
   return [
     "The normal NeuroLinks website notification could not be sent through Resend.",
     "",
-    "A separate clean contact email was attempted through the SiteGround SMTP fallback so staff can reply directly to the patient.",
+    "A separate clean contact email was attempted through the SMTP fallback so staff can reply directly to the patient.",
     "The submission itself was already saved successfully in Jotform.",
     "",
     "Please check Jotform for the official submission record.",
@@ -100,7 +100,11 @@ function resendFailureFromPayload(status: number, data: unknown): ResendFailure 
 async function sendWithResend(
   context: NotificationContext,
   fetcher: typeof fetch,
-): Promise<{ ok: true; id?: string } | { ok: false; failure: ResendFailure } | { ok: false; notConfigured: true }> {
+): Promise<
+  | { ok: true; id?: string }
+  | { ok: false; failure: ResendFailure }
+  | { ok: false; notConfigured: true }
+> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) return { ok: false, notConfigured: true };
 
@@ -137,7 +141,9 @@ async function sendWithResend(
     }
 
     const id =
-      data && typeof data === "object" && typeof (data as Record<string, unknown>).id === "string"
+      data &&
+      typeof data === "object" &&
+      typeof (data as Record<string, unknown>).id === "string"
         ? ((data as Record<string, unknown>).id as string)
         : undefined;
     return { ok: true, id };
@@ -151,14 +157,14 @@ async function sendWithResend(
 
 function smtpConfigured() {
   return Boolean(
-    process.env.SITEGROUND_SMTP_HOST?.trim() &&
-      process.env.SITEGROUND_SMTP_USER?.trim() &&
-      process.env.SITEGROUND_SMTP_PASS,
+    process.env.SMTP_HOST?.trim() &&
+      process.env.SMTP_USER?.trim() &&
+      process.env.SMTP_PASS,
   );
 }
 
 function smtpPort() {
-  const raw = Number(process.env.SITEGROUND_SMTP_PORT);
+  const raw = Number(process.env.SMTP_PORT);
   if (Number.isInteger(raw) && raw > 0 && raw <= 65535) return raw;
   return DEFAULT_SMTP_PORT;
 }
@@ -169,10 +175,12 @@ function encodeHeader(value: string) {
 }
 
 function base64Lines(value: string) {
-  return Buffer.from(value, "utf8")
-    .toString("base64")
-    .match(/.{1,76}/g)
-    ?.join("\r\n") ?? "";
+  return (
+    Buffer.from(value, "utf8")
+      .toString("base64")
+      .match(/.{1,76}/g)
+      ?.join("\r\n") ?? ""
+  );
 }
 
 function dotStuff(value: string) {
@@ -194,30 +202,47 @@ async function readSmtpReply(iterator: AsyncIterator<string>) {
   }
 }
 
-function assertSmtp(reply: { code: number | null; lines: string[] }, expected: number | number[]) {
+function assertSmtp(
+  reply: { code: number | null; lines: string[] },
+  expected: number | number[],
+) {
   const allowed = Array.isArray(expected) ? expected : [expected];
   if (reply.code === null || !allowed.includes(reply.code)) {
     throw new Error(`SMTP command failed with ${reply.code ?? "unknown"}`);
   }
 }
 
-async function smtpCommand(socket: TLSSocket, iterator: AsyncIterator<string>, command: string, expected: number | number[]) {
+async function smtpCommand(
+  socket: TLSSocket,
+  iterator: AsyncIterator<string>,
+  command: string,
+  expected: number | number[],
+) {
   socket.write(`${command}\r\n`);
   const reply = await readSmtpReply(iterator);
   assertSmtp(reply, expected);
 }
 
-async function sendSiteGroundSmtp(args: SmtpMessage) {
-  const host = process.env.SITEGROUND_SMTP_HOST?.trim();
-  const user = process.env.SITEGROUND_SMTP_USER?.trim();
-  const pass = process.env.SITEGROUND_SMTP_PASS;
-  if (!host || !user || !pass) throw new Error("SiteGround SMTP is not configured");
+async function sendSmtpFallback(args: SmtpMessage) {
+  const host = process.env.SMTP_HOST?.trim();
+  const user = process.env.SMTP_USER?.trim();
+  const pass = process.env.SMTP_PASS;
+  if (!host || !user || !pass) {
+    throw new Error("SMTP fallback is not configured");
+  }
 
-  const fromAddress = process.env.SITEGROUND_SMTP_FROM_EMAIL?.trim() || user;
-  const fromName = process.env.SITEGROUND_SMTP_FROM_NAME?.trim() || "NeuroLinks Website";
+  const fromAddress = process.env.SMTP_FROM_EMAIL?.trim() || user;
+  const fromName = process.env.SMTP_FROM_NAME?.trim() || "NeuroLinks Website";
   const port = smtpPort();
-  const socket = tlsConnect({ host, port, servername: host, rejectUnauthorized: true });
-  socket.setTimeout(SMTP_TIMEOUT_MS, () => socket.destroy(new Error("SMTP connection timed out")));
+  const socket = tlsConnect({
+    host,
+    port,
+    servername: host,
+    rejectUnauthorized: true,
+  });
+  socket.setTimeout(SMTP_TIMEOUT_MS, () =>
+    socket.destroy(new Error("SMTP connection timed out")),
+  );
 
   try {
     await once(socket, "secureConnect");
@@ -227,8 +252,18 @@ async function sendSiteGroundSmtp(args: SmtpMessage) {
       assertSmtp(await readSmtpReply(iterator), 220);
       await smtpCommand(socket, iterator, "EHLO neurolinks.ca", 250);
       await smtpCommand(socket, iterator, "AUTH LOGIN", 334);
-      await smtpCommand(socket, iterator, Buffer.from(user, "utf8").toString("base64"), 334);
-      await smtpCommand(socket, iterator, Buffer.from(pass, "utf8").toString("base64"), 235);
+      await smtpCommand(
+        socket,
+        iterator,
+        Buffer.from(user, "utf8").toString("base64"),
+        334,
+      );
+      await smtpCommand(
+        socket,
+        iterator,
+        Buffer.from(pass, "utf8").toString("base64"),
+        235,
+      );
       await smtpCommand(socket, iterator, `MAIL FROM:<${fromAddress}>`, 250);
       await smtpCommand(socket, iterator, `RCPT TO:<${args.to}>`, [250, 251]);
       await smtpCommand(socket, iterator, "DATA", 354);
@@ -264,7 +299,8 @@ async function sendFallback(
     return { contact: "not-configured" as const, alert: "not-configured" as const };
   }
 
-  const to = process.env.CONTACT_NOTIFICATION_EMAIL?.trim() || DEFAULT_NOTIFICATION_TO;
+  const to =
+    process.env.CONTACT_NOTIFICATION_EMAIL?.trim() || DEFAULT_NOTIFICATION_TO;
   let contact: "sent" | "failed" = "failed";
   let alert: "sent" | "failed" = "failed";
 
@@ -303,7 +339,7 @@ async function sendFallback(
 export async function sendContactNotification(
   context: NotificationContext,
   fetcher: typeof fetch = globalThis.fetch,
-  smtpSender: SmtpSender = sendSiteGroundSmtp,
+  smtpSender: SmtpSender = sendSmtpFallback,
 ): Promise<NotificationResult> {
   const resend = await sendWithResend(context, fetcher);
 
