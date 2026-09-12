@@ -40,6 +40,7 @@ export default buildConfig({
   csrf: cmsTrustedOrigins(),
   admin: {
     user: Users.slug,
+    // Keep editorial scheduling aligned with the clinic's local Pacific time.
     timezones: {
       defaultTimezone: "America/Vancouver",
     },
