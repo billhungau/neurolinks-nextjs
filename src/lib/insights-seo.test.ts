@@ -3,7 +3,13 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { articleJsonLd, breadcrumbJsonLd, doiHref, formatReference } from "./insights.ts";
+import {
+  articleJsonLd,
+  breadcrumbJsonLd,
+  doiHref,
+  formatReference,
+  resolveInsightCanonical,
+} from "./insights.ts";
 import { productionUrl } from "./site.ts";
 
 const seoSource = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "insights-seo.ts"), "utf8");
@@ -18,19 +24,45 @@ const article = {
   medicalReviewer: { name: "Dr. Chi Hung Au", role: "Psychiatrist" },
 };
 
+const articlePath = "/insights/how-vac-authorization-for-tms-works-in-british-columbia/";
+
 test("article JSON-LD uses visible fields only and production canonicals", () => {
   const data = articleJsonLd(article);
   assert.equal(data["@type"], "Article");
   assert.equal(data.headline, article.title);
   assert.equal(data.description, article.summary);
-  assert.equal(
-    data.url,
-    productionUrl("/insights/how-vac-authorization-for-tms-works-in-british-columbia/"),
-  );
+  assert.equal(data.url, productionUrl(articlePath));
   assert.equal((data.author as { name: string }).name, "Dr. Chi Hung Au");
   assert.equal((data.publisher as { name: string }).name, "NeuroLinks");
   assert.equal(JSON.stringify(data).includes("miracle"), false);
   assert.equal("image" in data, false);
+});
+
+test("canonical overrides are restricted to the production origin", () => {
+  assert.equal(resolveInsightCanonical(articlePath), productionUrl(articlePath));
+  assert.equal(
+    resolveInsightCanonical(articlePath, "https://neurolinks.ca/insights/custom-canonical"),
+    "https://neurolinks.ca/insights/custom-canonical/",
+  );
+
+  for (const unsafe of [
+    "https://neurolinks-nextjs.vercel.app/insights/custom-canonical/",
+    "https://example.com/insights/custom-canonical/",
+    "http://neurolinks.ca/insights/custom-canonical/",
+    "https://www.neurolinks.ca/insights/custom-canonical/",
+    "https://neurolinks.ca/insights/custom-canonical/?utm_source=test",
+    "https://neurolinks.ca/insights/custom-canonical/#section",
+    "not-a-url",
+  ]) {
+    assert.equal(resolveInsightCanonical(articlePath, unsafe), productionUrl(articlePath));
+  }
+
+  const jsonLd = articleJsonLd({
+    ...article,
+    canonicalUrl: "https://neurolinks-nextjs.vercel.app/insights/custom-canonical/",
+  });
+  assert.equal(jsonLd.url, productionUrl(articlePath));
+  assert.equal((jsonLd.mainEntityOfPage as { "@id": string })["@id"], productionUrl(articlePath));
 });
 
 test("MedicalWebPage and reviewedBy are only added where they are justified", () => {
@@ -61,7 +93,7 @@ test("breadcrumb JSON-LD lists Home, Insights and the article", () => {
     { name: "Insights", path: "/insights/" },
     {
       name: article.title,
-      path: "/insights/how-vac-authorization-for-tms-works-in-british-columbia/",
+      path: articlePath,
     },
   ]);
   assert.equal(data["@type"], "BreadcrumbList");
@@ -79,6 +111,7 @@ test("article metadata uses unique titles, canonicals, article Open Graph and da
   assert.match(seoSource, /authors: article\.author\?\.name \? \[article\.author\.name\]/);
   assert.match(seoSource, /articleShareImage/);
   assert.match(seoSource, /path: "\/insights\/"/);
+  assert.match(seoSource, /resolveInsightCanonical\(path, article\.canonicalUrl\)/);
   assert.equal(seoSource.includes("miracle"), false);
 });
 
@@ -91,7 +124,7 @@ test("SEO fallbacks and the noindex switch are wired through one resolver each",
   assert.match(seoSource, /article\.socialImage \?\? article\.featuredImage/);
   assert.match(seoSource, /if \(!source\) return DEFAULT_OG_IMAGE/);
   assert.match(seoSource, /article\.indexable === false/);
-  assert.match(seoSource, /article\.canonicalUrl \|\| productionUrl\(path\)/);
+  assert.match(seoSource, /resolveInsightCanonical\(path, article\.canonicalUrl\)/);
 });
 
 test("references render a consistent citation string without injecting HTML", () => {
