@@ -336,7 +336,11 @@ export const Insights: CollectionConfig = {
               },
             });
 
-            return upcoming.docs[0]?.waitUntil ?? null;
+            const nextJob = upcoming.docs[0] as
+              | { waitUntil?: string | null }
+              | undefined;
+
+            return nextJob?.waitUntil ?? null;
           },
         ],
       },
