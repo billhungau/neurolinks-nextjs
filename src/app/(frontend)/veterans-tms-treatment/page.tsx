@@ -31,7 +31,7 @@ const FAQS = [
   { question: "Will I need to stop my medications?", answer: "Not necessarily. Medications and other treatments are reviewed during assessment, and any changes should be made with your treating clinician." },
   { question: "Do I need a referral?", answer: "Contact NeuroLinks and our team can explain the appropriate next step for your circumstances, including whether referral documentation is needed." },
   { question: "Can Veterans Affairs Canada authorize TMS treatment?", answer: "Authorization and coverage are determined individually by Veterans Affairs Canada. NeuroLinks can help explain the administrative process and information that may be required." },
-] as const;
+];
 
 const REVIEWS = [
   "The team at NeuroLinks is professional, compassionate and truly supportive throughout the process.",
