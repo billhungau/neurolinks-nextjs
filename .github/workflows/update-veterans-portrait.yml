@@ -1,0 +1,49 @@
+name: Update Veterans TMS portrait
+
+on:
+  push:
+    paths:
+      - '.github/workflows/update-veterans-portrait.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Update portrait only on Veterans TMS page
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/app/(frontend)/veterans-tms-treatment/page.tsx')
+          s = p.read_text()
+          old = 'src={MEDIA.drAu} alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks"'
+          new = 'src="/media/images/Portrait for veterans page.png" alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks"'
+          if old not in s:
+              raise SystemExit('Expected Veterans portrait reference not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+
+      - name: Verify no global portrait path changed
+        shell: bash
+        run: |
+          grep -q 'drAu: "/media/images/Neurolink-Portraits-Au-768x768.jpg"' src/lib/media.ts
+          grep -q 'src="/media/images/Portrait for veterans page.png"' 'src/app/(frontend)/veterans-tms-treatment/page.tsx'
+
+      - name: Commit page change and remove workflow
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm '.github/workflows/update-veterans-portrait.yml'
+          git add -A
+          git commit -m 'Use dedicated Veterans page psychiatrist portrait'
+          git push origin HEAD:main
