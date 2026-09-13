@@ -24,6 +24,6 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add 'src/app/(frontend)/veterans-tms-treatment/veterans-tms-refinements.css' '.github/workflows/apply-veterans-tms-final-polish.yml'
+          git add -A
           git commit -m 'Polish Veterans TMS responsive layout'
           git push origin HEAD:main
