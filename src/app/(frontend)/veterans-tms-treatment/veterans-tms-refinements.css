@@ -47,11 +47,12 @@
 /* Conditions: editorial image + warm content split instead of another dark band. */
 .vtms-conditions{display:grid;grid-template-columns:1fr 1fr;background:#f4f0e8;min-height:520px}
 .vtms-conditions-visual{position:relative;min-height:520px;overflow:hidden}
-.vtms-conditions-visual .vtms-cover{object-position:center}
+.vtms-conditions-visual .vtms-cover{object-position:center 45%}
 .vtms-conditions-visual-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,38,58,.08) 0%,rgba(8,38,58,.24) 48%,rgba(8,38,58,.72) 100%)}
-.vtms-conditions-visual-copy{position:absolute;left:max(32px,calc((100vw - 1180px)/2));right:40px;bottom:44px;color:#fff;max-width:430px}
-.vtms-conditions-visual-copy h2{font-family:var(--font-serif),Georgia,serif;font-size:clamp(2rem,3vw,3rem);line-height:1.04;margin:0 0 18px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.18)}
-.vtms-conditions-visual-copy p{margin:0;font-size:1.08rem;line-height:1.45;color:rgba(255,255,255,.9)}
+.vtms-conditions-visual-copy{position:absolute;left:max(32px,calc((100vw - 1180px)/2));right:40px;bottom:44px;color:#fff;max-width:360px}
+.vtms-conditions-visual-copy h2{font-family:var(--font-serif),Georgia,serif;font-size:clamp(2.1rem,3.25vw,3.35rem);line-height:1.02;margin:0 0 18px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.18)}
+.vtms-conditions-visual-copy p{margin:0;font-size:1.08rem;line-height:1.45;color:rgba(255,255,255,.9);display:flex;align-items:center;gap:14px;max-width:260px}
+.vtms-purpose-rule{display:inline-block;width:42px;height:1px;background:rgba(255,255,255,.9);flex:0 0 auto}
 .vtms-conditions-content{padding:78px max(40px,calc((100vw - 1180px)/2)) 72px 58px;display:flex;flex-direction:column;justify-content:center}
 .vtms-conditions-content h2{font-family:var(--font-serif),Georgia,serif;color:var(--vnavy);font-size:clamp(2rem,3.2vw,3.25rem);line-height:1.04;letter-spacing:-.02em;margin:0 0 16px}
 .vtms-conditions-content>p:not(.vtms-eyebrow):not(.vtms-condition-note){font-size:1.03rem;line-height:1.65;margin:0 0 24px}
@@ -62,7 +63,11 @@
 
 /* Psychiatrist-led care. */
 .vtms-clinician{background:#ece8df}
-.vtms-photo-card{box-shadow:0 18px 42px rgba(31,54,68,.16)}
+.vtms-photo-card{position:relative;overflow:hidden;box-shadow:0 18px 42px rgba(31,54,68,.16)}
+.vtms-photo-card::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,33,49,.60) 0%,rgba(8,33,49,.22) 48%,rgba(8,33,49,0) 72%);pointer-events:none}
+.vtms-clinician-quote{position:absolute;z-index:2;left:28px;top:28px;width:min(48%,245px);color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.22)}
+.vtms-clinician-quote blockquote{margin:0 0 12px;font-family:var(--font-serif),Georgia,serif;font-size:clamp(1.15rem,1.8vw,1.55rem);line-height:1.16;font-weight:650}
+.vtms-clinician-quote span{font-size:.82rem;color:rgba(255,255,255,.88)}
 .vtms-steps-visual{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid #c5cbc9;border-bottom:1px solid #c5cbc9;margin-top:30px}
 .vtms-steps-visual li{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:20px 18px;border:0;border-right:1px solid #c5cbc9}
 .vtms-steps-visual li:first-child{padding-left:0}
@@ -80,31 +85,37 @@
 .vtms-review footer{display:flex;flex-direction:column;gap:2px;color:#647482;font-size:.8rem}
 .vtms-review footer strong{color:#274b63;font-size:.84rem}
 
-/* VAC: natural BC landscape rather than abstract water imagery. */
+/* VAC: uploaded Canadian flag imagery. */
 .vtms-vac{background:#cfdfe7}
 .vtms-vac-grid{gap:54px}
 .vtms-vac-image{box-shadow:0 18px 44px rgba(25,59,78,.16)}
-.vtms-vac-image .vtms-cover{object-position:center}
+.vtms-vac-image .vtms-cover{object-position:center center}
 .vtms-vac-grid h3{font-size:1.16rem}
 .vtms-note{color:#405e70}
 
-/* Video and FAQ were already strong: preserve their structure. */
+/* Video remains unchanged structurally. */
 .vtms-video-section{background:#f3efe7}
 .vtms-video-grid{grid-template-columns:.85fr 1.15fr;gap:56px}
 .vtms-video-frame .tms-video{box-shadow:0 18px 44px rgba(18,49,68,.14)}
-.vtms-faq{background:#e8eef0}
-.vtms-faq-grid{gap:58px}
 
-/* Final CTA echoes the warm hero with a controlled photographic treatment. */
-.vtms-final{position:relative;overflow:hidden;padding:84px 0;background:#0b2d46;color:#fff}
+/* FAQ + final CTA: equal desktop split, stacked on mobile. */
+.vtms-bottom-split{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;background:#e8eef0}
+.vtms-faq{background:#e8eef0}
+.vtms-faq-panel{padding:72px max(42px,calc((100vw - 1180px)/2)) 76px max(42px,calc((100vw - 1180px)/2));background:#e8eef0}
+.vtms-faq-panel-inner{max-width:590px;margin-left:auto;width:100%}
+.vtms-faq-panel h2{font-family:var(--font-serif),Georgia,serif;color:var(--vnavy);font-size:clamp(2.2rem,3.4vw,3.5rem);line-height:1.02;margin:0 0 14px}
+.vtms-faq-intro{margin:0 0 30px;max-width:440px;color:#455f70;line-height:1.6}
+.vtms-faq-panel .faq-accordion{width:100%}
+
+.vtms-final{position:relative;overflow:hidden;background:#0b2d46;color:#fff}
+.vtms-final-panel{min-height:100%;padding:0;display:flex;align-items:stretch}
 .vtms-final-media,.vtms-final-overlay{position:absolute;inset:0}
-.vtms-final-photo{object-fit:cover;object-position:center 62%;filter:saturate(.95) brightness(.78)}
-.vtms-final-overlay{background:linear-gradient(90deg,rgba(8,38,58,.94) 0%,rgba(8,38,58,.86) 45%,rgba(8,38,58,.62) 70%,rgba(8,38,58,.38) 100%)}
-.vtms-final .vtms-wrap{position:relative;z-index:2}
+.vtms-final-photo{object-fit:cover;object-position:64% center;filter:saturate(.98) brightness(.84)}
+.vtms-final-overlay{background:linear-gradient(90deg,rgba(7,35,53,.93) 0%,rgba(7,35,53,.78) 46%,rgba(7,35,53,.50) 100%)}
 .vtms-final .vtms-eyebrow{color:#a9d3e6}
-.vtms-final h2{color:#fff;max-width:720px}
-.vtms-final-grid{grid-template-columns:1.15fr .85fr;gap:72px}
-.vtms-final-grid>div:first-child>p:not(.vtms-eyebrow){color:rgba(255,255,255,.86);font-size:1.04rem}
+.vtms-final-panel-inner{position:relative;z-index:2;width:100%;max-width:590px;padding:72px max(42px,calc((100vw - 1180px)/2)) 76px 58px;display:flex;flex-direction:column;justify-content:center;gap:34px}
+.vtms-final-panel h2{font-family:var(--font-serif),Georgia,serif;font-size:clamp(2.2rem,3.35vw,3.45rem);line-height:1.04;margin:0 0 18px;color:#fff}
+.vtms-final-panel-inner>div:first-child>p:not(.vtms-eyebrow){font-size:1.03rem;line-height:1.65;color:rgba(255,255,255,.9)}
 .vtms-final-actions{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
 .vtms-final-actions p{margin:0;color:rgba(255,255,255,.88)}
 .vtms-button-light{background:#f3efe7;color:var(--vnavy)!important;box-shadow:none}
@@ -125,13 +136,19 @@
   .vtms-conditions-visual{min-height:380px}
   .vtms-conditions-visual-copy{left:30px;right:30px;bottom:34px}
   .vtms-conditions-content{padding:56px 30px 60px}
+  .vtms-clinician-quote{left:22px;top:22px;width:52%}
   .vtms-steps-visual{grid-template-columns:1fr}
   .vtms-steps-visual li,.vtms-steps-visual li:first-child,.vtms-steps-visual li:last-child{padding:18px 0;border-right:0;border-bottom:1px solid #c5cbc9}
   .vtms-steps-visual li:last-child{border-bottom:0}
   .vtms-review-grid{grid-template-columns:1fr}
   .vtms-review{min-height:auto}
   .vtms-video-grid{grid-template-columns:1fr}
-  .vtms-final-overlay{background:linear-gradient(180deg,rgba(8,38,58,.84) 0%,rgba(8,38,58,.92) 100%)}
+  .vtms-bottom-split{grid-template-columns:1fr}
+  .vtms-faq-panel{padding:58px 30px 62px}
+  .vtms-faq-panel-inner{max-width:none;margin:0}
+  .vtms-final-panel{min-height:500px}
+  .vtms-final-panel-inner{max-width:none;padding:62px 30px 70px}
+  .vtms-final-overlay{background:linear-gradient(180deg,rgba(7,35,53,.72) 0%,rgba(7,35,53,.91) 100%)}
 }
 
 @media(max-width:560px){
@@ -145,5 +162,8 @@
   .vtms-trust-icon{width:25px;height:25px}
   .vtms-conditions-visual{min-height:320px}
   .vtms-conditions-content{padding:48px 22px 52px}
-  .vtms-final{padding:64px 0}
+  .vtms-clinician-quote{left:18px;top:18px;width:58%}
+  .vtms-clinician-quote blockquote{font-size:1.05rem}
+  .vtms-faq-panel{padding:48px 22px 52px}
+  .vtms-final-panel-inner{padding:54px 22px 68px}
 }
