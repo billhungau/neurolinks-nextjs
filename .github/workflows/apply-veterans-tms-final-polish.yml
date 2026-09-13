@@ -1,3 +1,4 @@
+# trigger final polish
 name: Apply Veterans TMS final polish
 
 on:
@@ -88,7 +89,6 @@ jobs:
 }
 
 @media(max-width:900px){
-  /* Keep the photographic portion of the hero finite so the stacked form does not force a giant crop. */
   .vtms-hero{background:#0b2d46}
   .vtms-hero-media{
     position:absolute;
