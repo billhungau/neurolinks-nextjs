@@ -86,27 +86,27 @@ const TRUST_ITEMS = [
 const FAQS = [
   {
     q: "Does TMS require anesthesia?",
-    a: "No. TMS is non-invasive and does not require anesthesia or sedation. You remain awake throughout treatment.",
+    a: "No. TMS is non-invasive and does not require anesthesia or sedation. You remain awake and alert throughout each session. Unlike ECT, a TMS session does not require a recovery period from anesthesia.",
   },
   {
     q: "Can I drive after treatment?",
-    a: "Most people can return to their usual activities after a TMS session. Your psychiatrist will advise you if your individual circumstances require different precautions.",
+    a: "In general, yes. TMS does not use anesthesia or sedation, so most patients can drive, return to work, and continue their usual activities immediately after a session. Your psychiatrist will advise you if there is an individual reason to take additional precautions.",
   },
   {
     q: "How long does TMS treatment take?",
-    a: "A standard course is usually delivered over several weeks. Accelerated schedules may also be considered for selected patients after psychiatric assessment.",
+    a: "A typical treatment course is about 30 sessions delivered over several weeks. The exact schedule and protocol are individualized after assessment. Shorter, more intensive schedules that deliver several sessions per day may be considered for selected patients.",
   },
   {
     q: "Will I need to stop my medications?",
-    a: "Not necessarily. Medications and other treatments are reviewed during assessment, and any changes should be made with your treating clinician.",
+    a: "Usually not. TMS is commonly provided while patients continue their prescribed antidepressant or other psychiatric medications. Medication changes should not be made on your own; your treatment history and current medications are reviewed during the psychiatric assessment.",
   },
   {
-    q: "Do I need a referral?",
-    a: "Contact NeuroLinks and our team can explain the appropriate next step for your circumstances, including whether referral documentation is needed.",
+    q: "Are there reasons someone may not be able to receive TMS?",
+    a: "Most people can receive TMS, but certain non-removable metal or electronic devices in or near the head can be contraindications. Examples include some aneurysm clips or coils, brain stimulators, and certain implanted devices. A recent hemorrhagic stroke, significant head injury, or other factors that increase seizure risk also require individual review before treatment.",
   },
   {
     q: "Can Veterans Affairs Canada authorize TMS treatment?",
-    a: "Authorization and coverage are determined individually by Veterans Affairs Canada. NeuroLinks can help explain the administrative process and information that may be required.",
+    a: "VAC may authorize TMS for eligible Veterans when the clinical and administrative requirements are met. Authorization and coverage are determined individually by Veterans Affairs Canada. NeuroLinks can help clarify what referral, treatment history, or other documentation may be required before treatment begins.",
   },
 ];
 
@@ -197,7 +197,7 @@ export default function VeteransTmsLandingPage() {
 
         <section className="vtms-conditions">
           <div className="vtms-conditions-visual">
-            <Image src="/media/images/everyday-life-vancouver-island.webp" alt="Vancouver Island coastal landscape" fill sizes="(max-width: 900px) 100vw, 50vw" className="vtms-cover" />
+            <Image src="/media/images/veterans-mountain.webp" alt="Mountain and forest landscape in British Columbia" fill sizes="(max-width: 900px) 100vw, 50vw" className="vtms-cover" />
             <div className="vtms-conditions-visual-overlay" />
             <div className="vtms-conditions-visual-copy">
               <h2>Different experiences.<br />A shared purpose.</h2>
@@ -219,8 +219,12 @@ export default function VeteransTmsLandingPage() {
 
         <section className="vtms-section vtms-clinician">
           <div className="vtms-wrap vtms-split">
-            <div className="vtms-photo-card">
+            <div className="vtms-photo-card vtms-photo-card-quote">
               <Image src={MEDIA.drAu} alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />
+              <div className="vtms-photo-quote">
+                <blockquote>“Compassionate, evidence-based care focused on meaningful change.”</blockquote>
+                <p>— Dr. Chi Hung Au</p>
+              </div>
             </div>
             <div className="vtms-copy">
               <p className="vtms-eyebrow">Psychiatrist-led care</p>
@@ -256,7 +260,7 @@ export default function VeteransTmsLandingPage() {
         <section className="vtms-section vtms-vac">
           <div className="vtms-wrap vtms-vac-grid">
             <div className="vtms-vac-image">
-              <Image src="/media/images/desolation%20sound.jpg" alt="Coastal British Columbia landscape" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />
+              <Image src="/media/images/vac-canadian-flag.webp" alt="Canadian flag overlooking Nanaimo and the coast from Mount Benson" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />
             </div>
             <div>
               <p className="vtms-eyebrow">Veterans Affairs Canada</p>
@@ -283,31 +287,29 @@ export default function VeteransTmsLandingPage() {
           </div>
         </section>
 
-        <section className="vtms-section vtms-faq">
-          <div className="vtms-wrap vtms-faq-grid">
-            <div>
+        <section className="vtms-bottom-split">
+          <div className="vtms-bottom-faq">
+            <div className="vtms-bottom-inner">
               <p className="vtms-eyebrow">Frequently asked questions</p>
               <h2>Common Questions</h2>
-              <p>Clear answers to practical questions that often come up before assessment.</p>
+              <p className="vtms-bottom-intro">Clear answers to practical questions that often come up before assessment.</p>
+              <FaqAccordion items={FAQS} />
             </div>
-            <FaqAccordion items={FAQS} />
           </div>
-        </section>
 
-        <section className="vtms-final">
-          <div className="vtms-final-media" aria-hidden="true">
-            <Image src="/media/images/veterans-tms-hero.webp" alt="" fill sizes="100vw" className="vtms-final-photo" />
-          </div>
-          <div className="vtms-final-overlay" aria-hidden="true" />
-          <div className="vtms-wrap vtms-final-grid">
-            <div>
+          <div className="vtms-bottom-cta">
+            <div className="vtms-bottom-cta-media" aria-hidden="true">
+              <Image src="/media/images/veterans-tms-hero.webp" alt="" fill sizes="(max-width: 900px) 100vw, 50vw" className="vtms-final-photo" />
+            </div>
+            <div className="vtms-bottom-cta-overlay" aria-hidden="true" />
+            <div className="vtms-bottom-cta-content">
               <p className="vtms-eyebrow">Take the next step</p>
               <h2>Let’s Talk About What May Be Right for You</h2>
               <p>Speak with our team about TMS treatment and what would be involved in determining whether it may be appropriate.</p>
-            </div>
-            <div className="vtms-final-actions">
-              <a href="#inquiry" className="vtms-button vtms-button-light">Request Information</a>
-              <p>Prefer to speak with someone? <a href={SITE.phoneHref}>Call {SITE.phone}</a></p>
+              <div className="vtms-final-actions">
+                <a href="#inquiry" className="vtms-button vtms-button-light">Request Information</a>
+                <p>Prefer to speak with someone? <a href={SITE.phoneHref}>Call {SITE.phone}</a></p>
+              </div>
             </div>
           </div>
         </section>
