@@ -1,0 +1,137 @@
+/* Final responsive polish for the Veterans TMS campaign page. */
+
+/* Keep the veteran visible between the copy and form on wide screens. */
+.vtms-hero-photo{
+  object-position:center center;
+  transform:translateX(-9%) scale(1.11);
+  transform-origin:center center;
+  filter:saturate(.98) brightness(.98) contrast(1.01);
+}
+.vtms-hero-overlay{
+  background:linear-gradient(90deg,rgba(7,30,47,.74) 0%,rgba(7,30,47,.52) 30%,rgba(7,30,47,.20) 48%,rgba(7,30,47,.03) 66%,rgba(7,30,47,0) 100%);
+}
+
+/* Ensure the uploaded mountain photo is visibly rendered rather than reading as a blue block. */
+.vtms-conditions-visual{background:#516c79;isolation:isolate;}
+.vtms-conditions-visual .vtms-cover{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center 48%!important;
+  opacity:1!important;
+  filter:none!important;
+  z-index:0;
+}
+.vtms-conditions-visual-overlay{
+  z-index:1;
+  background:linear-gradient(180deg,rgba(8,38,58,.02) 0%,rgba(8,38,58,.10) 48%,rgba(8,38,58,.58) 100%);
+}
+.vtms-conditions-visual-copy{z-index:2;}
+
+/* Keep the portrait clear: move Dr. Au visually to the right and reserve the left for the quote. */
+.vtms-photo-card .vtms-cover{
+  transform:translateX(10%) scale(1.12);
+  transform-origin:center center;
+  object-position:center center!important;
+}
+.vtms-photo-card::after{
+  background:linear-gradient(90deg,rgba(8,33,49,.68) 0%,rgba(8,33,49,.34) 38%,rgba(8,33,49,.06) 60%,rgba(8,33,49,0) 76%);
+}
+.vtms-clinician-quote{width:min(43%,220px);}
+
+/* Slightly more usable FAQ targets. */
+.vtms-faq-panel button{min-height:52px;padding-top:14px!important;padding-bottom:14px!important;}
+
+@media(max-width:900px){
+  /* Mobile hero: crop around the veteran rather than the empty landscape. */
+  .vtms-hero-photo{
+    transform:none;
+    object-position:76% center;
+    filter:saturate(.98) brightness(.96) contrast(1.01);
+  }
+  .vtms-hero-overlay{
+    background:linear-gradient(180deg,rgba(7,30,47,.18) 0%,rgba(7,30,47,.48) 42%,rgba(7,30,47,.80) 100%);
+  }
+  .vtms-hero-grid{padding:32px 0 34px;gap:20px;}
+  .vtms-hero h1{font-size:clamp(2.5rem,10.8vw,3.35rem);line-height:.98;}
+  .vtms-hero-lede{font-size:1.22rem;line-height:1.3;margin-top:18px;}
+  .vtms-hero-support{font-size:.98rem;line-height:1.5;margin-top:12px;}
+  .vtms-hero-copy .vtms-button{margin-top:18px;}
+
+  .vtms-hero-card{padding:20px;}
+  .vtms-hero-card h2{font-size:1.7rem;line-height:1.05;margin-bottom:8px;}
+  .vtms-hero-card>p{font-size:.93rem;line-height:1.45;margin-bottom:15px;}
+  .vtms-hero-card .ct-form{gap:9px;}
+  .vtms-hero-card .ct-form-row{gap:9px;}
+  .vtms-hero-card .ct-field{gap:4px;}
+  .vtms-hero-card .ct-field input{min-height:38px;padding:7px 9px;}
+  .vtms-hero-card .ct-field textarea{min-height:72px;padding:8px 9px;}
+  .vtms-hero-card .ct-submit{min-height:42px;}
+
+  .vtms-trust-item{min-height:68px;padding:10px 12px;}
+  .vtms-trust-icon{width:26px;height:26px;}
+
+  .vtms-benefit-grid{gap:12px;}
+  .vtms-benefit-card{
+    min-height:0!important;
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr);
+    column-gap:14px;
+    row-gap:4px;
+    padding:18px!important;
+  }
+  .vtms-benefit-icon{grid-column:1;grid-row:1 / span 2;width:34px;height:34px;margin:1px 0 0;}
+  .vtms-benefit-card h3{grid-column:2;margin:0;}
+  .vtms-benefit-card p{grid-column:2;margin:0;}
+
+  .vtms-conditions-visual{min-height:340px;}
+  .vtms-conditions-visual .vtms-cover{object-position:center 44%!important;}
+  .vtms-conditions-visual-overlay{background:linear-gradient(180deg,rgba(8,38,58,.01) 0%,rgba(8,38,58,.08) 48%,rgba(8,38,58,.58) 100%);}
+
+  .vtms-photo-card .vtms-cover{transform:translateX(12%) scale(1.15);}
+  .vtms-clinician-quote{left:20px;top:20px;width:42%;}
+  .vtms-clinician-quote blockquote{font-size:1.02rem;line-height:1.2;}
+
+  .vtms-steps-visual li,
+  .vtms-steps-visual li:first-child,
+  .vtms-steps-visual li:last-child{
+    display:grid;
+    grid-template-columns:38px minmax(0,1fr);
+    column-gap:12px;
+    row-gap:4px;
+    padding:14px 0;
+  }
+  .vtms-step-icon{grid-column:1;grid-row:1 / span 2;width:30px;height:30px;margin:1px 0 0;}
+  .vtms-steps-visual strong{grid-column:2;margin:0;}
+  .vtms-steps-visual span{grid-column:2;margin:0;}
+
+  .vtms-review{padding:20px;}
+
+  .vtms-faq-panel button{min-height:54px;}
+
+  .vtms-mobile-bar{min-height:58px;padding:7px 10px;gap:8px;}
+  .vtms-mobile-bar a{min-height:44px;padding:10px 12px;font-size:.92rem;}
+  .vtms-mobile-bar a:first-child{flex:0 0 30%;}
+}
+
+@media(max-width:560px){
+  .vtms-hero-grid{padding-top:28px;padding-bottom:30px;}
+  .vtms-hero h1{font-size:clamp(2.35rem,10.5vw,3rem);}
+  .vtms-hero-card{padding:17px;}
+  /* Keep paired fields paired on phones to reduce form height. */
+  .vtms-hero-card .ct-form-row{grid-template-columns:1fr 1fr!important;gap:8px;}
+  .vtms-hero-card .ct-field label{font-size:.74rem;}
+  .vtms-hero-card .ct-field input{font-size:.9rem;}
+  .vtms-section{padding:52px 0;}
+  .vtms-conditions-visual{min-height:300px;}
+  .vtms-conditions-visual-copy{left:22px;right:22px;bottom:26px;}
+  .vtms-conditions-visual-copy h2{font-size:2rem;margin-bottom:12px;}
+  .vtms-photo-card .vtms-cover{transform:translateX(13%) scale(1.16);}
+  .vtms-clinician-quote{left:17px;top:17px;width:40%;}
+  .vtms-clinician-quote blockquote{font-size:.96rem;}
+  .vtms-review{padding:18px;}
+  .vtms-faq-panel{padding-top:42px;padding-bottom:46px;}
+  .vtms-final-panel-inner{padding-top:48px;}
+}
