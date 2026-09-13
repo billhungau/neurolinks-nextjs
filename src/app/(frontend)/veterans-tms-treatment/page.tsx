@@ -25,12 +25,12 @@ const BENEFITS = [
 ] as const;
 
 const FAQS = [
-  { question: "Does TMS require anesthesia?", answer: "No. TMS is non-invasive and does not require anesthesia or sedation. You remain awake throughout treatment." },
-  { question: "Can I drive after treatment?", answer: "Most people can return to their usual activities after a TMS session. Your psychiatrist will advise you if your individual circumstances require different precautions." },
-  { question: "How long does TMS treatment take?", answer: "A standard course is usually delivered over several weeks. Accelerated schedules may also be considered for selected patients after psychiatric assessment." },
-  { question: "Will I need to stop my medications?", answer: "Not necessarily. Medications and other treatments are reviewed during assessment, and any changes should be made with your treating clinician." },
-  { question: "Do I need a referral?", answer: "Contact NeuroLinks and our team can explain the appropriate next step for your circumstances, including whether referral documentation is needed." },
-  { question: "Can Veterans Affairs Canada authorize TMS treatment?", answer: "Authorization and coverage are determined individually by Veterans Affairs Canada. NeuroLinks can help explain the administrative process and information that may be required." },
+  { q: "Does TMS require anesthesia?", a: "No. TMS is non-invasive and does not require anesthesia or sedation. You remain awake throughout treatment." },
+  { q: "Can I drive after treatment?", a: "Most people can return to their usual activities after a TMS session. Your psychiatrist will advise you if your individual circumstances require different precautions." },
+  { q: "How long does TMS treatment take?", a: "A standard course is usually delivered over several weeks. Accelerated schedules may also be considered for selected patients after psychiatric assessment." },
+  { q: "Will I need to stop my medications?", a: "Not necessarily. Medications and other treatments are reviewed during assessment, and any changes should be made with your treating clinician." },
+  { q: "Do I need a referral?", a: "Contact NeuroLinks and our team can explain the appropriate next step for your circumstances, including whether referral documentation is needed." },
+  { q: "Can Veterans Affairs Canada authorize TMS treatment?", a: "Authorization and coverage are determined individually by Veterans Affairs Canada. NeuroLinks can help explain the administrative process and information that may be required." },
 ];
 
 const REVIEWS = [
