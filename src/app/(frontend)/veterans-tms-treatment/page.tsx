@@ -79,7 +79,7 @@ export default function VeteransTmsLandingPage() {
       <main>
         <section className="vtms-hero">
           <div className="vtms-hero-media" aria-hidden="true">
-            <Image src={MEDIA.tmsClinic} alt="" fill priority sizes="100vw" className="vtms-hero-photo" />
+            <Image src="/media/images/veterans-tms-hero.webp" alt="" fill priority sizes="100vw" className="vtms-hero-photo" />
           </div>
           <div className="vtms-hero-overlay" aria-hidden="true" />
           <div className="vtms-wrap vtms-hero-grid">
