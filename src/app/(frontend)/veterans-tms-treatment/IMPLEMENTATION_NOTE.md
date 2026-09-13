@@ -1,0 +1,1 @@
+This landing page intentionally reuses the existing ContactForm and VETERAN_CONDITIONS resources. Google review excerpts displayed on the page are verbatim excerpts surfaced from the clinic's Google Business Profile during implementation; no testimonial copy was generated for the page.
