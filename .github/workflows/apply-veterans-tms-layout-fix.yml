@@ -1,4 +1,4 @@
-name: Apply Veterans TMS image and layout fixes
+name: Apply Veterans TMS layout fix
 
 on:
   push:
@@ -16,174 +16,21 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-
-      - name: Update Veterans TMS page assets
+      - name: Update image paths
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-
-          page = Path('src/app/(frontend)/veterans-tms-treatment/page.tsx')
-          text = page.read_text()
-          text = text.replace('/media/images/veterans-mountain.webp', '/media/images/veterans-mountain.jpg')
-          text = text.replace('/media/images/vac-canadian-flag.webp', '/media/images/Canadian-flag.png')
-          page.write_text(text)
-
-          css_path = Path('src/app/(frontend)/veterans-tms-treatment/veterans-tms-refinements.css')
-          css = css_path.read_text()
-          marker = '/* FINAL LAYOUT CORRECTIONS 2026-09-13 */'
-          block = r'''
-
-/* FINAL LAYOUT CORRECTIONS 2026-09-13 */
-/* Render the uploaded nature photograph directly; do not hide it behind the old fallback treatment. */
-.vtms-conditions-visual{
-  background:none!important;
-}
-.vtms-conditions-visual>.vtms-cover{
-  opacity:1!important;
-  object-fit:cover;
-  object-position:54% 50%!important;
-}
-.vtms-conditions-visual-overlay{
-  background:linear-gradient(180deg,rgba(8,38,58,0) 0%,rgba(8,38,58,.02) 54%,rgba(8,38,58,.56) 100%)!important;
-}
-.vtms-conditions-visual-copy{
-  z-index:2;
-}
-
-/* Give VAC a distinct visual chapter after the review section. */
-.vtms-vac{
-  background:#d5e4eb!important;
-  border-top:1px solid rgba(23,85,122,.08);
-  border-bottom:1px solid rgba(23,85,122,.08);
-  padding-top:92px!important;
-  padding-bottom:92px!important;
-}
-.vtms-vac-image{
-  min-height:360px;
-  border-radius:14px;
-  overflow:hidden;
-}
-.vtms-vac-image .vtms-cover{
-  object-position:center 48%!important;
-}
-
-/* FAQ and final CTA are full-width sequential sections, not a compressed side-by-side split. */
-.vtms-bottom-split{
-  display:block!important;
-  background:#e8eef0;
-}
-.vtms-faq-panel{
-  width:100%;
-  padding:82px 30px 88px!important;
-}
-.vtms-faq-panel-inner{
-  width:min(100%,960px)!important;
-  max-width:960px!important;
-  margin:0 auto!important;
-}
-.vtms-faq-intro{
-  max-width:620px!important;
-}
-
-.vtms-final-panel{
-  width:100%;
-  min-height:410px!important;
-}
-.vtms-final-panel-inner{
-  max-width:1180px!important;
-  margin:0 auto!important;
-  padding:74px 40px 78px!important;
-  gap:28px!important;
-}
-.vtms-final-panel-inner>div{
-  max-width:560px;
-}
-.vtms-final-panel h2{
-  font-size:clamp(2.5rem,4.2vw,4.4rem)!important;
-  line-height:1.02!important;
-  max-width:620px;
-}
-.vtms-final-panel-inner>div:first-child>p:not(.vtms-eyebrow){
-  max-width:570px;
-}
-.vtms-final-photo{
-  object-position:74% center!important;
-}
-.vtms-final-overlay{
-  background:linear-gradient(90deg,rgba(7,35,53,.94) 0%,rgba(7,35,53,.82) 34%,rgba(7,35,53,.48) 58%,rgba(7,35,53,.16) 76%,rgba(7,35,53,.08) 100%)!important;
-}
-
-@media(max-width:900px){
-  .vtms-conditions-visual>.vtms-cover{
-    object-position:58% center!important;
-  }
-  .vtms-vac{
-    padding-top:66px!important;
-    padding-bottom:66px!important;
-  }
-  .vtms-vac-image{
-    min-height:300px;
-  }
-  .vtms-faq-panel{
-    padding:62px 30px 66px!important;
-  }
-  .vtms-final-panel{
-    min-height:460px!important;
-  }
-  .vtms-final-panel-inner{
-    padding:64px 30px 72px!important;
-  }
-  .vtms-final-panel-inner>div{
-    max-width:600px;
-  }
-  .vtms-final-panel h2{
-    font-size:clamp(2.35rem,8vw,3.6rem)!important;
-  }
-  .vtms-final-photo{
-    object-position:72% center!important;
-  }
-}
-
-@media(max-width:560px){
-  .vtms-conditions-visual>.vtms-cover{
-    object-position:60% center!important;
-  }
-  .vtms-vac{
-    padding-top:54px!important;
-    padding-bottom:54px!important;
-  }
-  .vtms-vac-image{
-    min-height:250px;
-  }
-  .vtms-faq-panel{
-    padding:52px 22px 58px!important;
-  }
-  .vtms-final-panel{
-    min-height:430px!important;
-  }
-  .vtms-final-panel-inner{
-    padding:56px 22px 66px!important;
-  }
-  .vtms-final-panel h2{
-    font-size:clamp(2.25rem,11vw,3rem)!important;
-  }
-  .vtms-final-photo{
-    object-position:76% center!important;
-  }
-}
-'''
-          if marker not in css:
-              css_path.write_text(css.rstrip() + block + '\n')
+          p = Path('src/app/(frontend)/veterans-tms-treatment/page.tsx')
+          s = p.read_text()
+          s = s.replace('/media/images/veterans-mountain.webp','/media/images/veterans-mountain.jpg')
+          s = s.replace('/media/images/vac-canadian-flag.webp','/media/images/Canadian-flag.png')
+          p.write_text(s)
           PY
-
-      - name: Verify replacements
+      - name: Append layout corrections
         shell: bash
         run: |
-          grep -q '/media/images/veterans-mountain.jpg' 'src/app/(frontend)/veterans-tms-treatment/page.tsx'
-          grep -q '/media/images/Canadian-flag.png' 'src/app/(frontend)/veterans-tms-treatment/page.tsx'
-          grep -q 'FINAL LAYOUT CORRECTIONS 2026-09-13' 'src/app/(frontend)/veterans-tms-treatment/veterans-tms-refinements.css'
-
+          echo 'LyogRklOQUwgTEFZT1VUIENPUlJFQ1RJT05TIDIwMjYtMDktMTMgKi8KLnZ0bXMtY29uZGl0aW9ucy12aXN1YWx7YmFja2dyb3VuZDpub25lIWltcG9ydGFudH0KLnZ0bXMtY29uZGl0aW9ucy12aXN1YWw+LnZ0bXMtY292ZXJ7b3BhY2l0eToxIWltcG9ydGFudDtvYmplY3QtZml0OmNvdmVyO29iamVjdC1wb3NpdGlvbjo1NCUgNTAlIWltcG9ydGFudH0KLnZ0bXMtY29uZGl0aW9ucy12aXN1YWwtb3ZlcmxheXtiYWNrZ3JvdW5kOmxpbmVhci1ncmFkaWVudCgxODBkZWcscmdiYSg4LDM4LDU4LDApIDAlLHJnYmEoOCwzOCw1OCwuMDIpIDU0JSxyZ2JhKDgsMzgsNTgsLjU2KSAxMDAlKSFpbXBvcnRhbnR9Ci52dG1zLWNvbmRpdGlvbnMtdmlzdWFsLWNvcHl7ei1pbmRleDoyfQoudnRtcy12YWN7YmFja2dyb3VuZDojZDVlNGViIWltcG9ydGFudDtib3JkZXItdG9wOjFweCBzb2xpZCByZ2JhKDIzLDg1LDEyMiwuMDgpO2JvcmRlci1ib3R0b206MXB4IHNvbGlkIHJnYmEoMjMsODUsMTIyLC4wOCk7cGFkZGluZy10b3A6OTJweCFpbXBvcnRhbnQ7cGFkZGluZy1ib3R0b206OTJweCFpbXBvcnRhbnR9Ci52dG1zLXZhYy1pbWFnZXttaW4taGVpZ2h0OjM2MHB4O2JvcmRlci1yYWRpdXM6MTRweDtvdmVyZmxvdzpoaWRkZW59Ci52dG1zLXZhYy1pbWFnZSAudnRtcy1jb3ZlcntvYmplY3QtcG9zaXRpb246Y2VudGVyIDQ4JSFpbXBvcnRhbnR9Ci52dG1zLWJvdHRvbS1zcGxpdHtkaXNwbGF5OmJsb2NrIWltcG9ydGFudDtiYWNrZ3JvdW5kOiNlOGVlZjB9Ci52dG1zLWZhcS1wYW5lbHt3aWR0aDoxMDAlO3BhZGRpbmc6ODJweCAzMHB4IDg4cHghaW1wb3J0YW50fQoudnRtcy1mYXEtcGFuZWwtaW5uZXJ7d2lkdGg6bWluKDEwMCUsOTYwcHgpIWltcG9ydGFudDttYXgtd2lkdGg6OTYwcHghaW1wb3J0YW50O21hcmdpbjowIGF1dG8haW1wb3J0YW50fQoudnRtcy1mYXEtaW50cm97bWF4LXdpZHRoOjYyMHB4IWltcG9ydGFudH0KLnZ0bXMtZmluYWwtcGFuZWx7d2lkdGg6MTAwJTttaW4taGVpZ2h0OjQxMHB4IWltcG9ydGFudH0KLnZ0bXMtZmluYWwtcGFuZWwtaW5uZXJ7bWF4LXdpZHRoOjExODBweCFpbXBvcnRhbnQ7bWFyZ2luOjAgYXV0byFpbXBvcnRhbnQ7cGFkZGluZzo3NHB4IDQwcHggNzhweCFpbXBvcnRhbnQ7Z2FwOjI4cHghaW1wb3J0YW50fQoudnRtcy1maW5hbC1wYW5lbC1pbm5lcj5kaXZ7bWF4LXdpZHRoOjU2MHB4fQoudnRtcy1maW5hbC1wYW5lbCBoMntmb250LXNpemU6Y2xhbXAoMi41cmVtLDQuMnZ3LDQuNHJlbSkhaW1wb3J0YW50O2xpbmUtaGVpZ2h0OjEuMDIhaW1wb3J0YW50O21heC13aWR0aDo2MjBweH0KLnZ0bXMtZmluYWwtcGFuZWwtaW5uZXI+ZGl2OmZpcnN0LWNoaWxkPnA6bm90KC52dG1zLWV5ZWJyb3cpe21heC13aWR0aDo1NzBweH0KLnZ0bXMtZmluYWwtcGhvdG97b2JqZWN0LXBvc2l0aW9uOjc0JSBjZW50ZXIhaW1wb3J0YW50fQoudnRtcy1maW5hbC1vdmVybGF5e2JhY2tncm91bmQ6bGluZWFyLWdyYWRpZW50KDkwZGVnLHJnYmEoNywzNSw1MywuOTQpIDAlLHJnYmEoNywzNSw1MywuODIpIDM0JSxyZ2JhKDcsMzUsNTMsLjQ4KSA1OCUscmdiYSg3LDM1LDUzLC4xNikgNzYlLHJnYmEoNywzNSw1MywuMDgpIDEwMCUpIWltcG9ydGFudH0KQG1lZGlhKG1heC13aWR0aDo5MDBweCl7Ci52dG1zLWNvbmRpdGlvbnMtdmlzdWFsPi52dG1zLWNvdmVye29iamVjdC1wb3NpdGlvbjo1OCUgY2VudGVyIWltcG9ydGFudH0KLnZ0bXMtdmFje3BhZGRpbmctdG9wOjY2cHghaW1wb3J0YW50O3BhZGRpbmctYm90dG9tOjY2cHghaW1wb3J0YW50fQoudnRtcy12YWMtaW1hZ2V7bWluLWhlaWdodDozMDBweH0KLnZ0bXMtZmFxLXBhbmVse3BhZGRpbmc6NjJweCAzMHB4IDY2cHghaW1wb3J0YW50fQoudnRtcy1maW5hbC1wYW5lbHttaW4taGVpZ2h0OjQ2MHB4IWltcG9ydGFudH0KLnZ0bXMtZmluYWwtcGFuZWwtaW5uZXJ7cGFkZGluZzo2NHB4IDMwcHggNzJweCFpbXBvcnRhbnR9Ci52dG1zLWZpbmFsLXBhbmVsLWlubmVyPmRpdnttYXgtd2lkdGg6NjAwcHh9Ci52dG1zLWZpbmFsLXBhbmVsIGgye2ZvbnQtc2l6ZTpjbGFtcCgyLjM1cmVtLDh2dywzLjZyZW0pIWltcG9ydGFudH0KLnZ0bXMtZmluYWwtcGhvdG97b2JqZWN0LXBvc2l0aW9uOjcyJSBjZW50ZXIhaW1wb3J0YW50fQp9CkBtZWRpYShtYXgtd2lkdGg6NTYwcHgpewoudnRtcy1jb25kaXRpb25zLXZpc3VhbD4udnRtcy1jb3ZlcntvYmplY3QtcG9zaXRpb246NjAlIGNlbnRlciFpbXBvcnRhbnR9Ci52dG1zLXZhY3twYWRkaW5nLXRvcDo1NHB4IWltcG9ydGFudDtwYWRkaW5nLWJvdHRvbTo1NHB4IWltcG9ydGFudH0KLnZ0bXMtdmFjLWltYWdle21pbi1oZWlnaHQ6MjUwcHh9Ci52dG1zLWZhcS1wYW5lbHtwYWRkaW5nOjUycHggMjJweCA1OHB4IWltcG9ydGFudH0KLnZ0bXMtZmluYWwtcGFuZWx7bWluLWhlaWdodDo0MzBweCFpbXBvcnRhbnR9Ci52dG1zLWZpbmFsLXBhbmVsLWlubmVye3BhZGRpbmc6NTZweCAyMnB4IDY2cHghaW1wb3J0YW50fQoudnRtcy1maW5hbC1wYW5lbCBoMntmb250LXNpemU6Y2xhbXAoMi4yNXJlbSwxMXZ3LDNyZW0pIWltcG9ydGFudH0KLnZ0bXMtZmluYWwtcGhvdG97b2JqZWN0LXBvc2l0aW9uOjc2JSBjZW50ZXIhaW1wb3J0YW50fQp9Cg==' | base64 -d >> 'src/app/(frontend)/veterans-tms-treatment/veterans-tms-refinements.css'
       - name: Commit changes
         shell: bash
         run: |
