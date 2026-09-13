@@ -14,7 +14,10 @@ export function ArticleCollection({ articles }: { articles: InsightsArticleCard[
 
   useEffect(() => {
     const saved = window.localStorage.getItem(VIEW_PREFERENCE_KEY);
-    if (saved === "grid" || saved === "list") setView(saved);
+    if (saved !== "grid" && saved !== "list") return;
+
+    const frame = window.requestAnimationFrame(() => setView(saved));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   function chooseView(next: ViewMode) {

@@ -184,7 +184,7 @@ export interface Insight {
     [k: string]: unknown;
   } | null;
   /**
-   * The clinician who wrote the article.
+   * The clinician who wrote the article. Automatically selected when there is only one author.
    */
   author: number | Author;
   /**
@@ -262,6 +262,10 @@ export interface Insight {
    * Optional. Leave blank to use the alternative text stored with the image.
    */
   featuredImageAlt?: string | null;
+  /**
+   * The next scheduled publication time from Payload's publishing queue.
+   */
+  scheduledPublishAt?: string | null;
   /**
    * Required before the article can appear publicly. Set automatically when you publish.
    */
@@ -660,6 +664,7 @@ export interface InsightsSelect<T extends boolean = true> {
   topics?: T;
   featuredImage?: T;
   featuredImageAlt?: T;
+  scheduledPublishAt?: T;
   publishedAt?: T;
   featured?: T;
   readingTime?: T;
