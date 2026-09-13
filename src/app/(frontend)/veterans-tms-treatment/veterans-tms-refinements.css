@@ -284,3 +284,23 @@
 .vtms-final-panel h2{font-size:clamp(2.25rem,11vw,3rem)!important}
 .vtms-final-photo{object-position:76% center!important}
 }
+/* FUSED PSYCHIATRIST SECTION 2026-09-13 */
+.vtms-clinician .vtms-split{display:grid;grid-template-columns:minmax(0,42%) minmax(0,58%);gap:0!important;align-items:stretch;overflow:hidden;border-radius:18px;background:#f3efe7;box-shadow:0 20px 52px rgba(31,54,68,.12)}
+.vtms-clinician .vtms-photo-card{min-height:520px;border-radius:0;box-shadow:none;background:#dce5eb}
+.vtms-clinician .vtms-photo-card>.vtms-cover{object-fit:contain!important;object-position:right center!important}
+.vtms-clinician .vtms-photo-card::after{background:linear-gradient(90deg,rgba(8,33,49,.58) 0%,rgba(8,33,49,.30) 34%,rgba(8,33,49,.08) 53%,rgba(8,33,49,0) 68%)!important}
+.vtms-clinician .vtms-clinician-quote{left:30px;top:34px;width:min(40%,220px)}
+.vtms-clinician .vtms-copy{padding:58px 54px 52px;display:flex;flex-direction:column;justify-content:center;background:#f3efe7}
+.vtms-clinician .vtms-copy>p:not(.vtms-eyebrow){max-width:660px}
+@media(max-width:900px){
+.vtms-clinician .vtms-split{grid-template-columns:1fr;border-radius:16px}
+.vtms-clinician .vtms-photo-card{min-height:0;aspect-ratio:3/2}
+.vtms-clinician .vtms-photo-card>.vtms-cover{object-fit:contain!important;object-position:right center!important}
+.vtms-clinician .vtms-clinician-quote{left:26px;top:28px;width:min(39%,210px)}
+.vtms-clinician .vtms-copy{padding:46px 34px 42px}}
+@media(max-width:560px){
+.vtms-clinician .vtms-photo-card{aspect-ratio:1.42/1}
+.vtms-clinician .vtms-clinician-quote{left:18px;top:20px;width:41%}
+.vtms-clinician .vtms-clinician-quote blockquote{font-size:1rem;line-height:1.18}
+.vtms-clinician .vtms-clinician-quote span{font-size:.72rem}
+.vtms-clinician .vtms-copy{padding:36px 22px 34px}}
