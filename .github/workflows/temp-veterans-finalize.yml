@@ -1,0 +1,196 @@
+name: Temporary Veterans Landing Finalize
+
+on:
+  push:
+    branches:
+      - chatgpt/veterans-tms-premium-refresh
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/veterans-tms-premium-refresh
+          fetch-depth: 0
+
+      - name: Apply final Veterans landing refinements
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          page_path = Path('src/app/(frontend)/veterans-tms-treatment/page.tsx')
+          css_path = Path('src/app/(frontend)/veterans-tms-treatment/veterans-tms-refinements.css')
+          page = page_path.read_text()
+
+          # Replace FAQ copy with specific, practical answers grounded in the site's TMS information.
+          faq_start = page.index('const FAQS = [')
+          faq_end = page.index('\n\nconst REVIEWS = [', faq_start)
+          faq_block = '''const FAQS = [
+            {
+              q: "Does TMS require anesthesia?",
+              a: "No. TMS is non-invasive and does not require anesthesia or sedation. You remain awake during treatment. Unlike ECT, there is no anesthesia recovery period, and most people can return to their usual activities immediately afterward.",
+            },
+            {
+              q: "Can I drive after treatment?",
+              a: "Yes, most people can drive and return to work or their usual activities after a TMS session because treatment does not require anesthesia or sedation. If you experience an unusual symptom or your psychiatrist gives you individual precautions, follow that advice.",
+            },
+            {
+              q: "How many treatments are needed?",
+              a: "A typical course is about 30 sessions, usually delivered 5 days per week over approximately 4 to 6 weeks. Some patients may be considered for a shorter, more intensive schedule with several treatments per day over 5 days after psychiatric assessment.",
+            },
+            {
+              q: "Will I need to stop my medications?",
+              a: "Usually not. TMS can be given alongside antidepressant medication. Your medications are reviewed during assessment, and continuing an oral antidepressant may help support the durability of response. Do not stop or change medication unless your treating clinician advises it.",
+            },
+            {
+              q: "Do I need a referral?",
+              a: "Contact NeuroLinks first and our team can explain the referral or documentation needed for your situation. A psychiatric assessment is required before TMS treatment begins.",
+            },
+            {
+              q: "Who may not be able to receive TMS?",
+              a: "TMS may not be suitable for people with certain non-removable metal or implanted devices in or near the head, such as some aneurysm clips or coils, brain stents, deep-brain stimulators, or some ear or eye implants. A recent hemorrhagic stroke or head injury may also require additional risk assessment.",
+            },
+            {
+              q: "Can Veterans Affairs Canada authorize TMS treatment?",
+              a: "VAC authorization and coverage are determined individually. NeuroLinks can help explain the administrative process and what clinical or referral information may be required, but authorization cannot be guaranteed in advance.",
+            },
+          ];'''
+          page = page[:faq_start] + faq_block + page[faq_end:]
+
+          # Use the uploaded mountain image and match the approved mockup's line breaks.
+          page = page.replace(
+            '<Image src="/media/images/everyday-life-vancouver-island.webp" alt="Vancouver Island coastal landscape" fill sizes="(max-width: 900px) 100vw, 50vw" className="vtms-cover" />',
+            '<Image src="/media/images/veterans-mountain-purpose.svg" alt="Mountain and forest landscape in British Columbia" fill sizes="(max-width: 900px) 100vw, 50vw" className="vtms-cover" />'
+          )
+          page = page.replace(
+            '<h2>Different experiences.<br />A shared purpose.</h2>\n              <p>Support for what comes next.</p>',
+            '<h2>Different<br />experiences.<br />A shared purpose.</h2>\n              <p><span className="vtms-purpose-rule" aria-hidden="true" />Support for what comes next.</p>'
+          )
+
+          # Add the requested physician quote over the portrait.
+          portrait = '<Image src={MEDIA.drAu} alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />'
+          portrait_with_quote = portrait + '''\n              <div className="vtms-clinician-quote">\n                <blockquote>“Compassionate, evidence-based care for meaningful change.”</blockquote>\n                <span>— Dr. Chi Hung Au</span>\n              </div>'''
+          page = page.replace(portrait, portrait_with_quote)
+
+          # Use the uploaded Canadian flag image in the VAC section.
+          page = page.replace(
+            '<Image src="/media/images/desolation%20sound.jpg" alt="Coastal British Columbia landscape" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />',
+            '<Image src="/media/images/vac-canadian-flag.svg" alt="Canadian flag overlooking a coastal British Columbia landscape" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />'
+          )
+
+          # Combine FAQ and final CTA into an equal 50:50 desktop split.
+          bottom_start = page.index('        <section className="vtms-section vtms-faq">')
+          bottom_end = page.index('      </main>', bottom_start)
+          bottom = '''        <section className="vtms-bottom-split">
+          <div className="vtms-faq vtms-faq-panel">
+            <div className="vtms-faq-panel-inner">
+              <p className="vtms-eyebrow">Frequently asked questions</p>
+              <h2>Common Questions</h2>
+              <p className="vtms-faq-intro">Clear answers to practical questions that often come up before assessment.</p>
+              <FaqAccordion items={FAQS} />
+            </div>
+          </div>
+
+          <div className="vtms-final vtms-final-panel">
+            <div className="vtms-final-media" aria-hidden="true">
+              <Image src="/media/images/veterans-tms-hero.webp" alt="" fill sizes="(max-width: 900px) 100vw, 50vw" className="vtms-final-photo" />
+            </div>
+            <div className="vtms-final-overlay" aria-hidden="true" />
+            <div className="vtms-final-panel-inner">
+              <div>
+                <p className="vtms-eyebrow">Take the next step</p>
+                <h2>Let’s Talk About What May Be Right for You</h2>
+                <p>Speak with our team about TMS treatment and what would be involved in determining whether it may be appropriate.</p>
+              </div>
+              <div className="vtms-final-actions">
+                <a href="#inquiry" className="vtms-button vtms-button-light">Request Information</a>
+                <p>Prefer to speak with someone? <a href={SITE.phoneHref}>Call {SITE.phone}</a></p>
+              </div>
+            </div>
+          </div>
+        </section>
+'''
+          page = page[:bottom_start] + bottom + page[bottom_end:]
+          page_path.write_text(page)
+
+          css = css_path.read_text()
+          marker = '/* Final user-requested mockup refinements. */'
+          if marker not in css:
+            css += r'''
+
+/* Final user-requested mockup refinements. */
+.vtms-conditions-visual .vtms-cover{object-position:center 45%}
+.vtms-conditions-visual-copy{max-width:360px}
+.vtms-conditions-visual-copy h2{font-size:clamp(2.1rem,3.25vw,3.35rem);line-height:1.02}
+.vtms-conditions-visual-copy p{display:flex;align-items:center;gap:14px;max-width:260px}
+.vtms-purpose-rule{display:inline-block;width:42px;height:1px;background:rgba(255,255,255,.9);flex:0 0 auto}
+
+.vtms-photo-card{position:relative;overflow:hidden}
+.vtms-photo-card::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,33,49,.60) 0%,rgba(8,33,49,.22) 48%,rgba(8,33,49,0) 72%);pointer-events:none}
+.vtms-clinician-quote{position:absolute;z-index:2;left:28px;top:28px;width:min(48%,245px);color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.22)}
+.vtms-clinician-quote blockquote{margin:0 0 12px;font-family:var(--font-serif),Georgia,serif;font-size:clamp(1.15rem,1.8vw,1.55rem);line-height:1.16;font-weight:650}
+.vtms-clinician-quote span{font-size:.82rem;color:rgba(255,255,255,.88)}
+
+.vtms-vac-image .vtms-cover{object-position:center center}
+
+.vtms-bottom-split{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;background:#e8eef0}
+.vtms-faq-panel{padding:72px max(42px,calc((100vw - 1180px)/2)) 76px max(42px,calc((100vw - 1180px)/2));background:#e8eef0}
+.vtms-faq-panel-inner{max-width:590px;margin-left:auto;width:100%}
+.vtms-faq-panel h2{font-family:var(--font-serif),Georgia,serif;color:var(--vnavy);font-size:clamp(2.2rem,3.4vw,3.5rem);line-height:1.02;margin:0 0 14px}
+.vtms-faq-intro{margin:0 0 30px;max-width:440px;color:#455f70;line-height:1.6}
+.vtms-faq-panel .faq-accordion{width:100%}
+
+.vtms-final-panel{min-height:100%;padding:0;display:flex;align-items:stretch}
+.vtms-final-panel .vtms-final-media,.vtms-final-panel .vtms-final-overlay{position:absolute;inset:0}
+.vtms-final-panel-inner{position:relative;z-index:2;width:100%;max-width:590px;padding:72px max(42px,calc((100vw - 1180px)/2)) 76px 58px;display:flex;flex-direction:column;justify-content:center;gap:34px}
+.vtms-final-panel h2{font-family:var(--font-serif),Georgia,serif;font-size:clamp(2.2rem,3.35vw,3.45rem);line-height:1.04;margin:0 0 18px;color:#fff}
+.vtms-final-panel-inner>div:first-child>p:not(.vtms-eyebrow){font-size:1.03rem;line-height:1.65;color:rgba(255,255,255,.9)}
+.vtms-final-panel .vtms-final-photo{object-position:64% center;filter:saturate(.98) brightness(.84)}
+.vtms-final-panel .vtms-final-overlay{background:linear-gradient(90deg,rgba(7,35,53,.93) 0%,rgba(7,35,53,.78) 46%,rgba(7,35,53,.50) 100%)}
+
+@media(max-width:900px){
+  .vtms-clinician-quote{left:22px;top:22px;width:52%}
+  .vtms-bottom-split{grid-template-columns:1fr}
+  .vtms-faq-panel{padding:58px 30px 62px}
+  .vtms-faq-panel-inner{max-width:none;margin:0}
+  .vtms-final-panel{min-height:500px}
+  .vtms-final-panel-inner{max-width:none;padding:62px 30px 70px}
+  .vtms-final-panel .vtms-final-overlay{background:linear-gradient(180deg,rgba(7,35,53,.72) 0%,rgba(7,35,53,.91) 100%)}
+}
+@media(max-width:560px){
+  .vtms-clinician-quote{left:18px;top:18px;width:58%}
+  .vtms-clinician-quote blockquote{font-size:1.05rem}
+  .vtms-faq-panel{padding:48px 22px 52px}
+  .vtms-final-panel-inner{padding:54px 22px 68px}
+}
+'''
+          css_path.write_text(css)
+          PY
+
+      - name: Verify restricted term is absent on landing page
+        shell: bash
+        run: |
+          if grep -Eini 'ketamine|esketamine' 'src/app/(frontend)/veterans-tms-treatment'; then
+            echo 'Restricted treatment terminology found on Veterans TMS landing route.'
+            exit 1
+          fi
+
+      - name: Commit refinements
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'src/app/(frontend)/veterans-tms-treatment/page.tsx' 'src/app/(frontend)/veterans-tms-treatment/veterans-tms-refinements.css'
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+          else
+            git commit -m 'Finalize Veterans landing mockup refinements'
+            git push origin HEAD:chatgpt/veterans-tms-premium-refresh
+          fi
