@@ -142,6 +142,44 @@ function Header() {
 export default function VeteransTmsLandingPage() {
   return (
     <div className="vtms-page">
+      <style>{`
+        .vtms-photo-card-quote{position:relative;overflow:hidden}
+        .vtms-photo-card-quote:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,30,47,.74) 0%,rgba(7,30,47,.32) 42%,rgba(7,30,47,0) 68%);pointer-events:none}
+        .vtms-photo-quote{position:absolute;z-index:2;left:30px;top:34px;width:min(48%,260px);color:#fff}
+        .vtms-photo-quote blockquote{font-family:var(--font-serif),Georgia,serif;font-size:clamp(1.25rem,2vw,1.7rem);line-height:1.15;margin:0 0 12px;color:#fff}
+        .vtms-photo-quote p{margin:0;color:rgba(255,255,255,.9);font-size:.9rem}
+        .vtms-vac-image .vtms-cover{object-position:center 52%}
+        .vtms-bottom-split{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;background:#e8eef0}
+        .vtms-bottom-faq{background:#e8eef0;padding:72px max(34px,calc((100vw - 1180px)/2)) 76px max(34px,calc((100vw - 1180px)/2))}
+        .vtms-bottom-inner{max-width:590px;margin-left:auto;width:100%}
+        .vtms-bottom-inner h2{font-family:var(--font-serif),Georgia,serif;color:var(--vnavy);font-size:clamp(2.2rem,3.4vw,3.6rem);line-height:1.02;margin:0 0 14px}
+        .vtms-bottom-intro{margin:0 0 28px;max-width:500px;color:#536879;line-height:1.6}
+        .vtms-bottom-cta{position:relative;overflow:hidden;min-height:100%;display:flex;align-items:center;color:#fff}
+        .vtms-bottom-cta-media,.vtms-bottom-cta-overlay{position:absolute;inset:0}
+        .vtms-bottom-cta-media .vtms-final-photo{object-position:68% center;filter:saturate(.96) brightness(.8)}
+        .vtms-bottom-cta-overlay{background:linear-gradient(90deg,rgba(8,38,58,.93) 0%,rgba(8,38,58,.78) 46%,rgba(8,38,58,.45) 100%)}
+        .vtms-bottom-cta-content{position:relative;z-index:2;padding:76px max(40px,calc((100vw - 1180px)/2)) 78px 56px;max-width:690px}
+        .vtms-bottom-cta .vtms-eyebrow{color:#a9d3e6}
+        .vtms-bottom-cta h2{font-family:var(--font-serif),Georgia,serif;color:#fff;font-size:clamp(2.4rem,3.7vw,4rem);line-height:1.02;margin:0 0 18px;max-width:590px}
+        .vtms-bottom-cta-content>p:not(.vtms-eyebrow){color:rgba(255,255,255,.9);font-size:1.04rem;line-height:1.65;max-width:560px}
+        .vtms-bottom-cta .vtms-final-actions{margin-top:28px}
+        @media(max-width:900px){
+          .vtms-photo-quote{left:24px;top:26px;width:54%}
+          .vtms-bottom-split{grid-template-columns:1fr}
+          .vtms-bottom-faq{padding:60px 30px}
+          .vtms-bottom-inner{max-width:none;margin:0}
+          .vtms-bottom-cta{min-height:520px}
+          .vtms-bottom-cta-content{padding:62px 30px}
+          .vtms-bottom-cta-overlay{background:linear-gradient(180deg,rgba(8,38,58,.68) 0%,rgba(8,38,58,.9) 100%)}
+        }
+        @media(max-width:560px){
+          .vtms-photo-quote{left:20px;top:22px;width:62%}
+          .vtms-photo-quote blockquote{font-size:1.2rem}
+          .vtms-bottom-faq{padding:52px 22px}
+          .vtms-bottom-cta{min-height:480px}
+          .vtms-bottom-cta-content{padding:54px 22px 68px}
+        }
+      `}</style>
       <Header />
       <main>
         <section className="vtms-hero">
