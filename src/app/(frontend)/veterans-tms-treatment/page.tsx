@@ -224,7 +224,7 @@ export default function VeteransTmsLandingPage() {
         <section className="vtms-section vtms-clinician">
           <div className="vtms-wrap vtms-split">
             <div className="vtms-photo-card">
-              <Image src={MEDIA.drAu} alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />
+              <Image src="/media/images/Portrait for veterans page.png" alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />
               <div className="vtms-clinician-quote">
                 <blockquote>“Compassionate, evidence-based care for meaningful change.”</blockquote>
                 <span>— Dr. Chi Hung Au</span>
