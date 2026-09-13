@@ -201,7 +201,7 @@ export default function VeteransTmsLandingPage() {
 
         <section className="vtms-conditions">
           <div className="vtms-conditions-visual">
-            <Image src="/media/images/veterans-mountain.webp" alt="Mountain and forest landscape in British Columbia" fill sizes="(max-width: 900px) 100vw, 50vw" className="vtms-cover" />
+            <Image src="/media/images/veterans-mountain.jpg" alt="Mountain and forest landscape in British Columbia" fill sizes="(max-width: 900px) 100vw, 50vw" className="vtms-cover" />
             <div className="vtms-conditions-visual-overlay" />
             <div className="vtms-conditions-visual-copy">
               <h2>Different<br />experiences.<br />A shared purpose.</h2>
@@ -264,7 +264,7 @@ export default function VeteransTmsLandingPage() {
         <section className="vtms-section vtms-vac">
           <div className="vtms-wrap vtms-vac-grid">
             <div className="vtms-vac-image">
-              <Image src="/media/images/vac-canadian-flag.webp" alt="Canadian flag overlooking Nanaimo and the coast from Mount Benson" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />
+              <Image src="/media/images/Canadian-flag.png" alt="Canadian flag overlooking Nanaimo and the coast from Mount Benson" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />
             </div>
             <div>
               <p className="vtms-eyebrow">Veterans Affairs Canada</p>
