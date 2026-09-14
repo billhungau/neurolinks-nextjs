@@ -1,18 +1,18 @@
-/* Preview-only Veterans landing-page polish. Loaded after legacy refinements. */
+/* Veterans landing-page polish. Loaded after legacy refinements. */
 
 /* Header: render one deliberate phone label at each breakpoint. */
 .vtms-phone{white-space:nowrap}
 .vtms-phone-mobile{display:none}
 
-/* Keep this landing page from exposing parent/container background at viewport edges. */
-.vtms-page{overflow-x:clip}
+/* Keep the landing page and its main content genuinely full width. */
+.vtms-page{width:100%;max-width:none;overflow-x:clip}
+.vtms-page>main{display:block;width:100%;max-width:none;margin:0;padding:0}
 
-/* Hero: true viewport-width full bleed, independent of any parent width. */
+/* Hero: full width without viewport-width compensation. */
 .vtms-hero{
-  width:100vw!important;
-  max-width:100vw!important;
-  margin-left:calc(50% - 50vw)!important;
-  margin-right:calc(50% - 50vw)!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
 }
 .vtms-hero-media,.vtms-hero-overlay{inset:0!important;width:100%!important;max-width:none!important}
 .vtms-hero-photo{width:100%!important;height:100%!important;max-width:none!important}
@@ -33,30 +33,30 @@
 /* Dedicated conversion section immediately after the trust strip. */
 .vtms-contact-section{
   background:linear-gradient(180deg,#edf4f7 0%,#e7f0f4 100%);
-  padding:68px 0!important;
+  padding:62px 0!important;
 }
 .vtms-contact-grid{
   display:grid;
   grid-template-columns:minmax(0,.82fr) minmax(420px,1.18fr);
-  gap:64px;
+  gap:56px;
   align-items:center;
 }
 .vtms-contact-copy h2{
   font-family:var(--font-serif),Georgia,serif;
   color:var(--vnavy);
-  font-size:clamp(2rem,3.1vw,3.15rem);
+  font-size:clamp(2rem,3vw,3rem);
   line-height:1.04;
   letter-spacing:-.02em;
-  margin:0 0 18px;
+  margin:0 0 16px;
 }
-.vtms-contact-copy>p:not(.vtms-eyebrow){font-size:1.04rem;line-height:1.65;max-width:560px}
+.vtms-contact-copy>p:not(.vtms-eyebrow){font-size:1.02rem;line-height:1.6;max-width:540px}
 .vtms-contact-card{
   scroll-margin-top:92px;
   background:#f8f5ef;
   border:1px solid rgba(8,45,80,.12);
   border-radius:16px;
   box-shadow:0 18px 46px rgba(23,54,74,.11);
-  padding:28px;
+  padding:26px;
 }
 .vtms-contact-card h3{
   margin:0 0 6px;
@@ -64,16 +64,16 @@
   font-family:var(--font-serif),Georgia,serif;
   font-size:1.55rem;
 }
-.vtms-contact-card>p{margin:0 0 18px;line-height:1.5;color:#4d6677}
+.vtms-contact-card>p{margin:0 0 16px;line-height:1.5;color:#4d6677}
 
 /* Secondary call actions. */
-.vtms-action-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px}
+.vtms-action-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px}
 .vtms-button-outline{
   background:transparent!important;
   color:var(--vnavy)!important;
   border:1px solid rgba(8,45,80,.32)!important;
   box-shadow:none!important;
-  margin-top:18px;
+  margin-top:16px;
 }
 .vtms-button-outline:hover{background:rgba(8,45,80,.06)!important}
 .vtms-action-row .vtms-button-outline{margin-top:0}
@@ -85,15 +85,21 @@
 }
 .vtms-button-outline-light:hover{background:rgba(255,255,255,.12)!important}
 
-/* Indication section: persuasive but clinically clear. */
+/* Why TMS: keep the four reasons concise and visually lighter. */
+.vtms-benefit-card{min-height:190px!important;padding:24px 20px!important}
+.vtms-benefit-icon{margin-bottom:18px!important}
+.vtms-benefit-card p{font-size:.95rem;line-height:1.5}
+
+/* Indication section: persuasive but not overly heavy. */
 .vtms-condition-emphasis{
   margin:18px 0 0!important;
   padding-top:18px;
   border-top:1px solid rgba(24,52,72,.16);
   font-family:var(--font-serif),Georgia,serif;
-  font-size:1.12rem!important;
-  line-height:1.55!important;
-  color:var(--vnavy)!important;
+  font-size:1.04rem!important;
+  line-height:1.5!important;
+  font-weight:500!important;
+  color:#31576d!important;
 }
 
 /* Psychiatrist section: natural image height, no artificial band beneath the photo. */
@@ -148,22 +154,23 @@
   line-height:1.17!important;
 }
 .vtms-clinician .vtms-copy{
-  padding:40px 44px 36px!important;
+  padding:38px 42px 34px!important;
   display:flex;
   flex-direction:column;
   justify-content:center;
   background:#f3efe7;
 }
 .vtms-clinician-subhead{
-  margin:-4px 0 14px;
+  margin:-4px 0 12px;
   color:#31576d;
   font-family:var(--font-serif),Georgia,serif;
-  font-size:1.18rem;
+  font-size:1.16rem;
   line-height:1.35;
   font-weight:650;
 }
-.vtms-clinician .vtms-steps-visual{margin-top:20px}
-.vtms-clinician .vtms-steps-visual li{padding-top:14px;padding-bottom:14px}
+.vtms-clinician .vtms-steps-visual{margin-top:18px}
+.vtms-clinician .vtms-steps-visual li{padding-top:12px;padding-bottom:12px}
+.vtms-clinician .vtms-steps-visual span{line-height:1.38}
 
 /* At tablet / narrow-desktop widths, stack instead of squeezing two columns. */
 @media(max-width:1180px){
@@ -172,15 +179,23 @@
     align-items:stretch!important;
   }
   .vtms-clinician .vtms-photo-card.vtms-portrait-natural{width:100%}
-  .vtms-clinician .vtms-copy{padding:40px 32px 36px!important}
+  .vtms-clinician .vtms-copy{padding:38px 30px 34px!important}
 }
 
 @media(max-width:900px){
-  .vtms-hero-grid{grid-template-columns:1fr!important}
-  .vtms-contact-section{padding:52px 0!important}
-  .vtms-contact-grid{grid-template-columns:1fr;gap:28px}
-  .vtms-contact-card{scroll-margin-top:74px;padding:22px}
-  .vtms-benefits .vtms-section-heading{margin-bottom:24px!important}
+  /* Stronger photo readability on tablet/mobile. */
+  .vtms-hero-overlay{
+    top:0!important;
+    background:linear-gradient(180deg,rgba(5,24,39,.36) 0%,rgba(5,24,39,.56) 32%,rgba(5,24,39,.78) 66%,rgba(5,24,39,.9) 100%)!important;
+  }
+  .vtms-hero-grid{grid-template-columns:1fr!important;padding:36px 0 38px!important}
+  .vtms-hero-copy{max-width:620px}
+  .vtms-hero h1,.vtms-hero-lede,.vtms-hero-support{text-shadow:0 2px 16px rgba(0,0,0,.45)}
+
+  .vtms-contact-section{padding:48px 0!important}
+  .vtms-contact-grid{grid-template-columns:1fr;gap:24px}
+  .vtms-contact-card{scroll-margin-top:74px;padding:21px}
+  .vtms-benefits .vtms-section-heading{margin-bottom:22px!important}
   .vtms-review{padding:22px!important}
   .vtms-final-panel h2{font-size:clamp(2.15rem,8.5vw,2.85rem)!important}
 
@@ -202,53 +217,73 @@
   .vtms-phone-desktop{display:none}
   .vtms-phone-mobile{display:inline;font-size:.84rem;font-weight:700}
 
-  .vtms-hero-actions{align-items:stretch;gap:10px}
-  .vtms-hero-actions .vtms-button{flex:1 1 100%;width:100%}
+  /* Hero: improve contrast and reduce vertical load. */
+  .vtms-hero-photo{object-position:64% center!important;filter:saturate(.94) brightness(.82)!important}
+  .vtms-hero-overlay{
+    background:linear-gradient(180deg,rgba(4,22,37,.48) 0%,rgba(4,22,37,.62) 28%,rgba(4,22,37,.82) 64%,rgba(4,22,37,.93) 100%)!important;
+  }
+  .vtms-hero-grid{padding:30px 0 32px!important}
+  .vtms-hero h1{font-size:clamp(2.45rem,11vw,3.15rem)!important;line-height:.98!important}
+  .vtms-hero-lede{font-size:1.18rem!important;line-height:1.2!important;margin:18px 0 10px!important}
+  .vtms-hero-support{font-size:.94rem!important;line-height:1.5!important;margin-bottom:18px!important}
+  .vtms-hero-actions{align-items:stretch;gap:9px}
+  .vtms-hero-actions .vtms-button{flex:1 1 100%;width:100%;min-height:44px;padding:10px 16px!important}
 
-  .vtms-contact-grid{gap:24px}
-  .vtms-contact-copy h2{font-size:2rem}
-  .vtms-contact-card{padding:20px}
+  /* Contact section: shorten the mobile journey to the next content block. */
+  .vtms-contact-section{padding:40px 0!important}
+  .vtms-contact-grid{gap:20px}
+  .vtms-contact-copy h2{font-size:1.82rem!important;line-height:1.04!important;margin-bottom:12px}
+  .vtms-contact-copy>p:not(.vtms-eyebrow){font-size:.96rem;line-height:1.55}
+  .vtms-contact-copy .vtms-button-outline{margin-top:14px}
+  .vtms-contact-card{padding:18px}
+  .vtms-contact-card>p{margin-bottom:14px}
+  .vtms-contact-card .ct-form{gap:10px!important}
+  .vtms-contact-card .ct-form-row{gap:10px!important}
+  .vtms-contact-card .ct-field{gap:4px!important}
+  .vtms-contact-card .ct-field input{min-height:42px!important}
+  .vtms-contact-card .ct-field textarea{min-height:130px!important}
+
   .vtms-review{padding:18px!important}
   .vtms-action-row{align-items:stretch}
   .vtms-action-row .vtms-button{width:100%}
   .vtms-final-actions .vtms-button{width:100%}
 
-  /* Mobile benefits: readable horizontal cards rather than squeezed 2-column cards. */
+  /* Mobile benefits: readable horizontal cards, with tighter copy. */
   .vtms-benefit-grid{
     grid-template-columns:1fr!important;
-    gap:10px!important;
+    gap:9px!important;
   }
   .vtms-benefit-card{
     display:grid!important;
-    grid-template-columns:38px minmax(0,1fr)!important;
+    grid-template-columns:36px minmax(0,1fr)!important;
     grid-template-areas:'icon title' 'icon body'!important;
-    column-gap:13px!important;
-    row-gap:4px!important;
+    column-gap:12px!important;
+    row-gap:3px!important;
     align-items:start!important;
-    padding:15px 16px!important;
+    padding:14px 15px!important;
     min-height:0!important;
   }
   .vtms-benefit-icon{
     grid-area:icon!important;
-    width:30px!important;
-    height:30px!important;
+    width:28px!important;
+    height:28px!important;
     margin:1px 0 0!important;
   }
   .vtms-benefit-card h3{
     grid-area:title!important;
     margin:0!important;
-    font-size:1rem!important;
-    line-height:1.25!important;
+    font-size:.98rem!important;
+    line-height:1.22!important;
   }
   .vtms-benefit-card p{
     grid-area:body!important;
     margin:0!important;
-    font-size:.86rem!important;
-    line-height:1.45!important;
+    font-size:.83rem!important;
+    line-height:1.4!important;
   }
 
-  .vtms-condition-emphasis{font-size:1.02rem!important}
-  .vtms-clinician-subhead{font-size:1.08rem}
+  .vtms-condition-emphasis{font-size:.96rem!important;line-height:1.46!important;padding-top:15px}
+  .vtms-clinician-subhead{font-size:1.05rem}
   .vtms-clinician-photo{width:105%!important;transform:translateX(-5%)!important}
   .vtms-clinician .vtms-clinician-quote{
     left:18px!important;
@@ -260,5 +295,15 @@
     line-height:1.18!important;
   }
   .vtms-clinician .vtms-clinician-quote span{font-size:.69rem!important}
-  .vtms-clinician .vtms-copy{padding:32px 20px 30px!important}
+  .vtms-clinician .vtms-copy{padding:28px 18px 26px!important}
+  .vtms-clinician .vtms-steps-visual{margin-top:14px!important}
+  .vtms-clinician .vtms-steps-visual li{padding:10px 0!important}
+  .vtms-clinician .vtms-steps-visual span{font-size:.78rem!important;line-height:1.34!important}
+
+  /* FAQ and final CTA: reduce unnecessary vertical length. */
+  .vtms-faq-panel{padding-top:50px!important;padding-bottom:54px!important}
+  .vtms-faq-panel button{padding-top:12px!important;padding-bottom:12px!important}
+  .vtms-faq-panel [role='region']{padding-bottom:12px!important}
+  .vtms-final-panel-inner{padding-top:50px!important;padding-bottom:48px!important;gap:24px!important}
+  .vtms-final-panel-inner>div:first-child>p:not(.vtms-eyebrow){font-size:.96rem!important;line-height:1.55!important}
 }
