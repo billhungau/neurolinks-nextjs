@@ -1,4 +1,9 @@
-/* Preview-only deterministic portrait layout. Loaded after all legacy refinements. */
+/* Preview-only deterministic portrait and mobile polish. Loaded after all legacy refinements. */
+
+/* Header: prevent the legacy mobile pseudo-label from rendering beside the real number. */
+.vtms-phone{white-space:nowrap}
+
+/* Psychiatrist section: preserve the natural square portrait and only use the fused side-by-side layout when there is enough room. */
 .vtms-clinician .vtms-split{
   display:grid!important;
   grid-template-columns:minmax(0,42%) minmax(0,58%)!important;
@@ -34,71 +39,102 @@
   object-fit:contain!important;
 }
 .vtms-clinician .vtms-photo-card::after{
-  background:linear-gradient(90deg,rgba(8,33,49,.56) 0%,rgba(8,33,49,.26) 29%,rgba(8,33,49,.06) 48%,rgba(8,33,49,0) 62%)!important;
+  background:linear-gradient(90deg,rgba(8,33,49,.56) 0%,rgba(8,33,49,.25) 29%,rgba(8,33,49,.05) 48%,rgba(8,33,49,0) 62%)!important;
 }
 .vtms-clinician .vtms-clinician-quote{
-  left:28px!important;
-  top:30px!important;
-  width:min(38%,190px)!important;
+  left:26px!important;
+  top:28px!important;
+  width:min(36%,184px)!important;
 }
 .vtms-clinician .vtms-clinician-quote blockquote{
-  font-size:clamp(1rem,1.35vw,1.28rem)!important;
+  font-size:clamp(1rem,1.28vw,1.24rem)!important;
   line-height:1.17!important;
 }
 .vtms-clinician .vtms-copy{
-  padding:48px 50px 44px!important;
+  padding:40px 44px 36px!important;
   display:flex;
   flex-direction:column;
   justify-content:center;
   background:#f3efe7;
 }
+.vtms-clinician .vtms-steps-visual{margin-top:20px}
+.vtms-clinician .vtms-steps-visual li{padding-top:14px;padding-bottom:14px}
 
-@media(max-width:900px){
+/* At tablet / narrow-desktop widths, stack instead of squeezing two columns. */
+@media(max-width:1180px){
   .vtms-clinician .vtms-split{
     grid-template-columns:1fr!important;
     align-items:stretch!important;
   }
-  .vtms-clinician .vtms-photo-card.vtms-portrait-natural{
-    width:100%;
-  }
-  .vtms-portrait-image-wrap{
-    aspect-ratio:1.22/1;
-  }
+  .vtms-clinician .vtms-photo-card.vtms-portrait-natural{width:100%}
+  .vtms-portrait-image-wrap{aspect-ratio:1.28/1}
   .vtms-clinician-photo{
-    width:116%!important;
+    width:108%!important;
     height:auto!important;
-    transform:translateX(-13%);
+    transform:translateX(-6.5%);
   }
   .vtms-clinician .vtms-clinician-quote{
     left:24px!important;
     top:26px!important;
-    width:min(36%,175px)!important;
+    width:min(34%,175px)!important;
   }
-  .vtms-clinician .vtms-copy{
-    padding:42px 32px 38px!important;
-  }
+  .vtms-clinician .vtms-copy{padding:40px 32px 36px!important}
 }
 
 @media(max-width:560px){
-  .vtms-portrait-image-wrap{
-    aspect-ratio:1.16/1;
+  /* Mobile header: show one concise phone label only. */
+  .vtms-phone{font-size:0!important}
+  .vtms-phone::after{content:'Call clinic'!important;font-size:.84rem!important;font-weight:700!important}
+
+  /* Mobile benefits: use readable horizontal cards instead of narrow 2-column cards. */
+  .vtms-benefit-grid{
+    grid-template-columns:1fr!important;
+    gap:10px!important;
   }
+  .vtms-benefit-card{
+    display:grid!important;
+    grid-template-columns:38px minmax(0,1fr)!important;
+    grid-template-areas:'icon title' 'icon body'!important;
+    column-gap:13px!important;
+    row-gap:4px!important;
+    align-items:start!important;
+    padding:15px 16px!important;
+    min-height:0!important;
+  }
+  .vtms-benefit-icon{
+    grid-area:icon!important;
+    width:30px!important;
+    height:30px!important;
+    margin:1px 0 0!important;
+  }
+  .vtms-benefit-card h3{
+    grid-area:title!important;
+    margin:0!important;
+    font-size:1rem!important;
+    line-height:1.25!important;
+  }
+  .vtms-benefit-card p{
+    grid-area:body!important;
+    margin:0!important;
+    font-size:.86rem!important;
+    line-height:1.45!important;
+  }
+
+  /* Mobile portrait: modestly crop unused left background without enlarging the face aggressively. */
+  .vtms-portrait-image-wrap{aspect-ratio:1.24/1}
   .vtms-clinician-photo{
-    width:114%!important;
-    transform:translateX(-12%);
+    width:108%!important;
+    transform:translateX(-6%)!important;
   }
   .vtms-clinician .vtms-clinician-quote{
     left:18px!important;
     top:20px!important;
-    width:34%!important;
+    width:32%!important;
   }
   .vtms-clinician .vtms-clinician-quote blockquote{
-    font-size:.92rem!important;
+    font-size:.91rem!important;
+    line-height:1.18!important;
   }
-  .vtms-clinician .vtms-clinician-quote span{
-    font-size:.70rem!important;
-  }
-  .vtms-clinician .vtms-copy{
-    padding:34px 22px 32px!important;
-  }
+  .vtms-clinician .vtms-clinician-quote span{font-size:.69rem!important}
+  .vtms-clinician .vtms-copy{padding:32px 20px 30px!important}
 }
