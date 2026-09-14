@@ -13,6 +13,14 @@
   gap:36px!important;
 }
 .vtms-hero-copy{max-width:650px}
+.vtms-hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.vtms-button-ghost{
+  background:rgba(255,255,255,.08)!important;
+  color:#fff!important;
+  border:1px solid rgba(255,255,255,.72)!important;
+  box-shadow:none!important;
+}
+.vtms-button-ghost:hover{background:rgba(255,255,255,.16)!important}
 
 /* Dedicated conversion section immediately after the trust strip. */
 .vtms-contact-section{
@@ -50,6 +58,17 @@
   font-size:1.55rem;
 }
 .vtms-contact-card>p{margin:0 0 18px;line-height:1.5;color:#4d6677}
+
+/* Indication section: persuasive but clinically clear. */
+.vtms-condition-emphasis{
+  margin:18px 0 0!important;
+  padding-top:18px;
+  border-top:1px solid rgba(24,52,72,.16);
+  font-family:var(--font-serif),Georgia,serif;
+  font-size:1.12rem!important;
+  line-height:1.55!important;
+  color:var(--vnavy)!important;
+}
 
 /* Psychiatrist section: natural image height, no artificial band beneath the photo. */
 .vtms-clinician .vtms-split{
@@ -109,6 +128,14 @@
   justify-content:center;
   background:#f3efe7;
 }
+.vtms-clinician-subhead{
+  margin:-4px 0 14px;
+  color:#31576d;
+  font-family:var(--font-serif),Georgia,serif;
+  font-size:1.18rem;
+  line-height:1.35;
+  font-weight:650;
+}
 .vtms-clinician .vtms-steps-visual{margin-top:20px}
 .vtms-clinician .vtms-steps-visual li{padding-top:14px;padding-bottom:14px}
 
@@ -149,6 +176,9 @@
   .vtms-phone-desktop{display:none}
   .vtms-phone-mobile{display:inline;font-size:.84rem;font-weight:700}
 
+  .vtms-hero-actions{align-items:stretch;gap:10px}
+  .vtms-hero-actions .vtms-button{flex:1 1 100%;width:100%}
+
   .vtms-contact-grid{gap:24px}
   .vtms-contact-copy h2{font-size:2rem}
   .vtms-contact-card{padding:20px}
@@ -188,6 +218,8 @@
     line-height:1.45!important;
   }
 
+  .vtms-condition-emphasis{font-size:1.02rem!important}
+  .vtms-clinician-subhead{font-size:1.08rem}
   .vtms-clinician-photo{width:105%!important;transform:translateX(-5%)!important}
   .vtms-clinician .vtms-clinician-quote{
     left:18px!important;
