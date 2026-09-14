@@ -1,0 +1,186 @@
+name: Apply Veterans Latest Preview
+
+on:
+  push:
+    branches:
+      - fix/veterans-portrait-preview
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/veterans-portrait-preview
+          fetch-depth: 0
+      - name: Apply latest Veterans landing page refinements
+        shell: python
+        run: |
+          from pathlib import Path
+
+          page = Path('src/app/(frontend)/veterans-tms-treatment/page.tsx')
+          text = page.read_text()
+
+          import_line = 'import "./veterans-latest-preview.css";\n'
+          if import_line not in text:
+              anchor = 'import "./veterans-portrait-natural.css";\n'
+              text = text.replace(anchor, anchor + import_line)
+
+          old_form = '''            <aside id="inquiry" className="vtms-hero-card" aria-label="Request information">
+              <h2>Talk With Our Team</h2>
+              <p>Send us a message about TMS, VAC authorization or the next step in assessment.</p>
+              <ContactForm showReferralNote={false} />
+            </aside>
+'''
+          text = text.replace(old_form, '')
+
+          contact = '''
+        <section id="inquiry" className="vtms-section vtms-contact-section">
+          <div className="vtms-wrap vtms-contact-grid">
+            <div className="vtms-contact-copy">
+              <p className="vtms-eyebrow">Talk with our team</p>
+              <h2>Questions About TMS or VAC Authorization?</h2>
+              <p>Our team can explain the next step in assessment, answer practical questions about TMS, and help you understand what information may be needed for VAC authorization.</p>
+              <p className="vtms-contact-phone">Prefer to speak with someone? <a href={SITE.phoneHref}>Call {SITE.phone}</a></p>
+            </div>
+            <div className="vtms-contact-card" aria-label="Request information">
+              <h3>Request Information</h3>
+              <p>Send us a message and our team will respond to discuss your questions.</p>
+              <ContactForm showReferralNote={false} />
+            </div>
+          </div>
+        </section>
+'''
+          marker = '\n        <section id="tms-benefits" className="vtms-section vtms-benefits">'
+          if 'className="vtms-section vtms-contact-section"' not in text:
+              text = text.replace(marker, contact + marker, 1)
+
+          page.write_text(text)
+
+          css = Path('src/app/(frontend)/veterans-tms-treatment/veterans-latest-preview.css')
+          css.write_text(r'''/* Latest preview polish: clean hero, dedicated lead form, deterministic portrait crop. */
+
+/* Hero: message left, Veteran unobstructed on the right. */
+.vtms-hero-grid{
+  grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)!important;
+  gap:36px!important;
+}
+.vtms-hero-copy{max-width:650px}
+
+/* Dedicated conversion section immediately after the trust strip. */
+.vtms-contact-section{
+  background:linear-gradient(180deg,#edf4f7 0%,#e7f0f4 100%);
+  padding:68px 0!important;
+}
+.vtms-contact-grid{
+  display:grid;
+  grid-template-columns:minmax(0,.82fr) minmax(420px,1.18fr);
+  gap:64px;
+  align-items:center;
+}
+.vtms-contact-copy h2{
+  font-family:var(--font-serif),Georgia,serif;
+  color:var(--vnavy);
+  font-size:clamp(2rem,3.1vw,3.15rem);
+  line-height:1.04;
+  letter-spacing:-.02em;
+  margin:0 0 18px;
+}
+.vtms-contact-copy>p:not(.vtms-eyebrow){font-size:1.04rem;line-height:1.65;max-width:560px}
+.vtms-contact-phone{margin-top:22px!important;color:#496579}
+.vtms-contact-phone a{font-weight:800;color:var(--vnavy);text-decoration:none}
+.vtms-contact-card{
+  background:#f8f5ef;
+  border:1px solid rgba(8,45,80,.12);
+  border-radius:16px;
+  box-shadow:0 18px 46px rgba(23,54,74,.11);
+  padding:28px;
+}
+.vtms-contact-card h3{
+  margin:0 0 6px;
+  color:var(--vnavy);
+  font-family:var(--font-serif),Georgia,serif;
+  font-size:1.55rem;
+}
+.vtms-contact-card>p{margin:0 0 18px;line-height:1.5;color:#4d6677}
+.vtms-contact-card .ct-form{display:grid;gap:12px}
+.vtms-contact-card .ct-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vtms-contact-card .ct-field{display:grid;gap:5px}
+.vtms-contact-card .ct-field label{font-size:.78rem;font-weight:750;color:var(--vnavy)}
+.vtms-contact-card .ct-field input,.vtms-contact-card .ct-field textarea{width:100%;border:1px solid #bacbd3;border-radius:6px;padding:9px 10px;background:#fff;color:var(--vtext);font:inherit}
+.vtms-contact-card .ct-field textarea{min-height:92px}
+.vtms-contact-card .ct-submit{width:100%;min-height:46px;border:0;border-radius:6px;background:var(--vnavy);color:#fff;font-weight:750}
+
+/* Portrait: remove the blue strip by letting the visible image define the wrapper height. */
+.vtms-clinician .vtms-photo-card.vtms-portrait-natural{
+  min-height:0!important;
+  height:auto!important;
+  aspect-ratio:auto!important;
+  align-self:center!important;
+  background:#f3efe7!important;
+  overflow:hidden!important;
+}
+.vtms-portrait-image-wrap{
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:auto!important;
+  overflow:hidden!important;
+  line-height:0!important;
+  background:#f3efe7!important;
+}
+.vtms-clinician-photo{
+  display:block!important;
+  position:relative!important;
+  width:100%!important;
+  height:auto!important;
+  max-width:none!important;
+  transform:none!important;
+  object-fit:contain!important;
+}
+
+/* Small final polish. */
+@media(max-width:900px){
+  .vtms-hero-grid{grid-template-columns:1fr!important}
+  .vtms-contact-section{padding:52px 0!important}
+  .vtms-contact-grid{grid-template-columns:1fr;gap:28px}
+  .vtms-contact-card{padding:22px}
+  .vtms-contact-card .ct-form-row{grid-template-columns:1fr 1fr}
+  .vtms-benefits .vtms-section-heading{margin-bottom:24px!important}
+  .vtms-review{padding:22px!important}
+  .vtms-final-panel h2{font-size:clamp(2.15rem,8.5vw,2.85rem)!important}
+
+  .vtms-clinician .vtms-photo-card.vtms-portrait-natural{background:#f3efe7!important}
+  .vtms-portrait-image-wrap{height:auto!important;aspect-ratio:auto!important;background:#f3efe7!important}
+  .vtms-clinician-photo{
+    width:106%!important;
+    height:auto!important;
+    transform:translateX(-6%)!important;
+  }
+}
+
+@media(max-width:560px){
+  .vtms-contact-grid{gap:24px}
+  .vtms-contact-copy h2{font-size:2rem}
+  .vtms-contact-card{padding:20px}
+  .vtms-contact-card .ct-form-row{grid-template-columns:1fr 1fr;gap:10px}
+  .vtms-contact-card .ct-field input{min-height:40px}
+  .vtms-contact-card .ct-field textarea{min-height:82px}
+  .vtms-review{padding:18px!important}
+  .vtms-clinician-photo{width:105%!important;transform:translateX(-5%)!important}
+}
+''')
+      - name: Commit preview changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/'(frontend)'/veterans-tms-treatment/page.tsx src/app/'(frontend)'/veterans-tms-treatment/veterans-latest-preview.css
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Refine Veterans hero form and portrait preview"
+            git push origin HEAD:fix/veterans-portrait-preview
+          fi
