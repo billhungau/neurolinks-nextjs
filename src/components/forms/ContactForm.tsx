@@ -121,11 +121,15 @@ export function ContactForm({
         | { success?: boolean; message?: string }
         | null;
       if (response.ok && data?.success) {
+        const scrollX = window.scrollX;
+        const scrollY = window.scrollY;
         setValues(EMPTY_FIELDS);
         setHoneypot("");
         setStatus("success");
         requestAnimationFrame(() => {
           successRef.current?.focus({ preventScroll: true });
+          window.scrollTo(scrollX, scrollY);
+          requestAnimationFrame(() => window.scrollTo(scrollX, scrollY));
         });
         return;
       }
