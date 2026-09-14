@@ -1,0 +1,44 @@
+/* Veterans landing-page navigation and mobile CTA fixes. Loaded last. */
+.vtms-logo-link{
+  display:inline-flex;
+  align-items:center;
+  text-decoration:none;
+  line-height:0;
+}
+.vtms-logo-link:focus-visible{
+  outline:2px solid #2d6f91;
+  outline-offset:4px;
+  border-radius:4px;
+}
+
+/* Anchor the How TMS Works CTA to the visible heading block, not the section padding. */
+.vtms-anchor-target{
+  scroll-margin-top:calc(var(--nl-header-height, 72px) + var(--nl-anchor-gap, 16px));
+}
+
+@media(max-width:900px){
+  .vtms-anchor-target{
+    scroll-margin-top:calc(var(--nl-header-height, 62px) + 14px);
+  }
+
+  /* Keep the fixed conversion bar fully above mobile browser chrome and safe areas. */
+  .vtms-mobile-bar{
+    box-sizing:border-box;
+    align-items:center;
+    min-height:calc(68px + env(safe-area-inset-bottom, 0px));
+    padding:
+      9px
+      max(10px, env(safe-area-inset-right, 0px))
+      calc(13px + env(safe-area-inset-bottom, 0px))
+      max(10px, env(safe-area-inset-left, 0px))!important;
+  }
+  .vtms-mobile-bar a{
+    min-height:46px!important;
+    line-height:1.2;
+    padding:8px 10px;
+    box-sizing:border-box;
+  }
+  .vtms-page{
+    padding-bottom:calc(82px + env(safe-area-inset-bottom, 0px))!important;
+  }
+}
