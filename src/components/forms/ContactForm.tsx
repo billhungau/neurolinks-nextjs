@@ -9,7 +9,6 @@ import {
   type RefObject,
 } from "react";
 import {
-  ADVERTISING_LANDING_SOURCE,
   CONTACT_ERROR_WITH_PHONE,
   CONTACT_LIMITS,
   CONTACT_SUCCESS_MESSAGE,
@@ -62,7 +61,6 @@ export function ContactForm({
   const emailRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
-  const phoneRequired = source !== ADVERTISING_LANDING_SOURCE;
 
   function updateField(name: ContactFieldName, value: string) {
     setValues((current) => ({ ...current, [name]: value }));
@@ -101,7 +99,7 @@ export function ContactForm({
 
     const trimmed = trimContactFields(values);
     setValues(trimmed);
-    const nextErrors = validateContactFields(trimmed, { phoneRequired });
+    const nextErrors = validateContactFields(trimmed, { phoneRequired: false });
     if (Object.keys(nextErrors).length > 0) {
       lockRef.current.release();
       setErrors(nextErrors);
@@ -127,7 +125,6 @@ export function ContactForm({
         setHoneypot("");
         setStatus("success");
         requestAnimationFrame(() => {
-          window.scrollTo({ top: 0, behavior: "auto" });
           successRef.current?.focus({ preventScroll: true });
         });
         return;
@@ -239,7 +236,7 @@ export function ContactForm({
             inputRef={phoneRef}
             disabled={submitting}
             onChange={updateField}
-            required={phoneRequired}
+            required={false}
           />
         </div>
         <Field
