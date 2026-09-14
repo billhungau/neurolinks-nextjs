@@ -9,6 +9,7 @@ import { SITE } from "@/lib/site";
 import { treatmentVideoSrc } from "@/lib/videos";
 import "./veterans-tms.css";
 import "./veterans-tms-refinements.css";
+import "./veterans-portrait-natural.css";
 
 export const metadata = pageMetadata({
   title: "TMS Treatment for Veterans in BC | NeuroLinks Psychiatry",
@@ -135,7 +136,7 @@ function Header() {
       <div className="vtms-wrap vtms-header-inner">
         <Image src={SITE.logo} alt="NeuroLinks" width={230} height={46} priority className="vtms-logo" />
         <div className="vtms-header-actions">
-          <a href={SITE.phoneHref} className="vtms-phone">Call {SITE.phone}</a>
+          <a href={SITE.phoneHref} className="vtms-phone"><span className="vtms-phone-desktop">Call {SITE.phone}</span><span className="vtms-phone-mobile">Call clinic</span></a>
           <a href="#inquiry" className="vtms-button vtms-button-small">Request information</a>
         </div>
       </div>
@@ -161,11 +162,6 @@ export default function VeteransTmsLandingPage() {
               <p className="vtms-hero-support">Non-invasive treatment provided in Nanaimo, BC, with assessment and care led by a psychiatrist.</p>
               <a href="#tms-benefits" className="vtms-button vtms-button-secondary">Learn About TMS ↓</a>
             </div>
-            <aside id="inquiry" className="vtms-hero-card" aria-label="Request information">
-              <h2>Talk With Our Team</h2>
-              <p>Send us a message about TMS, VAC authorization or the next step in assessment.</p>
-              <ContactForm showReferralNote={false} />
-            </aside>
           </div>
         </section>
 
@@ -177,6 +173,22 @@ export default function VeteransTmsLandingPage() {
                 <span>{label}</span>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section id="inquiry" className="vtms-section vtms-contact-section">
+          <div className="vtms-wrap vtms-contact-grid">
+            <div className="vtms-contact-copy">
+              <p className="vtms-eyebrow">Talk with our team</p>
+              <h2>Questions About TMS or VAC Authorization?</h2>
+              <p>Our team can explain the next step in assessment, answer practical questions about TMS, and help you understand what information may be needed for VAC authorization.</p>
+              <p className="vtms-contact-phone">Prefer to speak with someone? <a href={SITE.phoneHref}>Call {SITE.phone}</a></p>
+            </div>
+            <div className="vtms-contact-card" aria-label="Request information">
+              <h3>Request Information</h3>
+              <p>Send us a message and our team will respond to discuss your questions.</p>
+              <ContactForm showReferralNote={false} />
+            </div>
           </div>
         </section>
 
@@ -223,8 +235,10 @@ export default function VeteransTmsLandingPage() {
 
         <section className="vtms-section vtms-clinician">
           <div className="vtms-wrap vtms-split">
-            <div className="vtms-photo-card">
-              <Image src="/media/images/Portrait for veterans page.png" alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />
+            <div className="vtms-photo-card vtms-portrait-natural">
+              <div className="vtms-portrait-image-wrap">
+                <Image src="/media/images/Portrait for veterans page.png" alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks" width={768} height={768} sizes="(max-width: 900px) calc(100vw - 44px), 42vw" className="vtms-clinician-photo" />
+              </div>
               <div className="vtms-clinician-quote">
                 <blockquote>“Compassionate, evidence-based care for meaningful change.”</blockquote>
                 <span>— Dr. Chi Hung Au</span>
