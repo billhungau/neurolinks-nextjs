@@ -37,7 +37,8 @@ export function jotformTimeoutMs() {
   return JOTFORM_SUBMIT_TIMEOUT_MS;
 }
 
-export const CONTACT_SUCCESS_MESSAGE = "Thank you. Your message has been sent.";
+export const CONTACT_SUCCESS_MESSAGE =
+  "Thank you for reaching out to us. We have received your message, and a member of our team will review it and follow up with you as soon as possible.";
 export const CONTACT_ERROR_MESSAGE = "We couldn't send your message. Please try again.";
 export const CONTACT_ERROR_WITH_PHONE =
   "We couldn't send your message. Please try again or contact the clinic by phone.";
@@ -76,7 +77,7 @@ export function trimContactFields(input: Partial<Record<string, unknown>>): Cont
 
 export function validateContactFields(
   fields: ContactFields,
-  { phoneRequired = true }: { phoneRequired?: boolean } = {},
+  { phoneRequired = false }: { phoneRequired?: boolean } = {},
 ): ContactFieldErrors {
   const errors: ContactFieldErrors = {};
 
@@ -192,9 +193,7 @@ export function parseContactPayload(raw: unknown): ValidatedContact {
   }
 
   const fields = trimContactFields(record);
-  const errors = validateContactFields(fields, {
-    phoneRequired: source !== ADVERTISING_LANDING_SOURCE,
-  });
+  const errors = validateContactFields(fields, { phoneRequired: false });
   if (Object.keys(errors).length > 0) {
     return { ok: false, errors };
   }
