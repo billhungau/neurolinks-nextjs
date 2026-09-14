@@ -70,10 +70,10 @@ function Icon({ name, className = "" }: { name: IconName; className?: string }) 
 }
 
 const BENEFITS = [
-  ["A different approach after medication", "When depression has continued despite medication or therapy, TMS offers an evidence-based treatment that works differently from another medication change.", "evidence"],
-  ["No systemic drug exposure", "TMS is non-invasive, requires no anesthesia, and avoids many of the whole-body side effects associated with antidepressant medication.", "noAnesthesia"],
-  ["Return to your day", "Treatment is outpatient and generally does not require recovery time, so most people can return to their usual activities afterward.", "dailyLife"],
-  ["VAC coverage can make treatment accessible", "For eligible Veterans, TMS may be covered through Veterans Affairs Canada. NeuroLinks helps prepare the documentation required for authorization.", "veteranSupport"],
+  ["A different approach after medication", "When depression persists despite medication or therapy, TMS offers an evidence-based approach that works differently from another medication change.", "evidence"],
+  ["No systemic drug exposure", "TMS is non-invasive, requires no anesthesia, and avoids many systemic side effects associated with antidepressants.", "noAnesthesia"],
+  ["Return to your day", "Treatment is outpatient and usually requires no recovery time, so most people can return to their day.", "dailyLife"],
+  ["VAC coverage can make treatment accessible", "For eligible Veterans, TMS may be covered through VAC. NeuroLinks helps prepare the authorization documentation.", "veteranSupport"],
 ] as const satisfies readonly [string, string, IconName][];
 
 const TRUST_ITEMS = [
@@ -186,7 +186,7 @@ export default function VeteransTmsLandingPage() {
           <div className="vtms-wrap vtms-contact-grid">
             <div className="vtms-contact-copy">
               <p className="vtms-eyebrow">Talk with our team</p>
-              <h2>See Whether TMS and VAC Coverage May Be Right for You</h2>
+              <h2>See Whether TMS May Be Right for You</h2>
               <p>Our team can answer questions about TMS, help you understand VAC coverage, and explain the next step toward psychiatric assessment.</p>
               <a href={SITE.phoneHref} className="vtms-button vtms-button-outline">Call the Clinic</a>
             </div>
@@ -251,9 +251,9 @@ export default function VeteransTmsLandingPage() {
               <h3 className="vtms-clinician-subhead">Treatment planned around your clinical history</h3>
               <p>Your treatment is assessed and overseen by a psychiatrist, with the TMS protocol selected according to your clinical history, symptoms, medications, and previous treatment response.</p>
               <ol className="vtms-steps vtms-steps-visual">
-                <li><Icon name="assessment" className="vtms-step-icon" /><strong>Psychiatric assessment</strong><span>Review symptoms, diagnosis, previous treatments, medications and relevant clinical factors.</span></li>
-                <li><Icon name="plan" className="vtms-step-icon" /><strong>Individualized TMS protocol</strong><span>Treatment parameters are selected based on your clinical presentation and treatment history.</span></li>
-                <li><Icon name="monitoring" className="vtms-step-icon" /><strong>Measurement-based monitoring</strong><span>Symptoms and treatment response are followed throughout the course so progress can be reviewed objectively.</span></li>
+                <li><Icon name="assessment" className="vtms-step-icon" /><strong>Psychiatric assessment</strong><span>Review symptoms, diagnosis, medications and previous treatment.</span></li>
+                <li><Icon name="plan" className="vtms-step-icon" /><strong>Individualized TMS protocol</strong><span>Parameters are selected for your clinical presentation and history.</span></li>
+                <li><Icon name="monitoring" className="vtms-step-icon" /><strong>Measurement-based monitoring</strong><span>Symptoms and response are tracked throughout treatment.</span></li>
               </ol>
             </div>
           </div>
@@ -268,8 +268,7 @@ export default function VeteransTmsLandingPage() {
               <p className="vtms-eyebrow">Veterans Affairs Canada</p>
               <h2>TMS May Be Covered Through Veterans Affairs Canada</h2>
               <h3>We help make the authorization process straightforward.</h3>
-              <p>If TMS is recommended after psychiatric assessment, NeuroLinks can prepare the clinical rationale, proposed treatment protocol, schedule and estimated cost required for authorization.</p>
-              <p>VAC and Medavie Blue Cross review the request and provide the required authorization before treatment begins.</p>
+              <p>If TMS is recommended, NeuroLinks can prepare the clinical rationale, treatment protocol, schedule and estimated cost for VAC/Medavie Blue Cross authorization.</p>
               <div className="vtms-action-row">
                 <a href="#inquiry" className="vtms-button">Check Your VAC Coverage</a>
                 <a href={SITE.phoneHref} className="vtms-button vtms-button-outline">Call the Clinic</a>
@@ -329,7 +328,7 @@ export default function VeteransTmsLandingPage() {
               <div>
                 <p className="vtms-eyebrow">Take the next step</p>
                 <h2>See Whether TMS May Be the Next Step</h2>
-                <p>The goal is not simply another treatment. It is helping you move toward feeling more like yourself again. If previous treatments have not provided enough relief, our team can help you understand whether TMS may be appropriate and how VAC authorization works.</p>
+                <p>If previous treatments have not provided enough relief, our team can help you understand whether TMS may be appropriate and how VAC coverage works.</p>
               </div>
               <div className="vtms-final-actions">
                 <a href="#inquiry" className="vtms-button vtms-button-light">Check Your VAC Coverage</a>
