@@ -1,0 +1,178 @@
+name: Apply Veterans Preview Polish
+on:
+  push:
+    branches: [fix/veterans-portrait-preview]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  polish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/veterans-portrait-preview
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Apply preview fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          page = Path('src/app/(frontend)/veterans-tms-treatment/page.tsx')
+          text = page.read_text()
+          old = '<a href={SITE.phoneHref} className="vtms-phone">Call {SITE.phone}</a>'
+          new = '<a href={SITE.phoneHref} className="vtms-phone"><span className="vtms-phone-desktop">Call {SITE.phone}</span><span className="vtms-phone-mobile">Call clinic</span></a>'
+          if old not in text:
+              raise SystemExit('Header phone markup not found')
+          text = text.replace(old, new, 1)
+          page.write_text(text)
+
+          css = Path('src/app/(frontend)/veterans-tms-treatment/veterans-portrait-natural.css')
+          css.write_text(r'''/* Preview-only deterministic portrait and mobile polish. Loaded after all legacy refinements. */
+.vtms-phone{white-space:nowrap}
+.vtms-phone-mobile{display:none}
+
+.vtms-clinician .vtms-split{
+  display:grid!important;
+  grid-template-columns:minmax(0,42%) minmax(0,58%)!important;
+  gap:0!important;
+  align-items:center!important;
+  overflow:hidden;
+  border-radius:18px;
+  background:#f3efe7;
+  box-shadow:0 20px 52px rgba(31,54,68,.12);
+}
+.vtms-clinician .vtms-photo-card.vtms-portrait-natural{
+  min-height:0!important;
+  height:auto!important;
+  aspect-ratio:auto!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#d9e3ea;
+  align-self:center;
+}
+.vtms-portrait-image-wrap{
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  line-height:0;
+  background:#d9e3ea;
+}
+.vtms-clinician-photo{
+  position:relative!important;
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-width:none!important;
+  object-fit:contain!important;
+}
+.vtms-clinician .vtms-photo-card::after{
+  background:linear-gradient(90deg,rgba(8,33,49,.56) 0%,rgba(8,33,49,.25) 29%,rgba(8,33,49,.05) 48%,rgba(8,33,49,0) 62%)!important;
+}
+.vtms-clinician .vtms-clinician-quote{
+  left:26px!important;
+  top:28px!important;
+  width:min(36%,184px)!important;
+}
+.vtms-clinician .vtms-clinician-quote blockquote{
+  font-size:clamp(1rem,1.28vw,1.24rem)!important;
+  line-height:1.17!important;
+}
+.vtms-clinician .vtms-copy{
+  padding:42px 46px 38px!important;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:#f3efe7;
+}
+.vtms-clinician .vtms-steps-visual{margin-top:22px}
+.vtms-clinician .vtms-steps-visual li{padding-top:16px;padding-bottom:16px}
+
+@media(max-width:1100px){
+  .vtms-clinician .vtms-split{
+    grid-template-columns:1fr!important;
+    align-items:stretch!important;
+  }
+  .vtms-clinician .vtms-photo-card.vtms-portrait-natural{width:100%}
+  .vtms-portrait-image-wrap{aspect-ratio:1.28/1}
+  .vtms-clinician-photo{
+    width:108%!important;
+    height:auto!important;
+    transform:translateX(-6.5%);
+  }
+  .vtms-clinician .vtms-clinician-quote{
+    left:24px!important;
+    top:26px!important;
+    width:min(34%,175px)!important;
+  }
+  .vtms-clinician .vtms-copy{padding:42px 32px 38px!important}
+}
+
+@media(max-width:560px){
+  .vtms-phone{font-size:inherit!important}
+  .vtms-phone::after{content:none!important;display:none!important}
+  .vtms-phone-desktop{display:none}
+  .vtms-phone-mobile{display:inline;font-size:.84rem;font-weight:700}
+
+  .vtms-benefit-grid{
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+  .vtms-benefit-card{
+    display:grid!important;
+    grid-template-columns:38px minmax(0,1fr)!important;
+    grid-template-areas:'icon title' 'icon body'!important;
+    column-gap:13px!important;
+    row-gap:4px!important;
+    align-items:start!important;
+    padding:15px 16px!important;
+    min-height:0!important;
+  }
+  .vtms-benefit-icon{
+    grid-area:icon!important;
+    width:30px!important;
+    height:30px!important;
+    margin:1px 0 0!important;
+  }
+  .vtms-benefit-card h3{
+    grid-area:title!important;
+    margin:0!important;
+    font-size:1rem!important;
+    line-height:1.25!important;
+  }
+  .vtms-benefit-card p{
+    grid-area:body!important;
+    margin:0!important;
+    font-size:.86rem!important;
+    line-height:1.45!important;
+  }
+
+  .vtms-portrait-image-wrap{aspect-ratio:1.22/1}
+  .vtms-clinician-photo{
+    width:108%!important;
+    transform:translateX(-6%)!important;
+  }
+  .vtms-clinician .vtms-clinician-quote{
+    left:18px!important;
+    top:20px!important;
+    width:32%!important;
+  }
+  .vtms-clinician .vtms-clinician-quote blockquote{
+    font-size:.91rem!important;
+    line-height:1.18!important;
+  }
+  .vtms-clinician .vtms-clinician-quote span{font-size:.69rem!important}
+  .vtms-clinician .vtms-copy{padding:32px 20px 30px!important}
+}
+''')
+          PY
+      - name: Commit preview polish
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'src/app/(frontend)/veterans-tms-treatment/page.tsx' 'src/app/(frontend)/veterans-tms-treatment/veterans-portrait-natural.css'
+          git commit -m 'Refine Veterans preview responsive layout'
+          git push origin fix/veterans-portrait-preview
