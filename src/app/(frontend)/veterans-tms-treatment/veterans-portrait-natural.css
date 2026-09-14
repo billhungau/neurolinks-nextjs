@@ -1,0 +1,104 @@
+/* Preview-only deterministic portrait layout. Loaded after all legacy refinements. */
+.vtms-clinician .vtms-split{
+  display:grid!important;
+  grid-template-columns:minmax(0,42%) minmax(0,58%)!important;
+  gap:0!important;
+  align-items:center!important;
+  overflow:hidden;
+  border-radius:18px;
+  background:#f3efe7;
+  box-shadow:0 20px 52px rgba(31,54,68,.12);
+}
+.vtms-clinician .vtms-photo-card.vtms-portrait-natural{
+  min-height:0!important;
+  height:auto!important;
+  aspect-ratio:auto!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#d9e3ea;
+  align-self:center;
+}
+.vtms-portrait-image-wrap{
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  line-height:0;
+  background:#d9e3ea;
+}
+.vtms-clinician-photo{
+  position:relative!important;
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-width:none!important;
+  object-fit:contain!important;
+}
+.vtms-clinician .vtms-photo-card::after{
+  background:linear-gradient(90deg,rgba(8,33,49,.56) 0%,rgba(8,33,49,.26) 29%,rgba(8,33,49,.06) 48%,rgba(8,33,49,0) 62%)!important;
+}
+.vtms-clinician .vtms-clinician-quote{
+  left:28px!important;
+  top:30px!important;
+  width:min(38%,190px)!important;
+}
+.vtms-clinician .vtms-clinician-quote blockquote{
+  font-size:clamp(1rem,1.35vw,1.28rem)!important;
+  line-height:1.17!important;
+}
+.vtms-clinician .vtms-copy{
+  padding:48px 50px 44px!important;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:#f3efe7;
+}
+
+@media(max-width:900px){
+  .vtms-clinician .vtms-split{
+    grid-template-columns:1fr!important;
+    align-items:stretch!important;
+  }
+  .vtms-clinician .vtms-photo-card.vtms-portrait-natural{
+    width:100%;
+  }
+  .vtms-portrait-image-wrap{
+    aspect-ratio:1.22/1;
+  }
+  .vtms-clinician-photo{
+    width:116%!important;
+    height:auto!important;
+    transform:translateX(-13%);
+  }
+  .vtms-clinician .vtms-clinician-quote{
+    left:24px!important;
+    top:26px!important;
+    width:min(36%,175px)!important;
+  }
+  .vtms-clinician .vtms-copy{
+    padding:42px 32px 38px!important;
+  }
+}
+
+@media(max-width:560px){
+  .vtms-portrait-image-wrap{
+    aspect-ratio:1.16/1;
+  }
+  .vtms-clinician-photo{
+    width:114%!important;
+    transform:translateX(-12%);
+  }
+  .vtms-clinician .vtms-clinician-quote{
+    left:18px!important;
+    top:20px!important;
+    width:34%!important;
+  }
+  .vtms-clinician .vtms-clinician-quote blockquote{
+    font-size:.92rem!important;
+  }
+  .vtms-clinician .vtms-clinician-quote span{
+    font-size:.70rem!important;
+  }
+  .vtms-clinician .vtms-copy{
+    padding:34px 22px 32px!important;
+  }
+}

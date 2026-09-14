@@ -9,6 +9,7 @@ import { SITE } from "@/lib/site";
 import { treatmentVideoSrc } from "@/lib/videos";
 import "./veterans-tms.css";
 import "./veterans-tms-refinements.css";
+import "./veterans-portrait-natural.css";
 
 export const metadata = pageMetadata({
   title: "TMS Treatment for Veterans in BC | NeuroLinks Psychiatry",
@@ -223,8 +224,10 @@ export default function VeteransTmsLandingPage() {
 
         <section className="vtms-section vtms-clinician">
           <div className="vtms-wrap vtms-split">
-            <div className="vtms-photo-card">
-              <Image src="/media/images/Portrait for veterans page.png" alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks" fill sizes="(max-width: 800px) 100vw, 45vw" className="vtms-cover" />
+            <div className="vtms-photo-card vtms-portrait-natural">
+              <div className="vtms-portrait-image-wrap">
+                <Image src="/media/images/Portrait for veterans page.png" alt="Dr. Chi Hung Au, psychiatrist and founder of NeuroLinks" width={768} height={768} sizes="(max-width: 900px) calc(100vw - 44px), 42vw" className="vtms-clinician-photo" />
+              </div>
               <div className="vtms-clinician-quote">
                 <blockquote>“Compassionate, evidence-based care for meaningful change.”</blockquote>
                 <span>— Dr. Chi Hung Au</span>
