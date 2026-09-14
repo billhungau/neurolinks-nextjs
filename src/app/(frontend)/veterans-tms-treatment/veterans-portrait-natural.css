@@ -8,7 +8,7 @@
 .vtms-page{width:100%;max-width:none;overflow-x:clip}
 .vtms-page>main{display:block;width:100%;max-width:none;margin:0;padding:0}
 
-/* Hero: let the section itself own the photograph and overlay. This avoids gaps from the legacy absolute media layer. */
+/* Hero: the section itself owns the photograph and readability gradient. */
 .vtms-hero{
   width:100%!important;
   max-width:none!important;
@@ -18,10 +18,9 @@
     linear-gradient(90deg,rgba(7,30,47,.78) 0%,rgba(7,30,47,.58) 31%,rgba(7,30,47,.26) 49%,rgba(7,30,47,.06) 67%,rgba(7,30,47,.03) 100%),
     url('/media/images/veterans-tms-hero.webp')!important;
   background-size:cover!important;
-  background-position:center 48%!important;
+  background-position:center 34%!important;
   background-repeat:no-repeat!important;
 }
-.vtms-hero-media,.vtms-hero-overlay{display:none!important}
 .vtms-hero-grid{
   grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)!important;
   gap:36px!important;
@@ -225,7 +224,7 @@
   .vtms-phone-desktop{display:none}
   .vtms-phone-mobile{display:inline;font-size:.84rem;font-weight:700}
 
-  /* Hero: stronger contrast and mobile-safe crop, with no separate media layer. */
+  /* Hero: stronger contrast and mobile-safe crop. */
   .vtms-hero{
     background-image:
       linear-gradient(180deg,rgba(4,22,37,.48) 0%,rgba(4,22,37,.62) 28%,rgba(4,22,37,.82) 64%,rgba(4,22,37,.93) 100%),
