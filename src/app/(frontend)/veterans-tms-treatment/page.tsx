@@ -9,6 +9,7 @@ import { treatmentVideoSrc } from "@/lib/videos";
 import "./veterans-tms.css";
 import "./veterans-tms-refinements.css";
 import "./veterans-portrait-natural.css";
+import "./veterans-navigation-fixes.css";
 
 export const metadata = pageMetadata({
   title: "TMS Treatment for Veterans in BC | NeuroLinks Psychiatry",
@@ -135,9 +136,11 @@ const REVIEWS = [
 
 function Header() {
   return (
-    <header className="vtms-header">
+    <header className="vtms-header landing-header">
       <div className="vtms-wrap vtms-header-inner">
-        <Image src={SITE.logo} alt="NeuroLinks" width={230} height={46} priority className="vtms-logo" />
+        <a href="/" className="vtms-logo-link" aria-label="NeuroLinks home">
+          <Image src={SITE.logo} alt="NeuroLinks" width={230} height={46} priority className="vtms-logo" />
+        </a>
         <div className="vtms-header-actions">
           <a href={SITE.phoneHref} className="vtms-phone"><span className="vtms-phone-desktop">Call {SITE.phone}</span><span className="vtms-phone-mobile">Call clinic</span></a>
           <a href="#inquiry" className="vtms-button vtms-button-small">Check VAC Coverage</a>
@@ -198,9 +201,9 @@ export default function VeteransTmsLandingPage() {
           </div>
         </section>
 
-        <section id="why-tms" className="vtms-section vtms-benefits">
+        <section className="vtms-section vtms-benefits">
           <div className="vtms-wrap">
-            <div className="vtms-section-heading">
+            <div id="why-tms" className="vtms-section-heading vtms-anchor-target">
               <p className="vtms-eyebrow">Why TMS</p>
               <h2>Why Veterans Consider TMS</h2>
               <p>You may have already tried medications, therapy, or both and still not feel like yourself. TMS offers another evidence-based option when previous treatment has not been enough.</p>
