@@ -6,17 +6,51 @@
   line-height:0;
 }
 .vtms-logo-link:focus-visible{
-  outline:2px solid #2d6f91;
+  outline:2px solid #fff;
   outline-offset:4px;
   border-radius:4px;
 }
 
-/* Anchor the How TMS Works CTA to the visible heading block, not the section padding. */
+/* Match the homepage header pattern: transparent over the hero, solid after scroll. */
+.vtms-header{
+  position:fixed!important;
+  top:0;
+  left:0;
+  right:0;
+  z-index:70!important;
+  background:transparent!important;
+  border-bottom-color:transparent!important;
+  color:#fff;
+  box-shadow:none;
+  transition:background-color .2s ease,border-color .2s ease,box-shadow .2s ease,backdrop-filter .2s ease;
+}
+.vtms-header--solid{
+  background:rgba(8,45,80,.94)!important;
+  border-bottom-color:rgba(255,255,255,.12)!important;
+  box-shadow:0 1px 0 rgba(0,0,0,.16),0 8px 24px rgba(8,45,80,.12);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.vtms-header .vtms-phone{color:#fff!important}
+.vtms-header .vtms-button-small{
+  background:rgba(247,245,240,.96)!important;
+  color:var(--vnavy)!important;
+  border:1px solid rgba(255,255,255,.5)!important;
+  box-shadow:0 5px 18px rgba(0,0,0,.12)!important;
+}
+.vtms-header .vtms-button-small:hover{background:#fff!important}
+
+/* The fixed transparent header overlays the hero, so keep hero copy below it. */
+.vtms-hero-grid{padding-top:118px!important}
+
+/* The global anchor helper scrolls the h2 itself, so the id and margin belong on that h2. */
 .vtms-anchor-target{
   scroll-margin-top:calc(var(--nl-header-height, 72px) + var(--nl-anchor-gap, 16px));
 }
 
 @media(max-width:900px){
+  .vtms-hero-grid{padding-top:92px!important}
+
   .vtms-anchor-target{
     scroll-margin-top:calc(var(--nl-header-height, 62px) + 14px);
   }
