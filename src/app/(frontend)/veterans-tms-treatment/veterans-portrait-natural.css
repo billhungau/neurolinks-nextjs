@@ -4,9 +4,17 @@
 .vtms-phone{white-space:nowrap}
 .vtms-phone-mobile{display:none}
 
-/* Hero: keep the Veteran image unobstructed and force the media layer edge-to-edge. */
-.vtms-hero{width:100%!important}
-.vtms-hero-media,.vtms-hero-overlay{left:0!important;right:0!important;width:100%!important;max-width:none!important}
+/* Keep this landing page from exposing parent/container background at viewport edges. */
+.vtms-page{overflow-x:clip}
+
+/* Hero: true viewport-width full bleed, independent of any parent width. */
+.vtms-hero{
+  width:100vw!important;
+  max-width:100vw!important;
+  margin-left:calc(50% - 50vw)!important;
+  margin-right:calc(50% - 50vw)!important;
+}
+.vtms-hero-media,.vtms-hero-overlay{inset:0!important;width:100%!important;max-width:none!important}
 .vtms-hero-photo{width:100%!important;height:100%!important;max-width:none!important}
 .vtms-hero-grid{
   grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)!important;
@@ -42,9 +50,8 @@
   margin:0 0 18px;
 }
 .vtms-contact-copy>p:not(.vtms-eyebrow){font-size:1.04rem;line-height:1.65;max-width:560px}
-.vtms-contact-phone{margin-top:22px!important;color:#496579}
-.vtms-contact-phone a{font-weight:800;color:var(--vnavy);text-decoration:none}
 .vtms-contact-card{
+  scroll-margin-top:92px;
   background:#f8f5ef;
   border:1px solid rgba(8,45,80,.12);
   border-radius:16px;
@@ -58,6 +65,25 @@
   font-size:1.55rem;
 }
 .vtms-contact-card>p{margin:0 0 18px;line-height:1.5;color:#4d6677}
+
+/* Secondary call actions. */
+.vtms-action-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px}
+.vtms-button-outline{
+  background:transparent!important;
+  color:var(--vnavy)!important;
+  border:1px solid rgba(8,45,80,.32)!important;
+  box-shadow:none!important;
+  margin-top:18px;
+}
+.vtms-button-outline:hover{background:rgba(8,45,80,.06)!important}
+.vtms-action-row .vtms-button-outline{margin-top:0}
+.vtms-button-outline-light{
+  background:transparent!important;
+  color:#fff!important;
+  border:1px solid rgba(255,255,255,.72)!important;
+  box-shadow:none!important;
+}
+.vtms-button-outline-light:hover{background:rgba(255,255,255,.12)!important}
 
 /* Indication section: persuasive but clinically clear. */
 .vtms-condition-emphasis{
@@ -153,7 +179,7 @@
   .vtms-hero-grid{grid-template-columns:1fr!important}
   .vtms-contact-section{padding:52px 0!important}
   .vtms-contact-grid{grid-template-columns:1fr;gap:28px}
-  .vtms-contact-card{padding:22px}
+  .vtms-contact-card{scroll-margin-top:74px;padding:22px}
   .vtms-benefits .vtms-section-heading{margin-bottom:24px!important}
   .vtms-review{padding:22px!important}
   .vtms-final-panel h2{font-size:clamp(2.15rem,8.5vw,2.85rem)!important}
@@ -183,6 +209,9 @@
   .vtms-contact-copy h2{font-size:2rem}
   .vtms-contact-card{padding:20px}
   .vtms-review{padding:18px!important}
+  .vtms-action-row{align-items:stretch}
+  .vtms-action-row .vtms-button{width:100%}
+  .vtms-final-actions .vtms-button{width:100%}
 
   /* Mobile benefits: readable horizontal cards rather than squeezed 2-column cards. */
   .vtms-benefit-grid{
