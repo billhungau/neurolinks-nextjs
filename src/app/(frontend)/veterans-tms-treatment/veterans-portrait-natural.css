@@ -4,7 +4,10 @@
 .vtms-phone{white-space:nowrap}
 .vtms-phone-mobile{display:none}
 
-/* Hero: keep the Veteran image unobstructed after removing the form card. */
+/* Hero: keep the Veteran image unobstructed and force the media layer edge-to-edge. */
+.vtms-hero{width:100%!important}
+.vtms-hero-media,.vtms-hero-overlay{left:0!important;right:0!important;width:100%!important;max-width:none!important}
+.vtms-hero-photo{width:100%!important;height:100%!important;max-width:none!important}
 .vtms-hero-grid{
   grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)!important;
   gap:36px!important;
