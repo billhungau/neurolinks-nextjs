@@ -141,10 +141,6 @@ export default function VeteransTmsLandingPage() {
       <VeteransLandingHeader />
       <main>
         <section className="vtms-hero">
-          <div className="vtms-hero-media" aria-hidden="true">
-            <Image src="/media/images/veterans-tms-hero.webp" alt="" fill priority sizes="100vw" className="vtms-hero-photo" />
-          </div>
-          <div className="vtms-hero-overlay" aria-hidden="true" />
           <div className="vtms-wrap vtms-hero-grid">
             <div className="vtms-hero-copy">
               <p className="vtms-eyebrow">Care for Canadian Veterans</p>
