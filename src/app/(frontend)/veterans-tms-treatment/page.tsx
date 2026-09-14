@@ -182,15 +182,15 @@ export default function VeteransTmsLandingPage() {
           </div>
         </section>
 
-        <section id="inquiry" className="vtms-section vtms-contact-section">
+        <section className="vtms-section vtms-contact-section">
           <div className="vtms-wrap vtms-contact-grid">
             <div className="vtms-contact-copy">
               <p className="vtms-eyebrow">Talk with our team</p>
               <h2>See Whether TMS and VAC Coverage May Be Right for You</h2>
               <p>Our team can answer questions about TMS, help you understand VAC coverage, and explain the next step toward psychiatric assessment.</p>
-              <p className="vtms-contact-phone">Prefer to speak with someone? <a href={SITE.phoneHref}>Call {SITE.phone}</a></p>
+              <a href={SITE.phoneHref} className="vtms-button vtms-button-outline">Call the Clinic</a>
             </div>
-            <div className="vtms-contact-card" aria-label="Check VAC coverage">
+            <div id="inquiry" className="vtms-contact-card" aria-label="Check VAC coverage">
               <h3>Check Your VAC Coverage</h3>
               <p>Send us a message and our team will follow up about TMS, assessment and VAC authorization.</p>
               <ContactForm showReferralNote={false} />
@@ -270,7 +270,10 @@ export default function VeteransTmsLandingPage() {
               <h3>We help make the authorization process straightforward.</h3>
               <p>If TMS is recommended after psychiatric assessment, NeuroLinks can prepare the clinical rationale, proposed treatment protocol, schedule and estimated cost required for authorization.</p>
               <p>VAC and Medavie Blue Cross review the request and provide the required authorization before treatment begins.</p>
-              <a href="#inquiry" className="vtms-button">Check Your VAC Coverage</a>
+              <div className="vtms-action-row">
+                <a href="#inquiry" className="vtms-button">Check Your VAC Coverage</a>
+                <a href={SITE.phoneHref} className="vtms-button vtms-button-outline">Call the Clinic</a>
+              </div>
             </div>
           </div>
         </section>
@@ -330,13 +333,13 @@ export default function VeteransTmsLandingPage() {
               </div>
               <div className="vtms-final-actions">
                 <a href="#inquiry" className="vtms-button vtms-button-light">Check Your VAC Coverage</a>
-                <p>Prefer to speak with someone? <a href={SITE.phoneHref}>Call {SITE.phone}</a></p>
+                <a href={SITE.phoneHref} className="vtms-button vtms-button-outline-light">Call the Clinic</a>
               </div>
             </div>
           </div>
         </section>
       </main>
-      <div className="vtms-mobile-bar"><a href={SITE.phoneHref} aria-label="Call NeuroLinks">Call</a><a href="#inquiry">Check VAC Coverage</a></div>
+      <div className="vtms-mobile-bar"><a href={SITE.phoneHref} aria-label="Call NeuroLinks">Call the Clinic</a><a href="#inquiry">Check VAC Coverage</a></div>
     </div>
   );
 }
