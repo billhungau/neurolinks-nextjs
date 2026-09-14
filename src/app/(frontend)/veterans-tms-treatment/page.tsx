@@ -2,6 +2,7 @@ import Image from "next/image";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { TmsVideo } from "@/components/tms/TmsVideo";
+import { VeteransLandingHeader } from "@/components/veterans/VeteransLandingHeader";
 import { MEDIA } from "@/lib/media";
 import { adsLandingRobots, PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
@@ -134,26 +135,10 @@ const REVIEWS = [
   },
 ] as const;
 
-function Header() {
-  return (
-    <header className="vtms-header landing-header">
-      <div className="vtms-wrap vtms-header-inner">
-        <a href="/" className="vtms-logo-link" aria-label="NeuroLinks home">
-          <Image src={SITE.logo} alt="NeuroLinks" width={230} height={46} priority className="vtms-logo" />
-        </a>
-        <div className="vtms-header-actions">
-          <a href={SITE.phoneHref} className="vtms-phone"><span className="vtms-phone-desktop">Call {SITE.phone}</span><span className="vtms-phone-mobile">Call clinic</span></a>
-          <a href="#inquiry" className="vtms-button vtms-button-small">Check VAC Coverage</a>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 export default function VeteransTmsLandingPage() {
   return (
     <div className="vtms-page">
-      <Header />
+      <VeteransLandingHeader />
       <main>
         <section className="vtms-hero">
           <div className="vtms-hero-media" aria-hidden="true">
@@ -203,9 +188,9 @@ export default function VeteransTmsLandingPage() {
 
         <section className="vtms-section vtms-benefits">
           <div className="vtms-wrap">
-            <div id="why-tms" className="vtms-section-heading vtms-anchor-target">
+            <div className="vtms-section-heading">
               <p className="vtms-eyebrow">Why TMS</p>
-              <h2>Why Veterans Consider TMS</h2>
+              <h2 id="why-tms" className="vtms-anchor-target">Why Veterans Consider TMS</h2>
               <p>You may have already tried medications, therapy, or both and still not feel like yourself. TMS offers another evidence-based option when previous treatment has not been enough.</p>
             </div>
             <div className="vtms-benefit-grid">
