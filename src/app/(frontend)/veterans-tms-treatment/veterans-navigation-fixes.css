@@ -72,6 +72,9 @@
     padding:8px 10px;
     box-sizing:border-box;
   }
+  .vtms-mobile-bar a:first-child{
+    background:#f2f4f5;
+  }
   .vtms-page{
     padding-bottom:calc(82px + env(safe-area-inset-bottom, 0px))!important;
   }
