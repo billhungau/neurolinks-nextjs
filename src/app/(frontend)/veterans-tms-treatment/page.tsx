@@ -265,7 +265,7 @@ export default function VeteransTmsLandingPage() {
           <div className="vtms-wrap">
             <div className="vtms-section-heading">
               <p className="vtms-eyebrow">What patients say</p>
-              <h2>Real Experiences</h2>
+              <h2>What Patients Say About Their Care</h2>
             </div>
             <div className="vtms-review-grid">
               {REVIEWS.map((review) => (
