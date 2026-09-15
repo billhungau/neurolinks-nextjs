@@ -264,7 +264,7 @@ export default function VeteransTmsLandingPage() {
         <section className="vtms-section vtms-reviews">
           <div className="vtms-wrap">
             <div className="vtms-section-heading">
-              <p className="vtms-eyebrow">What patients say</p>
+              <p className="vtms-eyebrow">Patient Reviews</p>
               <h2>What Patients Say About Their Care</h2>
             </div>
             <div className="vtms-review-grid">
