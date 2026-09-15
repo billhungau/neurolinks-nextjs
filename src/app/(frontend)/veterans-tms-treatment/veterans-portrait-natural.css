@@ -4,6 +4,18 @@
 .vtms-phone{white-space:nowrap}
 .vtms-phone-mobile{display:none}
 
+/* Desktop header: use the viewport width rather than the content column so
+   phone/VAC actions remain visually anchored to the right edge. */
+@media(min-width:901px){
+  .vtms-header-inner{
+    width:100%!important;
+    max-width:none!important;
+    margin-inline:0!important;
+    padding-inline:clamp(28px,3vw,56px)!important;
+  }
+  .vtms-header-actions{margin-left:auto!important}
+}
+
 /* Keep the landing page and its main content genuinely full width. */
 .vtms-page{width:100%;max-width:none;overflow-x:clip}
 .vtms-page>main{display:block;width:100%;max-width:none;margin:0;padding:0}
