@@ -71,6 +71,7 @@
     line-height:1.2;
     padding:8px 10px;
     box-sizing:border-box;
+    border-radius:5px;
   }
   .vtms-mobile-bar a:first-child{
     background:#f2f4f5;
