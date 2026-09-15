@@ -45,10 +45,12 @@ export function ContactForm({
   source = "contact",
   notice,
   showReferralNote = true,
+  submitLabel = "Send message",
 }: {
   source?: ContactSource;
   notice?: string;
   showReferralNote?: boolean;
+  submitLabel?: string;
 }) {
   const [values, setValues] = useState<ContactFields>(EMPTY_FIELDS);
   const [errors, setErrors] = useState<ContactFieldErrors>({});
@@ -255,7 +257,7 @@ export function ContactForm({
         />
         <div className="ct-form-actions">
           <button className="ct-submit" type="submit" disabled={submitting}>
-            {submitting ? "Sending…" : "Send message"}
+            {submitting ? "Sending…" : submitLabel}
           </button>
         </div>
       </form>
