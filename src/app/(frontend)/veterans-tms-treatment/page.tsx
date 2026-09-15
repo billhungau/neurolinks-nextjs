@@ -122,8 +122,8 @@ const FAQS = [
 
 const REVIEWS = [
   {
-    quote: "I finally have hope and feel like I’m getting my life back. I highly recommend giving TMS a try if you are struggling.",
-    initials: "C. M.",
+    quote: "I’m so thankful for the wonderful space Neurolinks has created and for a team that treats me with compassion, care, and humanity. I feel safe there. I feel heard. And most importantly, I feel like they genuinely care about me and my journey.",
+    initials: "Veteran · 38 years",
   },
   {
     quote: "Thank you Dr. Au and Hannah for all your help during and after my TMS treatment — life is brighter, have not felt this good in years.",
@@ -146,7 +146,7 @@ export default function VeteransTmsLandingPage() {
               <p className="vtms-eyebrow">Care for Canadian Veterans</p>
               <h1>TMS Treatment for Veterans</h1>
               <p className="vtms-hero-lede">When previous treatments haven’t provided enough relief, TMS may offer another option.</p>
-              <p className="vtms-hero-support">Non-invasive treatment provided in Nanaimo, BC, with assessment and care led by a psychiatrist.</p>
+              <p className="vtms-hero-support">Non-invasive treatment for depression provided in Nanaimo, with assessment, treatment planning and monitoring led by a psychiatrist.</p>
               <div className="vtms-hero-actions">
                 <a href="#inquiry" className="vtms-button vtms-button-secondary">Check Your VAC Coverage</a>
                 <a href="#why-tms" className="vtms-button vtms-button-ghost">How TMS Works</a>
@@ -177,7 +177,7 @@ export default function VeteransTmsLandingPage() {
             <div id="inquiry" className="vtms-contact-card" aria-label="Check VAC coverage">
               <h3>Check Your VAC Coverage</h3>
               <p>Send us a message and our team will follow up about TMS, assessment and VAC authorization.</p>
-              <ContactForm showReferralNote={false} />
+              <ContactForm showReferralNote={false} submitLabel="Request TMS Information" />
             </div>
           </div>
         </section>
@@ -206,8 +206,7 @@ export default function VeteransTmsLandingPage() {
             <Image src="/media/images/veterans-mountain.jpg" alt="Mountain and forest landscape in British Columbia" fill sizes="(max-width: 900px) 100vw, 50vw" className="vtms-cover" />
             <div className="vtms-conditions-visual-overlay" />
             <div className="vtms-conditions-visual-copy">
-              <h2>Different<br />experiences.<br />A shared purpose.</h2>
-              <p><span className="vtms-purpose-rule" aria-hidden="true" />Support for what comes next.</p>
+              <h2>Veterans Often Come to Us With More Than Depression</h2>
             </div>
           </div>
           <div className="vtms-conditions-content">
@@ -234,6 +233,7 @@ export default function VeteransTmsLandingPage() {
               <h2>Psychiatrist-Led TMS Care</h2>
               <h3 className="vtms-clinician-subhead">Treatment planned around your clinical history</h3>
               <p>Your treatment is assessed and overseen by a psychiatrist, with the TMS protocol selected according to your clinical history, symptoms, medications, and previous treatment response.</p>
+              <p>For eligible BC residents, psychiatric assessment is covered by MSP when an appropriate referral is received.</p>
               <ol className="vtms-steps vtms-steps-visual">
                 <li><Icon name="assessment" className="vtms-step-icon" /><strong>Psychiatric assessment</strong><span>Review symptoms, diagnosis, medications and previous treatment.</span></li>
                 <li><Icon name="plan" className="vtms-step-icon" /><strong>Individualized TMS protocol</strong><span>Parameters are selected for your clinical presentation and history.</span></li>
@@ -251,8 +251,8 @@ export default function VeteransTmsLandingPage() {
             <div>
               <p className="vtms-eyebrow">Veterans Affairs Canada</p>
               <h2>TMS May Be Covered Through Veterans Affairs Canada</h2>
-              <h3>We help make the authorization process straightforward.</h3>
-              <p>If TMS is recommended, NeuroLinks can prepare the clinical rationale, treatment protocol, schedule and estimated cost for VAC/Medavie Blue Cross authorization.</p>
+              <h3>NeuroLinks can help with the TMS authorization process.</h3>
+              <p>If TMS is recommended after assessment, we can prepare the clinical rationale, proposed treatment protocol, schedule and cost information required for review. Coverage and authorization are determined individually by Veterans Affairs Canada.</p>
               <div className="vtms-action-row">
                 <a href="#inquiry" className="vtms-button">Check Your VAC Coverage</a>
                 <a href={SITE.phoneHref} className="vtms-button vtms-button-outline">Call the Clinic</a>
