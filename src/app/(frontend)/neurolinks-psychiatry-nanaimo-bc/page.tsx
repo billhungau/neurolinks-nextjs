@@ -32,6 +32,7 @@ import { IMG_SIZES } from "@/lib/image-sizes";
 import { HOME_HERO_ASSET, LANDING_VIDEO_POSTERS, LANDING_YOUTUBE, MEDIA } from "@/lib/media";
 import { adsLandingRobots, PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 import { SITE } from "@/lib/site";
+import "./landing-refinements.css";
 
 export const metadata = pageMetadata({
   title: "Psychiatry Clinic in Nanaimo, BC | TMS & Ketamine | NeuroLinks",
@@ -79,7 +80,7 @@ export default function LandingPage() {
     <>
       <div id="top" className="landing-top-anchor" />
       <LandingHeader />
-      <main id="main-content" className="flex-1" tabIndex={-1}>
+      <main id="main-content" className="landing-reference-page flex-1" tabIndex={-1}>
         <FaqJsonLd items={LANDING_FAQS} />
 
         <section id="landing-hero" className="landing-hero" aria-labelledby="landing-hero-heading">
@@ -96,11 +97,11 @@ export default function LandingPage() {
                 ))}
               </p>
               <div className="landing-hero-actions">
-                <ButtonLink href="#treatment" variant="accent" className="landing-hero-primary">
-                  Explore treatments
+                <ButtonLink href="#inquiry" variant="accent" className="landing-hero-primary">
+                  Discuss your treatment options
                 </ButtonLink>
-                <ButtonLink href="#inquiry" variant="on-dark" className="landing-hero-secondary">
-                  Talk to our team
+                <ButtonLink href="#treatment" variant="on-dark" className="landing-hero-secondary">
+                  Explore TMS &amp; ketamine
                 </ButtonLink>
               </div>
             </div>
@@ -116,6 +117,35 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
+          </div>
+        </section>
+
+        <section
+          id="inquiry"
+          className="landing-inquiry-section nl-anchor-section"
+          aria-labelledby="inquiry-heading"
+        >
+          <div className="nl-wrap landing-inquiry">
+            <div className="landing-inquiry-intro">
+              <h2 id="inquiry-heading">{LANDING_INQUIRY_HEADING}</h2>
+              <p>{LANDING_INQUIRY_SUPPORTING_TEXT}</p>
+              <p>{LANDING_INQUIRY_FOLLOW_UP}</p>
+              <ButtonLink href={SITE.phoneHref} variant="accent" className="landing-inquiry-call">
+                {LANDING_INQUIRY_CALL_LABEL}
+              </ButtonLink>
+            </div>
+            <div className="ct-form-frame landing-inquiry-form">
+              <ContactForm source={ADVERTISING_LANDING_SOURCE} showReferralNote={false} />
+            </div>
+          </div>
+        </section>
+
+        <section className="landing-why" aria-labelledby="landing-why-heading">
+          <div className="nl-wrap">
+            <div className="landing-why-block">
+              <h2 id="landing-why-heading">{LANDING_WHY_HEADING}</h2>
+              <p>{LANDING_WHY_TEXT}</p>
+            </div>
           </div>
         </section>
 
@@ -162,35 +192,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-why" aria-labelledby="landing-why-heading">
-          <div className="nl-wrap">
-            <div className="landing-why-block">
-              <h2 id="landing-why-heading">{LANDING_WHY_HEADING}</h2>
-              <p>{LANDING_WHY_TEXT}</p>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="inquiry"
-          className="landing-inquiry-section nl-anchor-section"
-          aria-labelledby="inquiry-heading"
-        >
-          <div className="nl-wrap landing-inquiry">
-            <div className="landing-inquiry-intro">
-              <h2 id="inquiry-heading">{LANDING_INQUIRY_HEADING}</h2>
-              <p>{LANDING_INQUIRY_SUPPORTING_TEXT}</p>
-              <p>{LANDING_INQUIRY_FOLLOW_UP}</p>
-              <ButtonLink href={SITE.phoneHref} variant="accent" className="landing-inquiry-call">
-                {LANDING_INQUIRY_CALL_LABEL}
-              </ButtonLink>
-            </div>
-            <div className="ct-form-frame landing-inquiry-form">
-              <ContactForm source={ADVERTISING_LANDING_SOURCE} showReferralNote={false} />
-            </div>
-          </div>
-        </section>
-
         <section
           id="psychiatrist"
           className="home-section bg-white"
@@ -221,6 +222,28 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="home-section bg-white" aria-labelledby="landing-reviews-heading">
+          <div className="nl-wrap">
+            <h2 id="landing-reviews-heading" className="home-h2 text-[var(--nl-navy)]">
+              Patient experiences
+            </h2>
+            <p className="mt-2 text-sm text-[var(--nl-muted)]">on Google Reviews</p>
+            <div className="landing-reviews">
+              {LANDING_REVIEWS.map((review) => (
+                <blockquote key={review.who}>
+                  <p>{review.text}</p>
+                  <footer>— {review.who}</footer>
+                </blockquote>
+              ))}
+            </div>
+            <p className="landing-section-cta">
+              <ButtonLink href="#inquiry" variant="accent" className="landing-inline-cta">
+                {LANDING_REVIEWS_CTA_LABEL}
+              </ButtonLink>
+            </p>
+          </div>
+        </section>
+
         <section
           className="home-section bg-[var(--nl-navy)] text-white"
           aria-labelledby="landing-next-heading"
@@ -243,28 +266,6 @@ export default function LandingPage() {
                 ))}
               </ol>
             </div>
-          </div>
-        </section>
-
-        <section className="home-section bg-white" aria-labelledby="landing-reviews-heading">
-          <div className="nl-wrap">
-            <h2 id="landing-reviews-heading" className="home-h2 text-[var(--nl-navy)]">
-              Patient experiences
-            </h2>
-            <p className="mt-2 text-sm text-[var(--nl-muted)]">on Google Reviews</p>
-            <div className="landing-reviews">
-              {LANDING_REVIEWS.map((review) => (
-                <blockquote key={review.who}>
-                  <p>{review.text}</p>
-                  <footer>— {review.who}</footer>
-                </blockquote>
-              ))}
-            </div>
-            <p className="landing-section-cta">
-              <ButtonLink href="#inquiry" variant="accent" className="landing-inline-cta">
-                {LANDING_REVIEWS_CTA_LABEL}
-              </ButtonLink>
-            </p>
           </div>
         </section>
 
