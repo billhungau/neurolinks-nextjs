@@ -123,6 +123,90 @@
   max-width: 650px;
 }
 
+.landing-reference-page .landing-coverage {
+  padding-block: clamp(4.25rem, 7vw, 6.25rem);
+  background:
+    linear-gradient(180deg, rgba(245, 239, 226, 0.72), rgba(248, 246, 239, 0.96));
+  border-block: 1px solid rgba(25, 48, 69, 0.08);
+}
+
+.landing-reference-page .landing-coverage-heading {
+  max-width: 760px;
+}
+
+.landing-reference-page .landing-coverage-eyebrow {
+  margin: 0 0 0.65rem;
+  color: var(--nl-navy);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.landing-reference-page .landing-coverage-heading h2 {
+  margin: 0;
+  color: var(--nl-navy);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.landing-reference-page .landing-coverage-heading > p:last-child {
+  max-width: 650px;
+  margin-top: 1rem;
+  color: var(--nl-muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.landing-reference-page .landing-coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.landing-reference-page .landing-coverage-card {
+  padding: clamp(1.35rem, 2.4vw, 1.8rem);
+  border: 1px solid rgba(25, 48, 69, 0.11);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 30px rgba(22, 42, 60, 0.055);
+}
+
+.landing-reference-page .landing-coverage-icon {
+  display: inline-flex;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(244, 190, 30, 0.16);
+  color: var(--nl-navy);
+}
+
+.landing-reference-page .landing-coverage-card h3 {
+  margin-top: 1rem;
+  color: var(--nl-navy);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.landing-reference-page .landing-coverage-card p {
+  margin-top: 0.7rem;
+  color: var(--nl-muted);
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.landing-reference-page .landing-coverage-cta {
+  margin-top: 1.6rem;
+}
+
 .landing-reference-page .landing-reviews {
   gap: 1rem;
 }
@@ -135,6 +219,12 @@
 
 .landing-reference-page .pathway > li {
   position: relative;
+}
+
+@media (max-width: 900px) {
+  .landing-reference-page .landing-coverage-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 767px) {
@@ -290,6 +380,45 @@
 
   .landing-reference-page .landing-psychiatrist-copy .home-h2 {
     margin-top: 0;
+  }
+
+  .landing-reference-page .landing-coverage {
+    padding-block: 3.5rem;
+  }
+
+  .landing-reference-page .landing-coverage-heading h2 {
+    font-size: clamp(2rem, 9vw, 2.5rem);
+  }
+
+  .landing-reference-page .landing-coverage-grid {
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+  }
+
+  .landing-reference-page .landing-coverage-card {
+    padding: 1.15rem;
+    border-radius: 17px;
+  }
+
+  .landing-reference-page .landing-coverage-icon {
+    width: 2.65rem;
+    height: 2.65rem;
+    border-radius: 12px;
+  }
+
+  .landing-reference-page .landing-coverage-card h3 {
+    margin-top: 0.85rem;
+    font-size: 1.22rem;
+  }
+
+  .landing-reference-page .landing-coverage-card p {
+    margin-top: 0.55rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .landing-reference-page .landing-coverage-cta {
+    margin-top: 1.25rem;
   }
 
   .landing-reference-page .landing-reviews {
