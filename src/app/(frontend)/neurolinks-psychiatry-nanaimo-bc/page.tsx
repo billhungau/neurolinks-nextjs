@@ -12,6 +12,7 @@ import { DR_AU_PARAS } from "@/content/about-bios";
 import { LANDING_FAQS } from "@/content/faqs";
 import {
   LANDING_CLOSE_TEXT,
+  LANDING_COVERAGE,
   LANDING_HEADLINE,
   LANDING_INQUIRY_CALL_LABEL,
   LANDING_INQUIRY_FOLLOW_UP,
@@ -57,6 +58,47 @@ const TREATMENT_VIDEOS = {
 } as const;
 
 const HERO_ALT = "TMS coil on the left and ketamine vial on the right at NeuroLinks";
+
+type CoverageIconName = (typeof LANDING_COVERAGE)[number]["icon"];
+
+function CoverageIcon({ name }: { name: CoverageIconName }) {
+  const common = {
+    width: 30,
+    height: 30,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+
+  if (name === "msp") {
+    return (
+      <svg {...common}>
+        <path d="M12 3l7 3v5c0 4.6-2.8 8.2-7 10-4.2-1.8-7-5.4-7-10V6l7-3z" />
+        <path d="M9 12h6M12 9v6" />
+      </svg>
+    );
+  }
+
+  if (name === "vac") {
+    return (
+      <svg {...common}>
+        <path d="M12 3v18M5 12h14" />
+        <path d="M8 5l4-2 4 2M8 19l4 2 4-2" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg {...common}>
+      <rect x="3" y="6" width="18" height="13" rx="2" />
+      <path d="M7 10h10M7 14h6" />
+    </svg>
+  );
+}
 
 function LandingHeroPhoto() {
   const { props } = getImageProps({
@@ -219,6 +261,32 @@ export default function LandingPage() {
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="landing-coverage" aria-labelledby="landing-coverage-heading">
+          <div className="nl-wrap">
+            <div className="landing-coverage-heading">
+              <p className="landing-coverage-eyebrow">Coverage &amp; access</p>
+              <h2 id="landing-coverage-heading">Understanding your coverage options</h2>
+              <p>Coverage depends on the service and funding source. Our team can help you understand the next step.</p>
+            </div>
+            <div className="landing-coverage-grid">
+              {LANDING_COVERAGE.map((item) => (
+                <article className="landing-coverage-card" key={item.title}>
+                  <div className="landing-coverage-icon">
+                    <CoverageIcon name={item.icon} />
+                  </div>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </article>
+              ))}
+            </div>
+            <p className="landing-coverage-cta">
+              <ButtonLink href="#inquiry" variant="accent" className="landing-inline-cta">
+                Ask about coverage
+              </ButtonLink>
+            </p>
           </div>
         </section>
 
