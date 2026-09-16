@@ -5,11 +5,11 @@
  */
 
 export const LANDING_HEADLINE =
-  "When medication hasn’t helped enough, there will be another way forward.";
+  "Advanced Treatment for Depression When Medication Hasn’t Helped Enough";
 
 export const LANDING_SUPPORTING_LINES = [
-  "Psychiatrist-led TMS and ketamine treatment",
-  "Care tailored to your needs.",
+  "Psychiatrist-led TMS and ketamine treatment in Nanaimo",
+  "Assessment, treatment planning and monitoring tailored to your clinical history.",
 ] as const;
 
 export const LANDING_TRUST = [
