@@ -40,6 +40,23 @@
   align-items: center;
   justify-content: center;
   min-height: 76px;
+  gap: 0.65rem;
+}
+
+.landing-reference-page .landing-trust .trust-grid > li::before {
+  content: "✓";
+  display: inline-flex;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 1.65rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(25, 48, 69, 0.22);
+  border-radius: 999px;
+  color: var(--nl-navy);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .landing-reference-page .landing-inquiry-section {
@@ -70,7 +87,7 @@
 }
 
 .landing-reference-page .landing-why {
-  padding-block: clamp(3rem, 6vw, 5rem);
+  padding-block: clamp(3.5rem, 6vw, 5rem);
 }
 
 .landing-reference-page .landing-why-block {
@@ -123,38 +140,209 @@
 @media (max-width: 767px) {
   .landing-reference-page .landing-hero,
   .landing-reference-page .landing-hero-copy-wrap {
-    min-height: 620px;
+    min-height: 550px;
   }
 
   .landing-reference-page .landing-hero-copy {
-    padding-block: 4rem 3.5rem;
+    max-width: none;
+    padding-block: 3.35rem 3rem;
   }
 
   .landing-reference-page .landing-hero-copy h1 {
-    max-width: 11ch;
-    font-size: clamp(2.35rem, 11vw, 3.35rem);
+    max-width: 15ch;
+    font-size: clamp(2.05rem, 9.2vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .landing-reference-page .landing-hero-support {
+    margin-top: 1.15rem;
+    font-size: 0.96rem;
+    line-height: 1.5;
   }
 
   .landing-reference-page .landing-hero-actions {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 0.65rem;
+    margin-top: 1.35rem;
   }
 
   .landing-reference-page .landing-hero-actions a {
     width: 100%;
     justify-content: center;
+    min-height: 46px;
+  }
+
+  .landing-reference-page .landing-trust .trust-grid {
+    gap: 0;
   }
 
   .landing-reference-page .landing-trust .trust-grid > li {
+    justify-content: flex-start;
     min-height: auto;
+    padding-block: 0.85rem;
+    gap: 0.65rem;
+  }
+
+  .landing-reference-page .landing-trust .trust-grid > li::before {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-basis: 1.5rem;
+    font-size: 0.72rem;
+  }
+
+  .landing-reference-page .landing-trust .trust-title {
+    text-align: left;
   }
 
   .landing-reference-page .landing-inquiry-section {
-    padding-block: 3.25rem;
+    padding-block: 2.75rem 3.1rem;
+  }
+
+  .landing-reference-page .landing-inquiry {
+    gap: 1.35rem;
+  }
+
+  .landing-reference-page .landing-inquiry-intro h2 {
+    max-width: 14ch;
+    font-size: clamp(2rem, 9vw, 2.5rem);
+  }
+
+  .landing-reference-page .landing-inquiry-intro p {
+    margin-top: 0.8rem;
+  }
+
+  .landing-reference-page .landing-inquiry-call {
+    margin-top: 1rem;
   }
 
   .landing-reference-page .landing-inquiry-form {
     border-radius: 18px;
+  }
+
+  .landing-reference-page .landing-inquiry-form .ct-native {
+    padding: 1rem;
+  }
+
+  .landing-reference-page .landing-inquiry-form .ct-form {
+    gap: 0.85rem;
+  }
+
+  .landing-reference-page .landing-inquiry-form .ct-form-row {
+    gap: 0.85rem;
+  }
+
+  .landing-reference-page .landing-inquiry-form label {
+    margin-bottom: 0.32rem;
+  }
+
+  .landing-reference-page .landing-inquiry-form input,
+  .landing-reference-page .landing-inquiry-form textarea {
+    min-height: 46px;
+  }
+
+  .landing-reference-page .landing-inquiry-form textarea {
+    min-height: 118px;
+  }
+
+  .landing-reference-page .landing-why {
+    padding-block: 3.5rem;
+  }
+
+  .landing-reference-page .landing-why-block {
+    padding-inline-start: 0.9rem;
+    border-inline-start: 2px solid var(--nl-yellow);
+  }
+
+  .landing-reference-page .landing-why-block h2 {
+    max-width: 14ch;
+  }
+
+  .landing-reference-page .landing-tx {
+    padding: 1.15rem;
+  }
+
+  .landing-reference-page .landing-tx-points {
+    margin-top: 0.8rem;
+  }
+
+  .landing-reference-page .landing-tx-points li + li {
+    margin-top: 0.5rem;
+  }
+
+  .landing-reference-page .landing-tx-actions {
+    margin-top: 0.9rem;
+    gap: 0.7rem;
+  }
+
+  .landing-reference-page .landing-psychiatrist {
+    gap: 1.35rem;
+  }
+
+  .landing-reference-page .landing-psychiatrist-portrait {
+    width: 100%;
+    height: 320px;
+    min-height: 0;
+    aspect-ratio: auto;
+    border-radius: 18px;
+  }
+
+  .landing-reference-page .landing-psychiatrist-copy .home-h2 {
+    margin-top: 0;
+  }
+
+  .landing-reference-page .landing-reviews {
+    gap: 0.75rem;
+  }
+
+  .landing-reference-page .landing-reviews blockquote {
+    padding: 1rem;
+    border-radius: 15px;
+  }
+
+  .landing-reference-page .landing-reviews blockquote p {
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .landing-reference-page .landing-reviews blockquote footer {
+    margin-top: 0.65rem;
+  }
+
+  .landing-reference-page .pathway-block {
+    margin-top: 1.75rem;
+  }
+
+  .landing-reference-page .pathway {
+    position: relative;
+    display: block;
+    margin-left: 0.45rem;
+    padding-left: 2.2rem !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.22);
+  }
+
+  .landing-reference-page .pathway > li {
+    padding: 0 0 1.8rem 0;
+  }
+
+  .landing-reference-page .pathway > li:last-child {
+    padding-bottom: 0;
+  }
+
+  .landing-reference-page .pathway > li > p:first-child {
+    position: relative;
+    margin-left: -2.75rem;
+    width: 1.1rem;
+    padding-right: 0;
+    background: var(--nl-navy);
+  }
+
+  .landing-reference-page .pathway > li h3 {
+    margin-top: -1.7rem;
+  }
+
+  .landing-reference-page .pathway > li > p:last-child {
+    margin-top: 0.55rem;
   }
 }
