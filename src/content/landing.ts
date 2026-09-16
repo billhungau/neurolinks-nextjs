@@ -14,8 +14,8 @@ export const LANDING_SUPPORTING_LINES = [
 
 export const LANDING_TRUST = [
   "Psychiatrist-led care",
-  "Personalized treatment options",
   "MSP-covered assessment",
+  "VAC coverage support",
 ] as const;
 
 export const LANDING_TREATMENT_HEADING = "Explore your treatment options";
@@ -39,6 +39,24 @@ export const LANDING_REVIEWS_CTA_LABEL = "Talk to our team";
 
 export const LANDING_CLOSE_TEXT =
   "If you would like to discuss what may be appropriate, our team is here to help.";
+
+export const LANDING_COVERAGE = [
+  {
+    title: "MSP-covered psychiatric assessment",
+    body: "For eligible BC residents, psychiatric assessment is covered by MSP when an appropriate physician referral is received.",
+    icon: "msp",
+  },
+  {
+    title: "Veterans Affairs Canada",
+    body: "For eligible Veterans, TMS treatment may be covered through Veterans Affairs Canada. NeuroLinks can help prepare the clinical information and authorization documentation required for VAC review. Coverage is determined by VAC for each case.",
+    icon: "vac",
+  },
+  {
+    title: "Other treatment coverage",
+    body: "Coverage for TMS or ketamine can vary by insurer, benefit plan, or funding source. Our team can explain what documentation may be needed.",
+    icon: "other",
+  },
+] as const;
 
 /**
  * Card bodies reuse approved TMS and ketamine wording. The bold benefits
