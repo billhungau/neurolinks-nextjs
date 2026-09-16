@@ -236,7 +236,7 @@ export default function LandingPage() {
 
         <section
           id="psychiatrist"
-          className="home-section bg-white"
+          className="home-section landing-psychiatrist-section bg-white"
           aria-labelledby="landing-psychiatrist-heading"
         >
           <div className="nl-wrap">
@@ -290,7 +290,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="home-section bg-white" aria-labelledby="landing-reviews-heading">
+        <section className="home-section landing-reviews-section bg-white" aria-labelledby="landing-reviews-heading">
           <div className="nl-wrap">
             <h2 id="landing-reviews-heading" className="home-h2 text-[var(--nl-navy)]">
               Patient experiences
@@ -313,7 +313,7 @@ export default function LandingPage() {
         </section>
 
         <section
-          className="home-section bg-[var(--nl-navy)] text-white"
+          className="home-section landing-next-section bg-[var(--nl-navy)] text-white"
           aria-labelledby="landing-next-heading"
         >
           <div className="nl-wrap">
@@ -337,7 +337,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="faq" className="home-section bg-[var(--nl-cream)]" aria-labelledby="landing-faq-heading">
+        <section id="faq" className="home-section landing-faq-section bg-[var(--nl-cream)]" aria-labelledby="landing-faq-heading">
           <div className="nl-wrap">
             <h2 id="landing-faq-heading" className="home-h2 text-[var(--nl-navy)]">
               Frequently Asked Questions
