@@ -1,0 +1,160 @@
+.landing-reference-page .landing-hero {
+  min-height: min(680px, 78vh);
+}
+
+.landing-reference-page .landing-hero-copy-wrap {
+  display: flex;
+  align-items: center;
+  min-height: min(680px, 78vh);
+}
+
+.landing-reference-page .landing-hero-copy {
+  max-width: 690px;
+  padding-block: clamp(4.5rem, 9vw, 7rem);
+}
+
+.landing-reference-page .landing-hero-copy h1 {
+  max-width: 12ch;
+  font-size: clamp(2.6rem, 5.2vw, 4.7rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.landing-reference-page .landing-hero-support {
+  max-width: 650px;
+  margin-top: 1.35rem;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.6;
+}
+
+.landing-reference-page .landing-hero-actions {
+  margin-top: 1.8rem;
+}
+
+.landing-reference-page .landing-trust .trust-grid {
+  align-items: stretch;
+}
+
+.landing-reference-page .landing-trust .trust-grid > li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76px;
+}
+
+.landing-reference-page .landing-inquiry-section {
+  background: #fff;
+  padding-block: clamp(4rem, 7vw, 6rem);
+}
+
+.landing-reference-page .landing-inquiry {
+  align-items: start;
+}
+
+.landing-reference-page .landing-inquiry-intro {
+  padding-top: clamp(0.25rem, 1vw, 1rem);
+}
+
+.landing-reference-page .landing-inquiry-intro h2 {
+  max-width: 12ch;
+  font-size: clamp(2.15rem, 4vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+}
+
+.landing-reference-page .landing-inquiry-form {
+  border: 1px solid rgba(25, 48, 69, 0.12);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(22, 42, 60, 0.09);
+}
+
+.landing-reference-page .landing-why {
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.landing-reference-page .landing-why-block {
+  max-width: 860px;
+}
+
+.landing-reference-page .landing-why-block h2 {
+  max-width: 13ch;
+}
+
+.landing-reference-page .landing-tx-grid {
+  gap: clamp(1.25rem, 2.8vw, 2rem);
+}
+
+.landing-reference-page .landing-tx {
+  border-radius: 22px;
+  border: 1px solid rgba(25, 48, 69, 0.1);
+  box-shadow: 0 12px 34px rgba(22, 42, 60, 0.06);
+}
+
+.landing-reference-page .landing-psychiatrist {
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+
+.landing-reference-page .landing-psychiatrist-portrait {
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 55px rgba(22, 42, 60, 0.12);
+}
+
+.landing-reference-page .landing-psychiatrist-copy {
+  max-width: 650px;
+}
+
+.landing-reference-page .landing-reviews {
+  gap: 1rem;
+}
+
+.landing-reference-page .landing-reviews blockquote {
+  border: 1px solid rgba(25, 48, 69, 0.1);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(22, 42, 60, 0.05);
+}
+
+.landing-reference-page .pathway > li {
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .landing-reference-page .landing-hero,
+  .landing-reference-page .landing-hero-copy-wrap {
+    min-height: 620px;
+  }
+
+  .landing-reference-page .landing-hero-copy {
+    padding-block: 4rem 3.5rem;
+  }
+
+  .landing-reference-page .landing-hero-copy h1 {
+    max-width: 11ch;
+    font-size: clamp(2.35rem, 11vw, 3.35rem);
+  }
+
+  .landing-reference-page .landing-hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .landing-reference-page .landing-hero-actions a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .landing-reference-page .landing-trust .trust-grid > li {
+    min-height: auto;
+  }
+
+  .landing-reference-page .landing-inquiry-section {
+    padding-block: 3.25rem;
+  }
+
+  .landing-reference-page .landing-inquiry-form {
+    border-radius: 18px;
+  }
+}
