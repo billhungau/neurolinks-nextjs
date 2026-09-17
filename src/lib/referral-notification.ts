@@ -51,8 +51,29 @@ function displayValue(value: string) {
   return value || "Not provided";
 }
 
-function displayList(values: readonly string[]) {
-  return values.length > 0 ? values.join("; ") : "None selected";
+function displayList(values: readonly string[], emptyValue = "None selected") {
+  return values.length > 0 ? values.join("; ") : emptyValue;
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function htmlValue(value: string) {
+  return escapeHtml(displayValue(value));
+}
+
+function htmlList(values: readonly string[], emptyValue = "None selected") {
+  return escapeHtml(displayList(values, emptyValue));
+}
+
+function referralSubject(fields: ReferralFields) {
+  return `New physician referral — ${patientName(fields)}`;
 }
 
 function referralNotificationText(context: ReferralNotificationContext) {
@@ -78,14 +99,131 @@ function referralNotificationText(context: ReferralNotificationContext) {
     "",
     "TREATMENT CONSIDERATIONS",
     `Treatment options: ${displayList(fields.treatments)}`,
-    `Potential contraindications to TMS: ${displayList(fields.tmsContraindications)}`,
-    `Potential contraindications to ketamine therapy: ${displayList(fields.ketamineContraindications)}`,
-    "",
-    "OTHER INFORMATION",
-    displayValue(fields.otherInformation),
+    `Potential contraindications to TMS: ${displayList(fields.tmsContraindications, "None reported")}`,
+    `Potential contraindications to ketamine therapy: ${displayList(fields.ketamineContraindications, "None reported")}`,
+    ...(fields.otherInformation
+      ? ["", "OTHER INFORMATION", fields.otherInformation]
+      : []),
     "",
     `Jotform submission ID: ${context.jotformSubmissionId}`,
   ].join("\n");
+}
+
+function tableRow(label: string, value: string, isLast = false) {
+  const border = isLast ? "" : "border-bottom:1px solid #e5e7eb;";
+  return `<tr>
+    <td style="width:180px;padding:11px 14px;background:#f6f8fa;${border}font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.45;font-weight:600;color:#344054;vertical-align:top;">${escapeHtml(label)}</td>
+    <td style="padding:11px 14px;${border}font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#1f2937;vertical-align:top;word-break:break-word;">${value}</td>
+  </tr>`;
+}
+
+function sectionTable(title: string, rows: string) {
+  return `<tr>
+    <td style="padding:0 0 22px 0;">
+      <div style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.4;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#163b65;">${escapeHtml(title)}</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        ${rows}
+      </table>
+    </td>
+  </tr>`;
+}
+
+function referralNotificationHtml(context: ReferralNotificationContext) {
+  const { fields } = context;
+  const name = escapeHtml(patientName(fields));
+  const otherInformation = fields.otherInformation.trim();
+
+  const patientRows = [
+    tableRow("Patient name", name),
+    tableRow("PHN", htmlValue(fields.phn)),
+    tableRow("Patient phone", htmlValue(fields.patientPhone), true),
+  ].join("");
+
+  const referrerRows = [
+    tableRow("Referrer name", htmlValue(fields.referrerName)),
+    tableRow("MSP number", htmlValue(fields.mspNumber)),
+    tableRow("Referrer phone", htmlValue(fields.referrerPhone)),
+    tableRow("Fax number", htmlValue(fields.faxNumber), true),
+  ].join("");
+
+  const treatmentRows = [
+    tableRow("Treatment options", htmlList(fields.treatments)),
+    tableRow(
+      "TMS contraindications",
+      htmlList(fields.tmsContraindications, "None reported"),
+    ),
+    tableRow(
+      "Ketamine contraindications",
+      htmlList(fields.ketamineContraindications, "None reported"),
+      true,
+    ),
+  ].join("");
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <style>
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
+    @media only screen and (max-width: 620px) {
+      .email-shell { width: 100% !important; }
+      .email-padding { padding-left: 18px !important; padding-right: 18px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;color:#1f2937;-webkit-text-size-adjust:100%;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:#f4f6f8;border-collapse:collapse;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <table role="presentation" width="680" cellpadding="0" cellspacing="0" border="0" class="email-shell" style="width:680px;max-width:680px;background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;border-collapse:separate;">
+          <tr>
+            <td class="email-padding" style="padding:28px 32px 18px 32px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.4;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#667085;">NeuroLinks</div>
+              <h1 style="margin:5px 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:24px;line-height:1.25;font-weight:700;color:#163b65;">New Physician Referral</h1>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.4;font-weight:600;color:#1f2937;">${name}</div>
+              <div style="margin-top:5px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#667085;">Received through neurolinks.ca</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="email-padding" style="padding:24px 32px 8px 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
+                ${sectionTable("Patient information", patientRows)}
+                ${sectionTable("Referrer information", referrerRows)}
+                <tr>
+                  <td style="padding:0 0 22px 0;">
+                    <div style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.4;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#163b65;">Clinical information</div>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+                      ${tableRow("Diagnosis", htmlList(fields.diagnoses), true)}
+                    </table>
+                    <div style="margin:12px 0 6px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.4;font-weight:600;color:#344054;">Clinical details</div>
+                    <div style="padding:13px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1f2937;white-space:pre-wrap;word-break:break-word;">${htmlValue(fields.clinicalDetails)}</div>
+                  </td>
+                </tr>
+                ${sectionTable("Treatment considerations", treatmentRows)}
+                ${otherInformation
+                  ? `<tr>
+                  <td style="padding:0 0 22px 0;">
+                    <div style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.4;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#163b65;">Other information</div>
+                    <div style="padding:13px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1f2937;white-space:pre-wrap;word-break:break-word;">${escapeHtml(otherInformation)}</div>
+                  </td>
+                </tr>`
+                  : ""}
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="email-padding" style="padding:13px 32px 18px 32px;border-top:1px solid #eef0f2;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;color:#98a2b3;">
+              Jotform submission ID: ${escapeHtml(context.jotformSubmissionId)}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 }
 
 function fallbackAlertText(context: ReferralNotificationContext, failure: ResendFailure) {
@@ -151,8 +289,9 @@ async function sendWithResend(
       body: JSON.stringify({
         from,
         to: [to],
-        subject: `New physician referral - ${patientName(context.fields)}`,
+        subject: referralSubject(context.fields),
         text: referralNotificationText(context),
+        html: referralNotificationHtml(context),
       }),
       cache: "no-store",
     });
@@ -333,7 +472,7 @@ async function sendFallback(
   try {
     await smtpSender({
       to,
-      subject: `New physician referral - ${patientName(context.fields)}`,
+      subject: referralSubject(context.fields),
       text: referralNotificationText(context),
     });
     referral = "sent";
