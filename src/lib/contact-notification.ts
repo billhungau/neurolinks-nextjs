@@ -12,13 +12,105 @@ type SmtpSender = (message: SmtpMessage) => Promise<void>;
 
 const DEFAULT_NOTIFICATION_TO = "contact@neurolinks.ca";
 const DEFAULT_RESEND_FROM = "NeuroLinks Website <notifications@neurolinks.ca>";
-const CONTACT_SUBJECT = "Your message to NeuroLinks";
 const DEFAULT_SMTP_PORT = 465;
 const SMTP_TIMEOUT_MS = 10_000;
 
 function fullName(fields: ContactFields) { return `${fields.firstName} ${fields.lastName}`.trim(); }
-function sourceLabel(source: ContactSource) { if (source === "advertising-landing") return "Advertising landing page"; if (source === "veterans") return "Veterans page"; return "Contact page"; }
-function normalContactText(fields: ContactFields) { return [`Website inquiry from ${fullName(fields)}`, "", `Email: ${fields.email}`, `Phone: ${fields.phone || "Not provided"}`, "", "Message", fields.message].join("\n"); }
+function contactSubject(fields: ContactFields) { return `New website inquiry — ${fullName(fields)}`; }
+function sourceLabel(source: ContactSource) { if (source === "advertising-landing") return "Advertising landing page"; if (source === "veterans") return "Veterans TMS page"; return "Contact page"; }
+function sourcePath(source: ContactSource) { if (source === "advertising-landing") return "/neurolinks-psychiatry-nanaimo-bc/"; if (source === "veterans") return "/veterans-tms-treatment/"; return "/contact/"; }
+function formatPhone(value: string) {
+  if (!value) return "Not provided";
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `1-${digits.slice(1, 4)}-${digits.slice(4, 7)}-${digits.slice(7)}`;
+  return value;
+}
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+function normalContactText(context: NotificationContext) {
+  const { fields, source } = context;
+  return [
+    `New website inquiry from ${fullName(fields)}`,
+    "",
+    `Email: ${fields.email}`,
+    `Phone: ${formatPhone(fields.phone)}`,
+    "",
+    "Message",
+    fields.message,
+    "",
+    `Submitted through neurolinks.ca${sourcePath(source)}`,
+  ].join("\n");
+}
+function contactNotificationHtml(context: NotificationContext) {
+  const { fields, source } = context;
+  const name = escapeHtml(fullName(fields));
+  const email = escapeHtml(fields.email);
+  const phone = escapeHtml(formatPhone(fields.phone));
+  const message = escapeHtml(fields.message).replace(/\n/g, "<br>");
+  const path = sourcePath(source);
+  const pageLabel = escapeHtml(sourceLabel(source));
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="x-apple-disable-message-reformatting">
+  <style>
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f5f7f9;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#f5f7f9;">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:520px;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+          <tr>
+            <td style="padding:24px 26px 20px;border-bottom:1px solid #e8edf2;">
+              <div style="font-size:12px;line-height:18px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#355b7d;">New Website Inquiry</div>
+              <div style="margin-top:5px;font-size:22px;line-height:29px;font-weight:700;color:#172b3f;">${name}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:22px 26px 10px;">
+              <div style="margin:0 0 10px;font-size:13px;line-height:18px;font-weight:700;color:#355b7d;">CONTACT INFORMATION</div>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
+                <tr>
+                  <td width="28%" style="padding:11px 12px;background:#f7f9fb;border-bottom:1px solid #e2e8f0;font-size:13px;line-height:19px;font-weight:700;color:#475569;">Email</td>
+                  <td style="padding:11px 12px;border-bottom:1px solid #e2e8f0;font-size:14px;line-height:20px;color:#1f2937;"><a href="mailto:${email}" style="color:#245f8f;text-decoration:underline;">${email}</a></td>
+                </tr>
+                <tr>
+                  <td width="28%" style="padding:11px 12px;background:#f7f9fb;font-size:13px;line-height:19px;font-weight:700;color:#475569;">Phone</td>
+                  <td style="padding:11px 12px;font-size:14px;line-height:20px;color:#1f2937;text-decoration:none;">${phone}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:14px 26px 24px;">
+              <div style="margin:0 0 10px;font-size:13px;line-height:18px;font-weight:700;color:#355b7d;">MESSAGE</div>
+              <div style="padding:14px 15px;background:#f7f9fb;border:1px solid #e2e8f0;border-radius:6px;font-size:14px;line-height:21px;color:#1f2937;">${message}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:14px 26px 18px;border-top:1px solid #e8edf2;font-size:11px;line-height:17px;color:#7a8794;">
+              Submitted through <span style="color:#5d6b78;">neurolinks.ca${path}</span> · ${pageLabel}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
 function fallbackAlertText(context: NotificationContext, failure: ResendFailure) { return ["The normal NeuroLinks website notification could not be sent through Resend.", "", "A separate clean contact email was attempted through the SMTP fallback so staff can reply directly to the patient.", "The submission itself was already saved successfully in Jotform.", "", "Please check Jotform for the official submission record.", "", `Jotform submission ID: ${context.jotformSubmissionId}`, `Source: ${sourceLabel(context.source)}`, `Resend status: ${failure.status ?? "Unavailable"}`, `Resend code: ${failure.code ?? "Unavailable"}`, `Resend error: ${failure.message}`, `Failure time: ${new Date().toISOString()}`].join("\n"); }
 function safeErrorMessage(value: unknown) { if (value instanceof Error) return value.message.slice(0, 500); if (typeof value === "string") return value.slice(0, 500); return "Unknown error"; }
 function resendFailureFromPayload(status: number, data: unknown): ResendFailure { if (!data || typeof data !== "object") return { status, message: `Resend returned HTTP ${status}` }; const record = data as Record<string, unknown>; return { status, code: typeof record.name === "string" ? record.name : undefined, message: typeof record.message === "string" ? record.message.slice(0, 500) : `Resend returned HTTP ${status}` }; }
@@ -28,7 +120,7 @@ async function sendWithResend(context: NotificationContext, fetcher: typeof fetc
   const from = process.env.RESEND_FROM_EMAIL?.trim() || DEFAULT_RESEND_FROM;
   const to = process.env.CONTACT_NOTIFICATION_EMAIL?.trim() || DEFAULT_NOTIFICATION_TO;
   try {
-    const response = await fetcher("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", "Idempotency-Key": `neurolinks-contact/${context.jotformSubmissionId}` }, body: JSON.stringify({ from, to: [to], reply_to: context.fields.email, subject: CONTACT_SUBJECT, text: normalContactText(context.fields) }), cache: "no-store" });
+    const response = await fetcher("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", "Idempotency-Key": `neurolinks-contact/${context.jotformSubmissionId}` }, body: JSON.stringify({ from, to: [to], reply_to: context.fields.email, subject: contactSubject(context.fields), text: normalContactText(context), html: contactNotificationHtml(context) }), cache: "no-store" });
     let data: unknown = null; try { data = await response.json(); } catch {}
     if (!response.ok) return { ok: false, failure: resendFailureFromPayload(response.status, data) };
     const id = data && typeof data === "object" && typeof (data as Record<string, unknown>).id === "string" ? (data as Record<string, unknown>).id as string : undefined;
@@ -54,7 +146,7 @@ async function sendSmtpFallback(args: SmtpMessage) {
 async function sendFallback(context: NotificationContext, failure: ResendFailure, smtpSender: SmtpSender) {
   if (!smtpConfigured()) return { contact: "not-configured" as const, alert: "not-configured" as const };
   const to = process.env.CONTACT_NOTIFICATION_EMAIL?.trim() || DEFAULT_NOTIFICATION_TO; let contact: "sent" | "failed" = "failed", alert: "sent" | "failed" = "failed";
-  try { await smtpSender({ to, replyTo: context.fields.email, subject: CONTACT_SUBJECT, text: normalContactText(context.fields) }); contact = "sent"; } catch (error) { console.error("Contact SMTP fallback message failed", { jotformSubmissionId: context.jotformSubmissionId, error: safeErrorMessage(error) }); }
+  try { await smtpSender({ to, replyTo: context.fields.email, subject: contactSubject(context.fields), text: normalContactText(context) }); contact = "sent"; } catch (error) { console.error("Contact SMTP fallback message failed", { jotformSubmissionId: context.jotformSubmissionId, error: safeErrorMessage(error) }); }
   try { await smtpSender({ to, subject: `Website notification fallback activated - Jotform ${context.jotformSubmissionId}`, text: fallbackAlertText(context, failure) }); alert = "sent"; } catch (error) { console.error("Contact SMTP fallback alert failed", { jotformSubmissionId: context.jotformSubmissionId, error: safeErrorMessage(error) }); }
   return { contact, alert };
 }
