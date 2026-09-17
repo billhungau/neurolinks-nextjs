@@ -72,7 +72,8 @@ test("Resend referral notification includes all referral fields", async () => {
       const headers = new Headers(init.headers);
       assert.equal(headers.get("Idempotency-Key"), "neurolinks-referral/ref_123");
       const body = JSON.parse(String(init.body)) as Record<string, unknown>;
-      assert.equal(body.subject, "New physician referral - Test Patient");
+      assert.equal(body.subject, "New physician referral — Test Patient");
+
       const text = String(body.text);
       assert.equal(text.includes("Patient name: Test Patient"), true);
       assert.equal(text.includes("PHN: 0000000000"), true);
@@ -91,6 +92,20 @@ test("Resend referral notification includes all referral fields", async () => {
       );
       assert.equal(text.includes("other-information-placeholder"), true);
       assert.equal(text.includes("Jotform submission ID: ref_123"), true);
+
+      const html = String(body.html);
+      assert.equal(html.includes("New Physician Referral"), true);
+      assert.equal(html.includes("Patient information"), true);
+      assert.equal(html.includes("Referrer information"), true);
+      assert.equal(html.includes("Clinical information"), true);
+      assert.equal(html.includes("Treatment considerations"), true);
+      assert.equal(html.includes("Test Patient"), true);
+      assert.equal(html.includes("000-000-0000"), true);
+      assert.equal(html.includes("clinical-detail-placeholder"), true);
+      assert.equal(html.includes("other-information-placeholder"), true);
+      assert.equal(html.includes("tel:"), false);
+      assert.equal(html.includes('name="format-detection"'), true);
+
       return new Response(JSON.stringify({ id: "email_123" }), {
         status: 200,
         headers: { "content-type": "application/json" },
@@ -127,7 +142,7 @@ test("Resend failure sends complete SMTP referral notification and separate tech
   assert.equal(result.fallbackReferral, "sent");
   assert.equal(result.fallbackAlert, "sent");
   assert.equal(smtpMessages.length, 2);
-  assert.equal(smtpMessages[0].subject, "New physician referral - Test Patient");
+  assert.equal(smtpMessages[0].subject, "New physician referral — Test Patient");
   assert.equal(smtpMessages[0].text.includes("Patient name: Test Patient"), true);
   assert.equal(smtpMessages[0].text.includes("PHN: 0000000000"), true);
   assert.equal(smtpMessages[0].text.includes("clinical-detail-placeholder"), true);
