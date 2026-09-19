@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteChrome } from "@/components/SiteChrome";
@@ -11,7 +10,6 @@ import {
 } from "@/components/insights/ArticleBody";
 import { ArticleToc } from "@/components/insights/ArticleToc";
 import { AuthorshipPanel } from "@/components/insights/AuthorshipPanel";
-import { InsightsCardImage } from "@/components/insights/InsightsCardImage";
 import { JsonLd, PreviewBanner } from "@/components/insights/JsonLd";
 import { ReferencesList } from "@/components/insights/ReferencesList";
 import { RelatedInsights } from "@/components/insights/RelatedInsights";
@@ -25,7 +23,6 @@ import {
 } from "@/lib/insights";
 import { automaticArticleCta } from "@/lib/insights-editorial";
 import { articleJsonLd, articleMetadataRecord, breadcrumbJsonLd } from "@/lib/insights-seo";
-import { IMG_SIZES } from "@/lib/image-sizes";
 import {
   canShowArticle,
   getArticleBySlug,
@@ -66,7 +63,6 @@ export default async function InsightsArticlePage({ params }: Props) {
   const reviewed = formatInsightsDate(article.lastReviewedAt);
   const headings = extractHeadings(article.body);
   const ctaHref = article.ctaHref || defaultCtaHref(article.topics, article.category?.slug);
-  const hero = article.featuredImage;
   const related = await getRelatedArticles(article);
   const bodyHasCta = bodyContainsCta(article.body);
   const ctaKind = automaticArticleCta({
@@ -119,24 +115,6 @@ export default async function InsightsArticlePage({ params }: Props) {
             </p>
           </div>
         </div>
-
-        {hero ? (
-          <figure className="insights-article-hero">
-            <Image
-              src={hero.url}
-              alt={hero.alt}
-              width={hero.width || 1400}
-              height={hero.height || 900}
-              sizes={IMG_SIZES.insightsHero}
-              priority
-            />
-            {hero.caption ? <figcaption>{hero.caption}</figcaption> : null}
-          </figure>
-        ) : (
-          <div className="insights-article-hero insights-article-hero-graphic">
-            <InsightsCardImage article={article} featured />
-          </div>
-        )}
 
         {article.keyPoints?.length ? (
           <aside className="insights-keypoints" aria-labelledby="insights-keypoints-heading">
