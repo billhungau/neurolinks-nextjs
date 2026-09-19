@@ -14,6 +14,16 @@ export function EvidenceLink({
   href: string;
   children: React.ReactNode;
 }) {
+  const internal = href.startsWith("/");
+
+  if (internal) {
+    return (
+      <a className="evidence-link" href={href}>
+        {children}
+      </a>
+    );
+  }
+
   return (
     <a className="evidence-link" href={href} rel="noopener noreferrer" target="_blank">
       {children}
