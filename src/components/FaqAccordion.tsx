@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import { FaqAnswerText } from "@/components/FaqAnswer";
 import type { FaqItem } from "@/content/faqs";
+import { enhanceTmsFaqs } from "@/content/tms-faq-enhancements";
 
 export function FaqAccordion({
   items,
@@ -14,11 +15,12 @@ export function FaqAccordion({
   const base = useId();
   const [open, setOpen] = useState<number | null>(null);
   const editorial = variant === "editorial";
+  const displayItems = enhanceTmsFaqs(items);
 
   if (editorial) {
     return (
       <div className="tms-faq">
-        {items.map((item) => (
+        {displayItems.map((item) => (
           <EditorialFaqItem key={item.q} item={item} />
         ))}
       </div>
@@ -27,7 +29,7 @@ export function FaqAccordion({
 
   return (
     <div className="divide-y divide-slate-200 border-y border-slate-200">
-      {items.map((item, i) => {
+      {displayItems.map((item, i) => {
         const panelId = `${base}-panel-${i}`;
         const buttonId = `${base}-btn-${i}`;
         const expanded = open === i;
@@ -67,10 +69,7 @@ function EditorialFaqItem({ item }: { item: FaqItem }) {
   const panelId = useId();
 
   return (
-    <details
-      className="tms-faq-item"
-      onToggle={(event) => setOpen(event.currentTarget.open)}
-    >
+    <details className="tms-faq-item" onToggle={(event) => setOpen(event.currentTarget.open)}>
       <summary className="tms-faq-question" aria-expanded={open} aria-controls={panelId}>
         <h3>{item.q}</h3>
         <span className="tms-faq-mark" aria-hidden="true" />
