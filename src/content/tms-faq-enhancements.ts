@@ -16,11 +16,10 @@ const RELATED_INSIGHTS: Record<string, { title: string; href: string }> = {
   },
 };
 
-const KETAMINE_RELATED_INSIGHTS: Record<string, { title: string; href: string }> = {
-  "How should I choose among ketamine and TMS treatments?": {
-    title: "TMS vs Ketamine for Depression: Which Treatment Is Right for You?",
-    href: "/insights/tms-vs-ketamine-for-depression/",
-  },
+const KETAMINE_COMPARISON_QUESTION = "How should I choose among ketamine and TMS treatments?";
+const KETAMINE_COMPARISON_INSIGHT = {
+  title: "TMS vs Ketamine for Depression: Which Treatment Is Right for You?",
+  href: "/insights/tms-vs-ketamine-for-depression/",
 };
 
 const PTSD_FAQ: FaqItem = {
@@ -67,7 +66,7 @@ function isTmsFaqSet(items: FaqItem[]) {
 
 function isKetamineFaqSet(items: FaqItem[]) {
   return items.some((item) => item.q === "How effective is ketamine treatment?") &&
-    items.some((item) => item.q === "How should I choose among ketamine and TMS treatments?");
+    items.some((item) => item.q === KETAMINE_COMPARISON_QUESTION);
 }
 
 function appendRelatedInsight(
@@ -94,9 +93,50 @@ function appendRelatedInsight(
   return { ...item, a: [...item.a, relatedBlock] };
 }
 
+function enhanceKetamineComparison(item: FaqItem): FaqItem {
+  if (item.q !== KETAMINE_COMPARISON_QUESTION) return item;
+
+  return {
+    ...item,
+    a: [
+      {
+        type: "p",
+        content: [
+          {
+            type: "text",
+            value:
+              "Both TMS and ketamine are evidence-based options for treatment-resistant depression, and neither is universally better. Ketamine can work more quickly, while TMS is non-invasive and usually allows patients to return to normal activities immediately after treatment.",
+          },
+        ],
+      },
+      {
+        type: "p",
+        content: [
+          {
+            type: "text",
+            value:
+              "The better choice depends on how quickly improvement is needed, medical history, side-effect preferences, treatment schedule and previous treatment response. People who do not respond adequately to one treatment may still respond to the other.",
+          },
+        ],
+      },
+      {
+        type: "p",
+        content: [
+          { type: "strong", value: "Related Insight: " },
+          {
+            type: "link",
+            value: `${KETAMINE_COMPARISON_INSIGHT.title} →`,
+            href: KETAMINE_COMPARISON_INSIGHT.href,
+          },
+        ],
+      },
+    ],
+  };
+}
+
 export function enhanceTmsFaqs(items: FaqItem[]): FaqItem[] {
   if (isKetamineFaqSet(items)) {
-    return items.map((item) => appendRelatedInsight(item, KETAMINE_RELATED_INSIGHTS));
+    return items.map(enhanceKetamineComparison);
   }
 
   if (!isTmsFaqSet(items)) return items;
