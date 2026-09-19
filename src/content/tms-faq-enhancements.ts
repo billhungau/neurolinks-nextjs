@@ -16,6 +16,13 @@ const RELATED_INSIGHTS: Record<string, { title: string; href: string }> = {
   },
 };
 
+const KETAMINE_RELATED_INSIGHTS: Record<string, { title: string; href: string }> = {
+  "How should I choose among ketamine and TMS treatments?": {
+    title: "TMS vs Ketamine for Depression: Which Treatment Is Right for You?",
+    href: "/insights/tms-vs-ketamine-for-depression/",
+  },
+};
+
 const PTSD_FAQ: FaqItem = {
   q: "Can TMS help with PTSD?",
   a: [
@@ -58,8 +65,16 @@ function isTmsFaqSet(items: FaqItem[]) {
     items.some((item) => item.q === "Is the effect of TMS durable?");
 }
 
-function appendRelatedInsight(item: FaqItem): FaqItem {
-  const related = RELATED_INSIGHTS[item.q];
+function isKetamineFaqSet(items: FaqItem[]) {
+  return items.some((item) => item.q === "How effective is ketamine treatment?") &&
+    items.some((item) => item.q === "How should I choose among ketamine and TMS treatments?");
+}
+
+function appendRelatedInsight(
+  item: FaqItem,
+  relatedInsights: Record<string, { title: string; href: string }>,
+): FaqItem {
+  const related = relatedInsights[item.q];
   if (!related || faqEvidenceLinks(item.a).some((link) => link.href === related.href)) {
     return item;
   }
@@ -80,9 +95,13 @@ function appendRelatedInsight(item: FaqItem): FaqItem {
 }
 
 export function enhanceTmsFaqs(items: FaqItem[]): FaqItem[] {
+  if (isKetamineFaqSet(items)) {
+    return items.map((item) => appendRelatedInsight(item, KETAMINE_RELATED_INSIGHTS));
+  }
+
   if (!isTmsFaqSet(items)) return items;
 
-  const enhanced = items.map(appendRelatedInsight);
+  const enhanced = items.map((item) => appendRelatedInsight(item, RELATED_INSIGHTS));
   if (enhanced.some((item) => item.q === PTSD_FAQ.q)) return enhanced;
 
   const ocdIndex = enhanced.findIndex(
