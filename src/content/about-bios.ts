@@ -1,9 +1,8 @@
-/** Exact About Us biography strings. Do not edit wording. */
+/** About Us story and team biographies. */
 
 export const STORY_PARAS = [
-  "NeuroLinks was founded by our psychiatrist Dr. Au in Nanaimo, located in Central Vancouver Island in British Columbia.",
-  "NeuroLinks aims to improve mental wellbeing and quality of life for patients struggling with mental disorders. We understand that medication is not the only answer for many patients. We believe in patient autonomy and tailoring your healthcare to your needs, and offer transcranial magnetic stimulation (TMS) as an aid in enhancing your recovery or as an alternative to unsuccessful treatments.",
-  "NeuroLinks is extending its scope beyond TMS by introducing ketamine therapy and plans to introduce even more innovative treatments to support our patients.",
+  "NeuroLinks was founded in Nanaimo by psychiatrist Dr. Chi Hung Au to expand access to treatment for people whose mental health conditions have not improved enough with conventional care.",
+  "We believe in patient autonomy and tailor assessment and treatment planning to each person's needs. Our clinic provides psychiatrist-led TMS and ketamine treatment for appropriately selected patients.",
 ] as const;
 
 export const DR_AU_PARAS = [
@@ -16,7 +15,7 @@ export const DR_AU_PARAS = [
 ] as const;
 
 export const JULIE_BIO =
-  "Julie has recently graduated with a Bachelor of Science in biology with a specialty in Microbiology. She is passionate about helping people improve their well-being using her education and life experiences. This is why she was thrilled to join Dr. Au’s team to assist with TMS treatment. Over the past two years, she has worked as a health and wellness program leader at Vancouver Island University. Julie loves to spend time with people, biking, climbing, playing guitar and singing.";
+  "Julie holds a Bachelor of Science in biology with a specialty in Microbiology. She is passionate about helping people improve their well-being using her education and life experiences. She joined Dr. Au’s team to assist with TMS treatment and has worked as a health and wellness program leader at Vancouver Island University. Julie loves to spend time with people, biking, climbing, playing guitar and singing.";
 
 export const HANNAH_BIO =
   "Hannah completed her Bachelor of Arts Majoring in Psychology and her Addiction Studies Certificate in 2022. She is passionate about pursuing a career in Clinical Counselling and aims to create an environment for patients that is safe, authentic, non-judgmental, and empathetic. In her free time, Hannah actively practices yoga and meditation, enjoys spending time in nature, and is a music enthusiast.";

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { SiteChrome } from "@/components/SiteChrome";
 import { ButtonLink } from "@/components/ButtonLink";
 import { Eyebrow } from "@/components/Eyebrow";
@@ -18,7 +19,7 @@ import { PAGE_OG_IMAGES, pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "Dr. Chi Hung Au & Our Team | NeuroLinks Nanaimo",
   description:
-    "NeuroLinks in Nanaimo offers expert psychiatric care, TMS therapy, and ketamine treatment for depression and OCD. Book a consultation today.",
+    "Meet Dr. Chi Hung Au and the NeuroLinks team in Nanaimo. Learn about our psychiatrist-led TMS and ketamine treatment and individualized approach to care.",
   path: "/psychiatrist-tms-nanaimo/",
   image: PAGE_OG_IMAGES.about,
 });
@@ -137,6 +138,10 @@ export default function AboutUsPage() {
                 {STORY_PARAS.map((para) => (
                   <p key={para}>{para}</p>
                 ))}
+                <p>
+                  Learn more about our <Link href="/about-tms-treatment-on-psychiatric-illness/">TMS treatment</Link> and{" "}
+                  <Link href="/ketamine-treatment-resistant-depression-nanaimo/">ketamine treatment</Link>.
+                </p>
               </div>
             </div>
             <ol className="about-principles">

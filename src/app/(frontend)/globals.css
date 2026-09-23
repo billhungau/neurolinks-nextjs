@@ -4159,6 +4159,12 @@ h3,
   margin-top: 1rem;
 }
 
+.about-story-copy a {
+  color: var(--nl-blue);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 .about-principles {
   margin: 0;
   padding: 0;
@@ -6209,5 +6215,4 @@ html:has(.landing-header) {
   padding: 0 1.15rem;
   box-shadow: none;
 }
-
 
