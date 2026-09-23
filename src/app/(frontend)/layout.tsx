@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Source_Serif_4 } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import type { ReactNode } from "react";
 import { AnchorOffset } from "@/components/AnchorOffset";
@@ -15,23 +15,23 @@ import {
 } from "@/lib/site";
 import "./globals.css";
 
-const display = Source_Serif_4({
+const display = localFont({
+  src: "./fonts/source-serif-4-latin.woff2",
   variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: "600 700",
   style: "normal",
   display: "swap",
-  adjustFontFallback: true,
+  adjustFontFallback: "Times New Roman",
   preload: true,
 });
 
-const body = Inter({
+const body = localFont({
+  src: "./fonts/inter-latin.woff2",
   variable: "--font-body",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: "400 700",
   style: "normal",
   display: "swap",
-  adjustFontFallback: true,
+  adjustFontFallback: "Arial",
   preload: true,
 });
 
