@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getClinicianSession } from "@/lib/clinical/auth";
+import Link from "next/link";
 import { SendQuestionnaireForm } from "./SendQuestionnaireForm";
 
 export const dynamic = "force-dynamic";
@@ -17,15 +18,20 @@ export default async function ClinicianDashboardPage() {
             <h1 style={{ margin: 0, fontSize: "32px" }}>Clinical questionnaires</h1>
             <p style={{ margin: "8px 0 0", color: "#4b5563" }}>{session.email ?? "Authenticated clinician"}</p>
           </div>
-          <form action="/form/api/auth/logout/" method="post">
-            <button type="submit" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", cursor: "pointer" }}>Sign out</button>
-          </form>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <Link href="/form/dashboard/import/" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none" }}>
+              Import historical BDI-II
+            </Link>
+            <form action="/form/api/auth/logout/" method="post">
+              <button type="submit" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", cursor: "pointer" }}>Sign out</button>
+            </form>
+          </div>
         </header>
 
         <section style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: "16px", padding: "28px", boxShadow: "0 10px 30px rgba(17,24,39,.05)" }}>
           <h2 style={{ marginTop: 0 }}>Send questionnaire</h2>
           <p style={{ color: "#4b5563", lineHeight: 1.55 }}>
-            Enter the vcita client UUID. The UUID is pseudonymized before anything is stored in the clinical database.
+            Find the patient in vcita. Only a pseudonymized identifier is stored in the clinical questionnaire database.
           </p>
           <SendQuestionnaireForm />
         </section>
