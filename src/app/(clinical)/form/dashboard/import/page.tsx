@@ -15,9 +15,9 @@ export default async function HistoricalBdiImportPage() {
         <header style={{ marginBottom: "24px" }}>
           <Link href="/form/dashboard/" style={{ color: "#374151" }}>← Back to questionnaire dashboard</Link>
           <p style={{ margin: "18px 0 6px", fontSize: "14px", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em" }}>NeuroLinks</p>
-          <h1 style={{ margin: 0, fontSize: "32px" }}>Historical BDI-II import</h1>
+          <h1 style={{ margin: 0, fontSize: "32px" }}>Historical questionnaire import</h1>
           <p style={{ color: "#4b5563", lineHeight: 1.55, maxWidth: "760px" }}>
-            Reconcile historical Jotform BDI-II submissions with vcita patients by normalized patient name before any migration to the clinical database.
+            Reconcile historical Jotform questionnaire submissions with vcita patients using the same normalized-name matching rules before migration to the clinical database.
           </p>
         </header>
 
