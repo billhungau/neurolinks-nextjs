@@ -112,6 +112,27 @@ export function historicalImportTokenHash(submissionId: string) {
     .digest("hex");
 }
 
+export async function fetchBdiSubmissionById(submissionId: string): Promise<JotformSubmission | null> {
+  const id = submissionId.trim();
+  if (!/^\d+$/.test(id)) return null;
+
+  const url = new URL(`https://api.jotform.com/submission/${id}`);
+  url.searchParams.set("apiKey", jotformApiKey());
+
+  const response = await fetch(url, { cache: "no-store" });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`[historical-bdii] Jotform HTTP ${response.status}`);
+
+  const payload = (await response.json()) as {
+    responseCode?: number;
+    content?: JotformSubmission;
+  };
+  if (payload.responseCode !== 200 || !payload.content) {
+    throw new Error("[historical-bdii] Invalid Jotform submission response.");
+  }
+  return payload.content;
+}
+
 export async function fetchAllBdiSubmissions(): Promise<JotformSubmission[]> {
   const limit = 100;
   const all: JotformSubmission[] = [];
