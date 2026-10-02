@@ -9,6 +9,7 @@ type RequestBody = {
   vcitaUuid?: string;
   questionnaireCode?: string;
   expiresInHours?: number;
+  noExpiry?: boolean;
   allowDuplicateActive?: boolean;
 };
 
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
   const vcitaUuid = String(body.vcitaUuid ?? "").trim();
   const questionnaireCode = String(body.questionnaireCode ?? "bdii").trim().toLowerCase();
   const expiresInHours = Number(body.expiresInHours ?? 72);
+  const noExpiry = Boolean(body.noExpiry);
 
   if (!vcitaUuid || vcitaUuid.length > 200) {
     return Response.json({ ok: false, error: "A valid vcita client UUID is required." }, { status: 400 });
@@ -48,6 +50,7 @@ export async function POST(request: Request) {
       vcitaUuid,
       questionnaireCode,
       expiresInHours,
+      noExpiry,
       allowDuplicateActive: Boolean(body.allowDuplicateActive),
     });
 
@@ -62,6 +65,7 @@ export async function POST(request: Request) {
           metadata: {
             questionnaire_code: questionnaireCode,
             clinician_user_id: clinician.id,
+            no_expiry: invitation.noExpiry,
           },
         }),
       });
@@ -80,7 +84,7 @@ export async function POST(request: Request) {
     const url = new URL(invitation.path, request.url).toString();
 
     return Response.json(
-      { ok: true, url, expiresAt: invitation.expiresAt },
+      { ok: true, url, expiresAt: invitation.expiresAt, noExpiry: invitation.noExpiry },
       { status: 201, headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
