@@ -22,6 +22,9 @@ export default async function ClinicianDashboardPage() {
             <Link href="/form/dashboard/patients/" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none", fontWeight: 700 }}>
               Patient results
             </Link>
+            <Link href="/form/dashboard/jotform-sync/" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none" }}>
+              Jotform sync
+            </Link>
             <Link href="/form/dashboard/import/" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none" }}>
               Historical migration
             </Link>
