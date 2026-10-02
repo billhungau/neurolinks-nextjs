@@ -216,7 +216,7 @@ export function historicalQuestionnaireTotal(code: HistoricalImportedCode, submi
   return Number.isFinite(value) ? value : null;
 }
 
-async function buildBdiMappingByHistoricalName(
+export async function buildBdiMappingByHistoricalName(
   clients: VcitaClientSummary[],
 ): Promise<Map<string, VcitaClientSummary>> {
   const bdiSubmissions = await fetchAllBdiSubmissions();
