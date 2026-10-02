@@ -137,6 +137,9 @@ export async function syncJotformSubmission(input: {
 
   const submission = await fetchSubmission(code, input.submissionId);
   if (!submission) return { status: "error" as const, reason: "submission_not_found" };
+  if (submission.form_id && String(submission.form_id) !== input.formId) {
+    return { status: "error" as const, reason: "form_submission_mismatch" };
+  }
 
   let client: VcitaClientSummary | null = null;
   let matchMode: "patient_link_token" | "historical_mapping" | "exact_name" | "manual" | null = null;
