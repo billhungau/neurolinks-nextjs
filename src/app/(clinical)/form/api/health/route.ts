@@ -34,11 +34,15 @@ export async function GET() {
         },
       },
     );
-  } catch {
+  } catch (error) {
+    const diagnostic =
+      error instanceof Error ? error.message : "[clinical-health] Unknown error.";
+
     return Response.json(
       {
         ok: false,
         database: "unreachable",
+        diagnostic,
       },
       {
         status: 503,
