@@ -36,12 +36,16 @@ const nextConfig: NextConfig = {
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       }),
     );
+    const clinicalHeaders = ["/form", "/form/:path*"].map((source) => ({
+      source,
+      headers: [{ key: "X-Robots-Tag", value: CLOSED_ROBOTS_HEADER }],
+    }));
 
     if (isSearchIndexable()) {
       // Production HTML is indexable. Host-based noindex for vercel.app is
       // applied at request time in src/proxy.ts so the production alias cannot
       // inherit public indexing before neurolinks.ca DNS cutover.
-      return [...adsHeaders, ...cmsHeaders];
+      return [...adsHeaders, ...cmsHeaders, ...clinicalHeaders];
     }
 
     return [
