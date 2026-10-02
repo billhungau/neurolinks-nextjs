@@ -1,7 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 import { clinicalSupabaseRequest } from "./supabase";
 import { subjectKeyFromVcitaUuid } from "./pseudonym";
-import { BDI2_CODE, ensureBdi2Registry } from "./questionnaires/bdii";
+import { ensureBdi2Registry } from "./questionnaires/bdii";
+import { BDI2_CODE } from "./questionnaires/bdii-definition";
 
 const TOKEN_BYTES = 32;
 const DEFAULT_EXPIRY_HOURS = 72;
