@@ -92,7 +92,7 @@ export async function getVcitaClient(clientId: string): Promise<VcitaClientSumma
   }
 }
 
-async function directSearch(searchBy: "email" | "phone" | "uid", term: string) {
+async function directSearch(searchBy: "email" | "phone", term: string) {
   const data = await vcitaRequest<unknown>(
     `clients?search_term=${encodeURIComponent(term)}&search_by=${searchBy}&per_page=25&page=1`,
   );
@@ -132,11 +132,6 @@ export async function searchVcitaClients(term: string): Promise<VcitaClientSumma
 
   const digits = q.replace(/\D/g, "");
   if (digits.length >= 7) return directSearch("phone", q);
-
-  if (!q.includes(" ") && /^[a-z0-9_-]{8,64}$/i.test(q)) {
-    const byUid = await directSearch("uid", q);
-    if (byUid.length > 0) return byUid;
-  }
 
   return nameSearch(q);
 }
