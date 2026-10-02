@@ -7,9 +7,16 @@ import {
   type ImportedQuestionnaireCode,
   type ImportedQuestionnaireSchema,
 } from "../questionnaires/jotform-import";
+import { subjectKeyFromVcitaUuid } from "../pseudonym";
 import { clinicalSupabaseRequest } from "../supabase";
 import { listAllVcitaClients, type VcitaClientSummary } from "../vcita";
-import { answerText, findAnswer, normalizePatientName } from "./historical-bdii";
+import {
+  answerText,
+  fetchAllBdiSubmissions,
+  findAnswer,
+  historicalImportTokenHash,
+  normalizePatientName,
+} from "./historical-bdii";
 
 type JotformAnswer = {
   name?: string;
@@ -40,6 +47,7 @@ export type HistoricalPreviewRow = {
   totalScore: number | null;
   alreadyImported: boolean;
   status: "unique_exact" | "ambiguous" | "no_match";
+  matchBasis: "bdii_mapping" | "exact_name" | null;
   matches: Array<{
     id: string;
     firstName: string;
@@ -208,6 +216,70 @@ function historicalTotal(code: HistoricalImportedCode, submission: HistoricalSub
   return Number.isFinite(value) ? value : null;
 }
 
+async function buildBdiMappingByHistoricalName(
+  clients: VcitaClientSummary[],
+): Promise<Map<string, VcitaClientSummary>> {
+  const bdiSubmissions = await fetchAllBdiSubmissions();
+  const ids = bdiSubmissions
+    .map((submission) => String(submission.id ?? ""))
+    .filter(Boolean);
+
+  const inviteRows: Array<{ token_hash: string; subject_key: string }> = [];
+  for (let i = 0; i < ids.length; i += 40) {
+    const chunk = ids.slice(i, i + 40);
+    const hashes = chunk.map(historicalImportTokenHash);
+    const quoted = hashes.map((hash) => `"${hash}"`).join(",");
+    const rows = await clinicalSupabaseRequest<
+      Array<{ token_hash: string; subject_key: string }>
+    >(
+      `questionnaire_invitations?select=token_hash,subject_key&token_hash=in.(${encodeURIComponent(quoted)})`,
+      { method: "GET" },
+    );
+    inviteRows.push(...rows);
+  }
+
+  const subjectToClient = new Map<string, VcitaClientSummary>();
+  for (const client of clients) {
+    subjectToClient.set(subjectKeyFromVcitaUuid(client.id), client);
+  }
+
+  const hashToSubject = new Map(
+    inviteRows.map((row) => [row.token_hash, row.subject_key]),
+  );
+
+  const candidates = new Map<string, Set<string>>();
+  for (const submission of bdiSubmissions) {
+    const submissionId = String(submission.id ?? "");
+    if (!submissionId) continue;
+
+    const subjectKey = hashToSubject.get(historicalImportTokenHash(submissionId));
+    if (!subjectKey) continue;
+
+    const client = subjectToClient.get(subjectKey);
+    if (!client) continue;
+
+    const historicalName = answerText(
+      findAnswer(submission.answers ?? {}, ["Full Name", "Name"]),
+    );
+    const normalized = normalizePatientName(historicalName);
+    if (!normalized) continue;
+
+    const existing = candidates.get(normalized) ?? new Set<string>();
+    existing.add(client.id);
+    candidates.set(normalized, existing);
+  }
+
+  const result = new Map<string, VcitaClientSummary>();
+  for (const [name, idsForName] of candidates) {
+    if (idsForName.size !== 1) continue;
+    const clientId = [...idsForName][0];
+    const client = clients.find((candidate) => candidate.id === clientId);
+    if (client) result.set(name, client);
+  }
+
+  return result;
+}
+
 async function importedIds(code: HistoricalImportedCode, submissions: HistoricalSubmission[]) {
   const result = new Set<string>();
   const ids = submissions.map((submission) => String(submission.id ?? "")).filter(Boolean);
@@ -234,7 +306,10 @@ export async function buildHistoricalQuestionnairePreview(code: HistoricalImport
     fetchAllSubmissions(code),
     listAllVcitaClients({ maxPages: 50 }),
   ]);
-  const imported = await importedIds(code, submissions);
+  const [imported, bdiMapping] = await Promise.all([
+    importedIds(code, submissions),
+    buildBdiMappingByHistoricalName(clients),
+  ]);
 
   const byName = new Map<string, VcitaClientSummary[]>();
   for (const client of clients) {
@@ -248,7 +323,9 @@ export async function buildHistoricalQuestionnairePreview(code: HistoricalImport
   const rows: HistoricalPreviewRow[] = submissions.map((submission) => {
     const sourceName = answerText(findAnswer(submission.answers ?? {}, ["Full Name", "Name"]));
     const normalizedName = normalizePatientName(sourceName);
-    const matches = normalizedName ? byName.get(normalizedName) ?? [] : [];
+    const inherited = normalizedName ? bdiMapping.get(normalizedName) ?? null : null;
+    const exactMatches = normalizedName ? byName.get(normalizedName) ?? [] : [];
+    const matches = inherited ? [inherited] : exactMatches;
     const submissionId = String(submission.id ?? "");
 
     return {
@@ -264,6 +341,7 @@ export async function buildHistoricalQuestionnairePreview(code: HistoricalImport
           : matches.length > 1
             ? "ambiguous"
             : "no_match",
+      matchBasis: inherited ? "bdii_mapping" : matches.length === 1 ? "exact_name" : null,
       matches: matches.map((client) => ({
         id: client.id,
         firstName: client.firstName,
@@ -311,7 +389,7 @@ export async function importHistoricalQuestionnaireRecord(input: {
   code: HistoricalImportedCode;
   submissionId: string;
   vcitaUuid: string;
-  matchMode: "exact_name" | "manual";
+  matchMode: "exact_name" | "bdii_mapping" | "manual";
   clinicianId: string;
 }) {
   const { code, submissionId, vcitaUuid, matchMode, clinicianId } = input;
