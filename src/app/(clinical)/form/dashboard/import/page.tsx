@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getClinicianSession } from "@/lib/clinical/auth";
-import { HistoricalBdiImportPortal } from "./HistoricalBdiImportPortal";
+import { HistoricalQuestionnaireImportPortal } from "./HistoricalBdiImportPortal";
 
 export const dynamic = "force-dynamic";
 
@@ -21,16 +21,16 @@ export default async function HistoricalBdiImportPage() {
           </p>
           <div style={{ marginTop: "14px" }}>
             <Link
-              href="/form/dashboard/import/verify-bdii/"
+              href="/form/dashboard/import/verify/"
               style={{ display: "inline-block", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none", fontWeight: 700 }}
             >
-              Verify BDI-II migration
+              Verify questionnaire migrations
             </Link>
           </div>
         </header>
 
         <section style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(17,24,39,.05)" }}>
-          <HistoricalBdiImportPortal />
+          <HistoricalQuestionnaireImportPortal />
         </section>
       </div>
     </main>
