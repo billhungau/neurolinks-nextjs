@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 type ImportRecord = {
   submissionId?: string;
   vcitaUuid?: string;
-  matchMode?: "exact_name" | "manual";
+  matchMode?: "exact_name" | "bdii_mapping" | "manual";
 };
 
 type Body = {
@@ -55,7 +55,12 @@ export async function POST(request: Request) {
   for (const raw of records) {
     const submissionId = String(raw.submissionId ?? "").trim();
     const vcitaUuid = String(raw.vcitaUuid ?? "").trim();
-    const matchMode = raw.matchMode === "manual" ? "manual" : "exact_name";
+    const matchMode =
+      raw.matchMode === "manual"
+        ? "manual"
+        : raw.matchMode === "bdii_mapping"
+          ? "bdii_mapping"
+          : "exact_name";
 
     if (!/^\d+$/.test(submissionId) || !vcitaUuid || vcitaUuid.length > 200) {
       results.push({ submissionId, status: "error", error: "Invalid import record." });
