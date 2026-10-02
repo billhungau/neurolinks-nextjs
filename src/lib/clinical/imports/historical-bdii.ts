@@ -63,14 +63,23 @@ export function answerText(answer: JotformAnswer | undefined): string {
   return String(answer.prettyFormat ?? "").trim();
 }
 
+function normalizeFieldLabel(value: string): string {
+  return value
+    .normalize("NFKC")
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLocaleLowerCase();
+}
+
 export function findAnswer(
   answers: Record<string, JotformAnswer>,
   labels: string[],
 ): JotformAnswer | undefined {
-  const targets = labels.map((label) => label.trim().toLowerCase());
+  const targets = labels.map(normalizeFieldLabel);
   return Object.values(answers).find((answer) => {
-    const text = String(answer.text ?? "").trim().toLowerCase();
-    const name = String(answer.name ?? "").trim().toLowerCase();
+    const text = normalizeFieldLabel(String(answer.text ?? ""));
+    const name = normalizeFieldLabel(String(answer.name ?? ""));
     return targets.includes(text) || targets.includes(name);
   });
 }
