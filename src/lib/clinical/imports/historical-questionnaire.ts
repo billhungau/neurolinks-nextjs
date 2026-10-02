@@ -67,13 +67,13 @@ function vcitaFullName(client: VcitaClientSummary) {
   return [client.firstName, client.lastName].filter(Boolean).join(" ").trim();
 }
 
-function tokenHash(code: HistoricalImportedCode, submissionId: string) {
+export function historicalQuestionnaireTokenHash(code: HistoricalImportedCode, submissionId: string) {
   return createHash("sha256")
     .update(`historical-jotform-${code}:${submissionId}`, "utf8")
     .digest("hex");
 }
 
-async function fetchAllSubmissions(code: HistoricalImportedCode) {
+export async function fetchAllHistoricalQuestionnaireSubmissions(code: HistoricalImportedCode) {
   const formId = IMPORTED_QUESTIONNAIRES[code].jotformId;
   const all: HistoricalSubmission[] = [];
   const limit = 100;
@@ -170,7 +170,7 @@ function matrixAnswers(field: Extract<ImportedField, { kind: "matrix_radio" }>, 
   return output;
 }
 
-function mapSubmissionToSchema(
+export function mapHistoricalSubmissionToSchema(
   submission: HistoricalSubmission,
   schema: ImportedQuestionnaireSchema,
 ) {
@@ -203,7 +203,7 @@ function mapSubmissionToSchema(
   return answers;
 }
 
-function historicalTotal(code: HistoricalImportedCode, submission: HistoricalSubmission) {
+export function historicalQuestionnaireTotal(code: HistoricalImportedCode, submission: HistoricalSubmission) {
   const answers = submission.answers ?? {};
   const labels =
     code === "ybocs"
@@ -286,7 +286,7 @@ async function importedIds(code: HistoricalImportedCode, submissions: Historical
 
   for (let i = 0; i < ids.length; i += 40) {
     const chunk = ids.slice(i, i + 40);
-    const hashes = chunk.map((id) => tokenHash(code, id));
+    const hashes = chunk.map((id) => historicalQuestionnaireTokenHash(code, id));
     const quoted = hashes.map((hash) => `"${hash}"`).join(",");
     const rows = await clinicalSupabaseRequest<Array<{ token_hash: string }>>(
       `questionnaire_invitations?select=token_hash&token_hash=in.(${encodeURIComponent(quoted)})`,
@@ -294,7 +294,7 @@ async function importedIds(code: HistoricalImportedCode, submissions: Historical
     );
     const found = new Set(rows.map((row) => row.token_hash));
     chunk.forEach((id) => {
-      if (found.has(tokenHash(code, id))) result.add(id);
+      if (found.has(historicalQuestionnaireTokenHash(code, id))) result.add(id);
     });
   }
 
@@ -303,7 +303,7 @@ async function importedIds(code: HistoricalImportedCode, submissions: Historical
 
 export async function buildHistoricalQuestionnairePreview(code: HistoricalImportedCode) {
   const [submissions, clients] = await Promise.all([
-    fetchAllSubmissions(code),
+    fetchAllHistoricalQuestionnaireSubmissions(code),
     listAllVcitaClients({ maxPages: 50 }),
   ]);
   const [imported, bdiMapping] = await Promise.all([
@@ -333,7 +333,7 @@ export async function buildHistoricalQuestionnairePreview(code: HistoricalImport
       submittedAt: submission.created_at ? String(submission.created_at) : null,
       jotformName: sourceName,
       normalizedName,
-      totalScore: historicalTotal(code, submission),
+      totalScore: historicalQuestionnaireTotal(code, submission),
       alreadyImported: imported.has(submissionId),
       status:
         matches.length === 1
@@ -401,9 +401,9 @@ export async function importHistoricalQuestionnaireRecord(input: {
   if (!submission) throw new Error("Submission not found.");
   if (!submission.created_at) throw new Error("Submission date missing.");
 
-  const mappedAnswers = mapSubmissionToSchema(submission, registry.schema);
+  const mappedAnswers = mapHistoricalSubmissionToSchema(submission, registry.schema);
   const scored = scoreImportedQuestionnaire(code, registry.schema, mappedAnswers);
-  const sourceTotal = historicalTotal(code, submission);
+  const sourceTotal = historicalQuestionnaireTotal(code, submission);
   const totalScore = sourceTotal ?? scored.total;
 
   const subjectKeyModule = await import("../pseudonym");
@@ -423,7 +423,7 @@ export async function importHistoricalQuestionnaireRecord(input: {
   }
 
   const subjectKey = subjectKeyModule.subjectKeyFromVcitaUuid(vcitaUuid);
-  const hash = tokenHash(code, submissionId);
+  const hash = historicalQuestionnaireTokenHash(code, submissionId);
 
   const existingInvites = await clinicalSupabaseRequest<Array<{ id: string }>>(
     `questionnaire_invitations?select=id&token_hash=eq.${hash}&limit=1`,
