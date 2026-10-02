@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 type ApiResponse =
   | { ok: true; url: string; expiresAt: string }
@@ -26,22 +26,61 @@ export function SendQuestionnaireForm() {
   const [selected, setSelected] = useState<Client | null>(null);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const requestIdRef = useRef(0);
 
-  async function searchPatients(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  useEffect(() => {
+    const trimmed = query.trim();
+
+    if (trimmed.length < 2) {
+      setClients([]);
+      setSelected(null);
+      setSearchError(null);
+      setSearching(false);
+      setHasSearched(false);
+      return;
+    }
+
+    const requestId = ++requestIdRef.current;
+    const controller = new AbortController();
+
     setSearching(true);
     setSearchError(null);
-    setSelected(null);
-    setClients([]);
+    setHasSearched(false);
 
-    const response = await fetch(`/form/api/vcita/clients/?q=${encodeURIComponent(query)}`, {
-      cache: "no-store",
-    });
-    const data = (await response.json()) as SearchResponse;
-    if (data.ok) setClients(data.clients);
-    else setSearchError(data.error);
-    setSearching(false);
-  }
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/form/api/vcita/clients/?q=${encodeURIComponent(trimmed)}`,
+          { cache: "no-store", signal: controller.signal },
+        );
+        const data = (await response.json()) as SearchResponse;
+
+        if (requestId !== requestIdRef.current) return;
+
+        if (data.ok) {
+          setClients(data.clients);
+          setSearchError(null);
+        } else {
+          setClients([]);
+          setSearchError(data.error);
+        }
+        setHasSearched(true);
+      } catch (error) {
+        if (controller.signal.aborted || requestId !== requestIdRef.current) return;
+        setClients([]);
+        setSearchError("vcita patient search is unavailable.");
+        setHasSearched(true);
+      } finally {
+        if (requestId === requestIdRef.current) setSearching(false);
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,27 +110,31 @@ export function SendQuestionnaireForm() {
 
   return (
     <div>
-      <form onSubmit={searchPatients} style={{ marginBottom: "22px" }}>
+      <div style={{ marginBottom: "22px" }}>
         <label style={{ display: "block", marginBottom: "8px" }}>
           <span style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}>Find patient in vcita</span>
           <span style={{ display: "block", marginBottom: "8px", color: "#6b7280", fontSize: "14px" }}>
-            Search by name, email, phone, or vcita UUID.
+            Start typing a name, email, phone, or vcita UUID. Results update automatically.
           </span>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              required
-              minLength={2}
-              autoComplete="off"
-              style={{ flex: 1, minWidth: 0, padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }}
-            />
-            <button type="submit" disabled={searching} style={{ padding: "11px 16px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", fontWeight: 700, cursor: "pointer" }}>
-              {searching ? "Searching…" : "Search"}
-            </button>
-          </div>
+          <input
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setSelected(null);
+              setResult(null);
+            }}
+            minLength={2}
+            autoComplete="off"
+            aria-label="Search vcita patients"
+            style={{ width: "100%", boxSizing: "border-box", padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }}
+          />
         </label>
-      </form>
+        {searching ? (
+          <p aria-live="polite" style={{ margin: "8px 0 0", color: "#6b7280", fontSize: "14px" }}>
+            Searching vcita…
+          </p>
+        ) : null}
+      </div>
 
       {searchError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{searchError}</p> : null}
 
@@ -115,8 +158,10 @@ export function SendQuestionnaireForm() {
         </div>
       ) : null}
 
-      {clients.length === 0 && !searching && query.length >= 2 && !selected && !searchError ? (
-        <p style={{ color: "#6b7280", marginBottom: "20px" }}>No matching vcita patients found.</p>
+      {clients.length === 0 && hasSearched && !searching && query.trim().length >= 2 && !selected && !searchError ? (
+        <p aria-live="polite" style={{ color: "#6b7280", marginBottom: "20px" }}>
+          No matching vcita patients found.
+        </p>
       ) : null}
 
       {selected ? (
