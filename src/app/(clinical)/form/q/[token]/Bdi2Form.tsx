@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { BDI2_INSTRUCTIONS, BDI2_ITEMS } from "@/lib/clinical/questionnaires/bdii";
+import { BDI2_INSTRUCTIONS, BDI2_ITEMS } from "@/lib/clinical/questionnaires/bdii-definition";
 
 type SubmitResponse =
   | { ok: true; totalScore: number; severity: string }
