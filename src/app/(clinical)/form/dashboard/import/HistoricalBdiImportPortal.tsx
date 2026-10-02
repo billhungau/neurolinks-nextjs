@@ -209,7 +209,7 @@ function ManualMatchControl({
   );
 }
 
-export function HistoricalBdiImportPortal() {
+export function HistoricalQuestionnaireImportPortal() {
   const [code, setCode] = useState<Code>("bdii");
   const [preview, setPreview] = useState<PreviewResponse | null>(null);
   const [loading, setLoading] = useState(false);
