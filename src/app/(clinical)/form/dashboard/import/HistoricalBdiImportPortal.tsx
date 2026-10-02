@@ -2,6 +2,15 @@
 
 import { useMemo, useState } from "react";
 
+type Code = "bdii" | "bai" | "ybocs" | "pss";
+
+const SCALE_LABELS: Record<Code, string> = {
+  bdii: "BDI-II",
+  bai: "BAI",
+  ybocs: "Y-BOCS",
+  pss: "PSS",
+};
+
 type Match = {
   id: string;
   firstName: string;
@@ -24,6 +33,8 @@ type Row = {
 type PreviewResponse =
   | {
       ok: true;
+      code?: Code;
+      name?: string;
       generatedAt: string;
       submissionCount: number;
       vcitaClientCount: number;
@@ -58,21 +69,30 @@ const statusLabel: Record<Row["status"], string> = {
 };
 
 async function importRecords(
+  code: Code,
   records: Array<{ submissionId: string; vcitaUuid: string; matchMode: "exact_name" | "manual" }>,
 ) {
-  const response = await fetch("/form/api/import/bdii/commit/", {
+  const endpoint =
+    code === "bdii"
+      ? "/form/api/import/bdii/commit/"
+      : "/form/api/import/historical/commit/";
+
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ records }),
+    body: JSON.stringify(code === "bdii" ? { records } : { code, records }),
   });
+
   return (await response.json()) as ImportResponse;
 }
 
 function ManualMatchControl({
   row,
+  code,
   onImported,
 }: {
   row: Row;
+  code: Code;
   onImported: () => Promise<void>;
 }) {
   const [query, setQuery] = useState(row.jotformName);
@@ -106,18 +126,17 @@ function ManualMatchControl({
 
   async function importTo(client: Match) {
     const name = [client.firstName, client.lastName].filter(Boolean).join(" ");
-    if (!window.confirm(`Import this historical BDI-II result to ${name}?`)) return;
+    if (!window.confirm(`Import this historical ${SCALE_LABELS[code]} result to ${name}?`)) return;
 
     setImportingId(client.id);
     setMessage(null);
+
     try {
-      const data = await importRecords([
-        {
-          submissionId: row.submissionId,
-          vcitaUuid: client.id,
-          matchMode: "manual",
-        },
-      ]);
+      const data = await importRecords(code, [{
+        submissionId: row.submissionId,
+        vcitaUuid: client.id,
+        matchMode: "manual",
+      }]);
 
       if (!data.ok) {
         setMessage(data.error);
@@ -139,6 +158,10 @@ function ManualMatchControl({
 
   if (row.alreadyImported) {
     return <strong style={{ color: "#166534" }}>Imported</strong>;
+  }
+
+  if (!row.jotformName) {
+    return <span style={{ color: "#6b7280" }}>Unnamed — leave unimported</span>;
   }
 
   return (
@@ -169,14 +192,7 @@ function ManualMatchControl({
               type="button"
               onClick={() => importTo(client)}
               disabled={Boolean(importingId)}
-              style={{
-                textAlign: "left",
-                padding: "8px",
-                border: "1px solid #d1d5db",
-                borderRadius: "7px",
-                background: "#fff",
-                cursor: "pointer",
-              }}
+              style={{ textAlign: "left", padding: "8px", border: "1px solid #d1d5db", borderRadius: "7px", background: "#fff", cursor: "pointer" }}
             >
               <strong>{name || "Unnamed vcita client"}</strong>
               <span style={{ display: "block", color: "#6b7280", fontSize: "12px", marginTop: "2px" }}>
@@ -193,6 +209,7 @@ function ManualMatchControl({
 }
 
 export function HistoricalBdiImportPortal() {
+  const [code, setCode] = useState<Code>("bdii");
   const [preview, setPreview] = useState<PreviewResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<"all" | Row["status"]>("all");
@@ -203,11 +220,15 @@ export function HistoricalBdiImportPortal() {
 
   async function runPreview() {
     setLoading(true);
+    setImportMessage(null);
+
     try {
-      const response = await fetch("/form/api/import/bdii/preview/", {
-        method: "GET",
-        cache: "no-store",
-      });
+      const endpoint =
+        code === "bdii"
+          ? "/form/api/import/bdii/preview/"
+          : `/form/api/import/historical/preview/?code=${encodeURIComponent(code)}`;
+
+      const response = await fetch(endpoint, { method: "GET", cache: "no-store" });
       const data = (await response.json()) as PreviewResponse;
       setPreview(data);
     } catch {
@@ -228,14 +249,12 @@ export function HistoricalBdiImportPortal() {
         matchMode: "exact_name" as const,
       }));
 
-    if (records.length === 0) {
+    if (!records.length) {
       setImportMessage("All uniquely matched records are already imported.");
       return;
     }
 
-    if (!window.confirm(`Import ${records.length} uniquely matched historical BDI-II results into the clinical database?`)) {
-      return;
-    }
+    if (!window.confirm(`Import ${records.length} uniquely matched historical ${SCALE_LABELS[code]} results into the clinical database?`)) return;
 
     setImporting(true);
     setImportProgress({ done: 0, total: records.length });
@@ -248,7 +267,7 @@ export function HistoricalBdiImportPortal() {
     try {
       for (let index = 0; index < records.length; index += 20) {
         const batch = records.slice(index, index + 20);
-        const data = await importRecords(batch);
+        const data = await importRecords(code, batch);
 
         if (!data.ok) {
           failed += batch.length;
@@ -266,9 +285,7 @@ export function HistoricalBdiImportPortal() {
         });
       }
 
-      setImportMessage(
-        `Import finished: ${imported} imported, ${already} already present, ${failed} failed.`,
-      );
+      setImportMessage(`Import finished: ${imported} imported, ${already} already present, ${failed} failed.`);
       await runPreview();
     } catch {
       setImportMessage("The batch import stopped unexpectedly. It is safe to run it again; completed records will not be duplicated.");
@@ -303,10 +320,33 @@ export function HistoricalBdiImportPortal() {
 
   return (
     <div>
+      <div style={{ marginBottom: "18px" }}>
+        <label>
+          <span style={{ display: "block", marginBottom: "7px", fontWeight: 700 }}>Questionnaire to migrate</span>
+          <select
+            value={code}
+            onChange={(event) => {
+              setCode(event.target.value as Code);
+              setPreview(null);
+              setImportMessage(null);
+              setImportProgress(null);
+              setQuery("");
+              setFilter("all");
+            }}
+            style={{ width: "100%", maxWidth: "360px", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }}
+          >
+            <option value="bdii">BDI-II</option>
+            <option value="bai">Beck Anxiety Inventory (BAI)</option>
+            <option value="ybocs">Y-BOCS</option>
+            <option value="pss">PTSD Symptom Scale (PSS)</option>
+          </select>
+        </label>
+      </div>
+
       <div style={{ padding: "16px", border: "1px solid #bfdbfe", background: "#eff6ff", borderRadius: "10px", marginBottom: "20px" }}>
-        <strong>Review before import</strong>
+        <strong>Same patient mapping rules</strong>
         <p style={{ margin: "6px 0 0", lineHeight: 1.5 }}>
-          Exact-name matches can be imported in batches. Ambiguous and unmatched records require an explicit vcita patient selection. Re-running an import is safe: each Jotform submission has a deterministic import identifier and cannot be duplicated.
+          The portal uses the same normalized full-name matching against vcita for every questionnaire. Exact unique matches can be imported in batches. Unnamed submissions are left unimported; ambiguous or differently named submissions require manual selection.
         </p>
       </div>
 
@@ -317,7 +357,7 @@ export function HistoricalBdiImportPortal() {
           disabled={loading || importing}
           style={{ padding: "11px 16px", border: 0, borderRadius: "8px", background: "#111827", color: "#fff", fontWeight: 700, cursor: "pointer" }}
         >
-          {loading ? "Building preview…" : "Refresh matching preview"}
+          {loading ? "Building preview…" : `Preview ${SCALE_LABELS[code]} matches`}
         </button>
 
         {preview?.ok ? (
@@ -342,15 +382,11 @@ export function HistoricalBdiImportPortal() {
       ) : null}
 
       {importMessage ? (
-        <p style={{ marginTop: "14px", padding: "12px", background: "#f9fafb", borderRadius: "8px" }}>
-          {importMessage}
-        </p>
+        <p style={{ marginTop: "14px", padding: "12px", background: "#f9fafb", borderRadius: "8px" }}>{importMessage}</p>
       ) : null}
 
       {preview && !preview.ok ? (
-        <p role="alert" style={{ marginTop: "18px", padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>
-          {preview.error}
-        </p>
+        <p role="alert" style={{ marginTop: "18px", padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{preview.error}</p>
       ) : null}
 
       {preview?.ok ? (
@@ -404,12 +440,8 @@ export function HistoricalBdiImportPortal() {
                       <strong>{row.jotformName || "Unnamed"}</strong>
                       <div style={{ color: "#9ca3af", fontSize: "12px", marginTop: "2px" }}>{row.submissionId}</div>
                     </td>
-                    <td style={{ padding: "10px", borderBottom: "1px solid #f3f4f6" }}>
-                      {row.submittedAt ? new Date(row.submittedAt).toLocaleDateString() : "—"}
-                    </td>
-                    <td style={{ textAlign: "right", padding: "10px", borderBottom: "1px solid #f3f4f6" }}>
-                      {row.totalScore ?? "—"}
-                    </td>
+                    <td style={{ padding: "10px", borderBottom: "1px solid #f3f4f6" }}>{row.submittedAt ? new Date(row.submittedAt).toLocaleDateString() : "—"}</td>
+                    <td style={{ textAlign: "right", padding: "10px", borderBottom: "1px solid #f3f4f6" }}>{row.totalScore ?? "—"}</td>
                     <td style={{ padding: "10px", borderBottom: "1px solid #f3f4f6" }}>
                       {row.status === "unique_exact" ? (
                         row.alreadyImported ? (
@@ -423,7 +455,7 @@ export function HistoricalBdiImportPortal() {
                           </div>
                         ) : "—"
                       ) : (
-                        <ManualMatchControl row={row} onImported={runPreview} />
+                        <ManualMatchControl row={row} code={code} onImported={runPreview} />
                       )}
                     </td>
                     <td style={{ padding: "10px", borderBottom: "1px solid #f3f4f6", fontWeight: 700 }}>
@@ -436,7 +468,7 @@ export function HistoricalBdiImportPortal() {
           </div>
 
           <p style={{ color: "#6b7280", fontSize: "13px", marginTop: "12px" }}>
-            Showing {filteredRows.length} of {preview.rows.length} historical submissions. Preview generated {new Date(preview.generatedAt).toLocaleString()}.
+            Showing {filteredRows.length} of {preview.rows.length} historical {SCALE_LABELS[code]} submissions.
           </p>
         </>
       ) : null}
