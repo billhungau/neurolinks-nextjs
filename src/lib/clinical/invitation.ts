@@ -11,6 +11,7 @@ import {
 
 const TOKEN_BYTES = 32;
 const DEFAULT_EXPIRY_HOURS = 72;
+const NO_EXPIRY_AT = "9999-12-31T23:59:59.999Z";
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43,128}$/;
 
 type QuestionnaireRow = {
@@ -74,23 +75,26 @@ export async function createQuestionnaireInvitation(input: {
   vcitaUuid: string;
   questionnaireCode: string;
   expiresInHours?: number;
+  noExpiry?: boolean;
   allowDuplicateActive?: boolean;
 }): Promise<{
   invitationId: string;
   token: string;
   path: string;
   expiresAt: string;
+  noExpiry: boolean;
   subjectKey: string;
 }> {
   const code = input.questionnaireCode.trim().toLowerCase();
   if (code === BDI2_CODE) await ensureBdi2Registry();
   if (isImportedCode(code)) await ensureImportedQuestionnaire(code);
   const expiresInHours = input.expiresInHours ?? DEFAULT_EXPIRY_HOURS;
+  const noExpiry = Boolean(input.noExpiry);
 
   if (!/^[a-z0-9][a-z0-9_-]{1,49}$/.test(code)) {
     throw new Error("[clinical-invitation] Invalid questionnaire code.");
   }
-  if (!Number.isFinite(expiresInHours) || expiresInHours <= 0 || expiresInHours > 24 * 30) {
+  if (!noExpiry && (!Number.isFinite(expiresInHours) || expiresInHours <= 0 || expiresInHours > 24 * 30)) {
     throw new Error("[clinical-invitation] Invalid invitation expiry.");
   }
 
@@ -119,7 +123,9 @@ export async function createQuestionnaireInvitation(input: {
 
   const token = randomBytes(TOKEN_BYTES).toString("base64url");
   const tokenHash = hashInvitationToken(token);
-  const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString();
+  const expiresAt = noExpiry
+    ? NO_EXPIRY_AT
+    : new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString();
 
   const rows = await clinicalSupabaseRequest<Array<{ id: string; expires_at: string }>>(
     "questionnaire_invitations?select=id,expires_at",
@@ -145,6 +151,7 @@ export async function createQuestionnaireInvitation(input: {
     token,
     path: `/form/q/${token}`,
     expiresAt: created.expires_at,
+    noExpiry,
     subjectKey,
   };
 }
