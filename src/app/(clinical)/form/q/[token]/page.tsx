@@ -68,11 +68,20 @@ export default async function QuestionnaireInvitePage({ params }: PageProps) {
   const { token } = await params;
   const invitation = await resolveQuestionnaireInvitation(token);
 
-  if (invitation.status === "valid" && invitation.questionnaire) {
+  if (invitation.status === "valid") {
+    if (invitation.questionnaire) {
+      return (
+        <MessageCard
+          title={invitation.questionnaire.name}
+          body="Your secure questionnaire link is valid. The questionnaire itself will be added in the next step."
+        />
+      );
+    }
+
     return (
       <MessageCard
-        title={invitation.questionnaire.name}
-        body="Your secure questionnaire link is valid. The questionnaire itself will be added in the next step."
+        title="Questionnaire unavailable"
+        body="This questionnaire is not currently available. Please contact NeuroLinks."
       />
     );
   }
