@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { resolveQuestionnaireInvitation } from "@/lib/clinical/invitation";
 import { Bdi2Form } from "./Bdi2Form";
+import { ImportedQuestionnaireForm } from "./ImportedQuestionnaireForm";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,22 @@ export default async function QuestionnaireInvitePage({ params }: PageProps) {
           <p style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em" }}>NeuroLinks</p>
           <h1 style={{ margin: "0 0 24px", fontSize: "32px" }}>Beck Depression Inventory-II</h1>
           <Bdi2Form token={token} />
+        </section>
+      </main>
+    );
+  }
+
+  if (
+    invitation.status === "valid" &&
+    invitation.questionnaire?.schema &&
+    ["bai", "ybocs", "pss"].includes(invitation.questionnaire.code)
+  ) {
+    return (
+      <main style={{ minHeight: "100vh", padding: "28px 18px 60px" }}>
+        <section style={{ maxWidth: "820px", margin: "0 auto", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "16px", padding: "28px", boxShadow: "0 10px 30px rgba(17,24,39,.05)" }}>
+          <p style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em" }}>NeuroLinks</p>
+          <h1 style={{ margin: "0 0 24px", fontSize: "32px" }}>{invitation.questionnaire.name}</h1>
+          <ImportedQuestionnaireForm token={token} schema={invitation.questionnaire.schema} />
         </section>
       </main>
     );
