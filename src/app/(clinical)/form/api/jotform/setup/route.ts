@@ -38,16 +38,29 @@ async function getWebhooks(formId: string): Promise<string[]> {
 
 async function addWebhook(formId: string, webhookURL: string) {
   const body = new URLSearchParams({ webhookURL });
-  const response = await fetch(`https://api.jotform.com/form/${formId}/webhooks`, {
+  const url = new URL(`https://api.jotform.com/form/${formId}/webhooks`);
+  url.searchParams.set("apiKey", apiKey());
+
+  const response = await fetch(url, {
     method: "POST",
     headers: {
-      APIKEY: apiKey(),
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body,
     cache: "no-store",
   });
-  if (!response.ok) throw new Error("Could not add Jotform webhook.");
+
+  if (!response.ok) {
+    const detail = (await response.text()).slice(0, 500);
+    throw new Error(`Jotform webhook creation failed for form ${formId}: HTTP ${response.status} ${detail}`);
+  }
+
+  const payload = (await response.json()) as { responseCode?: number; message?: string };
+  if (payload.responseCode !== 200) {
+    throw new Error(
+      `Jotform webhook creation failed for form ${formId}: ${payload.message ?? "unknown Jotform error"}`,
+    );
+  }
 }
 
 export async function GET(request: Request) {
@@ -96,9 +109,23 @@ export async function POST(request: Request) {
       { ok: true, forms: results },
       { headers: { "Cache-Control": "no-store, private" } },
     );
-  } catch {
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Could not configure Jotform webhooks.";
+
+    console.error("[jotform-setup]", message);
+
+    const publicError =
+      message.includes("JOTFORM_WEBHOOK_SECRET")
+        ? "JOTFORM_WEBHOOK_SECRET is not configured in this deployment."
+        : message.includes("JOTFORM_API_KEY")
+          ? "JOTFORM_API_KEY is not configured in this deployment."
+          : message.includes("form ")
+            ? message
+            : "Could not configure Jotform webhooks.";
+
     return Response.json(
-      { ok: false, error: "Could not configure Jotform webhooks. Check JOTFORM_API_KEY and JOTFORM_WEBHOOK_SECRET." },
+      { ok: false, error: publicError },
       { status: 500, headers: { "Cache-Control": "no-store, private" } },
     );
   }
