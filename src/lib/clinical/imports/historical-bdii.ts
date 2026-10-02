@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import { BDI2_ITEMS, bdi2OptionId } from "../questionnaires/bdii-definition";
-import { listAllVcitaClients, type VcitaClientSummary } from "../vcita";
+import { ensureBdi2Registry } from "../questionnaires/bdii";
+import { subjectKeyFromVcitaUuid } from "../pseudonym";
+import { getVcitaClient, listAllVcitaClients, type VcitaClientSummary } from "../vcita";
 import { clinicalSupabaseRequest } from "../supabase";
 
 const BDI2_JOTFORM_ID = "221126900055242";
@@ -327,4 +329,122 @@ export async function buildHistoricalBdiPreview() {
     },
     rows,
   };
+}
+
+
+export async function importHistoricalBdiRecord(input: {
+  submissionId: string;
+  vcitaUuid: string;
+  matchMode: "exact_name" | "historical_mapping" | "patient_link_token" | "manual";
+  actorId?: string | null;
+  eventType?: "HISTORICAL_RESULT_IMPORTED" | "JOTFORM_RESULT_SYNCED";
+}) {
+  const submission = await fetchBdiSubmissionById(input.submissionId);
+  if (!submission) throw new Error("Jotform submission not found.");
+
+  const client = await getVcitaClient(input.vcitaUuid);
+  if (!client) throw new Error("vcita patient not found.");
+
+  if (input.matchMode === "exact_name") {
+    const sourceName = answerText(findAnswer(submission.answers ?? {}, ["Full Name", "Name"]));
+    const targetName = [client.firstName, client.lastName].filter(Boolean).join(" ");
+    if (!sourceName || normalizePatientName(sourceName) !== normalizePatientName(targetName)) {
+      throw new Error("Exact-name validation failed.");
+    }
+  }
+
+  const parsed = parseHistoricalBdiSubmission(submission);
+  if (!parsed.submittedAt) throw new Error("Submission date missing.");
+
+  await ensureBdi2Registry();
+  const questionnaires = await clinicalSupabaseRequest<Array<{ id: string }>>(
+    "questionnaires?select=id&code=eq.bdii&order=version.desc&limit=1",
+    { method: "GET" },
+  );
+  const questionnaireId = questionnaires[0]?.id;
+  if (!questionnaireId) throw new Error("BDI-II questionnaire registry missing.");
+
+  const subjectKey = subjectKeyFromVcitaUuid(input.vcitaUuid);
+  const tokenHash = historicalImportTokenHash(input.submissionId);
+  const existingInvites = await clinicalSupabaseRequest<Array<{ id: string }>>(
+    `questionnaire_invitations?select=id&token_hash=eq.${tokenHash}&limit=1`,
+    { method: "GET" },
+  );
+
+  let invitationId = existingInvites[0]?.id;
+  if (!invitationId) {
+    const submittedAt = new Date(parsed.submittedAt);
+    const expiresAt = new Date(submittedAt.getTime() + 86400000).toISOString();
+    const rows = await clinicalSupabaseRequest<Array<{ id: string }>>(
+      "questionnaire_invitations?select=id",
+      {
+        method: "POST",
+        prefer: "return=representation",
+        body: JSON.stringify({
+          subject_key: subjectKey,
+          questionnaire_id: questionnaireId,
+          token_hash: tokenHash,
+          created_at: parsed.submittedAt,
+          expires_at: expiresAt,
+          opened_at: parsed.submittedAt,
+          completed_at: parsed.submittedAt,
+        }),
+      },
+    );
+    invitationId = rows[0]?.id;
+    if (!invitationId) throw new Error("Historical invitation creation failed.");
+  }
+
+  const existingResults = await clinicalSupabaseRequest<Array<{ id: string }>>(
+    `assessment_results?select=id&invitation_id=eq.${invitationId}&limit=1`,
+    { method: "GET" },
+  );
+  if (existingResults[0]?.id) {
+    return { status: "already_imported" as const, assessmentId: existingResults[0].id };
+  }
+
+  const results = await clinicalSupabaseRequest<Array<{ id: string }>>(
+    "assessment_results?select=id",
+    {
+      method: "POST",
+      prefer: "return=representation",
+      body: JSON.stringify({
+        subject_key: subjectKey,
+        questionnaire_id: questionnaireId,
+        invitation_id: invitationId,
+        submitted_at: parsed.submittedAt,
+        answers: parsed.storedAnswers,
+        total_score: parsed.totalScore,
+        severity: parsed.severity,
+        clinical_flags: {
+          ...parsed.clinicalFlags,
+          historical_import: input.eventType !== "JOTFORM_RESULT_SYNCED",
+          live_jotform_sync: input.eventType === "JOTFORM_RESULT_SYNCED",
+        },
+        scoring_version: 1,
+      }),
+    },
+  );
+  const assessmentId = results[0]?.id;
+  if (!assessmentId) throw new Error("Assessment creation failed.");
+
+  await clinicalSupabaseRequest<unknown>("audit_events", {
+    method: "POST",
+    prefer: "return=minimal",
+    body: JSON.stringify({
+      event_type: input.eventType ?? "HISTORICAL_RESULT_IMPORTED",
+      subject_key: subjectKey,
+      invitation_id: invitationId,
+      assessment_id: assessmentId,
+      metadata: {
+        questionnaire_code: "bdii",
+        source: "jotform",
+        source_submission_id: input.submissionId,
+        matched_by: input.matchMode,
+        ...(input.actorId ? { actor_id: input.actorId } : {}),
+      },
+    }),
+  });
+
+  return { status: "imported" as const, assessmentId };
 }
