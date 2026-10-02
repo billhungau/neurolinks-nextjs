@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { PatientResultsPanel } from "./PatientResultsPanel";
 
 type ApiResponse =
   | { ok: true; url: string; expiresAt: string }
@@ -165,13 +166,16 @@ export function SendQuestionnaireForm() {
       ) : null}
 
       {selected ? (
-        <div style={{ marginBottom: "22px", padding: "14px", border: "1px solid #bfdbfe", borderRadius: "10px", background: "#eff6ff" }}>
+        <>
+        <div style={{ marginBottom: "16px", padding: "14px", border: "1px solid #bfdbfe", borderRadius: "10px", background: "#eff6ff" }}>
           <strong>{[selected.firstName, selected.lastName].filter(Boolean).join(" ") || "Selected vcita client"}</strong>
           <div style={{ marginTop: "3px", color: "#4b5563" }}>{[selected.email, selected.phone].filter(Boolean).join(" · ")}</div>
           <button type="button" onClick={() => setSelected(null)} style={{ marginTop: "9px", border: 0, padding: 0, background: "transparent", textDecoration: "underline", cursor: "pointer" }}>
             Choose another patient
           </button>
         </div>
+        <PatientResultsPanel vcitaUuid={selected.id} />
+        </>
       ) : null}
 
       <form onSubmit={submit}>

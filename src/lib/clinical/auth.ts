@@ -34,8 +34,22 @@ export async function getClinicianSession(): Promise<ClinicianSession | null> {
   const user = (await response.json()) as SupabaseUser;
   if (!user.id) return null;
 
+  const email = user.email?.trim().toLowerCase() ?? null;
+  const allowlist = process.env.CLINICIAN_EMAIL_ALLOWLIST
+    ?.split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  // Once configured, only explicitly approved clinician emails may access
+  // the clinical dashboard and APIs. Leaving it unset preserves access during
+  // setup so an environment-variable mistake does not immediately lock out
+  // the existing clinician account.
+  if (allowlist && allowlist.length > 0) {
+    if (!email || !allowlist.includes(email)) return null;
+  }
+
   return {
     id: user.id,
-    email: user.email ?? null,
+    email,
   };
 }
