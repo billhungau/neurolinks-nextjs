@@ -135,3 +135,27 @@ export async function searchVcitaClients(term: string): Promise<VcitaClientSumma
 
   return nameSearch(q);
 }
+
+
+export async function listAllVcitaClients(options: { maxPages?: number } = {}): Promise<VcitaClientSummary[]> {
+  const maxPages = Math.max(1, Math.min(options.maxPages ?? 50, 100));
+  const perPage = 100;
+  const clients: VcitaClientSummary[] = [];
+  const seen = new Set<string>();
+
+  for (let page = 1; page <= maxPages; page += 1) {
+    const data = await vcitaRequest<unknown>(`clients?per_page=${perPage}&page=${page}`);
+    const rows = extractClients(data);
+
+    for (const raw of rows) {
+      const client = normalizeClient(raw);
+      if (!client || seen.has(client.id)) continue;
+      seen.add(client.id);
+      clients.push(client);
+    }
+
+    if (rows.length < perPage) break;
+  }
+
+  return clients;
+}
