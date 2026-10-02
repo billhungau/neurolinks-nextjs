@@ -1,5 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
+import { after } from "next/server";
 import { syncJotformSubmission } from "@/lib/clinical/jotform-sync";
+import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -63,13 +65,29 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: "Missing form or submission ID." }, { status: 400 });
   }
 
-  try {
-    const result = await syncJotformSubmission(payload);
-    return Response.json({ ok: true, result }, { headers: { "Cache-Control": "no-store" } });
-  } catch {
-    return Response.json(
-      { ok: false, error: "Jotform submission sync failed." },
-      { status: 500, headers: { "Cache-Control": "no-store" } },
-    );
-  }
+  after(async () => {
+    try {
+      await syncJotformSubmission(payload);
+    } catch {
+      try {
+        await clinicalSupabaseRequest<unknown>("audit_events", {
+          method: "POST",
+          prefer: "return=minimal",
+          body: JSON.stringify({
+            event_type: "JOTFORM_SYNC_ERROR",
+            metadata: {
+              source: "jotform",
+              source_form_id: payload.formId,
+              source_submission_id: payload.submissionId,
+            },
+          }),
+        });
+      } catch {}
+    }
+  });
+
+  return Response.json(
+    { ok: true, accepted: true },
+    { status: 202, headers: { "Cache-Control": "no-store" } },
+  );
 }
