@@ -9,7 +9,7 @@ type AssessmentRow = {
   submitted_at: string;
   total_score: number;
   severity: string | null;
-  answers: Record<string, number>;
+  answers: Record<string, number | { optionId?: string; score?: number }>;
   clinical_flags: {
     bdii_item9_positive?: boolean;
     bdii_item9_score?: number;

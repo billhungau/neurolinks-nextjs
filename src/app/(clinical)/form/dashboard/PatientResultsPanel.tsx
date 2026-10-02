@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BDI2_ITEMS } from "@/lib/clinical/questionnaires/bdii-definition";
+import { BDI2_ITEMS, getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
 
 type Result = {
   id: string;
@@ -21,7 +21,7 @@ type ResultDetail = {
   submittedAt: string;
   totalScore: number;
   severity: string | null;
-  answers: Record<string, number>;
+  answers: Record<string, number | { optionId?: string; score?: number }>;
   item9Positive: boolean;
   item9Score: number;
 };
@@ -222,9 +222,26 @@ export function PatientResultsPanel({
               </div>
               <div style={{ display: "grid", gap: "8px", marginTop: "14px" }}>
                 {BDI2_ITEMS.map((item) => {
-                  const score = selectedDetail.answers[item.key];
-                  const option = item.options.find((candidate) => candidate.value === score);
+                  const rawAnswer = selectedDetail.answers[item.key];
+                  const isLegacy = typeof rawAnswer === "number";
+                  const score =
+                    typeof rawAnswer === "number"
+                      ? rawAnswer
+                      : Number(rawAnswer?.score ?? 0);
+
+                  const exact =
+                    typeof rawAnswer === "object" && rawAnswer?.optionId
+                      ? getBdi2OptionById(item.key, rawAnswer.optionId)
+                      : null;
+
+                  const matchingOptions = item.options.filter(
+                    (candidate) => candidate.value === score,
+                  );
+                  const option = exact?.option ?? matchingOptions[0] ?? null;
+                  const ambiguousLegacy =
+                    isLegacy && matchingOptions.length > 1;
                   const isItem9 = item.key === "q9";
+
                   return (
                     <div
                       key={item.key}
@@ -237,7 +254,9 @@ export function PatientResultsPanel({
                     >
                       <strong>{item.title}</strong>
                       <div style={{ marginTop: "4px" }}>
-                        {score}. {option?.label ?? "Recorded response"}
+                        {ambiguousLegacy
+                          ? `${score}. Legacy result — direction of this response was not captured.`
+                          : `${score}. ${option?.label ?? "Recorded response"}`}
                       </div>
                     </div>
                   );

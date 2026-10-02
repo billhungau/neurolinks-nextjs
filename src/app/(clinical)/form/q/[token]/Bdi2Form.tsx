@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { BDI2_INSTRUCTIONS, BDI2_ITEMS } from "@/lib/clinical/questionnaires/bdii-definition";
+import { BDI2_INSTRUCTIONS, BDI2_ITEMS, bdi2OptionId } from "@/lib/clinical/questionnaires/bdii-definition";
 
 type SubmitResponse =
   | { ok: true; totalScore: number; severity: string }
@@ -17,9 +17,9 @@ export function Bdi2Form({ token }: { token: string }) {
     setResult(null);
 
     const data = new FormData(event.currentTarget);
-    const answers: Record<string, number> = {};
+    const answers: Record<string, string> = {};
     for (const item of BDI2_ITEMS) {
-      answers[item.key] = Number(data.get(item.key));
+      answers[item.key] = String(data.get(item.key) ?? "");
     }
 
     const response = await fetch("/form/api/submit/", {
@@ -56,7 +56,7 @@ export function Bdi2Form({ token }: { token: string }) {
           <div style={{ display: "grid", gap: "9px" }}>
             {item.options.map((option, index) => (
               <label key={index} style={{ display: "flex", gap: "10px", alignItems: "flex-start", padding: "11px 12px", border: "1px solid #e5e7eb", borderRadius: "9px", cursor: "pointer" }}>
-                <input type="radio" name={item.key} value={option.value} required style={{ marginTop: "4px" }} />
+                <input type="radio" name={item.key} value={bdi2OptionId(item.key, index)} required style={{ marginTop: "4px" }} />
                 <span><strong>{option.value}.</strong> {option.label}</span>
               </label>
             ))}

@@ -143,3 +143,24 @@ export const BDI2_ITEMS: Bdi2Item[] = [
     { value: 3, label: "I have lost interest in sex completely." },
   ]},
 ];
+
+
+export function bdi2OptionId(itemKey: string, optionIndex: number): string {
+  return `${itemKey}_${optionIndex}`;
+}
+
+export function getBdi2OptionById(itemKey: string, optionId: string) {
+  const item = BDI2_ITEMS.find((candidate) => candidate.key === itemKey);
+  if (!item) return null;
+
+  const prefix = `${itemKey}_`;
+  if (!optionId.startsWith(prefix)) return null;
+
+  const index = Number(optionId.slice(prefix.length));
+  if (!Number.isInteger(index) || index < 0 || index >= item.options.length) return null;
+
+  return {
+    option: item.options[index],
+    index,
+  };
+}

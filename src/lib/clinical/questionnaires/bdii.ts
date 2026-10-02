@@ -5,7 +5,43 @@ import {
   BDI2_MAX_SCORE,
   BDI2_NAME,
   BDI2_VERSION,
+  getBdi2OptionById,
 } from "./bdii-definition";
+
+export type StoredBdi2Answer = {
+  optionId: string;
+  score: number;
+};
+
+export function scoreBdi2Selections(selections: Record<string, string>) {
+  const storedAnswers: Record<string, StoredBdi2Answer> = {};
+  const scoreAnswers: Record<string, number> = {};
+
+  for (const item of BDI2_ITEMS) {
+    const optionId = selections[item.key];
+    if (typeof optionId !== "string") {
+      throw new Error("[bdii] Invalid or incomplete answers.");
+    }
+
+    const match = getBdi2OptionById(item.key, optionId);
+    if (!match) {
+      throw new Error("[bdii] Invalid or incomplete answers.");
+    }
+
+    storedAnswers[item.key] = {
+      optionId,
+      score: match.option.value,
+    };
+    scoreAnswers[item.key] = match.option.value;
+  }
+
+  const scored = scoreBdi2(scoreAnswers);
+  return {
+    ...scored,
+    storedAnswers,
+    scoreAnswers,
+  };
+}
 
 export function scoreBdi2(answers: Record<string, number>) {
   const values = BDI2_ITEMS.map((item) => answers[item.key]);

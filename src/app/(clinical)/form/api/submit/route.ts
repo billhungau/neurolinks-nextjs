@@ -1,11 +1,11 @@
 import { resolveQuestionnaireInvitation } from "@/lib/clinical/invitation";
-import { scoreBdi2 } from "@/lib/clinical/questionnaires/bdii";
+import { scoreBdi2Selections } from "@/lib/clinical/questionnaires/bdii";
 import { BDI2_CODE } from "@/lib/clinical/questionnaires/bdii-definition";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 
 export const runtime = "nodejs";
 
-type Body = { token?: string; answers?: Record<string, number> };
+type Body = { token?: string; answers?: Record<string, string> };
 
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   let scored;
   try {
-    scored = scoreBdi2(body.answers ?? {});
+    scored = scoreBdi2Selections(body.answers ?? {});
   } catch {
     return Response.json({ ok: false, error: "Please answer every question." }, { status: 400 });
   }
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
           questionnaire_id: invitation.questionnaireId,
           invitation_id: invitation.invitationId,
           submitted_at: submittedAt,
-          answers: body.answers,
+          answers: scored.storedAnswers,
           total_score: scored.total,
           severity: scored.severity,
           clinical_flags: scored.clinicalFlags,
