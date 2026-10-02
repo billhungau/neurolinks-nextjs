@@ -1,11 +1,15 @@
 import { resolveQuestionnaireInvitation } from "@/lib/clinical/invitation";
 import { scoreBdi2Selections } from "@/lib/clinical/questionnaires/bdii";
 import { BDI2_CODE } from "@/lib/clinical/questionnaires/bdii-definition";
+import {
+  isImportedCode,
+  scoreImportedQuestionnaire,
+} from "@/lib/clinical/questionnaires/jotform-import";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 
 export const runtime = "nodejs";
 
-type Body = { token?: string; answers?: Record<string, string> };
+type Body = { token?: string; answers?: Record<string, unknown> };
 
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
@@ -22,15 +26,36 @@ export async function POST(request: Request) {
 
   const token = String(body.token ?? "");
   const invitation = await resolveQuestionnaireInvitation(token, { markOpened: false });
-  if (invitation.status !== "valid" || invitation.questionnaire?.code !== BDI2_CODE || !invitation.invitationId || !invitation.subjectKey || !invitation.questionnaireId) {
+  if (invitation.status !== "valid" || !invitation.questionnaire || !invitation.invitationId || !invitation.subjectKey || !invitation.questionnaireId) {
     return Response.json({ ok: false, error: "This questionnaire link is no longer valid." }, { status: 400 });
   }
 
   let scored;
+  let storedAnswers: Record<string, unknown>;
+
   try {
-    scored = scoreBdi2Selections(body.answers ?? {});
+    if (invitation.questionnaire.code === BDI2_CODE) {
+      const selections = Object.fromEntries(
+        Object.entries(body.answers ?? {}).map(([key, value]) => [key, String(value ?? "")]),
+      );
+      const bdii = scoreBdi2Selections(selections);
+      scored = bdii;
+      storedAnswers = bdii.storedAnswers;
+    } else if (
+      isImportedCode(invitation.questionnaire.code) &&
+      invitation.questionnaire.schema
+    ) {
+      scored = scoreImportedQuestionnaire(
+        invitation.questionnaire.code,
+        invitation.questionnaire.schema,
+        body.answers ?? {},
+      );
+      storedAnswers = body.answers ?? {};
+    } else {
+      throw new Error("Unsupported questionnaire.");
+    }
   } catch {
-    return Response.json({ ok: false, error: "Please answer every question." }, { status: 400 });
+    return Response.json({ ok: false, error: "Please answer every required question." }, { status: 400 });
   }
 
   const submittedAt = new Date().toISOString();
@@ -46,7 +71,7 @@ export async function POST(request: Request) {
           questionnaire_id: invitation.questionnaireId,
           invitation_id: invitation.invitationId,
           submitted_at: submittedAt,
-          answers: scored.storedAnswers,
+          answers: storedAnswers,
           total_score: scored.total,
           severity: scored.severity,
           clinical_flags: scored.clinicalFlags,
@@ -76,8 +101,11 @@ export async function POST(request: Request) {
         invitation_id: invitation.invitationId,
         assessment_id: assessmentId,
         metadata: {
-          questionnaire_code: BDI2_CODE,
-          item9_positive: scored.clinicalFlags.bdii_item9_positive,
+          questionnaire_code: invitation.questionnaire.code,
+          item9_positive:
+            invitation.questionnaire.code === BDI2_CODE
+              ? Boolean(scored.clinicalFlags.bdii_item9_positive)
+              : false,
         },
       }),
     });
