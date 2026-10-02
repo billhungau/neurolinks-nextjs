@@ -42,7 +42,7 @@ export function SendQuestionnaireForm() {
         <label style={{ display: "block", marginBottom: "16px" }}>
           <span style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}>Questionnaire</span>
           <select name="questionnaireCode" defaultValue="bdii" style={{ width: "100%", padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }}>
-            <option value="bdii">PHQ-9</option>
+            <option value="bdii">BDI-II</option>
           </select>
         </label>
 
