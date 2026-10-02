@@ -3,6 +3,11 @@ import { clinicalSupabaseRequest } from "./supabase";
 import { subjectKeyFromVcitaUuid } from "./pseudonym";
 import { ensureBdi2Registry } from "./questionnaires/bdii";
 import { BDI2_CODE } from "./questionnaires/bdii-definition";
+import {
+  ensureImportedQuestionnaire,
+  isImportedCode,
+  type ImportedQuestionnaireSchema,
+} from "./questionnaires/jotform-import";
 
 const TOKEN_BYTES = 32;
 const DEFAULT_EXPIRY_HOURS = 72;
@@ -15,6 +20,7 @@ type QuestionnaireRow = {
   name: string;
   max_score: number | null;
   active: boolean;
+  metadata?: { schema?: ImportedQuestionnaireSchema } | null;
 };
 
 type InvitationRow = {
@@ -46,6 +52,7 @@ export type ResolvedInvitation = {
     version: number;
     name: string;
     maxScore: number | null;
+    schema?: ImportedQuestionnaireSchema;
   };
   expiresAt?: string;
   subjectKey?: string;
@@ -77,6 +84,7 @@ export async function createQuestionnaireInvitation(input: {
 }> {
   const code = input.questionnaireCode.trim().toLowerCase();
   if (code === BDI2_CODE) await ensureBdi2Registry();
+  if (isImportedCode(code)) await ensureImportedQuestionnaire(code);
   const expiresInHours = input.expiresInHours ?? DEFAULT_EXPIRY_HOURS;
 
   if (!/^[a-z0-9][a-z0-9_-]{1,49}$/.test(code)) {
@@ -152,7 +160,7 @@ export async function resolveQuestionnaireInvitation(
   const tokenHash = hashInvitationToken(rawToken);
 
   const rows = await clinicalSupabaseRequest<InvitationRow[]>(
-    `questionnaire_invitations?select=id,subject_key,questionnaire_id,token_hash,created_at,expires_at,opened_at,completed_at,revoked_at,questionnaires(id,code,version,name,max_score,active)&token_hash=eq.${tokenHash}&limit=1`,
+    `questionnaire_invitations?select=id,subject_key,questionnaire_id,token_hash,created_at,expires_at,opened_at,completed_at,revoked_at,questionnaires(id,code,version,name,max_score,active,metadata)&token_hash=eq.${tokenHash}&limit=1`,
     { method: "GET" },
   );
 
@@ -198,6 +206,7 @@ export async function resolveQuestionnaireInvitation(
       version: questionnaire.version,
       name: questionnaire.name,
       maxScore: questionnaire.max_score,
+      schema: questionnaire.metadata?.schema,
     },
   };
 }
