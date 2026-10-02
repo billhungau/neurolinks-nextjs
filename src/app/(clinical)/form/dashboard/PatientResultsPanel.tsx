@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { BDI2_ITEMS } from "@/lib/clinical/questionnaires/bdii-definition";
 
 type Result = {
   id: string;
@@ -13,6 +14,21 @@ type Result = {
 
 type ApiResponse =
   | { ok: true; results: Result[] }
+  | { ok: false; error: string };
+
+type DetailResponse =
+  | {
+      ok: true;
+      result: {
+        id: string;
+        submittedAt: string;
+        totalScore: number;
+        severity: string | null;
+        answers: Record<string, number>;
+        item9Positive: boolean;
+        item9Score: number;
+      };
+    }
   | { ok: false; error: string };
 
 function TrendChart({ results }: { results: Result[] }) {
@@ -75,8 +91,16 @@ function TrendChart({ results }: { results: Result[] }) {
   );
 }
 
-export function PatientResultsPanel({ vcitaUuid }: { vcitaUuid: string }) {
+export function PatientResultsPanel({
+  vcitaUuid,
+  refreshKey,
+}: {
+  vcitaUuid: string;
+  refreshKey: number;
+}) {
   const [results, setResults] = useState<Result[]>([]);
+  const [selectedDetail, setSelectedDetail] = useState<DetailResponse extends { ok: true; result: infer R } ? R | null : never>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -112,7 +136,22 @@ export function PatientResultsPanel({ vcitaUuid }: { vcitaUuid: string }) {
 
     load();
     return () => controller.abort();
-  }, [vcitaUuid]);
+  }, [vcitaUuid, refreshKey]);
+
+  async function openDetail(id: string) {
+    setDetailLoading(true);
+    setSelectedDetail(null);
+    try {
+      const response = await fetch(
+        `/form/api/results/${encodeURIComponent(id)}/?vcitaUuid=${encodeURIComponent(vcitaUuid)}`,
+        { cache: "no-store" },
+      );
+      const data = (await response.json()) as DetailResponse;
+      if (data.ok) setSelectedDetail(data.result);
+    } finally {
+      setDetailLoading(false);
+    }
+  }
 
   return (
     <section
@@ -152,8 +191,8 @@ export function PatientResultsPanel({ vcitaUuid }: { vcitaUuid: string }) {
               </thead>
               <tbody>
                 {[...results].reverse().map((result) => (
-                  <tr key={result.id}>
-                    <td style={{ padding: "9px 6px", borderBottom: "1px solid #f3f4f6" }}>
+                  <tr key={result.id} onClick={() => openDetail(result.id)} style={{ cursor: "pointer" }}>
+                    <td style={{ padding: "9px 6px", borderBottom: "1px solid #f3f4f6", textDecoration: "underline" }}>
                       {new Date(result.submittedAt).toLocaleDateString()}
                     </td>
                     <td style={{ textAlign: "right", padding: "9px 6px", borderBottom: "1px solid #f3f4f6", fontWeight: 700 }}>
@@ -170,6 +209,43 @@ export function PatientResultsPanel({ vcitaUuid }: { vcitaUuid: string }) {
               </tbody>
             </table>
           </div>
+          {detailLoading ? <p style={{ color: "#6b7280" }}>Loading result details…</p> : null}
+
+          {selectedDetail ? (
+            <div style={{ marginTop: "18px", paddingTop: "16px", borderTop: "1px solid #e5e7eb" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "center" }}>
+                <h4 style={{ margin: 0, fontSize: "18px" }}>
+                  {new Date(selectedDetail.submittedAt).toLocaleString()} — Score {selectedDetail.totalScore}
+                </h4>
+                <button type="button" onClick={() => setSelectedDetail(null)} style={{ border: 0, background: "transparent", textDecoration: "underline", cursor: "pointer" }}>
+                  Close
+                </button>
+              </div>
+              <div style={{ display: "grid", gap: "8px", marginTop: "14px" }}>
+                {BDI2_ITEMS.map((item) => {
+                  const score = selectedDetail.answers[item.key];
+                  const option = item.options.find((candidate) => candidate.value === score);
+                  const isItem9 = item.key === "q9";
+                  return (
+                    <div
+                      key={item.key}
+                      style={{
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        border: isItem9 && score > 0 ? "2px solid #dc2626" : "1px solid #e5e7eb",
+                        background: isItem9 && score > 0 ? "#fef2f2" : "#fff",
+                      }}
+                    >
+                      <strong>{item.title}</strong>
+                      <div style={{ marginTop: "4px" }}>
+                        {score}. {option?.label ?? "Recorded response"}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </>
       ) : null}
     </section>

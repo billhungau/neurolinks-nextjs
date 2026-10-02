@@ -67,6 +67,7 @@ export async function createQuestionnaireInvitation(input: {
   vcitaUuid: string;
   questionnaireCode: string;
   expiresInHours?: number;
+  allowDuplicateActive?: boolean;
 }): Promise<{
   invitationId: string;
   token: string;
@@ -96,6 +97,18 @@ export async function createQuestionnaireInvitation(input: {
   }
 
   const subjectKey = subjectKeyFromVcitaUuid(input.vcitaUuid);
+
+  if (!input.allowDuplicateActive) {
+    const now = new Date().toISOString();
+    const active = await clinicalSupabaseRequest<Array<{ id: string }>>(
+      `questionnaire_invitations?select=id&subject_key=eq.${subjectKey}&questionnaire_id=eq.${questionnaire.id}&completed_at=is.null&revoked_at=is.null&expires_at=gt.${encodeURIComponent(now)}&limit=1`,
+      { method: "GET" },
+    );
+    if (active.length > 0) {
+      throw new Error("[clinical-invitation] Active invitation already exists.");
+    }
+  }
+
   const token = randomBytes(TOKEN_BYTES).toString("base64url");
   const tokenHash = hashInvitationToken(token);
   const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString();

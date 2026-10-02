@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { PatientResultsPanel } from "./PatientResultsPanel";
+import { InvitationHistoryPanel } from "./InvitationHistoryPanel";
 
 type ApiResponse =
   | { ok: true; url: string; expiresAt: string }
@@ -29,6 +30,7 @@ export function SendQuestionnaireForm() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const requestIdRef = useRef(0);
+  const [activityRefreshKey, setActivityRefreshKey] = useState(0);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -106,6 +108,7 @@ export function SendQuestionnaireForm() {
 
     const data = (await response.json()) as ApiResponse;
     setResult(data);
+    if (data.ok) setActivityRefreshKey((value) => value + 1);
     setSubmitting(false);
   }
 
@@ -174,7 +177,8 @@ export function SendQuestionnaireForm() {
             Choose another patient
           </button>
         </div>
-        <PatientResultsPanel vcitaUuid={selected.id} />
+        <PatientResultsPanel vcitaUuid={selected.id} refreshKey={activityRefreshKey} />
+        <InvitationHistoryPanel vcitaUuid={selected.id} refreshKey={activityRefreshKey} />
         </>
       ) : null}
 

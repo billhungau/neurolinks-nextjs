@@ -9,6 +9,7 @@ type RequestBody = {
   vcitaUuid?: string;
   questionnaireCode?: string;
   expiresInHours?: number;
+  allowDuplicateActive?: boolean;
 };
 
 export async function POST(request: Request) {
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
       vcitaUuid,
       questionnaireCode,
       expiresInHours,
+      allowDuplicateActive: Boolean(body.allowDuplicateActive),
     });
 
     try {
@@ -81,7 +83,21 @@ export async function POST(request: Request) {
       { ok: true, url, expiresAt: invitation.expiresAt },
       { status: 201, headers: { "Cache-Control": "no-store" } },
     );
-  } catch {
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes("Active invitation already exists")
+    ) {
+      return Response.json(
+        {
+          ok: false,
+          error: "An active BDI-II invitation already exists for this patient. Revoke it before creating a replacement.",
+          code: "ACTIVE_INVITATION_EXISTS",
+        },
+        { status: 409, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+
     return Response.json(
       { ok: false, error: "Could not create questionnaire link." },
       { status: 500, headers: { "Cache-Control": "no-store" } },
