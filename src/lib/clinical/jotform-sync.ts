@@ -73,14 +73,14 @@ async function resolvePatient(
   const normalized = normalizePatientName(name);
 
   if (normalized) {
+    const exact = await exactNameMatch(name, clients);
+    if (exact) return { client: exact, matchMode: "exact_name", reason: null };
+
     const historicalMap = await buildBdiMappingByHistoricalName(clients);
     const inherited = historicalMap.get(normalized);
     if (inherited) {
       return { client: inherited, matchMode: "historical_mapping", reason: null };
     }
-
-    const exact = await exactNameMatch(name, clients);
-    if (exact) return { client: exact, matchMode: "exact_name", reason: null };
   }
 
   return {
