@@ -1,6 +1,7 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { createQuestionnaireInvitation } from "@/lib/clinical/invitation";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
+import { getVcitaClient } from "@/lib/clinical/vcita";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    const vcitaClient = await getVcitaClient(vcitaUuid);
+    if (!vcitaClient) {
+      return Response.json({ ok: false, error: "The selected vcita patient could not be found." }, { status: 400 });
+    }
+
     const invitation = await createQuestionnaireInvitation({
       vcitaUuid,
       questionnaireCode,
