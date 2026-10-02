@@ -21,7 +21,7 @@ export function SendQuestionnaireForm() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         vcitaUuid: String(form.get("vcitaUuid") ?? ""),
-        questionnaireCode: String(form.get("questionnaireCode") ?? "phq9"),
+        questionnaireCode: String(form.get("questionnaireCode") ?? "bdii"),
         expiresInHours: Number(form.get("expiresInHours") ?? 72),
       }),
     });
@@ -41,8 +41,8 @@ export function SendQuestionnaireForm() {
 
         <label style={{ display: "block", marginBottom: "16px" }}>
           <span style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}>Questionnaire</span>
-          <select name="questionnaireCode" defaultValue="phq9" style={{ width: "100%", padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }}>
-            <option value="phq9">PHQ-9</option>
+          <select name="questionnaireCode" defaultValue="bdii" style={{ width: "100%", padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }}>
+            <option value="bdii">PHQ-9</option>
           </select>
         </label>
 

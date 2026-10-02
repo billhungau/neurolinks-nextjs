@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { clinicalSupabaseRequest } from "./supabase";
 import { subjectKeyFromVcitaUuid } from "./pseudonym";
+import { BDI2_CODE, ensureBdi2Registry } from "./questionnaires/bdii";
 
 const TOKEN_BYTES = 32;
 const DEFAULT_EXPIRY_HOURS = 72;
@@ -46,6 +47,8 @@ export type ResolvedInvitation = {
     maxScore: number | null;
   };
   expiresAt?: string;
+  subjectKey?: string;
+  questionnaireId?: string;
 };
 
 function hashInvitationToken(rawToken: string): string {
@@ -71,6 +74,7 @@ export async function createQuestionnaireInvitation(input: {
   subjectKey: string;
 }> {
   const code = input.questionnaireCode.trim().toLowerCase();
+  if (code === BDI2_CODE) await ensureBdi2Registry();
   const expiresInHours = input.expiresInHours ?? DEFAULT_EXPIRY_HOURS;
 
   if (!/^[a-z0-9][a-z0-9_-]{1,49}$/.test(code)) {
@@ -173,6 +177,8 @@ export async function resolveQuestionnaireInvitation(
     status: "valid",
     invitationId: invitation.id,
     expiresAt: invitation.expires_at,
+    subjectKey: invitation.subject_key,
+    questionnaireId: invitation.questionnaire_id,
     questionnaire: {
       code: questionnaire.code,
       version: questionnaire.version,

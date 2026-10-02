@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   }
 
   const vcitaUuid = String(body.vcitaUuid ?? "").trim();
-  const questionnaireCode = String(body.questionnaireCode ?? "phq9").trim().toLowerCase();
+  const questionnaireCode = String(body.questionnaireCode ?? "bdii").trim().toLowerCase();
   const expiresInHours = Number(body.expiresInHours ?? 72);
 
   if (!vcitaUuid || vcitaUuid.length > 200) {
