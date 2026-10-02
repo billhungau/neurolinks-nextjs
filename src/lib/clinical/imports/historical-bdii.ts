@@ -188,7 +188,12 @@ export function parseHistoricalBdiSubmission(submission: JotformSubmission) {
   const scores: number[] = [];
 
   for (const item of BDI2_ITEMS) {
-    const raw = answerText(findAnswer(answers, [item.title]));
+    const raw = answerText(
+      findAnswer(answers, [
+        item.title,
+        item.title.replace(/^\d+\.\s*/, ""),
+      ]),
+    );
     if (!raw) throw new Error("[historical-bdii] Missing BDI-II item.");
 
     let score = numericPrefix(raw);
