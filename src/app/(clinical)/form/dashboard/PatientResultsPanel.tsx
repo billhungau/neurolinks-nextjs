@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BDI2_ITEMS, getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
-import type { ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
+import type { ImportedField, ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
 
 type Result = {
   id: string;
@@ -30,6 +30,13 @@ type ApiResponse =
 type DetailResponse =
   | { ok: true; result: ResultDetail }
   | { ok: false; error: string };
+
+type ComparisonItem = {
+  key: string;
+  label: string;
+  answer: string;
+  score: number | null;
+};
 
 const ORDER = ["bdii", "bai", "ybocs", "pss"];
 const LABELS: Record<string, string> = {
@@ -83,9 +90,7 @@ function TrendChart({ results }: { results: Result[] }) {
               <title>{dateLabel}: score {result.totalScore}</title>
               <circle cx={x} cy={y} r="5" fill="currentColor" />
               <text x={x} y={y - 10} textAnchor="middle" fontSize="12" fontWeight="700" fill="currentColor">{result.totalScore}</text>
-              {showDate ? (
-                <text x={x} y={height - 22} textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.7">{dateLabel}</text>
-              ) : null}
+              {showDate ? <text x={x} y={height - 22} textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.7">{dateLabel}</text> : null}
             </g>
           );
         })}
@@ -94,75 +99,154 @@ function TrendChart({ results }: { results: Result[] }) {
   );
 }
 
+function numericPrefix(value: string): number | null {
+  const match = value.trim().match(/^([0-9]+)(?:[.\s]|$)/);
+  return match ? Number(match[1]) : null;
+}
+
+function bdiItem(detail: ResultDetail, itemKey: string): ComparisonItem {
+  const item = BDI2_ITEMS.find((candidate) => candidate.key === itemKey)!;
+  const rawAnswer = detail.answers[item.key] as number | { optionId?: string; score?: number; legacyText?: string } | undefined;
+  const isLegacy = typeof rawAnswer === "number";
+  const score = typeof rawAnswer === "number" ? rawAnswer : typeof rawAnswer?.score === "number" ? rawAnswer.score : null;
+  const exact = typeof rawAnswer === "object" && rawAnswer?.optionId ? getBdi2OptionById(item.key, rawAnswer.optionId) : null;
+  const matching = score === null ? [] : item.options.filter((candidate) => candidate.value === score);
+  const option = exact?.option ?? matching[0] ?? null;
+  const legacyText = typeof rawAnswer === "object" && rawAnswer?.legacyText ? rawAnswer.legacyText : null;
+  const ambiguousLegacy = isLegacy && matching.length > 1;
+
+  return {
+    key: item.key,
+    label: item.title,
+    score,
+    answer: legacyText
+      ? legacyText
+      : ambiguousLegacy
+        ? `${score}. Legacy result — direction of this response was not captured.`
+        : score === null
+          ? "—"
+          : `${score}. ${option?.label ?? "Recorded response"}`,
+  };
+}
+
+function importedFieldItems(detail: ResultDetail, field: ImportedField): ComparisonItem[] {
+  if (field.kind === "display") return [];
+
+  if (field.kind === "matrix_radio") {
+    return field.rows.map((row, rowIndex) => {
+      const value = String(detail.answers[`${field.qid}:${rowIndex}`] ?? "");
+      const columnIndex = field.columns.indexOf(value);
+      return {
+        key: `${field.qid}:${rowIndex}`,
+        label: row,
+        answer: value || "—",
+        score: value ? numericPrefix(value) ?? (columnIndex >= 0 ? columnIndex : null) : null,
+      };
+    });
+  }
+
+  const raw = detail.answers[field.qid];
+  const answer = Array.isArray(raw) ? raw.join(", ") : String(raw ?? "");
+  let score: number | null = null;
+
+  if (field.kind === "radio" && answer) {
+    const optionIndex = field.options.indexOf(answer);
+    score = detail.questionnaireCode === "ybocs"
+      ? (optionIndex >= 0 ? optionIndex : null)
+      : numericPrefix(answer);
+  }
+
+  return [{
+    key: field.qid,
+    label: field.text,
+    answer: answer || "—",
+    score,
+  }];
+}
+
+function comparisonItems(detail: ResultDetail): ComparisonItem[] {
+  if (detail.questionnaireCode === "bdii") {
+    return BDI2_ITEMS.map((item) => bdiItem(detail, item.key));
+  }
+  if (!detail.schema) return [];
+  return detail.schema.fields.flatMap((field) => importedFieldItems(detail, field));
+}
+
 function ImportedAnswers({ detail }: { detail: ResultDetail }) {
-  const schema = detail.schema;
-  if (!schema) return <p style={{ color: "#6b7280" }}>Exact questionnaire schema is unavailable for this result.</p>;
+  const items = comparisonItems(detail);
+  if (!items.length) return <p style={{ color: "#6b7280" }}>Exact questionnaire schema is unavailable for this result.</p>;
 
   return (
     <div style={{ display: "grid", gap: "9px", marginTop: "14px" }}>
-      {schema.fields.map((field) => {
-        if (field.kind === "display") return null;
-
-        if (field.kind === "matrix_radio") {
-          return field.rows.map((row, rowIndex) => {
-            const value = String(detail.answers[`${field.qid}:${rowIndex}`] ?? "—");
-            return (
-              <div key={`${field.qid}:${rowIndex}`} style={{ padding: "10px 12px", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
-                <strong>{row}</strong>
-                <div style={{ marginTop: "4px" }}>{value}</div>
-              </div>
-            );
-          });
-        }
-
-        const raw = detail.answers[field.qid];
-        const value = Array.isArray(raw) ? raw.join(", ") : String(raw ?? "—");
-        return (
-          <div key={field.qid} style={{ padding: "10px 12px", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
-            <strong>{field.text}</strong>
-            <div style={{ marginTop: "4px", whiteSpace: "pre-line" }}>{value}</div>
-          </div>
-        );
-      })}
+      {items.map((item) => (
+        <div key={item.key} style={{ padding: "10px 12px", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
+          <strong>{item.label}</strong>
+          <div style={{ marginTop: "4px", whiteSpace: "pre-line" }}>{item.answer}</div>
+        </div>
+      ))}
     </div>
   );
 }
 
-function BdiAnswers({ detail }: { detail: ResultDetail }) {
-  return (
-    <div style={{ display: "grid", gap: "8px", marginTop: "14px" }}>
-      {BDI2_ITEMS.map((item) => {
-        const rawAnswer = detail.answers[item.key] as number | { optionId?: string; score?: number; legacyText?: string } | undefined;
-        const isLegacy = typeof rawAnswer === "number";
-        const score = typeof rawAnswer === "number" ? rawAnswer : Number(rawAnswer?.score ?? 0);
-        const exact = typeof rawAnswer === "object" && rawAnswer?.optionId ? getBdi2OptionById(item.key, rawAnswer.optionId) : null;
-        const matching = item.options.filter((candidate) => candidate.value === score);
-        const option = exact?.option ?? matching[0] ?? null;
-        const legacyText =
-          typeof rawAnswer === "object" && rawAnswer?.legacyText
-            ? rawAnswer.legacyText
-            : null;
-        const ambiguousLegacy = isLegacy && matching.length > 1;
-        const isItem9 = item.key === "q9";
+function ComparisonTable({ details }: { details: ResultDetail[] }) {
+  const sorted = [...details].sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+  if (sorted.length < 2) return null;
 
-        return (
-          <div key={item.key} style={{
-            padding: "10px 12px",
-            borderRadius: "8px",
-            border: isItem9 && score > 0 ? "2px solid #dc2626" : "1px solid #e5e7eb",
-            background: isItem9 && score > 0 ? "#fef2f2" : "#fff",
-          }}>
-            <strong>{item.title}</strong>
-            <div style={{ marginTop: "4px" }}>
-              {legacyText
-                ? legacyText
-                : ambiguousLegacy
-                  ? `${score}. Legacy result — direction of this response was not captured.`
-                  : `${score}. ${option?.label ?? "Recorded response"}`}
-            </div>
-          </div>
-        );
-      })}
+  const itemSets = sorted.map(comparisonItems);
+  const keys = itemSets[0].map((item) => item.key);
+  const first = new Map(itemSets[0].map((item) => [item.key, item]));
+  const last = new Map(itemSets[itemSets.length - 1].map((item) => [item.key, item]));
+
+  return (
+    <div style={{ marginTop: "18px", paddingTop: "18px", borderTop: "1px solid #e5e7eb" }}>
+      <h4 style={{ margin: "0 0 6px", fontSize: "18px" }}>Item-by-item comparison</h4>
+      <p style={{ margin: "0 0 14px", color: "#6b7280", fontSize: "14px" }}>
+        Change compares the earliest selected assessment with the latest selected assessment. Negative numeric change indicates a lower symptom score.
+      </p>
+      <div style={{ overflowX: "auto", border: "1px solid #e5e7eb", borderRadius: "10px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", minWidth: `${420 + sorted.length * 190}px` }}>
+          <thead>
+            <tr>
+              <th style={{ position: "sticky", left: 0, zIndex: 2, background: "#fff", textAlign: "left", padding: "10px", borderBottom: "1px solid #e5e7eb", minWidth: "180px" }}>Symptom / item</th>
+              {sorted.map((detail) => (
+                <th key={detail.id} style={{ textAlign: "left", padding: "10px", borderBottom: "1px solid #e5e7eb", minWidth: "180px" }}>
+                  <div>{new Date(detail.submittedAt).toLocaleDateString()}</div>
+                  <div style={{ marginTop: "3px", color: "#6b7280", fontWeight: 500 }}>Total {detail.totalScore}</div>
+                </th>
+              ))}
+              <th style={{ textAlign: "center", padding: "10px", borderBottom: "1px solid #e5e7eb", minWidth: "90px" }}>Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            {keys.map((key) => {
+              const baseline = first.get(key);
+              const latest = last.get(key);
+              const change = baseline?.score !== null && baseline?.score !== undefined && latest?.score !== null && latest?.score !== undefined
+                ? latest.score - baseline.score
+                : null;
+              return (
+                <tr key={key}>
+                  <td style={{ position: "sticky", left: 0, background: "#fff", padding: "10px", borderBottom: "1px solid #f3f4f6", verticalAlign: "top", fontWeight: 700 }}>
+                    {baseline?.label ?? key}
+                  </td>
+                  {itemSets.map((items, index) => {
+                    const item = items.find((candidate) => candidate.key === key);
+                    return (
+                      <td key={`${sorted[index].id}:${key}`} style={{ padding: "10px", borderBottom: "1px solid #f3f4f6", verticalAlign: "top" }}>
+                        <div>{item?.answer ?? "—"}</div>
+                        {item?.score !== null && item?.score !== undefined ? <div style={{ color: "#6b7280", marginTop: "4px" }}>Score {item.score}</div> : null}
+                      </td>
+                    );
+                  })}
+                  <td style={{ textAlign: "center", padding: "10px", borderBottom: "1px solid #f3f4f6", verticalAlign: "top", fontWeight: 800 }}>
+                    {change === null ? "—" : change > 0 ? `+${change}` : String(change)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -174,6 +258,10 @@ export function PatientResultsPanel({ vcitaUuid, refreshKey }: { vcitaUuid: stri
   const [detailLoading, setDetailLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [comparisonDetails, setComparisonDetails] = useState<ResultDetail[]>([]);
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [comparisonError, setComparisonError] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -202,18 +290,56 @@ export function PatientResultsPanel({ vcitaUuid, refreshKey }: { vcitaUuid: stri
     return () => controller.abort();
   }, [vcitaUuid, refreshKey]);
 
+  useEffect(() => {
+    setCompareIds([]);
+    setComparisonDetails([]);
+    setComparisonError(null);
+    setSelectedDetail(null);
+  }, [activeCode, vcitaUuid]);
+
   const activeResults = results.filter((result) => result.questionnaireCode === activeCode);
   const availableCodes = ORDER.filter((code) => results.some((result) => result.questionnaireCode === code));
+
+  async function fetchDetail(id: string): Promise<ResultDetail | null> {
+    const response = await fetch(`/form/api/results/${encodeURIComponent(id)}/?vcitaUuid=${encodeURIComponent(vcitaUuid)}`, { cache: "no-store" });
+    const data = (await response.json()) as DetailResponse;
+    return data.ok ? data.result : null;
+  }
 
   async function openDetail(id: string) {
     setDetailLoading(true);
     setSelectedDetail(null);
     try {
-      const response = await fetch(`/form/api/results/${encodeURIComponent(id)}/?vcitaUuid=${encodeURIComponent(vcitaUuid)}`, { cache: "no-store" });
-      const data = (await response.json()) as DetailResponse;
-      if (data.ok) setSelectedDetail(data.result);
+      const detail = await fetchDetail(id);
+      if (detail) setSelectedDetail(detail);
     } finally {
       setDetailLoading(false);
+    }
+  }
+
+  function toggleCompare(id: string) {
+    setComparisonDetails([]);
+    setComparisonError(null);
+    setCompareIds((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
+  }
+
+  async function compareSelected() {
+    if (compareIds.length < 2) return;
+    setComparisonLoading(true);
+    setComparisonError(null);
+    setComparisonDetails([]);
+    try {
+      const details = await Promise.all(compareIds.map(fetchDetail));
+      const valid = details.filter((detail): detail is ResultDetail => Boolean(detail));
+      if (valid.length !== compareIds.length) {
+        setComparisonError("One or more selected assessments could not be loaded.");
+        return;
+      }
+      setComparisonDetails(valid);
+    } catch {
+      setComparisonError("Could not load the selected assessments for comparison.");
+    } finally {
+      setComparisonLoading(false);
     }
   }
 
@@ -229,7 +355,7 @@ export function PatientResultsPanel({ vcitaUuid, refreshKey }: { vcitaUuid: stri
         <>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
             {availableCodes.map((code) => (
-              <button key={code} type="button" onClick={() => { setActiveCode(code); setSelectedDetail(null); }}
+              <button key={code} type="button" onClick={() => setActiveCode(code)}
                 style={{
                   padding: "8px 12px",
                   borderRadius: "999px",
@@ -246,34 +372,62 @@ export function PatientResultsPanel({ vcitaUuid, refreshKey }: { vcitaUuid: stri
 
           <TrendChart results={activeResults} />
 
+          {activeResults.length > 1 ? (
+            <div style={{ marginTop: "16px", padding: "12px 14px", border: "1px solid #e5e7eb", borderRadius: "10px", background: "#f9fafb" }}>
+              <strong>Compare assessments</strong>
+              <div style={{ marginTop: "8px", color: "#4b5563", fontSize: "14px" }}>
+                Select two or more dates below, then compare item by item.
+              </div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "10px" }}>
+                <button type="button" onClick={compareSelected} disabled={compareIds.length < 2 || comparisonLoading}
+                  style={{ padding: "8px 12px", border: 0, borderRadius: "8px", background: "#111827", color: "#fff", fontWeight: 700, opacity: compareIds.length < 2 ? 0.45 : 1, cursor: compareIds.length < 2 ? "not-allowed" : "pointer" }}>
+                  {comparisonLoading ? "Loading comparison…" : `Compare selected (${compareIds.length})`}
+                </button>
+                {compareIds.length > 0 ? (
+                  <button type="button" onClick={() => { setCompareIds([]); setComparisonDetails([]); }}
+                    style={{ padding: "8px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", cursor: "pointer" }}>
+                    Clear selection
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
           <div style={{ overflowX: "auto", marginTop: "16px" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
               <thead>
                 <tr>
+                  {activeResults.length > 1 ? <th style={{ textAlign: "center", padding: "8px 6px", borderBottom: "1px solid #e5e7eb" }}>Compare</th> : null}
                   <th style={{ textAlign: "left", padding: "8px 6px", borderBottom: "1px solid #e5e7eb" }}>Date</th>
                   <th style={{ textAlign: "right", padding: "8px 6px", borderBottom: "1px solid #e5e7eb" }}>Score</th>
                   {activeCode === "ybocs" ? <>
                     <th style={{ textAlign: "right", padding: "8px 6px", borderBottom: "1px solid #e5e7eb" }}>Obs.</th>
                     <th style={{ textAlign: "right", padding: "8px 6px", borderBottom: "1px solid #e5e7eb" }}>Comp.</th>
                   </> : null}
-                  {activeCode === "bdii" ? <th style={{ textAlign: "left", padding: "8px 6px", borderBottom: "1px solid #e5e7eb" }}>Item 9</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {[...activeResults].reverse().map((result) => (
-                  <tr key={result.id} onClick={() => openDetail(result.id)} style={{ cursor: "pointer" }}>
-                    <td style={{ padding: "9px 6px", borderBottom: "1px solid #f3f4f6", textDecoration: "underline" }}>{new Date(result.submittedAt).toLocaleDateString()}</td>
+                  <tr key={result.id}>
+                    {activeResults.length > 1 ? (
+                      <td style={{ textAlign: "center", padding: "9px 6px", borderBottom: "1px solid #f3f4f6" }}>
+                        <input type="checkbox" checked={compareIds.includes(result.id)} onChange={() => toggleCompare(result.id)} aria-label={`Compare ${new Date(result.submittedAt).toLocaleDateString()}`} />
+                      </td>
+                    ) : null}
+                    <td onClick={() => openDetail(result.id)} style={{ padding: "9px 6px", borderBottom: "1px solid #f3f4f6", textDecoration: "underline", cursor: "pointer" }}>{new Date(result.submittedAt).toLocaleDateString()}</td>
                     <td style={{ textAlign: "right", padding: "9px 6px", borderBottom: "1px solid #f3f4f6", fontWeight: 700 }}>{result.totalScore}</td>
                     {activeCode === "ybocs" ? <>
                       <td style={{ textAlign: "right", padding: "9px 6px", borderBottom: "1px solid #f3f4f6" }}>{result.obsessionScore ?? "—"}</td>
                       <td style={{ textAlign: "right", padding: "9px 6px", borderBottom: "1px solid #f3f4f6" }}>{result.compulsionScore ?? "—"}</td>
                     </> : null}
-                    {activeCode === "bdii" ? <td style={{ padding: "9px 6px", borderBottom: "1px solid #f3f4f6", fontWeight: result.item9Positive ? 700 : 400 }}>{result.item9Positive ? `Positive (${result.item9Score})` : "0"}</td> : null}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          {comparisonError ? <p role="alert" style={{ marginTop: "12px", color: "#991b1b" }}>{comparisonError}</p> : null}
+          {comparisonDetails.length >= 2 ? <ComparisonTable details={comparisonDetails} /> : null}
 
           {detailLoading ? <p style={{ color: "#6b7280" }}>Loading result details…</p> : null}
 
@@ -287,10 +441,7 @@ export function PatientResultsPanel({ vcitaUuid, refreshKey }: { vcitaUuid: stri
                 </div>
                 <button type="button" onClick={() => setSelectedDetail(null)} style={{ border: 0, background: "transparent", textDecoration: "underline", cursor: "pointer" }}>Close</button>
               </div>
-
-              {selectedDetail.questionnaireCode === "bdii"
-                ? <BdiAnswers detail={selectedDetail} />
-                : <ImportedAnswers detail={selectedDetail} />}
+              <ImportedAnswers detail={selectedDetail} />
             </div>
           ) : null}
         </>
