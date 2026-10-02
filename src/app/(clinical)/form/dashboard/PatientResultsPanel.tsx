@@ -40,19 +40,22 @@ const LABELS: Record<string, string> = {
 };
 
 function TrendChart({ results }: { results: Result[] }) {
-  const width = 620;
-  const height = 180;
-  const pad = 28;
+  const width = 720;
+  const height = 230;
+  const padLeft = 34;
+  const padRight = 24;
+  const padTop = 30;
+  const padBottom = 52;
   const maxScore = Math.max(1, results[0]?.maxScore ?? Math.max(...results.map((r) => r.totalScore), 1));
 
   const points = useMemo(() => {
     if (!results.length) return "";
-    const usableWidth = width - pad * 2;
-    const usableHeight = height - pad * 2;
+    const usableWidth = width - padLeft - padRight;
+    const usableHeight = height - padTop - padBottom;
     return results
       .map((result, index) => {
-        const x = results.length === 1 ? width / 2 : pad + (index / (results.length - 1)) * usableWidth;
-        const y = height - pad - (Math.min(maxScore, Math.max(0, result.totalScore)) / maxScore) * usableHeight;
+        const x = results.length === 1 ? width / 2 : padLeft + (index / (results.length - 1)) * usableWidth;
+        const y = height - padBottom - (Math.min(maxScore, Math.max(0, result.totalScore)) / maxScore) * usableHeight;
         return `${x},${y}`;
       })
       .join(" ");
@@ -63,20 +66,26 @@ function TrendChart({ results }: { results: Result[] }) {
   return (
     <div style={{ overflowX: "auto", marginTop: "14px" }}>
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Questionnaire score trend" style={{ width: "100%", minWidth: "420px", height: "auto" }}>
-        <line x1={pad} y1={height - pad} x2={width - pad} y2={height - pad} stroke="currentColor" opacity="0.25" />
-        <line x1={pad} y1={pad} x2={pad} y2={height - pad} stroke="currentColor" opacity="0.25" />
-        <text x="4" y={pad + 4} fontSize="11" fill="currentColor" opacity="0.65">{maxScore}</text>
-        <text x="10" y={height - pad + 4} fontSize="11" fill="currentColor" opacity="0.65">0</text>
+        <line x1={padLeft} y1={height - padBottom} x2={width - padRight} y2={height - padBottom} stroke="currentColor" opacity="0.25" />
+        <line x1={padLeft} y1={padTop} x2={padLeft} y2={height - padBottom} stroke="currentColor" opacity="0.25" />
+        <text x="4" y={padTop + 4} fontSize="11" fill="currentColor" opacity="0.65">{maxScore}</text>
+        <text x="10" y={height - padBottom + 4} fontSize="11" fill="currentColor" opacity="0.65">0</text>
         {results.length > 1 ? <polyline points={points} fill="none" stroke="currentColor" strokeWidth="2.5" /> : null}
         {results.map((result, index) => {
-          const usableWidth = width - pad * 2;
-          const usableHeight = height - pad * 2;
-          const x = results.length === 1 ? width / 2 : pad + (index / (results.length - 1)) * usableWidth;
-          const y = height - pad - (result.totalScore / maxScore) * usableHeight;
+          const usableWidth = width - padLeft - padRight;
+          const usableHeight = height - padTop - padBottom;
+          const x = results.length === 1 ? width / 2 : padLeft + (index / (results.length - 1)) * usableWidth;
+          const y = height - padBottom - (result.totalScore / maxScore) * usableHeight;
+          const dateLabel = new Date(result.submittedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: results.length <= 6 ? "2-digit" : undefined });
+          const showDate = results.length <= 8 || index === 0 || index === results.length - 1 || index === Math.floor((results.length - 1) / 2);
           return (
             <g key={result.id}>
+              <title>{dateLabel}: score {result.totalScore}</title>
               <circle cx={x} cy={y} r="5" fill="currentColor" />
               <text x={x} y={y - 10} textAnchor="middle" fontSize="12" fontWeight="700" fill="currentColor">{result.totalScore}</text>
+              {showDate ? (
+                <text x={x} y={height - 22} textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.7">{dateLabel}</text>
+              ) : null}
             </g>
           );
         })}
