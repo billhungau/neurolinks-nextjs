@@ -91,7 +91,7 @@ export async function POST(request: Request) {
       return Response.json(
         {
           ok: false,
-          error: "An active BDI-II invitation already exists for this patient. Revoke it before creating a replacement.",
+          error: "An active invitation for this questionnaire already exists for this patient. Revoke it before creating a replacement.",
           code: "ACTIVE_INVITATION_EXISTS",
         },
         { status: 409, headers: { "Cache-Control": "no-store" } },
