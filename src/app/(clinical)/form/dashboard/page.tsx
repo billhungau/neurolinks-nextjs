@@ -18,9 +18,12 @@ export default async function ClinicianDashboardPage() {
             <h1 style={{ margin: 0, fontSize: "32px" }}>Clinical questionnaires</h1>
             <p style={{ margin: "8px 0 0", color: "#4b5563" }}>{session.email ?? "Authenticated clinician"}</p>
           </div>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <Link href="/form/dashboard/patients/" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none", fontWeight: 700 }}>
+              Patient results
+            </Link>
             <Link href="/form/dashboard/import/" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none" }}>
-              Import historical BDI-II
+              Historical migration
             </Link>
             <form action="/form/api/auth/logout/" method="post">
               <button type="submit" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", cursor: "pointer" }}>Sign out</button>
