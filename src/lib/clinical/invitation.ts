@@ -68,6 +68,7 @@ export async function createQuestionnaireInvitation(input: {
   token: string;
   path: string;
   expiresAt: string;
+  subjectKey: string;
 }> {
   const code = input.questionnaireCode.trim().toLowerCase();
   const expiresInHours = input.expiresInHours ?? DEFAULT_EXPIRY_HOURS;
@@ -118,6 +119,7 @@ export async function createQuestionnaireInvitation(input: {
     token,
     path: `/form/q/${token}`,
     expiresAt: created.expires_at,
+    subjectKey,
   };
 }
 
