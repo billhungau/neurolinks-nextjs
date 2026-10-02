@@ -187,6 +187,9 @@ export function SendQuestionnaireForm() {
           <span style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}>Questionnaire</span>
           <select name="questionnaireCode" defaultValue="bdii" style={{ width: "100%", padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }}>
             <option value="bdii">BDI-II</option>
+            <option value="bai">Beck Anxiety Inventory (BAI)</option>
+            <option value="ybocs">Y-BOCS</option>
+            <option value="pss">PTSD Symptom Scale (PSS)</option>
           </select>
         </label>
 
