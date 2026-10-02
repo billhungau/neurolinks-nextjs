@@ -18,6 +18,7 @@ type JotformAnswer = {
 
 export type JotformSubmission = {
   id?: string;
+  form_id?: string;
   created_at?: string;
   answers?: Record<string, JotformAnswer>;
 };
