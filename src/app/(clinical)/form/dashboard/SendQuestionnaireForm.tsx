@@ -114,7 +114,7 @@ export function SendQuestionnaireForm() {
         <label style={{ display: "block", marginBottom: "8px" }}>
           <span style={{ display: "block", marginBottom: "6px", fontWeight: 600 }}>Find patient in vcita</span>
           <span style={{ display: "block", marginBottom: "8px", color: "#6b7280", fontSize: "14px" }}>
-            Start typing a name, email, phone, or vcita UUID. Results update automatically.
+            Start typing a patient name, email, or phone number. Results update automatically.
           </span>
           <input
             value={query}
@@ -125,7 +125,7 @@ export function SendQuestionnaireForm() {
             }}
             minLength={2}
             autoComplete="off"
-            aria-label="Search vcita patients"
+            aria-label="Search vcita patients by name, email, or phone"
             style={{ width: "100%", boxSizing: "border-box", padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }}
           />
         </label>
