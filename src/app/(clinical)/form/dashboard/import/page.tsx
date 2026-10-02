@@ -19,6 +19,14 @@ export default async function HistoricalBdiImportPage() {
           <p style={{ color: "#4b5563", lineHeight: 1.55, maxWidth: "760px" }}>
             Reconcile historical Jotform questionnaire submissions with vcita patients using the same normalized-name matching rules before migration to the clinical database.
           </p>
+          <div style={{ marginTop: "14px" }}>
+            <Link
+              href="/form/dashboard/import/verify-bdii/"
+              style={{ display: "inline-block", padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none", fontWeight: 700 }}
+            >
+              Verify BDI-II migration
+            </Link>
+          </div>
         </header>
 
         <section style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(17,24,39,.05)" }}>
