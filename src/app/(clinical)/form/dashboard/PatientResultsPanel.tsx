@@ -123,12 +123,16 @@ function BdiAnswers({ detail }: { detail: ResultDetail }) {
   return (
     <div style={{ display: "grid", gap: "8px", marginTop: "14px" }}>
       {BDI2_ITEMS.map((item) => {
-        const rawAnswer = detail.answers[item.key] as number | { optionId?: string; score?: number } | undefined;
+        const rawAnswer = detail.answers[item.key] as number | { optionId?: string; score?: number; legacyText?: string } | undefined;
         const isLegacy = typeof rawAnswer === "number";
         const score = typeof rawAnswer === "number" ? rawAnswer : Number(rawAnswer?.score ?? 0);
         const exact = typeof rawAnswer === "object" && rawAnswer?.optionId ? getBdi2OptionById(item.key, rawAnswer.optionId) : null;
         const matching = item.options.filter((candidate) => candidate.value === score);
         const option = exact?.option ?? matching[0] ?? null;
+        const legacyText =
+          typeof rawAnswer === "object" && rawAnswer?.legacyText
+            ? rawAnswer.legacyText
+            : null;
         const ambiguousLegacy = isLegacy && matching.length > 1;
         const isItem9 = item.key === "q9";
 
@@ -141,7 +145,11 @@ function BdiAnswers({ detail }: { detail: ResultDetail }) {
           }}>
             <strong>{item.title}</strong>
             <div style={{ marginTop: "4px" }}>
-              {ambiguousLegacy ? `${score}. Legacy result — direction of this response was not captured.` : `${score}. ${option?.label ?? "Recorded response"}`}
+              {legacyText
+                ? legacyText
+                : ambiguousLegacy
+                  ? `${score}. Legacy result — direction of this response was not captured.`
+                  : `${score}. ${option?.label ?? "Recorded response"}`}
             </div>
           </div>
         );
