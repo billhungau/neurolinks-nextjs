@@ -27,6 +27,7 @@ type Row = {
   totalScore: number | null;
   alreadyImported: boolean;
   status: "unique_exact" | "ambiguous" | "no_match";
+  matchBasis?: "bdii_mapping" | "exact_name" | null;
   matches: Match[];
 };
 
@@ -70,7 +71,7 @@ const statusLabel: Record<Row["status"], string> = {
 
 async function importRecords(
   code: Code,
-  records: Array<{ submissionId: string; vcitaUuid: string; matchMode: "exact_name" | "manual" }>,
+  records: Array<{ submissionId: string; vcitaUuid: string; matchMode: "exact_name" | "bdii_mapping" | "manual" }>,
 ) {
   const endpoint =
     code === "bdii"
@@ -246,7 +247,7 @@ export function HistoricalBdiImportPortal() {
       .map((row) => ({
         submissionId: row.submissionId,
         vcitaUuid: row.matches[0].id,
-        matchMode: "exact_name" as const,
+        matchMode: row.matchBasis === "bdii_mapping" ? "bdii_mapping" as const : "exact_name" as const,
       }));
 
     if (!records.length) {
@@ -449,6 +450,11 @@ export function HistoricalBdiImportPortal() {
                         ) : row.matches[0] ? (
                           <div>
                             <strong>{[row.matches[0].firstName, row.matches[0].lastName].filter(Boolean).join(" ")}</strong>
+                            {row.matchBasis === "bdii_mapping" ? (
+                              <div style={{ color: "#166534", fontSize: "12px", fontWeight: 700, marginTop: "2px" }}>
+                                Reused from BDI-II mapping
+                              </div>
+                            ) : null}
                             <div style={{ color: "#6b7280", fontSize: "12px" }}>
                               {[row.matches[0].email, row.matches[0].phone].filter(Boolean).join(" · ")}
                             </div>
