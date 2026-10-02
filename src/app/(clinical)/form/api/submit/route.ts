@@ -1,5 +1,6 @@
 import { resolveQuestionnaireInvitation } from "@/lib/clinical/invitation";
-import { BDI2_CODE, scoreBdi2 } from "@/lib/clinical/questionnaires/bdii";
+import { scoreBdi2 } from "@/lib/clinical/questionnaires/bdii";
+import { BDI2_CODE } from "@/lib/clinical/questionnaires/bdii-definition";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 
 export const runtime = "nodejs";
