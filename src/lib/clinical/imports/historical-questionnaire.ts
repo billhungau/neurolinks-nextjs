@@ -389,8 +389,9 @@ export async function importHistoricalQuestionnaireRecord(input: {
   code: HistoricalImportedCode;
   submissionId: string;
   vcitaUuid: string;
-  matchMode: "exact_name" | "bdii_mapping" | "manual";
-  clinicianId: string;
+  matchMode: "exact_name" | "bdii_mapping" | "historical_mapping" | "patient_link_token" | "manual";
+  clinicianId?: string | null;
+  eventType?: "HISTORICAL_RESULT_IMPORTED" | "JOTFORM_RESULT_SYNCED";
 }) {
   const { code, submissionId, vcitaUuid, matchMode, clinicianId } = input;
   const [submission, registry] = await Promise.all([
@@ -463,7 +464,8 @@ export async function importHistoricalQuestionnaireRecord(input: {
 
   const clinicalFlags = {
     ...scored.clinicalFlags,
-    historical_import: true,
+    historical_import: input.eventType !== "JOTFORM_RESULT_SYNCED",
+    live_jotform_sync: input.eventType === "JOTFORM_RESULT_SYNCED",
     source: "jotform",
   };
 
@@ -493,7 +495,7 @@ export async function importHistoricalQuestionnaireRecord(input: {
     method: "POST",
     prefer: "return=minimal",
     body: JSON.stringify({
-      event_type: "HISTORICAL_RESULT_IMPORTED",
+      event_type: input.eventType ?? "HISTORICAL_RESULT_IMPORTED",
       subject_key: subjectKey,
       invitation_id: invitationId,
       assessment_id: assessmentId,
@@ -502,7 +504,7 @@ export async function importHistoricalQuestionnaireRecord(input: {
         source: "jotform",
         source_submission_id: submissionId,
         matched_by: matchMode,
-        clinician_user_id: clinicianId,
+        ...(clinicianId ? { clinician_user_id: clinicianId } : {}),
       },
     }),
   });
