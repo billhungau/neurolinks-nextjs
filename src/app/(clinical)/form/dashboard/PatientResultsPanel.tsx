@@ -16,19 +16,18 @@ type ApiResponse =
   | { ok: true; results: Result[] }
   | { ok: false; error: string };
 
+type ResultDetail = {
+  id: string;
+  submittedAt: string;
+  totalScore: number;
+  severity: string | null;
+  answers: Record<string, number>;
+  item9Positive: boolean;
+  item9Score: number;
+};
+
 type DetailResponse =
-  | {
-      ok: true;
-      result: {
-        id: string;
-        submittedAt: string;
-        totalScore: number;
-        severity: string | null;
-        answers: Record<string, number>;
-        item9Positive: boolean;
-        item9Score: number;
-      };
-    }
+  | { ok: true; result: ResultDetail }
   | { ok: false; error: string };
 
 function TrendChart({ results }: { results: Result[] }) {
@@ -99,7 +98,7 @@ export function PatientResultsPanel({
   refreshKey: number;
 }) {
   const [results, setResults] = useState<Result[]>([]);
-  const [selectedDetail, setSelectedDetail] = useState<DetailResponse extends { ok: true; result: infer R } ? R | null : never>(null);
+  const [selectedDetail, setSelectedDetail] = useState<ResultDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
