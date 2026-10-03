@@ -135,7 +135,8 @@ export function scoreNativeQuestionnaire(schema: NativeQuestionnaireSchema, answ
     }
 
     if (field.kind === "multiple") {
-      const raw = Array.isArray(answers[field.id]) ? answers[field.id].map(String) : [];
+      const answerValue = answers[field.id];
+      const raw = Array.isArray(answerValue) ? answerValue.map(String) : [];
       if (field.required && raw.length === 0) throw new Error("Incomplete response.");
       for (const selected of raw) {
         const option = field.options.find((candidate) => candidate.id === selected);
