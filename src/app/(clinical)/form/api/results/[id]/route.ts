@@ -2,21 +2,27 @@ import { getClinicianSession } from "@/lib/clinical/auth";
 import { subjectKeyFromVcitaUuid } from "@/lib/clinical/pseudonym";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 import type { ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
+import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
 
 export const runtime = "nodejs";
+
+type QuestionnaireMeta = {
+  schema?: ImportedQuestionnaireSchema;
+  native_schema?: NativeQuestionnaireSchema;
+};
 
 type QuestionnaireRelation =
   | {
       code: string;
       name: string;
       max_score: number | null;
-      metadata?: { schema?: ImportedQuestionnaireSchema } | null;
+      metadata?: QuestionnaireMeta | null;
     }
   | Array<{
       code: string;
       name: string;
       max_score: number | null;
-      metadata?: { schema?: ImportedQuestionnaireSchema } | null;
+      metadata?: QuestionnaireMeta | null;
     }>
   | null;
 
@@ -91,6 +97,7 @@ export async function GET(
           questionnaireName: questionnaire.name,
           maxScore: questionnaire.max_score,
           schema: questionnaire.metadata?.schema ?? null,
+          nativeSchema: questionnaire.metadata?.native_schema ?? null,
           item9Positive: Boolean(row.clinical_flags?.bdii_item9_positive),
           item9Score: Number(row.clinical_flags?.bdii_item9_score ?? 0),
           obsessionScore:
