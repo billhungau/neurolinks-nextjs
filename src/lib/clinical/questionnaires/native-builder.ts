@@ -1,4 +1,9 @@
 import { BDI2_INSTRUCTIONS, BDI2_ITEMS, BDI2_NAME } from "./bdii-definition";
+import type {
+  ImportedField,
+  ImportedQuestionnaireCode,
+  ImportedQuestionnaireSchema,
+} from "./jotform-import";
 
 export type NativeOption = {
   id: string;
@@ -9,6 +14,8 @@ export type NativeOption = {
 export type NativeField =
   | { kind: "paragraph"; id: string; text: string }
   | { kind: "pagebreak"; id: string }
+  | { kind: "text"; id: string; label: string; required: boolean; placeholder?: string }
+  | { kind: "textarea"; id: string; label: string; required: boolean; placeholder?: string }
   | { kind: "single"; id: string; label: string; required: boolean; options: NativeOption[] }
   | { kind: "multiple"; id: string; label: string; required: boolean; options: NativeOption[] }
   | { kind: "matrix"; id: string; label: string; required: boolean; rows: Array<{ id: string; label: string }>; columns: NativeOption[] };
@@ -17,6 +24,12 @@ export type SeverityBand = {
   min: number;
   max: number;
   label: string;
+};
+
+export type NativeSubscale = {
+  key: string;
+  label: string;
+  fieldIds: string[];
 };
 
 export type NativeQuestionnaireSchema = {
@@ -28,6 +41,7 @@ export type NativeQuestionnaireSchema = {
   scoring: {
     method: "sum";
     severityBands: SeverityBand[];
+    subscales?: NativeSubscale[];
   };
 };
 
@@ -38,6 +52,21 @@ function slug(value: string) {
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "")
     .slice(0, 40) || "field";
+}
+
+function numericPrefix(value: string): number | null {
+  const match = value.trim().match(/^([0-9]+)(?:[.\s]|$)/);
+  return match ? Number(match[1]) : null;
+}
+
+function importedOptionScore(code: ImportedQuestionnaireCode, label: string, index: number, scored: boolean) {
+  if (!scored) return 0;
+  if (code === "ybocs") return index;
+  return numericPrefix(label) ?? index;
+}
+
+function importedOption(id: string, label: string, score: number): NativeOption {
+  return { id, label, score };
 }
 
 export function blankNativeSchema(title = "Untitled questionnaire"): NativeQuestionnaireSchema {
@@ -83,6 +112,94 @@ export function bdi2NativeSchema(): NativeQuestionnaireSchema {
   };
 }
 
+function convertImportedField(code: ImportedQuestionnaireCode, field: ImportedField): NativeField[] {
+  const id = `jf_${field.qid}`;
+
+  if (field.kind === "display") return [{ kind: "paragraph", id, text: field.text }];
+  if (field.kind === "pagebreak") return [{ kind: "pagebreak", id }];
+  if (field.kind === "text") return [{ kind: "text", id, label: field.text, required: field.required }];
+  if (field.kind === "textarea") return [{ kind: "textarea", id, label: field.text, required: field.required }];
+
+  if (field.kind === "radio" || field.kind === "select") {
+    const scored = code !== "pss";
+    return [{
+      kind: "single",
+      id,
+      label: field.text,
+      required: field.required,
+      options: field.options.map((label, index) => importedOption(`${id}_o${index}`, label, importedOptionScore(code, label, index, scored))),
+    }];
+  }
+
+  if (field.kind === "checkbox") {
+    return [{
+      kind: "multiple",
+      id,
+      label: field.text,
+      required: field.required,
+      options: field.options.map((label, index) => importedOption(`${id}_o${index}`, label, code === "pss" ? 0 : (numericPrefix(label) ?? 0))),
+    }];
+  }
+
+  if (field.kind === "matrix_radio") {
+    return [{
+      kind: "matrix",
+      id,
+      label: field.text,
+      required: field.required,
+      rows: field.rows.map((label, index) => ({ id: `r${index}`, label })),
+      columns: field.columns.map((label, index) => importedOption(`${id}_c${index}`, label, importedOptionScore(code, label, index, true))),
+    }];
+  }
+
+  // Checkbox matrices are uncommon in the current instruments. Represent each
+  // row as a separate multiple-choice field so no patient response is lost.
+  return field.rows.map((row, rowIndex) => ({
+    kind: "multiple" as const,
+    id: `${id}_r${rowIndex}`,
+    label: `${field.text}${field.text ? " — " : ""}${row}`,
+    required: field.required,
+    options: field.columns.map((label, columnIndex) => importedOption(`${id}_r${rowIndex}_c${columnIndex}`, label, 0)),
+  }));
+}
+
+export function nativeSchemaFromImported(
+  code: ImportedQuestionnaireCode,
+  imported: ImportedQuestionnaireSchema,
+  title: string,
+): NativeQuestionnaireSchema {
+  const fields = imported.fields.flatMap((field) => convertImportedField(code, field));
+  const scoredSingles = fields.filter((field): field is Extract<NativeField, { kind: "single" }> =>
+    field.kind === "single" && field.options.some((option) => option.score > 0),
+  );
+
+  const patientFacingName = code === "bai"
+    ? "Anxiety questionnaire"
+    : code === "ybocs"
+      ? "OCD questionnaire"
+      : "PTSD questionnaire";
+
+  const subscales: NativeSubscale[] | undefined = code === "ybocs" && scoredSingles.length >= 10
+    ? [
+        { key: "obsession_score", label: "Obsession score", fieldIds: scoredSingles.slice(0, 5).map((field) => field.id) },
+        { key: "compulsion_score", label: "Compulsion score", fieldIds: scoredSingles.slice(5, 10).map((field) => field.id) },
+      ]
+    : undefined;
+
+  return {
+    source: "native",
+    title,
+    patientFacingName,
+    description: "",
+    fields,
+    scoring: {
+      method: "sum",
+      severityBands: [],
+      ...(subscales ? { subscales } : {}),
+    },
+  };
+}
+
 function scoredOptions(id: string): NativeOption[] {
   return [0, 1, 2, 3].map((score) => ({
     id: `${id}_${score}`,
@@ -95,6 +212,8 @@ export function nativeFieldTemplate(kind: NativeField["kind"], index: number): N
   const id = `${kind}_${Date.now()}_${index}`;
   if (kind === "paragraph") return { kind: "paragraph", id, text: "Instructions" };
   if (kind === "pagebreak") return { kind: "pagebreak", id };
+  if (kind === "text") return { kind: "text", id, label: "Short answer", required: false };
+  if (kind === "textarea") return { kind: "textarea", id, label: "Long answer", required: false };
   if (kind === "matrix") {
     return {
       kind: "matrix",
@@ -123,39 +242,55 @@ export function nativeFieldTemplate(kind: NativeField["kind"], index: number): N
   };
 }
 
-export function scoreNativeQuestionnaire(schema: NativeQuestionnaireSchema, answers: Record<string, unknown>) {
+function fieldScore(field: NativeField, answers: Record<string, unknown>) {
   let total = 0;
-
-  for (const field of schema.fields) {
-    if (field.kind === "single") {
-      const selected = String(answers[field.id] ?? "");
+  if (field.kind === "single") {
+    const selected = String(answers[field.id] ?? "");
+    const option = field.options.find((candidate) => candidate.id === selected);
+    if (field.required && !option) throw new Error("Incomplete response.");
+    if (option) total += option.score;
+  }
+  if (field.kind === "multiple") {
+    const answerValue = answers[field.id];
+    const raw = Array.isArray(answerValue) ? answerValue.map(String) : [];
+    if (field.required && raw.length === 0) throw new Error("Incomplete response.");
+    for (const selected of raw) {
       const option = field.options.find((candidate) => candidate.id === selected);
+      if (option) total += option.score;
+    }
+  }
+  if (field.kind === "matrix") {
+    for (const row of field.rows) {
+      const selected = String(answers[`${field.id}:${row.id}`] ?? "");
+      const option = field.columns.find((candidate) => candidate.id === selected);
       if (field.required && !option) throw new Error("Incomplete response.");
       if (option) total += option.score;
     }
+  }
+  if (field.kind === "text" || field.kind === "textarea") {
+    const value = String(answers[field.id] ?? "").trim();
+    if (field.required && !value) throw new Error("Incomplete response.");
+  }
+  return total;
+}
 
-    if (field.kind === "multiple") {
-      const answerValue = answers[field.id];
-      const raw = Array.isArray(answerValue) ? answerValue.map(String) : [];
-      if (field.required && raw.length === 0) throw new Error("Incomplete response.");
-      for (const selected of raw) {
-        const option = field.options.find((candidate) => candidate.id === selected);
-        if (option) total += option.score;
-      }
-    }
+export function scoreNativeQuestionnaire(schema: NativeQuestionnaireSchema, answers: Record<string, unknown>) {
+  let total = 0;
+  const scoresByField = new Map<string, number>();
 
-    if (field.kind === "matrix") {
-      for (const row of field.rows) {
-        const selected = String(answers[`${field.id}:${row.id}`] ?? "");
-        const option = field.columns.find((candidate) => candidate.id === selected);
-        if (field.required && !option) throw new Error("Incomplete response.");
-        if (option) total += option.score;
-      }
-    }
+  for (const field of schema.fields) {
+    const score = fieldScore(field, answers);
+    scoresByField.set(field.id, score);
+    total += score;
+  }
+
+  const clinicalFlags: Record<string, unknown> = {};
+  for (const subscale of schema.scoring.subscales ?? []) {
+    clinicalFlags[subscale.key] = subscale.fieldIds.reduce((sum, fieldId) => sum + (scoresByField.get(fieldId) ?? 0), 0);
   }
 
   const severity = schema.scoring.severityBands.find((band) => total >= band.min && total <= band.max)?.label ?? null;
-  return { total, severity, clinicalFlags: {}, storedAnswers: answers };
+  return { total, severity, clinicalFlags, storedAnswers: answers };
 }
 
 export function maxNativeScore(schema: NativeQuestionnaireSchema) {
