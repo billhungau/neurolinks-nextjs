@@ -56,8 +56,11 @@ function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<str
     }
     if (field.kind === "multiple") {
       fields.push({ kind: "checkbox", qid: field.id, text: field.label, order, options: field.options.map((option) => option.label), required: field.required });
-      const raw = Array.isArray(answers[field.id]) ? answers[field.id].map(String) : [];
-      projectedAnswers[field.id] = raw.map((selected) => field.options.find((option) => option.id === selected)?.label ?? selected);
+      const rawAnswer = answers[field.id];
+      const raw: string[] = Array.isArray(rawAnswer)
+        ? rawAnswer.map((value: unknown) => String(value))
+        : [];
+      projectedAnswers[field.id] = raw.map((selected: string) => field.options.find((option) => option.id === selected)?.label ?? selected);
       return;
     }
     fields.push({ kind: "matrix_radio", qid: field.id, text: field.label, order, rows: field.rows.map((row) => row.label), columns: field.columns.map((column) => column.label), required: field.required });
@@ -103,35 +106,54 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
         event_type: "RESULT_VIEWED",
         subject_key: subjectKey,
         assessment_id: row.id,
-        metadata: { questionnaire_code: questionnaire.code, clinician_user_id: clinician.id, view: "detail" },
+        metadata: {
+          questionnaire_code: questionnaire.code,
+          clinician_user_id: clinician.id,
+          view: "detail",
+        },
       }),
     });
 
-    const nativeSchema = questionnaire.metadata?.native_schema ?? null;
-    const projection = nativeSchema && questionnaire.code !== "bdii"
-      ? nativeProjection(nativeSchema, row.answers)
-      : null;
+    let resultAnswers = row.answers;
+    let resultSchema = questionnaire.metadata?.schema ?? null;
+    if (questionnaire.metadata?.native_schema) {
+      const projected = nativeProjection(questionnaire.metadata.native_schema, row.answers);
+      resultAnswers = projected.answers;
+      resultSchema = projected.schema;
+    }
 
-    return Response.json({
-      ok: true,
-      result: {
-        id: row.id,
-        submittedAt: row.submitted_at,
-        totalScore: row.total_score,
-        severity: row.severity,
-        answers: projection?.answers ?? row.answers,
-        questionnaireCode: questionnaire.code,
-        questionnaireName: questionnaire.name,
-        maxScore: questionnaire.max_score,
-        schema: projection?.schema ?? questionnaire.metadata?.schema ?? null,
-        nativeSchema,
-        item9Positive: Boolean(row.clinical_flags?.bdii_item9_positive),
-        item9Score: Number(row.clinical_flags?.bdii_item9_score ?? 0),
-        obsessionScore: typeof row.clinical_flags?.obsession_score === "number" ? row.clinical_flags.obsession_score : null,
-        compulsionScore: typeof row.clinical_flags?.compulsion_score === "number" ? row.clinical_flags.compulsion_score : null,
+    return Response.json(
+      {
+        ok: true,
+        result: {
+          id: row.id,
+          submittedAt: row.submitted_at,
+          totalScore: row.total_score,
+          severity: row.severity,
+          answers: resultAnswers,
+          questionnaireCode: questionnaire.code,
+          questionnaireName: questionnaire.name,
+          maxScore: questionnaire.max_score,
+          schema: resultSchema,
+          nativeSchema: questionnaire.metadata?.native_schema ?? null,
+          item9Positive: Boolean(row.clinical_flags?.bdii_item9_positive),
+          item9Score: Number(row.clinical_flags?.bdii_item9_score ?? 0),
+          obsessionScore:
+            typeof row.clinical_flags?.obsession_score === "number"
+              ? row.clinical_flags.obsession_score
+              : null,
+          compulsionScore:
+            typeof row.clinical_flags?.compulsion_score === "number"
+              ? row.clinical_flags.compulsion_score
+              : null,
+        },
       },
-    }, { headers: { "Cache-Control": "no-store, private" } });
+      { headers: { "Cache-Control": "no-store, private" } },
+    );
   } catch {
-    return Response.json({ ok: false, error: "Could not load result details." }, { status: 500, headers: { "Cache-Control": "no-store, private" } });
+    return Response.json(
+      { ok: false, error: "Could not load result details." },
+      { status: 500, headers: { "Cache-Control": "no-store, private" } },
+    );
   }
 }
