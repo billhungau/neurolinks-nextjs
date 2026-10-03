@@ -83,13 +83,21 @@ export function bdi2NativeSchema(): NativeQuestionnaireSchema {
   };
 }
 
+function scoredOptions(id: string): NativeOption[] {
+  return [0, 1, 2, 3].map((score) => ({
+    id: `${id}_${score}`,
+    label: `Option ${score + 1}`,
+    score,
+  }));
+}
+
 export function nativeFieldTemplate(kind: NativeField["kind"], index: number): NativeField {
   const id = `${kind}_${Date.now()}_${index}`;
-  if (kind === "paragraph") return { kind, id, text: "Instructions" };
-  if (kind === "pagebreak") return { kind, id };
+  if (kind === "paragraph") return { kind: "paragraph", id, text: "Instructions" };
+  if (kind === "pagebreak") return { kind: "pagebreak", id };
   if (kind === "matrix") {
     return {
-      kind,
+      kind: "matrix",
       id,
       label: "Matrix question",
       required: true,
@@ -97,12 +105,21 @@ export function nativeFieldTemplate(kind: NativeField["kind"], index: number): N
       columns: [0, 1, 2, 3].map((score) => ({ id: `${id}_c${score}`, label: String(score), score })),
     };
   }
+  if (kind === "single") {
+    return {
+      kind: "single",
+      id,
+      label: "Question",
+      required: true,
+      options: scoredOptions(id),
+    };
+  }
   return {
-    kind,
+    kind: "multiple",
     id,
     label: "Question",
     required: true,
-    options: [0, 1, 2, 3].map((score) => ({ id: `${id}_${score}`, label: `Option ${score + 1}`, score })),
+    options: scoredOptions(id),
   };
 }
 
