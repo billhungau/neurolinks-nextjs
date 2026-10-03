@@ -28,7 +28,7 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
 
   function validateCurrentPage(form: HTMLFormElement) {
     const page = form.querySelector(`[data-native-page="${pageIndex}"]`);
-    const controls = page?.querySelectorAll<HTMLInputElement>("input") ?? [];
+    const controls = page?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea") ?? [];
     for (const control of Array.from(controls)) {
       if (!control.checkValidity()) {
         control.reportValidity();
@@ -48,6 +48,7 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
     for (const field of schema.fields) {
       if (field.kind === "single") answers[field.id] = String(data.get(field.id) ?? "");
       if (field.kind === "multiple") answers[field.id] = data.getAll(field.id).map(String);
+      if (field.kind === "text" || field.kind === "textarea") answers[field.id] = String(data.get(field.id) ?? "");
       if (field.kind === "matrix") {
         for (const row of field.rows) {
           answers[`${field.id}:${row.id}`] = String(data.get(`${field.id}:${row.id}`) ?? "");
@@ -72,6 +73,18 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
 
   function renderField(field: NativeField) {
     if (field.kind === "paragraph") return <p key={field.id} style={{ whiteSpace: "pre-line", lineHeight: 1.65, color: "#374151" }}>{field.text}</p>;
+    if (field.kind === "text") return (
+      <label key={field.id} style={{ display: "block", margin: "0 0 28px" }}>
+        <span style={{ display: "block", fontSize: "18px", fontWeight: 700, marginBottom: "10px" }}>{field.label}{field.required ? " *" : ""}</span>
+        <input name={field.id} required={field.required} placeholder={field.placeholder} style={{ width: "100%", boxSizing: "border-box", padding: "12px", border: "1px solid #d1d5db", borderRadius: "9px", font: "inherit" }} />
+      </label>
+    );
+    if (field.kind === "textarea") return (
+      <label key={field.id} style={{ display: "block", margin: "0 0 28px" }}>
+        <span style={{ display: "block", fontSize: "18px", fontWeight: 700, marginBottom: "10px" }}>{field.label}{field.required ? " *" : ""}</span>
+        <textarea name={field.id} required={field.required} placeholder={field.placeholder} rows={5} style={{ width: "100%", boxSizing: "border-box", padding: "12px", border: "1px solid #d1d5db", borderRadius: "9px", font: "inherit", resize: "vertical" }} />
+      </label>
+    );
     if (field.kind === "single") return (
       <fieldset key={field.id} style={{ border: 0, padding: 0, margin: "0 0 28px" }}>
         <legend style={{ fontSize: "18px", fontWeight: 700, marginBottom: "12px" }}>{field.label}</legend>
