@@ -3,6 +3,7 @@ import { clinicalSupabaseRequest } from "./supabase";
 import { subjectKeyFromVcitaUuid } from "./pseudonym";
 import { ensureBdi2Registry } from "./questionnaires/bdii";
 import { BDI2_CODE } from "./questionnaires/bdii-definition";
+import type { NativeQuestionnaireSchema } from "./questionnaires/native-builder";
 import {
   ensureImportedQuestionnaire,
   isImportedCode,
@@ -21,7 +22,11 @@ type QuestionnaireRow = {
   name: string;
   max_score: number | null;
   active: boolean;
-  metadata?: { schema?: ImportedQuestionnaireSchema } | null;
+  metadata?: {
+    schema?: ImportedQuestionnaireSchema;
+    native_schema?: NativeQuestionnaireSchema;
+    builder_status?: string;
+  } | null;
 };
 
 type InvitationRow = {
@@ -54,6 +59,7 @@ export type ResolvedInvitation = {
     name: string;
     maxScore: number | null;
     schema?: ImportedQuestionnaireSchema;
+    nativeSchema?: NativeQuestionnaireSchema;
   };
   expiresAt?: string;
   subjectKey?: string;
@@ -214,6 +220,7 @@ export async function resolveQuestionnaireInvitation(
       name: questionnaire.name,
       maxScore: questionnaire.max_score,
       schema: questionnaire.metadata?.schema,
+      nativeSchema: questionnaire.metadata?.native_schema,
     },
   };
 }
