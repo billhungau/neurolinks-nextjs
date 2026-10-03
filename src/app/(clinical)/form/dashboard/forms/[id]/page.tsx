@@ -13,12 +13,13 @@ export default async function FormEditorPage({ params }: Props) {
   const { id } = await params;
 
   return (
-    <main style={{ minHeight: "100vh", padding: "28px 20px" }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
-        <header style={{ marginBottom: "20px" }}>
-          <Link href="/form/dashboard/forms/" style={{ color: "#374151" }}>← Back to forms</Link>
-          <p style={{ margin: "16px 0 5px", fontSize: "13px", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em" }}>NeuroLinks form builder</p>
-          <h1 style={{ margin: 0, fontSize: "30px" }}>Edit questionnaire</h1>
+    <main style={{ minHeight: "100vh", padding: "18px 18px 32px", background: "#f7f9fc" }}>
+      <div style={{ maxWidth: "1540px", margin: "0 auto" }}>
+        <header style={{ marginBottom: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+          <div>
+            <Link href="/form/dashboard/forms/" style={{ color: "#657083", fontSize: "13px", textDecoration: "none" }}>← Forms</Link>
+            <div style={{ marginTop: "7px", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", color: "#8b95a5" }}>NeuroLinks Form Builder</div>
+          </div>
         </header>
         <FormBuilder formId={id} />
       </div>
