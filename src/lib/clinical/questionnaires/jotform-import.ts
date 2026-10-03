@@ -22,11 +22,14 @@ type RawQuestion = Record<string, unknown> & {
 
 export type ImportedField =
   | { kind: "display"; qid: string; text: string; order: number }
+  | { kind: "pagebreak"; qid: string; text: string; order: number }
   | { kind: "radio"; qid: string; text: string; order: number; options: string[]; required: boolean }
+  | { kind: "select"; qid: string; text: string; order: number; options: string[]; required: boolean }
   | { kind: "checkbox"; qid: string; text: string; order: number; options: string[]; required: boolean }
   | { kind: "text"; qid: string; text: string; order: number; required: boolean }
   | { kind: "textarea"; qid: string; text: string; order: number; required: boolean }
-  | { kind: "matrix_radio"; qid: string; text: string; order: number; rows: string[]; columns: string[]; required: boolean };
+  | { kind: "matrix_radio"; qid: string; text: string; order: number; rows: string[]; columns: string[]; required: boolean }
+  | { kind: "matrix_checkbox"; qid: string; text: string; order: number; rows: string[]; columns: string[]; required: boolean };
 
 export type ImportedQuestionnaireSchema = {
   source: "jotform";
@@ -60,7 +63,7 @@ function plainText(value: unknown): string {
 
 function isTechnical(text: string, type: string) {
   const normalized = text.trim().toLowerCase();
-  if (type === "control_button" || type === "control_pagebreak") return true;
+  if (type === "control_button") return true;
   return [
     "name",
     "full name",
@@ -82,18 +85,26 @@ function normalize(raw: RawQuestion): ImportedField | null {
 
   if (!qid || isTechnical(text, type)) return null;
 
+  if (type === "control_pagebreak") {
+    return { kind: "pagebreak", qid, text: text || "Page Break", order };
+  }
   if (type === "control_text" || type === "control_head") {
     return text ? { kind: "display", qid, text, order } : null;
   }
-  if (type === "control_radio") {
+  if (type === "control_radio" || type === "control_yesno") {
     const options = splitPipe(raw.options);
-    return text && options.length ? { kind: "radio", qid, text, order, options, required } : null;
+    const resolved = options.length ? options : type === "control_yesno" ? ["Yes", "No"] : [];
+    return text && resolved.length ? { kind: "radio", qid, text, order, options: resolved, required } : null;
+  }
+  if (type === "control_dropdown") {
+    const options = splitPipe(raw.options);
+    return text && options.length ? { kind: "select", qid, text, order, options, required } : null;
   }
   if (type === "control_checkbox") {
     const options = splitPipe(raw.options);
     return text && options.length ? { kind: "checkbox", qid, text, order, options, required } : null;
   }
-  if (type === "control_textbox") {
+  if (["control_textbox", "control_number", "control_email", "control_phone"].includes(type)) {
     return text ? { kind: "text", qid, text, order, required } : null;
   }
   if (type === "control_textarea") {
@@ -103,9 +114,14 @@ function normalize(raw: RawQuestion): ImportedField | null {
     const rows = splitPipe(raw.mrows);
     const columns = splitPipe(raw.mcolumns);
     const inputType = String(raw.inputType ?? "Radio Button").toLowerCase();
-    return text && rows.length && columns.length && inputType === "radio button"
-      ? { kind: "matrix_radio", qid, text, order, rows, columns, required }
-      : null;
+    if (!text || !rows.length || !columns.length) return null;
+    if (inputType.includes("radio")) {
+      return { kind: "matrix_radio", qid, text, order, rows, columns, required };
+    }
+    if (inputType.includes("check")) {
+      return { kind: "matrix_checkbox", qid, text, order, rows, columns, required };
+    }
+    return null;
   }
   return null;
 }
@@ -189,7 +205,7 @@ export function scoreImportedQuestionnaire(
   const ybocsScores: number[] = [];
 
   for (const field of schema.fields) {
-    if (field.kind === "radio") {
+    if (field.kind === "radio" || field.kind === "select") {
       const selected = String(answers[field.qid] ?? "");
       const optionIndex = field.options.indexOf(selected);
       if (field.required && optionIndex < 0) throw new Error("Incomplete response.");
