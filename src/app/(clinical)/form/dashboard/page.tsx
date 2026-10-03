@@ -11,7 +11,7 @@ export default async function ClinicianDashboardPage() {
 
   return (
     <main style={{ minHeight: "100vh", padding: "32px 24px" }}>
-      <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "860px", margin: "0 auto" }}>
         <header style={{ display: "flex", justifyContent: "space-between", gap: "16px", alignItems: "center", marginBottom: "28px" }}>
           <div>
             <p style={{ margin: "0 0 6px", fontSize: "14px", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em" }}>NeuroLinks</p>
@@ -21,6 +21,9 @@ export default async function ClinicianDashboardPage() {
           <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
             <Link href="/form/dashboard/patients/" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none", fontWeight: 700 }}>
               Patient results
+            </Link>
+            <Link href="/form/dashboard/forms/" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none", fontWeight: 700 }}>
+              Forms
             </Link>
             <Link href="/form/dashboard/jotform-sync/" style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", color: "#111827", textDecoration: "none" }}>
               Jotform sync
