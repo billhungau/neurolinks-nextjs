@@ -12,6 +12,21 @@ export const runtime = "nodejs";
 
 type Body = { token?: string; answers?: Record<string, unknown> };
 
+function compatibleNativeBdiAnswers(
+  answers: Record<string, unknown>,
+  schema: NonNullable<Awaited<ReturnType<typeof resolveQuestionnaireInvitation>>["questionnaire"]>["nativeSchema"],
+) {
+  const stored: Record<string, unknown> = {};
+  for (const field of schema?.fields ?? []) {
+    if (field.kind !== "single") continue;
+    const selected = String(answers[field.id] ?? "");
+    const option = field.options.find((candidate) => candidate.id === selected);
+    if (!option) continue;
+    stored[field.id] = { optionId: option.id, score: option.score };
+  }
+  return stored;
+}
+
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) {
@@ -38,7 +53,9 @@ export async function POST(request: Request) {
     if (invitation.questionnaire.nativeSchema) {
       const native = scoreNativeQuestionnaire(invitation.questionnaire.nativeSchema, body.answers ?? {});
       scored = native;
-      storedAnswers = native.storedAnswers;
+      storedAnswers = invitation.questionnaire.code === BDI2_CODE
+        ? compatibleNativeBdiAnswers(body.answers ?? {}, invitation.questionnaire.nativeSchema)
+        : native.storedAnswers;
     } else if (invitation.questionnaire.code === BDI2_CODE) {
       const selections = Object.fromEntries(
         Object.entries(body.answers ?? {}).map(([key, value]) => [key, String(value ?? "")]),
