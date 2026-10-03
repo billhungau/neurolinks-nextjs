@@ -44,11 +44,9 @@ export async function POST(request: Request) {
     { method: "GET" },
   );
 
-  const existingDraft = existing.find((row) =>
-    Boolean(row.metadata?.native_schema) && String(row.metadata?.builder_status ?? "") === "draft",
-  );
-  if (existingDraft) {
-    return Response.json({ ok: true, id: existingDraft.id, existing: true });
+  const existingNative = existing.find((row) => Boolean(row.metadata?.native_schema) && row.metadata?.builder_deleted !== true);
+  if (existingNative) {
+    return Response.json({ ok: true, id: existingNative.id, existing: true });
   }
 
   const imported = await fetchImportedSchema(code);
