@@ -5,6 +5,7 @@ import {
   isImportedCode,
   scoreImportedQuestionnaire,
 } from "@/lib/clinical/questionnaires/jotform-import";
+import { scoreNativeQuestionnaire } from "@/lib/clinical/questionnaires/native-builder";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 
 export const runtime = "nodejs";
@@ -30,11 +31,15 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: "This questionnaire link is no longer valid." }, { status: 400 });
   }
 
-  let scored;
+  let scored: { total: number; severity: string | null; clinicalFlags: Record<string, unknown> };
   let storedAnswers: Record<string, unknown>;
 
   try {
-    if (invitation.questionnaire.code === BDI2_CODE) {
+    if (invitation.questionnaire.nativeSchema) {
+      const native = scoreNativeQuestionnaire(invitation.questionnaire.nativeSchema, body.answers ?? {});
+      scored = native;
+      storedAnswers = native.storedAnswers;
+    } else if (invitation.questionnaire.code === BDI2_CODE) {
       const selections = Object.fromEntries(
         Object.entries(body.answers ?? {}).map(([key, value]) => [key, String(value ?? "")]),
       );
@@ -75,7 +80,7 @@ export async function POST(request: Request) {
           total_score: scored.total,
           severity: scored.severity,
           clinical_flags: scored.clinicalFlags,
-          scoring_version: 1,
+          scoring_version: invitation.questionnaire.version,
         }),
       },
     );
@@ -102,10 +107,8 @@ export async function POST(request: Request) {
         assessment_id: assessmentId,
         metadata: {
           questionnaire_code: invitation.questionnaire.code,
-          item9_positive:
-            invitation.questionnaire.code === BDI2_CODE
-              ? Boolean(scored.clinicalFlags.bdii_item9_positive)
-              : false,
+          questionnaire_version: invitation.questionnaire.version,
+          source: invitation.questionnaire.nativeSchema ? "native" : "legacy",
         },
       }),
     });
