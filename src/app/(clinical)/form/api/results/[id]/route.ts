@@ -1,7 +1,7 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { subjectKeyFromVcitaUuid } from "@/lib/clinical/pseudonym";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
-import type { ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
+import type { ImportedField, ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
 import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
 
 export const runtime = "nodejs";
@@ -12,18 +12,8 @@ type QuestionnaireMeta = {
 };
 
 type QuestionnaireRelation =
-  | {
-      code: string;
-      name: string;
-      max_score: number | null;
-      metadata?: QuestionnaireMeta | null;
-    }
-  | Array<{
-      code: string;
-      name: string;
-      max_score: number | null;
-      metadata?: QuestionnaireMeta | null;
-    }>
+  | { code: string; name: string; max_score: number | null; metadata?: QuestionnaireMeta | null }
+  | Array<{ code: string; name: string; max_score: number | null; metadata?: QuestionnaireMeta | null }>
   | null;
 
 type AssessmentRow = {
@@ -40,21 +30,60 @@ function relation(value: QuestionnaireRelation) {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
-export async function GET(
-  request: Request,
-  context: { params: Promise<{ id: string }> },
-) {
+function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<string, unknown>) {
+  const projectedAnswers: Record<string, unknown> = {};
+  const fields: ImportedField[] = [];
+
+  schema.fields.forEach((field, order) => {
+    if (field.kind === "paragraph") {
+      fields.push({ kind: "display", qid: field.id, text: field.text, order });
+      return;
+    }
+    if (field.kind === "pagebreak") {
+      fields.push({ kind: "pagebreak", qid: field.id, text: "Page break", order });
+      return;
+    }
+    if (field.kind === "text" || field.kind === "textarea") {
+      fields.push({ kind: field.kind, qid: field.id, text: field.label, order, required: field.required });
+      projectedAnswers[field.id] = answers[field.id] ?? "";
+      return;
+    }
+    if (field.kind === "single") {
+      fields.push({ kind: "radio", qid: field.id, text: field.label, order, options: field.options.map((option) => option.label), required: field.required });
+      const selected = String(answers[field.id] ?? "");
+      projectedAnswers[field.id] = field.options.find((option) => option.id === selected)?.label ?? selected;
+      return;
+    }
+    if (field.kind === "multiple") {
+      fields.push({ kind: "checkbox", qid: field.id, text: field.label, order, options: field.options.map((option) => option.label), required: field.required });
+      const raw = Array.isArray(answers[field.id]) ? answers[field.id].map(String) : [];
+      projectedAnswers[field.id] = raw.map((selected) => field.options.find((option) => option.id === selected)?.label ?? selected);
+      return;
+    }
+    fields.push({ kind: "matrix_radio", qid: field.id, text: field.label, order, rows: field.rows.map((row) => row.label), columns: field.columns.map((column) => column.label), required: field.required });
+    field.rows.forEach((row, rowIndex) => {
+      const selected = String(answers[`${field.id}:${row.id}`] ?? "");
+      projectedAnswers[`${field.id}:${rowIndex}`] = field.columns.find((column) => column.id === selected)?.label ?? selected;
+    });
+  });
+
+  const projectedSchema: ImportedQuestionnaireSchema = {
+    source: "jotform",
+    jotformId: "native",
+    importedAt: new Date(0).toISOString(),
+    fields,
+  };
+  return { schema: projectedSchema, answers: projectedAnswers };
+}
+
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const clinician = await getClinicianSession();
-  if (!clinician) {
-    return Response.json({ ok: false, error: "Authentication required." }, { status: 401 });
-  }
+  if (!clinician) return Response.json({ ok: false, error: "Authentication required." }, { status: 401 });
 
   const { id } = await context.params;
   const { searchParams } = new URL(request.url);
   const vcitaUuid = String(searchParams.get("vcitaUuid") ?? "").trim();
-  if (!id || !vcitaUuid) {
-    return Response.json({ ok: false, error: "Invalid request." }, { status: 400 });
-  }
+  if (!id || !vcitaUuid) return Response.json({ ok: false, error: "Invalid request." }, { status: 400 });
 
   try {
     const subjectKey = subjectKeyFromVcitaUuid(vcitaUuid);
@@ -65,9 +94,7 @@ export async function GET(
 
     const row = rows[0];
     const questionnaire = row ? relation(row.questionnaires) : null;
-    if (!row || !questionnaire) {
-      return Response.json({ ok: false, error: "Result not found." }, { status: 404 });
-    }
+    if (!row || !questionnaire) return Response.json({ ok: false, error: "Result not found." }, { status: 404 });
 
     await clinicalSupabaseRequest<unknown>("audit_events", {
       method: "POST",
@@ -76,46 +103,35 @@ export async function GET(
         event_type: "RESULT_VIEWED",
         subject_key: subjectKey,
         assessment_id: row.id,
-        metadata: {
-          questionnaire_code: questionnaire.code,
-          clinician_user_id: clinician.id,
-          view: "detail",
-        },
+        metadata: { questionnaire_code: questionnaire.code, clinician_user_id: clinician.id, view: "detail" },
       }),
     });
 
-    return Response.json(
-      {
-        ok: true,
-        result: {
-          id: row.id,
-          submittedAt: row.submitted_at,
-          totalScore: row.total_score,
-          severity: row.severity,
-          answers: row.answers,
-          questionnaireCode: questionnaire.code,
-          questionnaireName: questionnaire.name,
-          maxScore: questionnaire.max_score,
-          schema: questionnaire.metadata?.schema ?? null,
-          nativeSchema: questionnaire.metadata?.native_schema ?? null,
-          item9Positive: Boolean(row.clinical_flags?.bdii_item9_positive),
-          item9Score: Number(row.clinical_flags?.bdii_item9_score ?? 0),
-          obsessionScore:
-            typeof row.clinical_flags?.obsession_score === "number"
-              ? row.clinical_flags.obsession_score
-              : null,
-          compulsionScore:
-            typeof row.clinical_flags?.compulsion_score === "number"
-              ? row.clinical_flags.compulsion_score
-              : null,
-        },
+    const nativeSchema = questionnaire.metadata?.native_schema ?? null;
+    const projection = nativeSchema && questionnaire.code !== "bdii"
+      ? nativeProjection(nativeSchema, row.answers)
+      : null;
+
+    return Response.json({
+      ok: true,
+      result: {
+        id: row.id,
+        submittedAt: row.submitted_at,
+        totalScore: row.total_score,
+        severity: row.severity,
+        answers: projection?.answers ?? row.answers,
+        questionnaireCode: questionnaire.code,
+        questionnaireName: questionnaire.name,
+        maxScore: questionnaire.max_score,
+        schema: projection?.schema ?? questionnaire.metadata?.schema ?? null,
+        nativeSchema,
+        item9Positive: Boolean(row.clinical_flags?.bdii_item9_positive),
+        item9Score: Number(row.clinical_flags?.bdii_item9_score ?? 0),
+        obsessionScore: typeof row.clinical_flags?.obsession_score === "number" ? row.clinical_flags.obsession_score : null,
+        compulsionScore: typeof row.clinical_flags?.compulsion_score === "number" ? row.clinical_flags.compulsion_score : null,
       },
-      { headers: { "Cache-Control": "no-store, private" } },
-    );
+    }, { headers: { "Cache-Control": "no-store, private" } });
   } catch {
-    return Response.json(
-      { ok: false, error: "Could not load result details." },
-      { status: 500, headers: { "Cache-Control": "no-store, private" } },
-    );
+    return Response.json({ ok: false, error: "Could not load result details." }, { status: 500, headers: { "Cache-Control": "no-store, private" } });
   }
 }
