@@ -102,6 +102,8 @@ export function ImportedQuestionnaireForm({
       return <p key={field.qid} style={{ lineHeight: 1.65, color: "#374151", whiteSpace: "pre-line" }}>{field.text}</p>;
     }
 
+    if (field.kind === "pagebreak") return null;
+
     if (field.kind === "radio") {
       return (
         <fieldset key={field.qid} style={{ border: 0, padding: 0, margin: "0 0 28px" }}>
@@ -185,14 +187,16 @@ export function ImportedQuestionnaireForm({
       );
     }
 
-    if (field.kind === "pagebreak") return null;
+    if (field.kind === "text") {
+      return (
+        <label key={field.qid} style={{ display: "block", marginBottom: "24px" }}>
+          <span style={{ display: "block", marginBottom: "8px", fontWeight: 700 }}>{field.text}</span>
+          <input name={field.qid} required={field.required} style={{ width: "100%", boxSizing: "border-box", padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }} />
+        </label>
+      );
+    }
 
-    return (
-      <label key={field.qid} style={{ display: "block", marginBottom: "24px" }}>
-        <span style={{ display: "block", marginBottom: "8px", fontWeight: 700 }}>{field.text}</span>
-        <input name={field.qid} required={field.required} style={{ width: "100%", boxSizing: "border-box", padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: "8px" }} />
-      </label>
-    );
+    return null;
   }
 
   return (
