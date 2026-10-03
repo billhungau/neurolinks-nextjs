@@ -43,7 +43,7 @@ export async function PATCH(request: Request, { params }: Props) {
   const current = await rowFor(id);
   if (!current) return Response.json({ ok: false, error: "Form not found." }, { status: 404 });
   const status = String(current.metadata?.builder_status ?? "");
-  if (status !== "draft") return Response.json({ ok: false, error: "Published versions are immutable. Create a new draft version to edit." }, { status: 409 });
+  if (status !== "draft") return Response.json({ ok: false, error: "Published forms are protected. Use Edit to create an editable copy." }, { status: 409 });
 
   let body: { name?: string; schema?: NativeQuestionnaireSchema };
   try { body = await request.json(); } catch { return Response.json({ ok: false, error: "Invalid request." }, { status: 400 }); }
@@ -66,4 +66,43 @@ export async function PATCH(request: Request, { params }: Props) {
   });
 
   return Response.json({ ok: true });
+}
+
+export async function DELETE(request: Request, { params }: Props) {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) return Response.json({ ok: false, error: "Forbidden." }, { status: 403 });
+  const clinician = await getClinicianSession();
+  if (!clinician) return Response.json({ ok: false, error: "Authentication required." }, { status: 401 });
+
+  const { id } = await params;
+  const current = await rowFor(id);
+  if (!current) return Response.json({ ok: false, error: "Form not found." }, { status: 404 });
+  if (!current.metadata?.native_schema) {
+    return Response.json({ ok: false, error: "Only native NeuroLinks forms can be deleted here." }, { status: 400 });
+  }
+
+  const family = await clinicalSupabaseRequest<Row[]>(
+    `questionnaires?select=id,code,version,name,max_score,active,metadata&code=eq.${encodeURIComponent(current.code)}&order=version.desc`,
+    { method: "GET" },
+  );
+  const nativeRows = family.filter((row) => Boolean(row.metadata?.native_schema));
+  const deletedAt = new Date().toISOString();
+
+  for (const row of nativeRows) {
+    await clinicalSupabaseRequest<unknown>(`questionnaires?id=eq.${encodeURIComponent(row.id)}`, {
+      method: "PATCH",
+      prefer: "return=minimal",
+      body: JSON.stringify({
+        active: false,
+        metadata: {
+          ...(row.metadata ?? {}),
+          builder_deleted: true,
+          deleted_at: deletedAt,
+          deleted_by: clinician.id,
+        },
+      }),
+    });
+  }
+
+  return Response.json({ ok: true }, { headers: { "Cache-Control": "no-store, private" } });
 }
