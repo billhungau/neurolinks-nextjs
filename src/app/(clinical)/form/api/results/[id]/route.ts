@@ -1,6 +1,7 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { subjectKeyFromVcitaUuid } from "@/lib/clinical/pseudonym";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
+import { getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
 import type { ImportedField, ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
 import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
 
@@ -30,6 +31,29 @@ function relation(value: QuestionnaireRelation) {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
+function normalizeBdiAnswers(answers: Record<string, unknown>) {
+  const normalized: Record<string, unknown> = { ...answers };
+
+  for (const [storedKey, raw] of Object.entries(answers)) {
+    if (typeof raw !== "string") continue;
+
+    const optionMatch = raw.match(/^(q(?:[1-9]|1\d|2[01]))_\d+$/);
+    const canonicalKey = optionMatch?.[1] ?? (/^q(?:[1-9]|1\d|2[01])$/.test(storedKey) ? storedKey : null);
+    if (!canonicalKey) continue;
+
+    const resolved = getBdi2OptionById(canonicalKey, raw);
+    if (!resolved) continue;
+
+    normalized[canonicalKey] = {
+      optionId: raw,
+      score: resolved.option.value,
+      legacyText: `${resolved.option.value}. ${resolved.option.label}`,
+    };
+  }
+
+  return normalized;
+}
+
 function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<string, unknown>, questionnaireCode: string) {
   const projectedAnswers: Record<string, unknown> = {};
   const fields: ImportedField[] = [];
@@ -56,7 +80,7 @@ function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<str
       const selectedOption = field.options.find((option) => option.id === selected);
       if (questionnaireCode === "bdii" && selectedOption) {
         projectedAnswers[canonicalId] = {
-          optionId: canonicalId === field.id ? selected : undefined,
+          optionId: selected.startsWith(`${canonicalId}_`) ? selected : undefined,
           score: selectedOption.score,
           legacyText: `${selectedOption.score}. ${selectedOption.label}`,
         };
@@ -125,11 +149,11 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       }),
     });
 
-    let resultAnswers = row.answers;
+    let resultAnswers = questionnaire.code === "bdii" ? normalizeBdiAnswers(row.answers) : row.answers;
     let resultSchema = questionnaire.metadata?.schema ?? null;
     if (questionnaire.metadata?.native_schema) {
       const projected = nativeProjection(questionnaire.metadata.native_schema, row.answers, questionnaire.code);
-      resultAnswers = projected.answers;
+      resultAnswers = questionnaire.code === "bdii" ? normalizeBdiAnswers(projected.answers) : projected.answers;
       resultSchema = projected.schema;
     }
 
