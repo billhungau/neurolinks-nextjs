@@ -16,6 +16,7 @@ type RawVcitaClient = {
   email?: string | null;
   phone?: string | null;
   mobile_phone?: string | null;
+  updated_at?: string | null;
 };
 
 export type VcitaClientSummary = {
@@ -138,8 +139,17 @@ export async function searchVcitaClients(term: string): Promise<VcitaClientSumma
 
 export async function listRecentVcitaClients(limit = 50): Promise<VcitaClientSummary[]> {
   const safeLimit = Math.max(1, Math.min(limit, 50));
-  const data = await vcitaRequest<unknown>(`clients?per_page=${safeLimit}&page=1`);
+  const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+  const data = await vcitaRequest<unknown>(
+    `clients?updated_at%5Bgte%5D=${encodeURIComponent(since)}&per_page=${safeLimit}&page=1`,
+  );
+
   return extractClients(data)
+    .sort((a, b) => {
+      const aTime = a.updated_at ? Date.parse(a.updated_at) : 0;
+      const bTime = b.updated_at ? Date.parse(b.updated_at) : 0;
+      return bTime - aTime;
+    })
     .map(normalizeClient)
     .filter((client): client is VcitaClientSummary => Boolean(client))
     .slice(0, safeLimit);
