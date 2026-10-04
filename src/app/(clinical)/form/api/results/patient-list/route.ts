@@ -8,6 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 25;
+const VCITA_CONCURRENCY = 6;
 
 type AssessmentRow = {
   subject_key: string;
@@ -20,18 +21,47 @@ type IdentityActivityRow = {
   last_submission_at: string;
 };
 
+type ResolvedEntry = {
+  subjectKey: string;
+  client: Awaited<ReturnType<typeof getVcitaClient>>;
+};
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let nextIndex = 0;
+
+  async function runWorker() {
+    while (true) {
+      const index = nextIndex;
+      nextIndex += 1;
+      if (index >= items.length) return;
+      results[index] = await worker(items[index]);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()),
+  );
+  return results;
+}
+
 async function resolveIndexedClients(rows: IdentityActivityRow[]) {
-  const resolved = await Promise.all(
-    rows.map(async (row) => {
+  return mapWithConcurrency<IdentityActivityRow, ResolvedEntry | null>(
+    rows,
+    VCITA_CONCURRENCY,
+    async (row) => {
       try {
         const client = await getVcitaClient(row.vcita_client_id);
         return client ? { subjectKey: row.subject_key, client } : null;
       } catch {
         return null;
       }
-    }),
+    },
   );
-  return resolved;
 }
 
 async function fastIndexedPage(requestedPage: number) {
@@ -43,6 +73,7 @@ async function fastIndexedPage(requestedPage: number) {
     );
   }
 
+  const supabaseStarted = Date.now();
   let page = requestedPage;
   let result = await loadPage(page);
   const total = result.count ?? 0;
@@ -53,12 +84,13 @@ async function fastIndexedPage(requestedPage: number) {
     page = totalPages;
     result = await loadPage(page);
   }
+  const supabaseMs = Date.now() - supabaseStarted;
 
-  const resolved = await resolveIndexedClients(result.data ?? []);
-  if (resolved.some((entry) => !entry?.client)) {
-    // A stale vcita ID should be repaired by the slower compatibility path.
-    return null;
-  }
+  const vcitaStarted = Date.now();
+  const rows = result.data ?? [];
+  const resolved = await resolveIndexedClients(rows);
+  const vcitaMs = Date.now() - vcitaStarted;
+  const failedLookups = resolved.filter((entry) => !entry?.client).length;
 
   const clients = resolved
     .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry?.client))
@@ -70,6 +102,20 @@ async function fastIndexedPage(requestedPage: number) {
       phone: null,
     }));
 
+  // PHI-free operational telemetry. Do not log IDs, names, emails, or subject keys.
+  console.info("[patient-list]", {
+    path: "fast-index",
+    page,
+    lookupCount: rows.length,
+    failedLookups,
+    supabaseMs,
+    vcitaMs,
+  });
+
+  // Do not abandon the fast path because one vcita record is stale or one
+  // upstream lookup times out. Returning the successfully resolved patients is
+  // much safer than triggering an assessment scan plus a full vcita-directory
+  // walk for a single transient failure.
   return { clients, page, total, totalPages };
 }
 
@@ -99,9 +145,12 @@ async function orderedAssessmentSubjects() {
 async function indexedPage(subjectKeys: string[]) {
   const mappings = await patientIdentityRows(subjectKeys);
   const bySubject = new Map(mappings.map((row) => [row.subject_key, row.vcita_client_id] as const));
-  const resolved = await Promise.all(
-    subjectKeys.map(async (subjectKey) => {
-      const vcitaId = bySubject.get(subjectKey);
+  const items = subjectKeys.map((subjectKey) => ({ subjectKey, vcitaId: bySubject.get(subjectKey) ?? null }));
+
+  return mapWithConcurrency<typeof items[number], ResolvedEntry | null>(
+    items,
+    VCITA_CONCURRENCY,
+    async ({ subjectKey, vcitaId }) => {
       if (!vcitaId) return null;
       try {
         const client = await getVcitaClient(vcitaId);
@@ -109,9 +158,8 @@ async function indexedPage(subjectKeys: string[]) {
       } catch {
         return null;
       }
-    }),
+    },
   );
-  return resolved;
 }
 
 async function repairFromVcita(allSubjectKeys: string[], latestBySubject: Map<string, string>) {
@@ -137,6 +185,7 @@ async function repairFromVcita(allSubjectKeys: string[], latestBySubject: Map<st
 }
 
 async function compatibilityPage(requestedPage: number) {
+  const started = Date.now();
   const { subjectKeys: allSubjectKeys, latestBySubject } = await orderedAssessmentSubjects();
   const total = allSubjectKeys.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -145,10 +194,17 @@ async function compatibilityPage(requestedPage: number) {
   const pageKeys = allSubjectKeys.slice(start, start + PAGE_SIZE);
 
   if (!pageKeys.length) {
+    console.info("[patient-list]", {
+      path: "compatibility",
+      page,
+      lookupCount: 0,
+      failedLookups: 0,
+      totalMs: Date.now() - started,
+    });
     return { clients: [], page, total, totalPages };
   }
 
-  let resolved: Array<{ subjectKey: string; client: Awaited<ReturnType<typeof getVcitaClient>> } | null> = [];
+  let resolved: Array<ResolvedEntry | null> = [];
   try {
     resolved = await indexedPage(pageKeys);
   } catch {
@@ -181,6 +237,14 @@ async function compatibilityPage(requestedPage: number) {
       phone: null,
     }));
 
+  console.info("[patient-list]", {
+    path: "compatibility",
+    page,
+    lookupCount: pageKeys.length,
+    failedLookups: Math.max(0, pageKeys.length - clients.length),
+    totalMs: Date.now() - started,
+  });
+
   return { clients, page, total, totalPages };
 }
 
@@ -198,7 +262,7 @@ export async function GET(request: Request) {
     try {
       result = await fastIndexedPage(page);
     } catch {
-      // Fall back until the activity column has been migrated/backfilled.
+      console.warn("[patient-list] fast index unavailable; using compatibility path");
     }
 
     const finalResult = result ?? await compatibilityPage(page);
@@ -215,6 +279,7 @@ export async function GET(request: Request) {
       { headers: { "Cache-Control": "no-store, private" } },
     );
   } catch {
+    console.error("[patient-list] request failed");
     return Response.json(
       { ok: false, error: "Could not load patient list." },
       { status: 500, headers: { "Cache-Control": "no-store, private" } },
