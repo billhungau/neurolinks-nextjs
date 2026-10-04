@@ -26,6 +26,11 @@ type ResolvedEntry = {
   client: Awaited<ReturnType<typeof getVcitaClient>>;
 };
 
+type ResolvedClientEntry = {
+  subjectKey: string;
+  client: NonNullable<Awaited<ReturnType<typeof getVcitaClient>>>;
+};
+
 async function mapWithConcurrency<T, R>(
   items: T[],
   concurrency: number,
@@ -93,7 +98,7 @@ async function fastIndexedPage(requestedPage: number) {
   const failedLookups = resolved.filter((entry) => !entry?.client).length;
 
   const clients = resolved
-    .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry?.client))
+    .filter((entry): entry is ResolvedClientEntry => Boolean(entry?.client))
     .map((entry) => ({
       id: entry.client.id,
       firstName: entry.client.firstName,
@@ -213,8 +218,8 @@ async function compatibilityPage(requestedPage: number) {
 
   const resolvedBySubject = new Map(
     resolved
-      .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry?.client))
-      .map((entry) => [entry.subjectKey, entry.client!] as const),
+      .filter((entry): entry is ResolvedClientEntry => Boolean(entry?.client))
+      .map((entry) => [entry.subjectKey, entry.client] as const),
   );
 
   if (resolvedBySubject.size < pageKeys.length) {
