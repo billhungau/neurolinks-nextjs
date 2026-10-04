@@ -1,7 +1,7 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { subjectKeyFromVcitaUuid } from "@/lib/clinical/pseudonym";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
-import { getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
+import { BDI2_ITEMS, bdi2OptionId, getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
 import type { ImportedField, ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
 import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
 
@@ -27,29 +27,106 @@ type AssessmentRow = {
   questionnaires: QuestionnaireRelation;
 };
 
+type StoredBdiAnswer = {
+  optionId?: string;
+  score?: number;
+  text?: string;
+  legacyText?: string;
+};
+
 function relation(value: QuestionnaireRelation) {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
-function normalizeBdiAnswers(answers: Record<string, unknown>) {
-  const normalized: Record<string, unknown> = { ...answers };
+function canonicalBdiAnswer(itemIndex: number, raw: unknown, nativeField?: Extract<NativeQuestionnaireSchema["fields"][number], { kind: "single" }>) {
+  const item = BDI2_ITEMS[itemIndex];
+  if (!item) return null;
 
-  for (const [storedKey, raw] of Object.entries(answers)) {
-    if (typeof raw !== "string") continue;
+  if (typeof raw === "number") {
+    return { score: raw };
+  }
 
-    const optionMatch = raw.match(/^(q(?:[1-9]|1\d|2[01]))_\d+$/);
-    const canonicalKey = optionMatch?.[1] ?? (/^q(?:[1-9]|1\d|2[01])$/.test(storedKey) ? storedKey : null);
-    if (!canonicalKey) continue;
+  if (typeof raw === "string") {
+    const canonical = getBdi2OptionById(item.key, raw);
+    if (canonical) {
+      return {
+        optionId: raw,
+        score: canonical.option.value,
+        legacyText: `${canonical.option.value}. ${canonical.option.label}`,
+      };
+    }
 
-    const resolved = getBdi2OptionById(canonicalKey, raw);
-    if (!resolved) continue;
+    const nativeOptionIndex = nativeField?.options.findIndex((option) => option.id === raw) ?? -1;
+    if (nativeField && nativeOptionIndex >= 0) {
+      const nativeOption = nativeField.options[nativeOptionIndex];
+      const matchingCanonical = item.options.findIndex(
+        (option) => option.value === nativeOption.score && option.label === nativeOption.label,
+      );
+      return {
+        optionId: matchingCanonical >= 0 ? bdi2OptionId(item.key, matchingCanonical) : undefined,
+        score: nativeOption.score,
+        legacyText: `${nativeOption.score}. ${nativeOption.label}`,
+      };
+    }
 
-    normalized[canonicalKey] = {
-      optionId: raw,
-      score: resolved.option.value,
-      legacyText: `${resolved.option.value}. ${resolved.option.label}`,
+    return null;
+  }
+
+  if (!raw || typeof raw !== "object") return null;
+  const answer = raw as StoredBdiAnswer;
+  const score = typeof answer.score === "number" ? answer.score : null;
+
+  if (answer.optionId) {
+    const canonical = getBdi2OptionById(item.key, answer.optionId);
+    if (canonical) {
+      return {
+        optionId: answer.optionId,
+        score: canonical.option.value,
+        legacyText: answer.legacyText ?? `${canonical.option.value}. ${canonical.option.label}`,
+      };
+    }
+
+    const nativeOptionIndex = nativeField?.options.findIndex((option) => option.id === answer.optionId) ?? -1;
+    if (nativeField && nativeOptionIndex >= 0) {
+      const nativeOption = nativeField.options[nativeOptionIndex];
+      const matchingCanonical = item.options.findIndex(
+        (option) => option.value === nativeOption.score && option.label === nativeOption.label,
+      );
+      return {
+        optionId: matchingCanonical >= 0 ? bdi2OptionId(item.key, matchingCanonical) : undefined,
+        score: nativeOption.score,
+        legacyText: answer.legacyText ?? `${nativeOption.score}. ${answer.text ?? nativeOption.label}`,
+      };
+    }
+  }
+
+  if (score !== null) {
+    const text = answer.text || answer.legacyText?.replace(/^\s*\d+\.\s*/, "") || "";
+    const matchingCanonical = item.options.findIndex(
+      (option) => option.value === score && (!text || option.label === text),
+    );
+    return {
+      optionId: matchingCanonical >= 0 ? bdi2OptionId(item.key, matchingCanonical) : undefined,
+      score,
+      legacyText: answer.legacyText ?? (text ? `${score}. ${text}` : undefined),
     };
   }
+
+  return null;
+}
+
+function normalizeBdiAnswers(answers: Record<string, unknown>, nativeSchema?: NativeQuestionnaireSchema | null) {
+  const normalized: Record<string, unknown> = {};
+  const nativeSingles = (nativeSchema?.fields ?? []).filter(
+    (field): field is Extract<NativeQuestionnaireSchema["fields"][number], { kind: "single" }> => field.kind === "single",
+  );
+
+  BDI2_ITEMS.forEach((item, itemIndex) => {
+    const nativeField = nativeSingles[itemIndex];
+    const raw = answers[item.key] ?? (nativeField ? answers[nativeField.id] : undefined);
+    const canonical = canonicalBdiAnswer(itemIndex, raw, nativeField);
+    if (canonical) normalized[item.key] = canonical;
+  });
 
   return normalized;
 }
@@ -74,19 +151,19 @@ function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<str
       return;
     }
     if (field.kind === "single") {
-      const canonicalId = questionnaireCode === "bdii" ? `q${++bdiSingleIndex}` : field.id;
+      const itemIndex = questionnaireCode === "bdii" ? bdiSingleIndex++ : -1;
+      const canonicalId = questionnaireCode === "bdii" ? `q${itemIndex + 1}` : field.id;
       fields.push({ kind: "radio", qid: canonicalId, text: field.label, order, options: field.options.map((option) => option.label), required: field.required });
-      const selected = String(answers[field.id] ?? "");
-      const selectedOption = field.options.find((option) => option.id === selected);
-      if (questionnaireCode === "bdii" && selectedOption) {
-        projectedAnswers[canonicalId] = {
-          optionId: selected.startsWith(`${canonicalId}_`) ? selected : undefined,
-          score: selectedOption.score,
-          legacyText: `${selectedOption.score}. ${selectedOption.label}`,
-        };
-      } else {
-        projectedAnswers[canonicalId] = selectedOption?.label ?? selected;
+
+      if (questionnaireCode === "bdii") {
+        const raw = answers[canonicalId] ?? answers[field.id];
+        const canonical = canonicalBdiAnswer(itemIndex, raw, field);
+        if (canonical) projectedAnswers[canonicalId] = canonical;
+        return;
       }
+
+      const selected = String(answers[field.id] ?? "");
+      projectedAnswers[canonicalId] = field.options.find((option) => option.id === selected)?.label ?? selected;
       return;
     }
     if (field.kind === "multiple") {
@@ -149,11 +226,16 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       }),
     });
 
-    let resultAnswers = questionnaire.code === "bdii" ? normalizeBdiAnswers(row.answers) : row.answers;
+    let resultAnswers = questionnaire.code === "bdii"
+      ? normalizeBdiAnswers(row.answers, questionnaire.metadata?.native_schema)
+      : row.answers;
     let resultSchema = questionnaire.metadata?.schema ?? null;
+
     if (questionnaire.metadata?.native_schema) {
       const projected = nativeProjection(questionnaire.metadata.native_schema, row.answers, questionnaire.code);
-      resultAnswers = questionnaire.code === "bdii" ? normalizeBdiAnswers(projected.answers) : projected.answers;
+      resultAnswers = questionnaire.code === "bdii"
+        ? normalizeBdiAnswers(projected.answers, questionnaire.metadata.native_schema)
+        : projected.answers;
       resultSchema = projected.schema;
     }
 
