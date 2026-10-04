@@ -41,7 +41,7 @@ export function PatientResultsPortal() {
       setLoadingRecent(true);
       setRecentError(null);
       try {
-        const response = await fetch("/form/api/vcita/clients/?recent=1", {
+        const response = await fetch("/form/api/results/patient-list/", {
           cache: "no-store",
           signal: controller.signal,
         });
@@ -50,7 +50,7 @@ export function PatientResultsPortal() {
         if (data.ok) setRecentClients(data.clients);
         else setRecentError(data.error);
       } catch {
-        if (!controller.signal.aborted) setRecentError("Recently active vcita patients are unavailable.");
+        if (!controller.signal.aborted) setRecentError("Patient list is unavailable.");
       } finally {
         if (!controller.signal.aborted) setLoadingRecent(false);
       }
@@ -138,12 +138,7 @@ export function PatientResultsPortal() {
       {!selected && !searchingMode ? (
         <section style={{ marginBottom: "22px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
-            <div>
-              <h3 style={{ margin: 0, fontSize: "16px" }}>Recently active</h3>
-              <p style={{ margin: "4px 0 0", color: "#6b7280", fontSize: "13px" }}>
-                vcita patients updated within the last 14 days, newest activity first.
-              </p>
-            </div>
+            <h3 style={{ margin: 0, fontSize: "16px" }}>Patient list</h3>
             {!loadingRecent && recentClients.length > INITIAL_VISIBLE_RECENT ? (
               <button
                 type="button"
@@ -155,7 +150,7 @@ export function PatientResultsPortal() {
             ) : null}
           </div>
 
-          {loadingRecent ? <p style={{ color: "#6b7280" }}>Loading recently active patients…</p> : null}
+          {loadingRecent ? <p style={{ color: "#6b7280" }}>Loading patient list…</p> : null}
           {recentError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{recentError}</p> : null}
         </section>
       ) : null}
@@ -183,7 +178,7 @@ export function PatientResultsPortal() {
               <span style={{ minWidth: 0 }}>
                 <strong style={{ display: "block", color: "#111827" }}>{clientName(client)}</strong>
                 <span style={{ display: "block", marginTop: "3px", color: "#6b7280", fontSize: "14px", overflowWrap: "anywhere" }}>
-                  {[client.email, client.phone].filter(Boolean).join(" · ") || "No email or phone listed"}
+                  {client.email || "No email listed"}
                 </span>
               </span>
               <span style={{ flex: "0 0 auto", color: "#2563eb", fontWeight: 700, fontSize: "13px" }}>View →</span>
@@ -197,7 +192,7 @@ export function PatientResultsPortal() {
       ) : null}
 
       {!selected && !searchingMode && !loadingRecent && !recentError && recentClients.length === 0 ? (
-        <p style={{ color: "#6b7280" }}>No vcita patients have been active in the last 14 days.</p>
+        <p style={{ color: "#6b7280" }}>No patients available yet.</p>
       ) : null}
 
       {selected ? (
@@ -205,7 +200,7 @@ export function PatientResultsPortal() {
           <div style={{ marginBottom: "18px", padding: "14px 16px", border: "1px solid #bfdbfe", borderRadius: "10px", background: "#eff6ff" }}>
             <div style={{ fontSize: "18px", fontWeight: 800 }}>{clientName(selected)}</div>
             <div style={{ marginTop: "3px", color: "#4b5563" }}>
-              {[selected.email, selected.phone].filter(Boolean).join(" · ")}
+              {selected.email || "No email listed"}
             </div>
             <button
               type="button"
