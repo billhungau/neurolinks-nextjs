@@ -2,6 +2,10 @@ const VCITA_BASE_URL =
   process.env.VCITA_BASE_URL?.trim().replace(/\/+$/, "") ||
   "https://api.vcita.biz/platform/v1";
 
+const NAME_DIRECTORY_TTL_MS = 2 * 60 * 1000;
+const NAME_DIRECTORY_BATCH_PAGES = 5;
+const NAME_DIRECTORY_MAX_PAGES = 10;
+
 type VcitaApiEnvelope<T> = {
   status?: string;
   data?: T;
@@ -26,6 +30,14 @@ export type VcitaClientSummary = {
   email: string | null;
   phone: string | null;
 };
+
+type CachedNameDirectory = {
+  clients: VcitaClientSummary[];
+  expiresAt: number;
+};
+
+let cachedNameDirectory: CachedNameDirectory | null = null;
+let nameDirectoryPromise: Promise<VcitaClientSummary[]> | null = null;
 
 function vcitaToken(): string {
   const token = process.env.VCITA_API_TOKEN?.trim();
@@ -102,39 +114,94 @@ async function directSearch(searchBy: "email" | "phone", term: string) {
     .filter((client): client is VcitaClientSummary => Boolean(client));
 }
 
+function normalizeSearchText(value: string) {
+  return value.trim().toLocaleLowerCase();
+}
+
 function nameMatches(client: VcitaClientSummary, normalized: string) {
-  const fullName = `${client.firstName} ${client.lastName}`.trim().toLocaleLowerCase();
-  return fullName.includes(normalized);
+  const first = normalizeSearchText(client.firstName);
+  const last = normalizeSearchText(client.lastName);
+  const full = `${first} ${last}`.trim();
+  const reverse = `${last} ${first}`.trim();
+  return first.includes(normalized) || last.includes(normalized) || full.includes(normalized) || reverse.includes(normalized);
+}
+
+async function fetchDirectoryPage(page: number) {
+  const perPage = 100;
+  const data = await vcitaRequest<unknown>(`clients?per_page=${perPage}&page=${page}`);
+  const rows = extractClients(data);
+  return {
+    rows,
+    clients: rows
+      .map(normalizeClient)
+      .filter((client): client is VcitaClientSummary => Boolean(client)),
+  };
+}
+
+async function loadNameDirectory(): Promise<VcitaClientSummary[]> {
+  if (cachedNameDirectory && cachedNameDirectory.expiresAt > Date.now()) {
+    return cachedNameDirectory.clients;
+  }
+  if (nameDirectoryPromise) return nameDirectoryPromise;
+
+  nameDirectoryPromise = (async () => {
+    const byId = new Map<string, VcitaClientSummary>();
+
+    for (let startPage = 1; startPage <= NAME_DIRECTORY_MAX_PAGES; startPage += NAME_DIRECTORY_BATCH_PAGES) {
+      const pages = Array.from(
+        { length: Math.min(NAME_DIRECTORY_BATCH_PAGES, NAME_DIRECTORY_MAX_PAGES - startPage + 1) },
+        (_, index) => startPage + index,
+      );
+
+      const batch = await Promise.all(pages.map((page) => fetchDirectoryPage(page)));
+      let reachedEnd = false;
+      for (const page of batch) {
+        for (const client of page.clients) byId.set(client.id, client);
+        if (page.rows.length < 100) reachedEnd = true;
+      }
+      if (reachedEnd) break;
+    }
+
+    const clients = [...byId.values()];
+    cachedNameDirectory = {
+      clients,
+      expiresAt: Date.now() + NAME_DIRECTORY_TTL_MS,
+    };
+    return clients;
+  })();
+
+  try {
+    return await nameDirectoryPromise;
+  } finally {
+    nameDirectoryPromise = null;
+  }
 }
 
 async function nameSearch(term: string) {
-  const normalized = term.toLocaleLowerCase();
-  const encoded = encodeURIComponent(term);
+  const normalized = normalizeSearchText(term);
 
-  // Keep name lookup server-side. Directory walking made a single search fan out
-  // to as many as five 100-client vcita requests and commonly took several
-  // seconds. Try the generic search plus likely name-specific variants in
-  // parallel, then merge/de-duplicate only genuine local name matches.
-  const attempts = await Promise.allSettled([
-    vcitaRequest<unknown>(`clients?search_term=${encoded}&per_page=25&page=1`),
-    vcitaRequest<unknown>(`clients?search_term=${encoded}&search_by=name&per_page=25&page=1`),
-    vcitaRequest<unknown>(`clients?search_term=${encoded}&search_by=first_name&per_page=25&page=1`),
-    vcitaRequest<unknown>(`clients?search_term=${encoded}&search_by=last_name&per_page=25&page=1`),
-  ]);
-
-  const byId = new Map<string, VcitaClientSummary>();
-  for (const attempt of attempts) {
-    if (attempt.status !== "fulfilled") continue;
-    for (const raw of extractClients(attempt.value)) {
-      const client = normalizeClient(raw);
-      if (!client || !nameMatches(client, normalized)) continue;
-      byId.set(client.id, client);
-      if (byId.size >= 20) break;
-    }
-    if (byId.size >= 20) break;
+  // Try vcita's generic server-side search first because it is cheapest when it
+  // works for the connected account.
+  try {
+    const direct = await vcitaRequest<unknown>(
+      `clients?search_term=${encodeURIComponent(term)}&per_page=25&page=1`,
+    );
+    const directMatches = extractClients(direct)
+      .map(normalizeClient)
+      .filter((client): client is VcitaClientSummary => Boolean(client))
+      .filter((client) => nameMatches(client, normalized))
+      .slice(0, 20);
+    if (directMatches.length > 0) return directMatches;
+  } catch {
+    // Fall through to the cached directory search.
   }
 
-  return [...byId.values()].slice(0, 20);
+  // vcita name filtering is not reliable on this account. Load directory pages
+  // in parallel, cache the normalized client list briefly in server memory, and
+  // search locally. This preserves reliable name lookup without the previous
+  // sequential 5-second page walk on every keystroke.
+  const directory = await loadNameDirectory();
+  return directory.filter((client) => nameMatches(client, normalized)).slice(0, 20);
 }
 
 export async function searchVcitaClients(term: string): Promise<VcitaClientSummary[]> {
