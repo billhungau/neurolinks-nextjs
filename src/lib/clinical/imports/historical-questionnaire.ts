@@ -371,18 +371,26 @@ export async function buildHistoricalQuestionnairePreview(code: HistoricalImport
 
 type QuestionnaireRow = {
   id: string;
-  metadata?: { schema?: ImportedQuestionnaireSchema } | null;
+  metadata?: { schema?: ImportedQuestionnaireSchema; source?: string } | null;
 };
 
 async function questionnaireRegistry(code: HistoricalImportedCode) {
-  await ensureImportedQuestionnaire(code);
-  const rows = await clinicalSupabaseRequest<QuestionnaireRow[]>(
-    `questionnaires?select=id,metadata&code=eq.${encodeURIComponent(code)}&order=version.desc&limit=1`,
+  let rows = await clinicalSupabaseRequest<QuestionnaireRow[]>(
+    `questionnaires?select=id,metadata&code=eq.${encodeURIComponent(code)}&metadata->>source=eq.jotform&order=version.desc&limit=1`,
     { method: "GET" },
   );
+
+  if (!rows.length) {
+    await ensureImportedQuestionnaire(code);
+    rows = await clinicalSupabaseRequest<QuestionnaireRow[]>(
+      `questionnaires?select=id,metadata&code=eq.${encodeURIComponent(code)}&metadata->>source=eq.jotform&order=version.desc&limit=1`,
+      { method: "GET" },
+    );
+  }
+
   const row = rows[0];
   const schema = row?.metadata?.schema;
-  if (!row || !schema) throw new Error("[historical-import] Questionnaire registry missing.");
+  if (!row || !schema) throw new Error("[historical-import] Jotform questionnaire registry missing.");
   return { id: row.id, schema };
 }
 
