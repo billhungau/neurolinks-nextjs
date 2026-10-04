@@ -197,10 +197,25 @@ export function PatientResultsPortal() {
 
       {selected ? (
         <>
-          <div style={{ marginBottom: "18px", padding: "14px 16px", border: "1px solid #bfdbfe", borderRadius: "10px", background: "#eff6ff" }}>
-            <div style={{ fontSize: "18px", fontWeight: 800 }}>{clientName(selected)}</div>
-            <div style={{ marginTop: "3px", color: "#4b5563" }}>
-              {selected.email || "No email listed"}
+          <div
+            style={{
+              marginBottom: "18px",
+              padding: "14px 16px",
+              border: "1px solid #bfdbfe",
+              borderRadius: "10px",
+              background: "#eff6ff",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "14px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: "18px", fontWeight: 800 }}>{clientName(selected)}</div>
+              <div style={{ marginTop: "3px", color: "#4b5563", overflowWrap: "anywhere" }}>
+                {selected.email || "No email listed"}
+              </div>
             </div>
             <button
               type="button"
@@ -209,9 +224,20 @@ export function PatientResultsPortal() {
                 setQuery("");
                 setClients([]);
               }}
-              style={{ marginTop: "8px", border: 0, padding: 0, background: "transparent", textDecoration: "underline", cursor: "pointer" }}
+              style={{
+                flex: "0 0 auto",
+                border: "1px solid #2563eb",
+                borderRadius: "8px",
+                padding: "9px 12px",
+                background: "#fff",
+                color: "#1d4ed8",
+                fontWeight: 750,
+                fontSize: "14px",
+                cursor: "pointer",
+                boxShadow: "0 1px 2px rgba(15,23,42,.06)",
+              }}
             >
-              Choose another patient
+              ← Choose another patient
             </button>
           </div>
 
