@@ -109,45 +109,32 @@ function nameMatches(client: VcitaClientSummary, normalized: string) {
 
 async function nameSearch(term: string) {
   const normalized = term.toLocaleLowerCase();
+  const encoded = encodeURIComponent(term);
 
-  // Prefer vcita's server-side search first. Some vcita accounts support a
-  // generic search_term without search_by; filtering the response locally keeps
-  // behavior safe even if the endpoint returns broader matches.
-  try {
-    const direct = await vcitaRequest<unknown>(
-      `clients?search_term=${encodeURIComponent(term)}&per_page=25&page=1`,
-    );
-    const directMatches = extractClients(direct)
-      .map(normalizeClient)
-      .filter((client): client is VcitaClientSummary => Boolean(client))
-      .filter((client) => nameMatches(client, normalized))
-      .slice(0, 20);
-    if (directMatches.length > 0) return directMatches;
-  } catch {
-    // Fall through to compatibility scan when generic server-side search is not
-    // supported by this vcita account.
-  }
+  // Keep name lookup server-side. Directory walking made a single search fan out
+  // to as many as five 100-client vcita requests and commonly took several
+  // seconds. Try the generic search plus likely name-specific variants in
+  // parallel, then merge/de-duplicate only genuine local name matches.
+  const attempts = await Promise.allSettled([
+    vcitaRequest<unknown>(`clients?search_term=${encoded}&per_page=25&page=1`),
+    vcitaRequest<unknown>(`clients?search_term=${encoded}&search_by=name&per_page=25&page=1`),
+    vcitaRequest<unknown>(`clients?search_term=${encoded}&search_by=first_name&per_page=25&page=1`),
+    vcitaRequest<unknown>(`clients?search_term=${encoded}&search_by=last_name&per_page=25&page=1`),
+  ]);
 
-  const matches: VcitaClientSummary[] = [];
-  const perPage = 100;
-
-  // Compatibility fallback. Cap the scan to five pages rather than repeatedly
-  // walking the whole client directory for every keystroke.
-  for (let page = 1; page <= 5 && matches.length < 20; page += 1) {
-    const data = await vcitaRequest<unknown>(`clients?per_page=${perPage}&page=${page}`);
-    const rows = extractClients(data);
-
-    for (const raw of rows) {
+  const byId = new Map<string, VcitaClientSummary>();
+  for (const attempt of attempts) {
+    if (attempt.status !== "fulfilled") continue;
+    for (const raw of extractClients(attempt.value)) {
       const client = normalizeClient(raw);
-      if (!client) continue;
-      if (nameMatches(client, normalized)) matches.push(client);
-      if (matches.length >= 20) break;
+      if (!client || !nameMatches(client, normalized)) continue;
+      byId.set(client.id, client);
+      if (byId.size >= 20) break;
     }
-
-    if (rows.length < perPage) break;
+    if (byId.size >= 20) break;
   }
 
-  return matches;
+  return [...byId.values()].slice(0, 20);
 }
 
 export async function searchVcitaClients(term: string): Promise<VcitaClientSummary[]> {
