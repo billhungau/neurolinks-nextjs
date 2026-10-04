@@ -172,7 +172,8 @@ export async function syncJotformSubmission(input: {
   // write failure to make an otherwise valid Jotform questionnaire sync fail.
   if (result.status === "imported" || result.status === "already_imported") {
     try {
-      await upsertPatientIdentity(client.id);
+      const submittedAt = submission.created_at ? String(submission.created_at) : null;
+      await upsertPatientIdentity(client.id, undefined, submittedAt);
     } catch {}
   }
 
