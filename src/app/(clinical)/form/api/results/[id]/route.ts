@@ -33,6 +33,7 @@ function relation(value: QuestionnaireRelation) {
 function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<string, unknown>, questionnaireCode: string) {
   const projectedAnswers: Record<string, unknown> = {};
   const fields: ImportedField[] = [];
+  let bdiSingleIndex = 0;
 
   schema.fields.forEach((field, order) => {
     if (field.kind === "paragraph") {
@@ -49,16 +50,18 @@ function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<str
       return;
     }
     if (field.kind === "single") {
-      fields.push({ kind: "radio", qid: field.id, text: field.label, order, options: field.options.map((option) => option.label), required: field.required });
+      const canonicalId = questionnaireCode === "bdii" ? `q${++bdiSingleIndex}` : field.id;
+      fields.push({ kind: "radio", qid: canonicalId, text: field.label, order, options: field.options.map((option) => option.label), required: field.required });
       const selected = String(answers[field.id] ?? "");
       const selectedOption = field.options.find((option) => option.id === selected);
       if (questionnaireCode === "bdii" && selectedOption) {
-        projectedAnswers[field.id] = {
+        projectedAnswers[canonicalId] = {
+          optionId: canonicalId === field.id ? selected : undefined,
           score: selectedOption.score,
           legacyText: `${selectedOption.score}. ${selectedOption.label}`,
         };
       } else {
-        projectedAnswers[field.id] = selectedOption?.label ?? selected;
+        projectedAnswers[canonicalId] = selectedOption?.label ?? selected;
       }
       return;
     }
