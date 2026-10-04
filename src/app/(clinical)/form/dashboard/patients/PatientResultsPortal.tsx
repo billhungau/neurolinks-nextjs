@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PatientResultsPanel } from "../PatientResultsPanel";
 
 type Client = {
@@ -22,6 +22,24 @@ const PREFETCH_DELAY_MS = 1500;
 
 function clientName(client: Client) {
   return [client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client";
+}
+
+function normalizeSearch(value: string) {
+  return value.trim().toLocaleLowerCase();
+}
+
+function clientMatchesLoadedSearch(client: Client, normalizedQuery: string) {
+  if (!normalizedQuery) return false;
+  const fullName = normalizeSearch(`${client.firstName} ${client.lastName}`);
+  const reverseName = normalizeSearch(`${client.lastName} ${client.firstName}`);
+  const email = normalizeSearch(client.email ?? "");
+  return fullName.includes(normalizedQuery) || reverseName.includes(normalizedQuery) || email.includes(normalizedQuery);
+}
+
+function mergeClients(primary: Client[], secondary: Client[]) {
+  const byId = new Map<string, Client>();
+  for (const client of [...primary, ...secondary]) byId.set(client.id, client);
+  return [...byId.values()];
 }
 
 export function PatientResultsPortal() {
@@ -96,6 +114,20 @@ export function PatientResultsPortal() {
     }
   }, [patientPage, patientPages, patientTotalPages]);
 
+  const loadedPatients = useMemo(() => {
+    const byId = new Map<string, Client>();
+    for (const pageClients of Object.values(patientPages)) {
+      for (const client of pageClients) byId.set(client.id, client);
+    }
+    return [...byId.values()];
+  }, [patientPages]);
+
+  const normalizedQuery = normalizeSearch(query);
+  const localMatches = useMemo(() => {
+    if (normalizedQuery.length < SEARCH_MIN_CHARS) return [];
+    return loadedPatients.filter((client) => clientMatchesLoadedSearch(client, normalizedQuery));
+  }, [loadedPatients, normalizedQuery]);
+
   useEffect(() => {
     const q = query.trim();
     if (q.length < SEARCH_MIN_CHARS) {
@@ -108,8 +140,10 @@ export function PatientResultsPortal() {
 
     const id = ++requestIdRef.current;
     const controller = new AbortController();
-    setSearching(true);
-    setHasSearched(false);
+    // Loaded page data is searched synchronously, so only show a searching
+    // indicator when there is not already an immediate local result.
+    setSearching(localMatches.length === 0);
+    setHasSearched(localMatches.length > 0);
     setSearchError(null);
 
     const timer = window.setTimeout(async () => {
@@ -148,7 +182,8 @@ export function PatientResultsPortal() {
 
   const searchingMode = query.trim().length >= SEARCH_MIN_CHARS;
   const currentPatientClients = patientPages[patientPage] ?? [];
-  const listClients = searchingMode ? clients : currentPatientClients;
+  const searchClients = useMemo(() => mergeClients(localMatches, clients), [localMatches, clients]);
+  const listClients = searchingMode ? searchClients : currentPatientClients;
 
   return (
     <div>
@@ -169,7 +204,7 @@ export function PatientResultsPortal() {
         />
       </label>
 
-      {searching ? <p style={{ color: "#6b7280" }}>Searching vcita…</p> : null}
+      {searching && localMatches.length === 0 ? <p style={{ color: "#6b7280" }}>Searching vcita…</p> : null}
       {searchError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{searchError}</p> : null}
 
       {!selected && !searchingMode ? (
@@ -247,7 +282,7 @@ export function PatientResultsPortal() {
         </nav>
       ) : null}
 
-      {!selected && hasSearched && !searching && clients.length === 0 && !searchError ? (
+      {!selected && hasSearched && !searching && searchClients.length === 0 && !searchError ? (
         <p style={{ color: "#6b7280" }}>No matching vcita patients found.</p>
       ) : null}
 
