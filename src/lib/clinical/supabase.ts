@@ -26,16 +26,10 @@ function clinicalHeaders(
   return headers;
 }
 
-/**
- * Server-only Data API helper for the clinical Supabase project.
- *
- * Never call this from a Client Component or pass the service key to browser
- * code. The key bypasses Row Level Security.
- */
-export async function clinicalSupabaseRequest<T>(
+async function clinicalSupabaseFetch(
   path: string,
   init: ClinicalSupabaseRequestInit = {},
-): Promise<T> {
+) {
   const { supabaseUrl, supabaseServiceKey } = clinicalConfig();
   const normalizedPath = path.replace(/^\/+/, "");
   const { prefer, headers: initHeaders, ...requestInit } = init;
@@ -54,9 +48,50 @@ export async function clinicalSupabaseRequest<T>(
     );
   }
 
+  return response;
+}
+
+/**
+ * Server-only Data API helper for the clinical Supabase project.
+ *
+ * Never call this from a Client Component or pass the service key to browser
+ * code. The key bypasses Row Level Security.
+ */
+export async function clinicalSupabaseRequest<T>(
+  path: string,
+  init: ClinicalSupabaseRequestInit = {},
+): Promise<T> {
+  const response = await clinicalSupabaseFetch(path, init);
   if (response.status === 204) return undefined as T;
 
   const text = await response.text();
   if (!text) return undefined as T;
   return JSON.parse(text) as T;
+}
+
+/**
+ * GET helper for PostgREST queries that need an exact row count without
+ * retrieving the entire result set. Use with Prefer: count=exact.
+ */
+export async function clinicalSupabaseRequestWithCount<T>(
+  path: string,
+  init: ClinicalSupabaseRequestInit = {},
+): Promise<{ data: T; count: number | null }> {
+  const prefer = init.prefer
+    ? `${init.prefer},count=exact`
+    : "count=exact";
+  const response = await clinicalSupabaseFetch(path, { ...init, prefer });
+  const contentRange = response.headers.get("content-range");
+  const countPart = contentRange?.split("/")[1] ?? "";
+  const parsedCount = countPart && countPart !== "*" ? Number(countPart) : NaN;
+
+  if (response.status === 204) {
+    return { data: undefined as T, count: Number.isFinite(parsedCount) ? parsedCount : null };
+  }
+
+  const text = await response.text();
+  return {
+    data: text ? JSON.parse(text) as T : undefined as T,
+    count: Number.isFinite(parsedCount) ? parsedCount : null,
+  };
 }
