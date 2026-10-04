@@ -16,6 +16,9 @@ type SearchResponse =
   | { ok: false; error: string };
 
 const PATIENTS_PER_PAGE = 25;
+const SEARCH_MIN_CHARS = 3;
+const SEARCH_DEBOUNCE_MS = 600;
+const PREFETCH_DELAY_MS = 1500;
 
 function clientName(client: Client) {
   return [client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client";
@@ -78,24 +81,28 @@ export function PatientResultsPortal() {
     if (!patientPages[patientPage]) void loadPatientPage(patientPage, { foreground: true });
   }, [patientPage, patientPages]);
 
-  // Once the current page is available, fetch exactly one page ahead. Do not
-  // recursively prefetch the whole directory; that creates a long waterfall of
-  // vcita requests and competes with the foreground request.
+  // Prefetch exactly one page ahead, but only after the current page has been
+  // visible for a moment so background vcita traffic does not compete with the
+  // foreground page load.
   useEffect(() => {
     if (!patientPages[patientPage]) return;
     const nextPage = patientPage + 1;
     if (nextPage <= patientTotalPages && !patientPages[nextPage]) {
-      const timer = window.setTimeout(() => void loadPatientPage(nextPage), 100);
+      const timer = window.setTimeout(
+        () => void loadPatientPage(nextPage),
+        PREFETCH_DELAY_MS,
+      );
       return () => window.clearTimeout(timer);
     }
   }, [patientPage, patientPages, patientTotalPages]);
 
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) {
+    if (q.length < SEARCH_MIN_CHARS) {
       setClients([]);
       setHasSearched(false);
       setSearchError(null);
+      setSearching(false);
       return;
     }
 
@@ -131,7 +138,7 @@ export function PatientResultsPortal() {
       } finally {
         if (id === requestIdRef.current) setSearching(false);
       }
-    }, 300);
+    }, SEARCH_DEBOUNCE_MS);
 
     return () => {
       window.clearTimeout(timer);
@@ -139,7 +146,7 @@ export function PatientResultsPortal() {
     };
   }, [query]);
 
-  const searchingMode = query.trim().length >= 2;
+  const searchingMode = query.trim().length >= SEARCH_MIN_CHARS;
   const currentPatientClients = patientPages[patientPage] ?? [];
   const listClients = searchingMode ? clients : currentPatientClients;
 
