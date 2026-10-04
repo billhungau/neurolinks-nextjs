@@ -102,20 +102,45 @@ async function directSearch(searchBy: "email" | "phone", term: string) {
     .filter((client): client is VcitaClientSummary => Boolean(client));
 }
 
+function nameMatches(client: VcitaClientSummary, normalized: string) {
+  const fullName = `${client.firstName} ${client.lastName}`.trim().toLocaleLowerCase();
+  return fullName.includes(normalized);
+}
+
 async function nameSearch(term: string) {
   const normalized = term.toLocaleLowerCase();
+
+  // Prefer vcita's server-side search first. Some vcita accounts support a
+  // generic search_term without search_by; filtering the response locally keeps
+  // behavior safe even if the endpoint returns broader matches.
+  try {
+    const direct = await vcitaRequest<unknown>(
+      `clients?search_term=${encodeURIComponent(term)}&per_page=25&page=1`,
+    );
+    const directMatches = extractClients(direct)
+      .map(normalizeClient)
+      .filter((client): client is VcitaClientSummary => Boolean(client))
+      .filter((client) => nameMatches(client, normalized))
+      .slice(0, 20);
+    if (directMatches.length > 0) return directMatches;
+  } catch {
+    // Fall through to compatibility scan when generic server-side search is not
+    // supported by this vcita account.
+  }
+
   const matches: VcitaClientSummary[] = [];
   const perPage = 100;
 
-  for (let page = 1; page <= 10 && matches.length < 20; page += 1) {
+  // Compatibility fallback. Cap the scan to five pages rather than repeatedly
+  // walking the whole client directory for every keystroke.
+  for (let page = 1; page <= 5 && matches.length < 20; page += 1) {
     const data = await vcitaRequest<unknown>(`clients?per_page=${perPage}&page=${page}`);
     const rows = extractClients(data);
 
     for (const raw of rows) {
       const client = normalizeClient(raw);
       if (!client) continue;
-      const fullName = `${client.firstName} ${client.lastName}`.trim().toLocaleLowerCase();
-      if (fullName.includes(normalized)) matches.push(client);
+      if (nameMatches(client, normalized)) matches.push(client);
       if (matches.length >= 20) break;
     }
 
