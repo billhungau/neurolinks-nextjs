@@ -147,7 +147,7 @@ export function FormsPortal() {
             </div>
             <div className="form-actions">
               <button type="button" className="text-action" disabled={busy || !native} onClick={() => editForm(family.formCode)}>{busy ? "Opening…" : "Edit"}</button>
-              <a className="text-action" href={`/form/dashboard/patients/?questionnaire=${encodeURIComponent(family.formCode)}`}>Submissions</a>
+              <a className="text-action" href={`/form/dashboard/forms/submissions/${encodeURIComponent(family.formCode)}/`}>Submissions</a>
               {native ? <a className="text-action" href={`/form/dashboard/forms/${source.id}/?preview=1`} target="_blank" rel="noreferrer">View form</a> : null}
               <div className="more-wrap"><button type="button" className="more" onClick={() => setOpenMenu(openMenu === family.formCode ? null : family.formCode)}>More⌄</button>{openMenu === family.formCode ? <div className="more-menu">{native ? <button type="button" onClick={() => deleteForm(family.formCode)}>Delete form</button> : null}</div> : null}</div>
             </div>
