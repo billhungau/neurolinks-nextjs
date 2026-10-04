@@ -1,6 +1,7 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 import { maxNativeScore, type NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
+import { ensurePssSymptomMatrix } from "@/lib/clinical/questionnaires/pss-native-repair";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,12 +26,44 @@ async function rowFor(id: string) {
   return rows[0] ?? null;
 }
 
+function nativeSchema(row: Row) {
+  const raw = row.metadata?.native_schema;
+  return raw && typeof raw === "object" ? raw as NativeQuestionnaireSchema : null;
+}
+
 export async function GET(_request: Request, { params }: Props) {
   const clinician = await getClinicianSession();
   if (!clinician) return Response.json({ ok: false, error: "Authentication required." }, { status: 401 });
   const { id } = await params;
-  const row = await rowFor(id);
+  let row = await rowFor(id);
   if (!row) return Response.json({ ok: false, error: "Form not found." }, { status: 404 });
+
+  // Older PSS drafts could have been created before the Jotform matrix rows were
+  // available to the native converter. Repair the editable draft when it is opened,
+  // so the clinician does not need to revisit the Forms list to trigger migration.
+  if (row.code === "pss" && String(row.metadata?.builder_status ?? "") === "draft") {
+    const currentSchema = nativeSchema(row);
+    if (currentSchema) {
+      const repairedSchema = ensurePssSymptomMatrix(currentSchema);
+      const hadMatrix = currentSchema.fields.some((field) => field.kind === "matrix" && field.rows.length >= 17);
+      if (!hadMatrix) {
+        const metadata = {
+          ...(row.metadata ?? {}),
+          native_schema: repairedSchema,
+          conversion_schema_revision: 4,
+          repaired_at: new Date().toISOString(),
+          repaired_by: clinician.id,
+        };
+        await clinicalSupabaseRequest<unknown>(`questionnaires?id=eq.${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          prefer: "return=minimal",
+          body: JSON.stringify({ max_score: maxNativeScore(repairedSchema), metadata }),
+        });
+        row = { ...row, max_score: maxNativeScore(repairedSchema), metadata };
+      }
+    }
+  }
+
   return Response.json({ ok: true, form: row }, { headers: { "Cache-Control": "no-store, private" } });
 }
 
