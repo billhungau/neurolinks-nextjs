@@ -50,7 +50,7 @@ export function PatientResultsPortal() {
         if (data.ok) setRecentClients(data.clients);
         else setRecentError(data.error);
       } catch {
-        if (!controller.signal.aborted) setRecentError("Recent vcita patients are unavailable.");
+        if (!controller.signal.aborted) setRecentError("Recently active vcita patients are unavailable.");
       } finally {
         if (!controller.signal.aborted) setLoadingRecent(false);
       }
@@ -139,9 +139,9 @@ export function PatientResultsPortal() {
         <section style={{ marginBottom: "22px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: "16px" }}>Recent patients</h3>
+              <h3 style={{ margin: 0, fontSize: "16px" }}>Recently active</h3>
               <p style={{ margin: "4px 0 0", color: "#6b7280", fontSize: "13px" }}>
-                Quick access to the first 50 patients returned by vcita.
+                vcita patients updated within the last 14 days, newest activity first.
               </p>
             </div>
             {!loadingRecent && recentClients.length > INITIAL_VISIBLE_RECENT ? (
@@ -155,7 +155,7 @@ export function PatientResultsPortal() {
             ) : null}
           </div>
 
-          {loadingRecent ? <p style={{ color: "#6b7280" }}>Loading recent patients…</p> : null}
+          {loadingRecent ? <p style={{ color: "#6b7280" }}>Loading recently active patients…</p> : null}
           {recentError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{recentError}</p> : null}
         </section>
       ) : null}
@@ -194,6 +194,10 @@ export function PatientResultsPortal() {
 
       {!selected && hasSearched && !searching && clients.length === 0 && !searchError ? (
         <p style={{ color: "#6b7280" }}>No matching vcita patients found.</p>
+      ) : null}
+
+      {!selected && !searchingMode && !loadingRecent && !recentError && recentClients.length === 0 ? (
+        <p style={{ color: "#6b7280" }}>No vcita patients have been active in the last 14 days.</p>
       ) : null}
 
       {selected ? (
