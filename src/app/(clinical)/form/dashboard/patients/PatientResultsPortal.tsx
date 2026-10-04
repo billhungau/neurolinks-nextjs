@@ -15,7 +15,7 @@ type SearchResponse =
   | { ok: true; clients: Client[] }
   | { ok: false; error: string };
 
-const INITIAL_VISIBLE_RECENT = 20;
+const PATIENTS_PER_PAGE = 25;
 
 function clientName(client: Client) {
   return [client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client";
@@ -24,22 +24,22 @@ function clientName(client: Client) {
 export function PatientResultsPortal() {
   const [query, setQuery] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
-  const [recentClients, setRecentClients] = useState<Client[]>([]);
+  const [patientClients, setPatientClients] = useState<Client[]>([]);
   const [selected, setSelected] = useState<Client | null>(null);
   const [searching, setSearching] = useState(false);
-  const [loadingRecent, setLoadingRecent] = useState(true);
+  const [loadingPatients, setLoadingPatients] = useState(true);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [recentError, setRecentError] = useState<string | null>(null);
+  const [patientError, setPatientError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [showAllRecent, setShowAllRecent] = useState(false);
+  const [patientPage, setPatientPage] = useState(1);
   const requestIdRef = useRef(0);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    async function loadRecent() {
-      setLoadingRecent(true);
-      setRecentError(null);
+    async function loadPatients() {
+      setLoadingPatients(true);
+      setPatientError(null);
       try {
         const response = await fetch("/form/api/results/patient-list/", {
           cache: "no-store",
@@ -47,16 +47,18 @@ export function PatientResultsPortal() {
         });
         const data = (await response.json()) as SearchResponse;
         if (controller.signal.aborted) return;
-        if (data.ok) setRecentClients(data.clients);
-        else setRecentError(data.error);
+        if (data.ok) {
+          setPatientClients(data.clients);
+          setPatientPage(1);
+        } else setPatientError(data.error);
       } catch {
-        if (!controller.signal.aborted) setRecentError("Patient list is unavailable.");
+        if (!controller.signal.aborted) setPatientError("Patient list is unavailable.");
       } finally {
-        if (!controller.signal.aborted) setLoadingRecent(false);
+        if (!controller.signal.aborted) setLoadingPatients(false);
       }
     }
 
-    loadRecent();
+    loadPatients();
     return () => controller.abort();
   }, []);
 
@@ -110,8 +112,14 @@ export function PatientResultsPortal() {
   }, [query]);
 
   const searchingMode = query.trim().length >= 2;
-  const recentVisible = showAllRecent ? recentClients : recentClients.slice(0, INITIAL_VISIBLE_RECENT);
-  const listClients = searchingMode ? clients : recentVisible;
+  const totalPages = Math.max(1, Math.ceil(patientClients.length / PATIENTS_PER_PAGE));
+  const pageStart = (patientPage - 1) * PATIENTS_PER_PAGE;
+  const pagedPatients = patientClients.slice(pageStart, pageStart + PATIENTS_PER_PAGE);
+  const listClients = searchingMode ? clients : pagedPatients;
+
+  function selectClient(client: Client) {
+    setSelected(client);
+  }
 
   return (
     <div>
@@ -136,32 +144,33 @@ export function PatientResultsPortal() {
       {searchError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{searchError}</p> : null}
 
       {!selected && !searchingMode ? (
-        <section style={{ marginBottom: "22px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
-            <h3 style={{ margin: 0, fontSize: "16px" }}>Patient list</h3>
-            {!loadingRecent && recentClients.length > INITIAL_VISIBLE_RECENT ? (
-              <button
-                type="button"
-                onClick={() => setShowAllRecent((current) => !current)}
-                style={{ border: "1px solid #d1d5db", background: "#fff", borderRadius: "8px", padding: "7px 10px", cursor: "pointer", fontWeight: 700 }}
-              >
-                {showAllRecent ? "Show fewer" : `Show all ${recentClients.length}`}
-              </button>
+        <section style={{ marginBottom: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "10px", flexWrap: "wrap" }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: "16px" }}>Patient list</h3>
+              {!loadingPatients && !patientError && patientClients.length > 0 ? (
+                <p style={{ margin: "4px 0 0", color: "#6b7280", fontSize: "13px" }}>
+                  {patientClients.length} patients · 25 per page
+                </p>
+              ) : null}
+            </div>
+            {!loadingPatients && patientClients.length > PATIENTS_PER_PAGE ? (
+              <div style={{ color: "#6b7280", fontSize: "13px" }}>Page {patientPage} of {totalPages}</div>
             ) : null}
           </div>
 
-          {loadingRecent ? <p style={{ color: "#6b7280" }}>Loading patient list…</p> : null}
-          {recentError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{recentError}</p> : null}
+          {loadingPatients ? <p style={{ color: "#6b7280" }}>Loading patient list…</p> : null}
+          {patientError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{patientError}</p> : null}
         </section>
       ) : null}
 
       {!selected && listClients.length > 0 ? (
-        <div style={{ display: "grid", gap: "8px", marginBottom: "22px" }}>
+        <div style={{ display: "grid", gap: "8px", marginBottom: "16px" }}>
           {listClients.map((client) => (
             <button
               key={client.id}
               type="button"
-              onClick={() => setSelected(client)}
+              onClick={() => selectClient(client)}
               style={{
                 textAlign: "left",
                 padding: "12px 14px",
@@ -187,11 +196,33 @@ export function PatientResultsPortal() {
         </div>
       ) : null}
 
+      {!selected && !searchingMode && !loadingPatients && patientClients.length > PATIENTS_PER_PAGE ? (
+        <nav aria-label="Patient list pagination" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "22px" }}>
+          <button
+            type="button"
+            disabled={patientPage <= 1}
+            onClick={() => setPatientPage((page) => Math.max(1, page - 1))}
+            style={{ padding: "8px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", fontWeight: 700, cursor: patientPage <= 1 ? "not-allowed" : "pointer", opacity: patientPage <= 1 ? 0.45 : 1 }}
+          >
+            ← Previous
+          </button>
+          <span style={{ color: "#6b7280", fontSize: "13px" }}>Page {patientPage} of {totalPages}</span>
+          <button
+            type="button"
+            disabled={patientPage >= totalPages}
+            onClick={() => setPatientPage((page) => Math.min(totalPages, page + 1))}
+            style={{ padding: "8px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", fontWeight: 700, cursor: patientPage >= totalPages ? "not-allowed" : "pointer", opacity: patientPage >= totalPages ? 0.45 : 1 }}
+          >
+            Next →
+          </button>
+        </nav>
+      ) : null}
+
       {!selected && hasSearched && !searching && clients.length === 0 && !searchError ? (
         <p style={{ color: "#6b7280" }}>No matching vcita patients found.</p>
       ) : null}
 
-      {!selected && !searchingMode && !loadingRecent && !recentError && recentClients.length === 0 ? (
+      {!selected && !searchingMode && !loadingPatients && !patientError && patientClients.length === 0 ? (
         <p style={{ color: "#6b7280" }}>No patients available yet.</p>
       ) : null}
 
