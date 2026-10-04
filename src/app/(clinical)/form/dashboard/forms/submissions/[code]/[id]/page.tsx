@@ -123,10 +123,18 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
     <main style={{ minHeight: "100vh", padding: "28px 24px", background: "#f8fafc" }}>
       <div style={{ maxWidth: 980, margin: "0 auto" }}>
         <Link href={`/form/dashboard/forms/submissions/${encodeURIComponent(code)}/`} style={{ color: "#334155", textDecoration: "none", fontSize: 14 }}>← Back to submissions</Link>
-        <header style={{ margin: "16px 0 20px" }}>
-          <p style={{ margin: "0 0 5px", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", color: "#64748b" }}>NeuroLinks Admin</p>
-          <h1 style={{ margin: 0, fontSize: 30 }}>{LABELS[code] ?? questionnaire.name} submission</h1>
-          <p style={{ margin: "8px 0 0", color: "#64748b" }}>{patientName} · {formatSubmittedAt(assessment.submitted_at)}</p>
+        <header style={{ margin: "16px 0 20px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+          <div>
+            <p style={{ margin: "0 0 5px", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", color: "#64748b" }}>NeuroLinks Admin</p>
+            <h1 style={{ margin: 0, fontSize: 30 }}>{LABELS[code] ?? questionnaire.name} submission</h1>
+            <p style={{ margin: "8px 0 0", color: "#64748b" }}>{patientName} · {formatSubmittedAt(assessment.submitted_at)}</p>
+          </div>
+          <a
+            href={`/form/api/results/${encodeURIComponent(assessment.id)}/pdf/`}
+            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 14px", borderRadius: 9, background: "#111827", color: "#fff", textDecoration: "none", fontWeight: 800, fontSize: 14 }}
+          >
+            Download PDF
+          </a>
         </header>
 
         <section style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 12, marginBottom: 18 }}>
