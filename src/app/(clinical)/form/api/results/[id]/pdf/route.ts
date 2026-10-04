@@ -198,7 +198,9 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
     const date = assessment.submitted_at.slice(0, 10);
     const filename = `${filePart(patientName)}-${filePart(questionnaire.code.toUpperCase())}-${date}.pdf`;
-    return new Response(bytes, {
+    const body = new ArrayBuffer(bytes.byteLength);
+    new Uint8Array(body).set(bytes);
+    return new Response(body, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
