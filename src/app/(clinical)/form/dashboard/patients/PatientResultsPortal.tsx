@@ -12,7 +12,7 @@ type Client = {
 };
 
 type SearchResponse =
-  | { ok: true; clients: Client[] }
+  | { ok: true; clients: Client[]; page?: number; pageSize?: number; total?: number; totalPages?: number }
   | { ok: false; error: string };
 
 const PATIENTS_PER_PAGE = 25;
@@ -24,7 +24,7 @@ function clientName(client: Client) {
 export function PatientResultsPortal() {
   const [query, setQuery] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
-  const [patientClients, setPatientClients] = useState<Client[]>([]);
+  const [patientPages, setPatientPages] = useState<Record<number, Client[]>>({});
   const [selected, setSelected] = useState<Client | null>(null);
   const [searching, setSearching] = useState(false);
   const [loadingPatients, setLoadingPatients] = useState(true);
@@ -32,35 +32,59 @@ export function PatientResultsPortal() {
   const [patientError, setPatientError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [patientPage, setPatientPage] = useState(1);
+  const [patientTotal, setPatientTotal] = useState(0);
+  const [patientTotalPages, setPatientTotalPages] = useState(1);
   const requestIdRef = useRef(0);
+  const patientPagesRef = useRef<Record<number, Client[]>>({});
+  const loadingPagesRef = useRef(new Set<number>());
 
-  useEffect(() => {
-    const controller = new AbortController();
+  function storePatientPage(page: number, pageClients: Client[]) {
+    patientPagesRef.current = { ...patientPagesRef.current, [page]: pageClients };
+    setPatientPages(patientPagesRef.current);
+  }
 
-    async function loadPatients() {
+  async function loadPatientPage(page: number, options: { foreground?: boolean } = {}) {
+    if (page < 1 || patientPagesRef.current[page] || loadingPagesRef.current.has(page)) return;
+    loadingPagesRef.current.add(page);
+    if (options.foreground) {
       setLoadingPatients(true);
       setPatientError(null);
-      try {
-        const response = await fetch("/form/api/results/patient-list/", {
-          cache: "no-store",
-          signal: controller.signal,
-        });
-        const data = (await response.json()) as SearchResponse;
-        if (controller.signal.aborted) return;
-        if (data.ok) {
-          setPatientClients(data.clients);
-          setPatientPage(1);
-        } else setPatientError(data.error);
-      } catch {
-        if (!controller.signal.aborted) setPatientError("Patient list is unavailable.");
-      } finally {
-        if (!controller.signal.aborted) setLoadingPatients(false);
-      }
     }
 
-    loadPatients();
-    return () => controller.abort();
+    try {
+      const response = await fetch(`/form/api/results/patient-list/?page=${page}`, { cache: "no-store" });
+      const data = (await response.json()) as SearchResponse;
+      if (!data.ok) {
+        if (options.foreground) setPatientError(data.error);
+        return;
+      }
+      const actualPage = data.page ?? page;
+      storePatientPage(actualPage, data.clients);
+      setPatientTotal(data.total ?? data.clients.length);
+      setPatientTotalPages(Math.max(1, data.totalPages ?? 1));
+
+      // Prefetch only the next page. This keeps first paint small while making
+      // the usual Next action effectively instant once the background request finishes.
+      const nextPage = actualPage + 1;
+      const totalPages = Math.max(1, data.totalPages ?? 1);
+      if (nextPage <= totalPages && !patientPagesRef.current[nextPage]) {
+        window.setTimeout(() => void loadPatientPage(nextPage), 0);
+      }
+    } catch {
+      if (options.foreground) setPatientError("Patient list is unavailable.");
+    } finally {
+      loadingPagesRef.current.delete(page);
+      if (options.foreground) setLoadingPatients(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadPatientPage(1, { foreground: true });
   }, []);
+
+  useEffect(() => {
+    if (!patientPages[patientPage]) void loadPatientPage(patientPage, { foreground: true });
+  }, [patientPage, patientPages]);
 
   useEffect(() => {
     const q = query.trim();
@@ -112,14 +136,8 @@ export function PatientResultsPortal() {
   }, [query]);
 
   const searchingMode = query.trim().length >= 2;
-  const totalPages = Math.max(1, Math.ceil(patientClients.length / PATIENTS_PER_PAGE));
-  const pageStart = (patientPage - 1) * PATIENTS_PER_PAGE;
-  const pagedPatients = patientClients.slice(pageStart, pageStart + PATIENTS_PER_PAGE);
-  const listClients = searchingMode ? clients : pagedPatients;
-
-  function selectClient(client: Client) {
-    setSelected(client);
-  }
+  const currentPatientClients = patientPages[patientPage] ?? [];
+  const listClients = searchingMode ? clients : currentPatientClients;
 
   return (
     <div>
@@ -148,18 +166,18 @@ export function PatientResultsPortal() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "10px", flexWrap: "wrap" }}>
             <div>
               <h3 style={{ margin: 0, fontSize: "16px" }}>Patient list</h3>
-              {!loadingPatients && !patientError && patientClients.length > 0 ? (
+              {!loadingPatients && !patientError && patientTotal > 0 ? (
                 <p style={{ margin: "4px 0 0", color: "#6b7280", fontSize: "13px" }}>
-                  {patientClients.length} patients · 25 per page
+                  {patientTotal} patients · {PATIENTS_PER_PAGE} per page
                 </p>
               ) : null}
             </div>
-            {!loadingPatients && patientClients.length > PATIENTS_PER_PAGE ? (
-              <div style={{ color: "#6b7280", fontSize: "13px" }}>Page {patientPage} of {totalPages}</div>
+            {!loadingPatients && patientTotal > PATIENTS_PER_PAGE ? (
+              <div style={{ color: "#6b7280", fontSize: "13px" }}>Page {patientPage} of {patientTotalPages}</div>
             ) : null}
           </div>
 
-          {loadingPatients ? <p style={{ color: "#6b7280" }}>Loading patient list…</p> : null}
+          {loadingPatients && currentPatientClients.length === 0 ? <p style={{ color: "#6b7280" }}>Loading patient list…</p> : null}
           {patientError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{patientError}</p> : null}
         </section>
       ) : null}
@@ -170,7 +188,7 @@ export function PatientResultsPortal() {
             <button
               key={client.id}
               type="button"
-              onClick={() => selectClient(client)}
+              onClick={() => setSelected(client)}
               style={{
                 textAlign: "left",
                 padding: "12px 14px",
@@ -196,7 +214,7 @@ export function PatientResultsPortal() {
         </div>
       ) : null}
 
-      {!selected && !searchingMode && !loadingPatients && patientClients.length > PATIENTS_PER_PAGE ? (
+      {!selected && !searchingMode && patientTotal > PATIENTS_PER_PAGE ? (
         <nav aria-label="Patient list pagination" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "22px" }}>
           <button
             type="button"
@@ -206,12 +224,12 @@ export function PatientResultsPortal() {
           >
             ← Previous
           </button>
-          <span style={{ color: "#6b7280", fontSize: "13px" }}>Page {patientPage} of {totalPages}</span>
+          <span style={{ color: "#6b7280", fontSize: "13px" }}>Page {patientPage} of {patientTotalPages}</span>
           <button
             type="button"
-            disabled={patientPage >= totalPages}
-            onClick={() => setPatientPage((page) => Math.min(totalPages, page + 1))}
-            style={{ padding: "8px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", fontWeight: 700, cursor: patientPage >= totalPages ? "not-allowed" : "pointer", opacity: patientPage >= totalPages ? 0.45 : 1 }}
+            disabled={patientPage >= patientTotalPages}
+            onClick={() => setPatientPage((page) => Math.min(patientTotalPages, page + 1))}
+            style={{ padding: "8px 12px", border: "1px solid #d1d5db", borderRadius: "8px", background: "#fff", fontWeight: 700, cursor: patientPage >= patientTotalPages ? "not-allowed" : "pointer", opacity: patientPage >= patientTotalPages ? 0.45 : 1 }}
           >
             Next →
           </button>
@@ -222,7 +240,7 @@ export function PatientResultsPortal() {
         <p style={{ color: "#6b7280" }}>No matching vcita patients found.</p>
       ) : null}
 
-      {!selected && !searchingMode && !loadingPatients && !patientError && patientClients.length === 0 ? (
+      {!selected && !searchingMode && !loadingPatients && !patientError && patientTotal === 0 ? (
         <p style={{ color: "#6b7280" }}>No patients available yet.</p>
       ) : null}
 
