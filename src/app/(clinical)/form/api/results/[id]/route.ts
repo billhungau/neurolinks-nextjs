@@ -30,7 +30,7 @@ function relation(value: QuestionnaireRelation) {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
-function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<string, unknown>) {
+function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<string, unknown>, questionnaireCode: string) {
   const projectedAnswers: Record<string, unknown> = {};
   const fields: ImportedField[] = [];
 
@@ -51,7 +51,15 @@ function nativeProjection(schema: NativeQuestionnaireSchema, answers: Record<str
     if (field.kind === "single") {
       fields.push({ kind: "radio", qid: field.id, text: field.label, order, options: field.options.map((option) => option.label), required: field.required });
       const selected = String(answers[field.id] ?? "");
-      projectedAnswers[field.id] = field.options.find((option) => option.id === selected)?.label ?? selected;
+      const selectedOption = field.options.find((option) => option.id === selected);
+      if (questionnaireCode === "bdii" && selectedOption) {
+        projectedAnswers[field.id] = {
+          score: selectedOption.score,
+          legacyText: `${selectedOption.score}. ${selectedOption.label}`,
+        };
+      } else {
+        projectedAnswers[field.id] = selectedOption?.label ?? selected;
+      }
       return;
     }
     if (field.kind === "multiple") {
@@ -117,7 +125,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     let resultAnswers = row.answers;
     let resultSchema = questionnaire.metadata?.schema ?? null;
     if (questionnaire.metadata?.native_schema) {
-      const projected = nativeProjection(questionnaire.metadata.native_schema, row.answers);
+      const projected = nativeProjection(questionnaire.metadata.native_schema, row.answers, questionnaire.code);
       resultAnswers = projected.answers;
       resultSchema = projected.schema;
     }
