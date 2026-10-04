@@ -10,12 +10,13 @@ import {
   maxNativeScore,
   nativeSchemaFromImported,
 } from "@/lib/clinical/questionnaires/native-builder";
+import { ensurePssSymptomMatrix } from "@/lib/clinical/questionnaires/pss-native-repair";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const ALLOWED = new Set<ImportedQuestionnaireCode>(["bai", "ybocs", "pss"]);
-const CONVERSION_SCHEMA_REVISION = 2;
+const CONVERSION_SCHEMA_REVISION = 3;
 
 type Row = {
   id: string;
@@ -60,7 +61,8 @@ export async function POST(request: Request) {
 
   const imported = await fetchImportedSchema(code);
   const config = IMPORTED_QUESTIONNAIRES[code];
-  const schema = nativeSchemaFromImported(code, imported, config.name);
+  const converted = nativeSchemaFromImported(code, imported, config.name);
+  const schema = code === "pss" ? ensurePssSymptomMatrix(converted) : converted;
   const maxScore = maxNativeScore(schema);
 
   if (needsPssRepair && existingNative) {
