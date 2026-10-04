@@ -1,5 +1,6 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { createQuestionnaireInvitation } from "@/lib/clinical/invitation";
+import { upsertPatientIdentity } from "@/lib/clinical/patient-identity-index";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 import { getVcitaClient } from "@/lib/clinical/vcita";
 
@@ -53,6 +54,12 @@ export async function POST(request: Request) {
       noExpiry,
       allowDuplicateActive: Boolean(body.allowDuplicateActive),
     });
+
+    // The identity index is an optimization only. Never invalidate a clinical
+    // invitation if this convenience index is unavailable or temporarily fails.
+    try {
+      await upsertPatientIdentity(vcitaUuid, invitation.subjectKey);
+    } catch {}
 
     try {
       await clinicalSupabaseRequest<unknown>("audit_events", {
