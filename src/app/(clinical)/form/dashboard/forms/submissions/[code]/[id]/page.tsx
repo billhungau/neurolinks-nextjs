@@ -73,7 +73,7 @@ function nativeItems(schema: NativeQuestionnaireSchema, answers: Record<string, 
     if (field.kind === "single") {
       const selected = String(answers[field.id] ?? "");
       const option = field.options.find((candidate) => candidate.id === selected);
-      items.push({ key: field.id, label: field.label, answer: option?.label ?? selected || "—", score: option?.score ?? null });
+      items.push({ key: field.id, label: field.label, answer: option?.label ?? (selected || "—"), score: option?.score ?? null });
       continue;
     }
     if (field.kind === "multiple") {
@@ -86,7 +86,7 @@ function nativeItems(schema: NativeQuestionnaireSchema, answers: Record<string, 
       field.rows.forEach((row) => {
         const selectedId = String(answers[`${field.id}:${row.id}`] ?? "");
         const option = field.columns.find((candidate) => candidate.id === selectedId);
-        items.push({ key: `${field.id}:${row.id}`, label: row.label, answer: option?.label ?? selectedId || "—", score: option?.score ?? null });
+        items.push({ key: `${field.id}:${row.id}`, label: row.label, answer: option?.label ?? (selectedId || "—"), score: option?.score ?? null });
       });
       continue;
     }
