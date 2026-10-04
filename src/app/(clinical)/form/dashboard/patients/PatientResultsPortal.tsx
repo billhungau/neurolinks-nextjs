@@ -15,14 +15,50 @@ type SearchResponse =
   | { ok: true; clients: Client[] }
   | { ok: false; error: string };
 
+const INITIAL_VISIBLE_RECENT = 20;
+
+function clientName(client: Client) {
+  return [client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client";
+}
+
 export function PatientResultsPortal() {
   const [query, setQuery] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
+  const [recentClients, setRecentClients] = useState<Client[]>([]);
   const [selected, setSelected] = useState<Client | null>(null);
   const [searching, setSearching] = useState(false);
+  const [loadingRecent, setLoadingRecent] = useState(true);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [recentError, setRecentError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showAllRecent, setShowAllRecent] = useState(false);
   const requestIdRef = useRef(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadRecent() {
+      setLoadingRecent(true);
+      setRecentError(null);
+      try {
+        const response = await fetch("/form/api/vcita/clients/?recent=1", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const data = (await response.json()) as SearchResponse;
+        if (controller.signal.aborted) return;
+        if (data.ok) setRecentClients(data.clients);
+        else setRecentError(data.error);
+      } catch {
+        if (!controller.signal.aborted) setRecentError("Recent vcita patients are unavailable.");
+      } finally {
+        if (!controller.signal.aborted) setLoadingRecent(false);
+      }
+    }
+
+    loadRecent();
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const q = query.trim();
@@ -73,6 +109,10 @@ export function PatientResultsPortal() {
     };
   }, [query]);
 
+  const searchingMode = query.trim().length >= 2;
+  const recentVisible = showAllRecent ? recentClients : recentClients.slice(0, INITIAL_VISIBLE_RECENT);
+  const listClients = searchingMode ? clients : recentVisible;
+
   return (
     <div>
       <label style={{ display: "block", marginBottom: "18px" }}>
@@ -95,19 +135,58 @@ export function PatientResultsPortal() {
       {searching ? <p style={{ color: "#6b7280" }}>Searching vcita…</p> : null}
       {searchError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{searchError}</p> : null}
 
-      {!selected && clients.length > 0 ? (
+      {!selected && !searchingMode ? (
+        <section style={{ marginBottom: "22px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: "16px" }}>Recent patients</h3>
+              <p style={{ margin: "4px 0 0", color: "#6b7280", fontSize: "13px" }}>
+                Quick access to the first 50 patients returned by vcita.
+              </p>
+            </div>
+            {!loadingRecent && recentClients.length > INITIAL_VISIBLE_RECENT ? (
+              <button
+                type="button"
+                onClick={() => setShowAllRecent((current) => !current)}
+                style={{ border: "1px solid #d1d5db", background: "#fff", borderRadius: "8px", padding: "7px 10px", cursor: "pointer", fontWeight: 700 }}
+              >
+                {showAllRecent ? "Show fewer" : `Show all ${recentClients.length}`}
+              </button>
+            ) : null}
+          </div>
+
+          {loadingRecent ? <p style={{ color: "#6b7280" }}>Loading recent patients…</p> : null}
+          {recentError ? <p role="alert" style={{ padding: "12px", background: "#fef2f2", borderRadius: "8px" }}>{recentError}</p> : null}
+        </section>
+      ) : null}
+
+      {!selected && listClients.length > 0 ? (
         <div style={{ display: "grid", gap: "8px", marginBottom: "22px" }}>
-          {clients.map((client) => (
+          {listClients.map((client) => (
             <button
               key={client.id}
               type="button"
               onClick={() => setSelected(client)}
-              style={{ textAlign: "left", padding: "12px", border: "1px solid #d1d5db", borderRadius: "9px", background: "#fff", cursor: "pointer" }}
+              style={{
+                textAlign: "left",
+                padding: "12px 14px",
+                border: "1px solid #dbe2ea",
+                borderRadius: "10px",
+                background: "#fff",
+                cursor: "pointer",
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "14px",
+                alignItems: "center",
+              }}
             >
-              <strong>{[client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client"}</strong>
-              <span style={{ display: "block", marginTop: "3px", color: "#6b7280" }}>
-                {[client.email, client.phone].filter(Boolean).join(" · ")}
+              <span style={{ minWidth: 0 }}>
+                <strong style={{ display: "block", color: "#111827" }}>{clientName(client)}</strong>
+                <span style={{ display: "block", marginTop: "3px", color: "#6b7280", fontSize: "14px", overflowWrap: "anywhere" }}>
+                  {[client.email, client.phone].filter(Boolean).join(" · ") || "No email or phone listed"}
+                </span>
               </span>
+              <span style={{ flex: "0 0 auto", color: "#2563eb", fontWeight: 700, fontSize: "13px" }}>View →</span>
             </button>
           ))}
         </div>
@@ -120,9 +199,7 @@ export function PatientResultsPortal() {
       {selected ? (
         <>
           <div style={{ marginBottom: "18px", padding: "14px 16px", border: "1px solid #bfdbfe", borderRadius: "10px", background: "#eff6ff" }}>
-            <div style={{ fontSize: "18px", fontWeight: 800 }}>
-              {[selected.firstName, selected.lastName].filter(Boolean).join(" ") || "Selected patient"}
-            </div>
+            <div style={{ fontSize: "18px", fontWeight: 800 }}>{clientName(selected)}</div>
             <div style={{ marginTop: "3px", color: "#4b5563" }}>
               {[selected.email, selected.phone].filter(Boolean).join(" · ")}
             </div>
