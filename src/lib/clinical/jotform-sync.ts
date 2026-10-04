@@ -43,19 +43,14 @@ function patientLinkToken(submission: { answers?: Record<string, any> }) {
   return answerText(findAnswer(submission.answers ?? {}, ["Patient Link Token"]));
 }
 
-async function exactNameMatch(
-  name: string,
-  clients: VcitaClientSummary[],
-): Promise<VcitaClientSummary | null> {
+async function exactNameMatch(name: string, clients: VcitaClientSummary[]): Promise<VcitaClientSummary | null> {
   const normalized = normalizePatientName(name);
   if (!normalized) return null;
   const matches = clients.filter((client) => normalizePatientName(fullName(client)) === normalized);
   return matches.length === 1 ? matches[0] : null;
 }
 
-async function resolvePatient(
-  submission: { answers?: Record<string, any> },
-): Promise<{
+async function resolvePatient(submission: { answers?: Record<string, any> }): Promise<{
   client: VcitaClientSummary | null;
   matchMode: "patient_link_token" | "historical_mapping" | "exact_name" | null;
   reason: string | null;
@@ -78,16 +73,10 @@ async function resolvePatient(
 
     const historicalMap = await buildBdiMappingByHistoricalName(clients);
     const inherited = historicalMap.get(normalized);
-    if (inherited) {
-      return { client: inherited, matchMode: "historical_mapping", reason: null };
-    }
+    if (inherited) return { client: inherited, matchMode: "historical_mapping", reason: null };
   }
 
-  return {
-    client: null,
-    matchMode: null,
-    reason: !name ? "missing_name" : "patient_not_resolved",
-  };
+  return { client: null, matchMode: null, reason: !name ? "missing_name" : "patient_not_resolved" };
 }
 
 async function alreadyResolved(submissionId: string) {
@@ -105,7 +94,6 @@ export async function recordUnresolvedJotformSync(input: {
   reason: string;
 }) {
   if (await alreadyResolved(input.submissionId)) return;
-
   await clinicalSupabaseRequest<unknown>("audit_events", {
     method: "POST",
     prefer: "return=minimal",
@@ -152,43 +140,32 @@ export async function syncJotformSubmission(input: {
     client = resolved.client;
     matchMode = resolved.matchMode;
     if (!client || !matchMode) {
-      await recordUnresolvedJotformSync({
-        code,
-        formId: input.formId,
-        submissionId: input.submissionId,
-        reason: resolved.reason ?? "patient_not_resolved",
-      });
+      await recordUnresolvedJotformSync({ code, formId: input.formId, submissionId: input.submissionId, reason: resolved.reason ?? "patient_not_resolved" });
       return { status: "unresolved" as const, reason: resolved.reason ?? "patient_not_resolved" };
     }
   }
 
   if (!client || !matchMode) {
-    await recordUnresolvedJotformSync({
-      code,
-      formId: input.formId,
-      submissionId: input.submissionId,
-      reason: "manual_patient_not_found",
-    });
+    await recordUnresolvedJotformSync({ code, formId: input.formId, submissionId: input.submissionId, reason: "manual_patient_not_found" });
     return { status: "unresolved" as const, reason: "manual_patient_not_found" };
   }
 
-  const result =
-    code === "bdii"
-      ? await importHistoricalBdiRecord({
-          submissionId: input.submissionId,
-          vcitaUuid: client.id,
-          matchMode,
-          actorId: input.actorId ?? null,
-          eventType: "JOTFORM_RESULT_SYNCED",
-        })
-      : await importHistoricalQuestionnaireRecord({
-          code,
-          submissionId: input.submissionId,
-          vcitaUuid: client.id,
-          matchMode,
-          clinicianId: input.actorId ?? null,
-          eventType: "JOTFORM_RESULT_SYNCED",
-        });
+  const result = code === "bdii"
+    ? await importHistoricalBdiRecord({
+        submissionId: input.submissionId,
+        vcitaUuid: client.id,
+        matchMode,
+        actorId: input.actorId ?? null,
+        eventType: "JOTFORM_RESULT_SYNCED",
+      })
+    : await importHistoricalQuestionnaireRecord({
+        code,
+        submissionId: input.submissionId,
+        vcitaUuid: client.id,
+        matchMode,
+        clinicianId: input.actorId ?? null,
+        eventType: "JOTFORM_RESULT_SYNCED",
+      });
 
   if (result.status === "imported" && input.manualVcitaUuid) {
     await clinicalSupabaseRequest<unknown>("audit_events", {
@@ -215,12 +192,13 @@ export async function syncJotformSubmission(input: {
 }
 
 export async function listUnresolvedJotformSyncs() {
-  const unresolved = await clinicalSupabaseRequest<Array<{
+  const pending = await clinicalSupabaseRequest<Array<{
     id: string;
+    event_type: string;
     occurred_at: string;
     metadata: Record<string, unknown> | null;
   }>>(
-    "audit_events?select=id,occurred_at,metadata&event_type=eq.JOTFORM_SYNC_UNRESOLVED&order=occurred_at.desc&limit=500",
+    "audit_events?select=id,event_type,occurred_at,metadata&event_type=in.(JOTFORM_SYNC_UNRESOLVED,JOTFORM_SYNC_ERROR)&order=occurred_at.desc&limit=500",
     { method: "GET" },
   );
 
@@ -229,18 +207,14 @@ export async function listUnresolvedJotformSyncs() {
     { method: "GET" },
   );
 
-  const resolvedIds = new Set(
-    resolved
-      .map((row) => String(row.metadata?.source_submission_id ?? ""))
-      .filter(Boolean),
-  );
-
+  const resolvedIds = new Set(resolved.map((row) => String(row.metadata?.source_submission_id ?? "")).filter(Boolean));
   const seen = new Set<string>();
   const queue = [];
-  for (const row of unresolved) {
+
+  for (const row of pending) {
     const submissionId = String(row.metadata?.source_submission_id ?? "");
     const formId = String(row.metadata?.source_form_id ?? "");
-    const code = String(row.metadata?.questionnaire_code ?? "") as SyncQuestionnaireCode;
+    const code = (String(row.metadata?.questionnaire_code ?? "") || codeForJotformForm(formId) || "") as SyncQuestionnaireCode;
     if (!submissionId || !formId || !code || resolvedIds.has(submissionId) || seen.has(submissionId)) continue;
     seen.add(submissionId);
 
@@ -251,7 +225,7 @@ export async function listUnresolvedJotformSyncs() {
       submissionId,
       formId,
       code,
-      reason: String(row.metadata?.reason ?? "patient_not_resolved"),
+      reason: row.event_type === "JOTFORM_SYNC_ERROR" ? "sync_error" : String(row.metadata?.reason ?? "patient_not_resolved"),
       jotformName: submission ? sourceName(submission) : "",
     });
   }
