@@ -1,6 +1,6 @@
 import { resolveQuestionnaireInvitation } from "@/lib/clinical/invitation";
 import { scoreBdi2Selections } from "@/lib/clinical/questionnaires/bdii";
-import { BDI2_CODE } from "@/lib/clinical/questionnaires/bdii-definition";
+import { BDI2_CODE, BDI2_ITEMS, bdi2OptionId } from "@/lib/clinical/questionnaires/bdii-definition";
 import {
   isImportedCode,
   scoreImportedQuestionnaire,
@@ -17,13 +17,39 @@ function compatibleNativeBdiAnswers(
   schema: NonNullable<Awaited<ReturnType<typeof resolveQuestionnaireInvitation>>["questionnaire"]>["nativeSchema"],
 ) {
   const stored: Record<string, unknown> = {};
-  for (const field of schema?.fields ?? []) {
-    if (field.kind !== "single") continue;
+  const singleFields = (schema?.fields ?? []).filter((field) => field.kind === "single");
+
+  singleFields.forEach((field, itemIndex) => {
+    const canonicalItem = BDI2_ITEMS[itemIndex];
+    if (!canonicalItem) return;
+
     const selected = String(answers[field.id] ?? "");
-    const option = field.options.find((candidate) => candidate.id === selected);
-    if (!option) continue;
-    stored[field.id] = { optionId: option.id, score: option.score };
-  }
+    const nativeOption = field.options.find((candidate) => candidate.id === selected);
+    if (!nativeOption) return;
+
+    let canonicalOptionIndex = canonicalItem.options.findIndex(
+      (candidate) => candidate.value === nativeOption.score && candidate.label === nativeOption.label,
+    );
+    if (canonicalOptionIndex < 0) {
+      const sameScore = canonicalItem.options
+        .map((candidate, index) => ({ candidate, index }))
+        .filter(({ candidate }) => candidate.value === nativeOption.score);
+      if (sameScore.length === 1) canonicalOptionIndex = sameScore[0].index;
+    }
+    if (canonicalOptionIndex < 0) {
+      const nativeIndex = field.options.findIndex((candidate) => candidate.id === selected);
+      if (nativeIndex >= 0 && nativeIndex < canonicalItem.options.length) canonicalOptionIndex = nativeIndex;
+    }
+
+    const canonicalKey = canonicalItem.key;
+    stored[canonicalKey] = {
+      optionId: canonicalOptionIndex >= 0 ? bdi2OptionId(canonicalKey, canonicalOptionIndex) : undefined,
+      score: nativeOption.score,
+      text: nativeOption.label,
+      legacyText: `${nativeOption.score}. ${nativeOption.label}`,
+    };
+  });
+
   return stored;
 }
 
