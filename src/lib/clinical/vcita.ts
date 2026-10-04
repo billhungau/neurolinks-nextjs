@@ -136,6 +136,14 @@ export async function searchVcitaClients(term: string): Promise<VcitaClientSumma
   return nameSearch(q);
 }
 
+export async function listRecentVcitaClients(limit = 50): Promise<VcitaClientSummary[]> {
+  const safeLimit = Math.max(1, Math.min(limit, 50));
+  const data = await vcitaRequest<unknown>(`clients?per_page=${safeLimit}&page=1`);
+  return extractClients(data)
+    .map(normalizeClient)
+    .filter((client): client is VcitaClientSummary => Boolean(client))
+    .slice(0, safeLimit);
+}
 
 export async function listAllVcitaClients(options: { maxPages?: number } = {}): Promise<VcitaClientSummary[]> {
   const maxPages = Math.max(1, Math.min(options.maxPages ?? 50, 100));
