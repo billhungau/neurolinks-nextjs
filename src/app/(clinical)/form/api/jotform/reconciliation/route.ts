@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   const submissionId = String(body.submissionId ?? "").trim();
   const vcitaUuid = String(body.vcitaUuid ?? "").trim();
 
-  if (!/^\d+$/.test(formId) || !/^\d+$/.test(submissionId) || !vcitaUuid) {
+  if (!/^\d+$/.test(formId) || !/^\d+$/.test(submissionId)) {
     return Response.json({ ok: false, error: "Invalid reconciliation request." }, { status: 400 });
   }
 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     const result = await syncJotformSubmission({
       formId,
       submissionId,
-      manualVcitaUuid: vcitaUuid,
+      ...(vcitaUuid ? { manualVcitaUuid: vcitaUuid } : {}),
       actorId: clinician.id,
     });
     return Response.json(
