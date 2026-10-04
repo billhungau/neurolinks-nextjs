@@ -62,14 +62,6 @@ export function PatientResultsPortal() {
       storePatientPage(actualPage, data.clients);
       setPatientTotal(data.total ?? data.clients.length);
       setPatientTotalPages(Math.max(1, data.totalPages ?? 1));
-
-      // Prefetch only the next page. This keeps first paint small while making
-      // the usual Next action effectively instant once the background request finishes.
-      const nextPage = actualPage + 1;
-      const totalPages = Math.max(1, data.totalPages ?? 1);
-      if (nextPage <= totalPages && !patientPagesRef.current[nextPage]) {
-        window.setTimeout(() => void loadPatientPage(nextPage), 0);
-      }
     } catch {
       if (options.foreground) setPatientError("Patient list is unavailable.");
     } finally {
@@ -85,6 +77,18 @@ export function PatientResultsPortal() {
   useEffect(() => {
     if (!patientPages[patientPage]) void loadPatientPage(patientPage, { foreground: true });
   }, [patientPage, patientPages]);
+
+  // Once the current page is available, fetch exactly one page ahead. Do not
+  // recursively prefetch the whole directory; that creates a long waterfall of
+  // vcita requests and competes with the foreground request.
+  useEffect(() => {
+    if (!patientPages[patientPage]) return;
+    const nextPage = patientPage + 1;
+    if (nextPage <= patientTotalPages && !patientPages[nextPage]) {
+      const timer = window.setTimeout(() => void loadPatientPage(nextPage), 100);
+      return () => window.clearTimeout(timer);
+    }
+  }, [patientPage, patientPages, patientTotalPages]);
 
   useEffect(() => {
     const q = query.trim();
