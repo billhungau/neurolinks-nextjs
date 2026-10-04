@@ -1,4 +1,5 @@
 import { resolveQuestionnaireInvitation } from "@/lib/clinical/invitation";
+import { touchPatientLastSubmission } from "@/lib/clinical/patient-identity-index";
 import { scoreBdi2Selections } from "@/lib/clinical/questionnaires/bdii";
 import { BDI2_CODE, BDI2_ITEMS, bdi2OptionId } from "@/lib/clinical/questionnaires/bdii-definition";
 import {
@@ -155,6 +156,12 @@ export async function POST(request: Request) {
         },
       }),
     });
+
+    // Patient-list activity is an optimization only. Never fail a clinical
+    // submission because the index could not be updated.
+    try {
+      await touchPatientLastSubmission(invitation.subjectKey, submittedAt);
+    } catch {}
 
     return Response.json(
       { ok: true, totalScore: scored.total, severity: scored.severity },
