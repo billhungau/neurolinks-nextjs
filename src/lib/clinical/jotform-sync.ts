@@ -1,6 +1,7 @@
 import { IMPORTED_QUESTIONNAIRES, type ImportedQuestionnaireCode } from "./questionnaires/jotform-import";
 import { clinicalSupabaseRequest } from "./supabase";
 import { getVcitaClient, listAllVcitaClients, type VcitaClientSummary } from "./vcita";
+import { upsertPatientIdentity } from "./patient-identity-index";
 import {
   answerText,
   fetchBdiSubmissionById,
@@ -166,6 +167,14 @@ export async function syncJotformSubmission(input: {
         clinicianId: input.actorId ?? null,
         eventType: "JOTFORM_RESULT_SYNCED",
       });
+
+  // The identity index is only a performance optimization. Never allow an index
+  // write failure to make an otherwise valid Jotform questionnaire sync fail.
+  if (result.status === "imported" || result.status === "already_imported") {
+    try {
+      await upsertPatientIdentity(client.id);
+    } catch {}
+  }
 
   if (result.status === "imported" && input.manualVcitaUuid) {
     await clinicalSupabaseRequest<unknown>("audit_events", {
