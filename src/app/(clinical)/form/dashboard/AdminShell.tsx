@@ -4,15 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-const NAV = [
+type NavItem = { href: string; label: string; icon: string; submissions?: boolean };
+
+const NAV: NavItem[] = [
   { href: "/form/dashboard/", label: "Send", icon: "↗" },
   { href: "/form/dashboard/patients/", label: "Patients", icon: "◫" },
   { href: "/form/dashboard/forms/", label: "Forms", icon: "▤" },
   { href: "/form/dashboard/forms/submissions/", label: "Submissions", icon: "≡", submissions: true },
   { href: "/form/dashboard/jotform-sync/", label: "Integrations", icon: "⛓" },
-] as const;
+];
 
-function activeFor(pathname: string, item: (typeof NAV)[number]) {
+function activeFor(pathname: string, item: NavItem) {
   if (item.label === "Send") return pathname === "/form/dashboard" || pathname === "/form/dashboard/";
   if (item.submissions) return pathname.startsWith("/form/dashboard/forms/submissions/");
   if (item.label === "Forms") return pathname.startsWith("/form/dashboard/forms/") && !pathname.includes("/submissions/");
