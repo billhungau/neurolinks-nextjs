@@ -132,14 +132,26 @@ export async function POST(request: Request) {
     const assessmentId = results[0]?.id;
     if (!assessmentId) throw new Error("No assessment id.");
 
-    await clinicalSupabaseRequest<unknown>(
-      `questionnaire_invitations?id=eq.${invitation.invitationId}&completed_at=is.null&revoked_at=is.null`,
-      {
-        method: "PATCH",
-        prefer: "return=minimal",
-        body: JSON.stringify({ completed_at: submittedAt }),
-      },
-    );
+    try {
+      await clinicalSupabaseRequest<unknown>(
+        `questionnaire_invitations?id=eq.${invitation.invitationId}&completed_at=is.null&revoked_at=is.null`,
+        {
+          method: "PATCH",
+          prefer: "return=minimal",
+          body: JSON.stringify({ completed_at: submittedAt, token_ciphertext: null }),
+        },
+      );
+    } catch {
+      // Compatibility before token_ciphertext migration exists.
+      await clinicalSupabaseRequest<unknown>(
+        `questionnaire_invitations?id=eq.${invitation.invitationId}&completed_at=is.null&revoked_at=is.null`,
+        {
+          method: "PATCH",
+          prefer: "return=minimal",
+          body: JSON.stringify({ completed_at: submittedAt }),
+        },
+      );
+    }
 
     await clinicalSupabaseRequest<unknown>("audit_events", {
       method: "POST",
@@ -157,8 +169,6 @@ export async function POST(request: Request) {
       }),
     });
 
-    // Patient-list activity is an optimization only. Never fail a clinical
-    // submission because the index could not be updated.
     try {
       await touchPatientLastSubmission(invitation.subjectKey, submittedAt);
     } catch {}
