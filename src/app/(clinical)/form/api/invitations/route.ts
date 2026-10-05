@@ -91,7 +91,13 @@ export async function POST(request: Request) {
     const url = new URL(invitation.path, request.url).toString();
 
     return Response.json(
-      { ok: true, url, expiresAt: invitation.expiresAt, noExpiry: invitation.noExpiry },
+      {
+        ok: true,
+        invitationId: invitation.invitationId,
+        url,
+        expiresAt: invitation.expiresAt,
+        noExpiry: invitation.noExpiry,
+      },
       { status: 201, headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
