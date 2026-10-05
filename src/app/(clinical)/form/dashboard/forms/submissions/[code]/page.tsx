@@ -2,12 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
-import { listAllVcitaClients } from "@/lib/clinical/vcita";
-import { subjectKeyFromVcitaUuid } from "@/lib/clinical/pseudonym";
+import { getVcitaClient } from "@/lib/clinical/vcita";
+import { patientIdentityRows } from "@/lib/clinical/patient-identity-index";
+import { SubmissionTableClient } from "./SubmissionTableClient";
 
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 50;
+const VCITA_CONCURRENCY = 8;
 const LABELS: Record<string, string> = { bdii: "BDI-II", bai: "BAI", ybocs: "Y-BOCS", pss: "PSS" };
 
 type QuestionnaireRow = { id: string; name: string };
@@ -24,6 +26,20 @@ function formatSubmittedAt(value: string) {
   return new Intl.DateTimeFormat("en-CA", {
     year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Vancouver",
   }).format(new Date(value));
+}
+
+async function mapWithConcurrency<T, R>(items: T[], concurrency: number, worker: (item: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let nextIndex = 0;
+  async function runWorker() {
+    while (true) {
+      const index = nextIndex++;
+      if (index >= items.length) return;
+      results[index] = await worker(items[index]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker()));
+  return results;
 }
 
 export default async function QuestionnaireSubmissionsPage({
@@ -61,8 +77,36 @@ export default async function QuestionnaireSubmissionsPage({
   const hasNext = fetched.length > PAGE_SIZE;
   const assessments = fetched.slice(0, PAGE_SIZE);
 
-  const clients = await listAllVcitaClients();
-  const clientBySubjectKey = new Map(clients.map((client) => [subjectKeyFromVcitaUuid(client.id), client] as const));
+  const subjectKeys = [...new Set(assessments.map((assessment) => assessment.subject_key).filter(Boolean))];
+  const identityRows = await patientIdentityRows(subjectKeys);
+  const vcitaIdBySubject = new Map(identityRows.map((row) => [row.subject_key, row.vcita_client_id] as const));
+  const resolved = await mapWithConcurrency(
+    subjectKeys,
+    VCITA_CONCURRENCY,
+    async (subjectKey) => {
+      const vcitaId = vcitaIdBySubject.get(subjectKey);
+      if (!vcitaId) return [subjectKey, null] as const;
+      try {
+        return [subjectKey, await getVcitaClient(vcitaId)] as const;
+      } catch {
+        return [subjectKey, null] as const;
+      }
+    },
+  );
+  const clientBySubjectKey = new Map(resolved);
+
+  const rows = assessments.map((assessment) => {
+    const client = clientBySubjectKey.get(assessment.subject_key);
+    const patientName = client ? [client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client" : "Patient not matched in vcita";
+    return {
+      id: assessment.id,
+      patientName,
+      patientEmail: client?.email ?? null,
+      submittedLabel: formatSubmittedAt(assessment.submitted_at),
+      totalScore: assessment.total_score,
+      severity: assessment.severity,
+    };
+  });
 
   return (
     <main style={{ minHeight: "100vh", padding: "28px 24px", background: "#f8fafc" }}>
@@ -80,27 +124,10 @@ export default async function QuestionnaireSubmissionsPage({
         </header>
 
         <section style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 16, boxShadow: "0 8px 26px rgba(15,23,42,.05)", overflow: "hidden" }}>
-          {assessments.length === 0 ? (
+          {rows.length === 0 ? (
             <div style={{ padding: 28, color: "#64748b" }}>No submissions on this page.</div>
           ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
-                <thead><tr style={{ background: "#f8fafc", color: "#64748b", textAlign: "left", fontSize: 12, textTransform: "uppercase", letterSpacing: ".05em" }}>
-                  <th style={{ padding: "12px 16px" }}>Patient</th><th style={{ padding: "12px 16px" }}>Submitted</th><th style={{ padding: "12px 16px" }}>Score</th><th style={{ padding: "12px 16px" }}>Severity</th><th style={{ padding: "12px 16px" }}></th>
-                </tr></thead>
-                <tbody>{assessments.map((assessment) => {
-                  const client = clientBySubjectKey.get(assessment.subject_key);
-                  const patientName = client ? [client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client" : "Patient not matched in vcita";
-                  return <tr key={assessment.id} style={{ borderTop: "1px solid #eef2f7" }}>
-                    <td style={{ padding: "14px 16px" }}><div style={{ fontWeight: 750, color: "#0f172a" }}>{patientName}</div>{client?.email ? <div style={{ marginTop: 3, color: "#64748b", fontSize: 13 }}>{client.email}</div> : null}</td>
-                    <td style={{ padding: "14px 16px", color: "#334155", whiteSpace: "nowrap" }}>{formatSubmittedAt(assessment.submitted_at)}</td>
-                    <td style={{ padding: "14px 16px", fontWeight: 800, fontSize: 16 }}>{assessment.total_score}</td>
-                    <td style={{ padding: "14px 16px", color: "#475569" }}>{assessment.severity || "—"}</td>
-                    <td style={{ padding: "14px 16px", textAlign: "right" }}><Link href={`/form/dashboard/forms/submissions/${encodeURIComponent(code)}/${assessment.id}/`} style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>View details →</Link></td>
-                  </tr>;
-                })}</tbody>
-              </table>
-            </div>
+            <SubmissionTableClient code={code} rows={rows} />
           )}
         </section>
 
