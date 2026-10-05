@@ -48,14 +48,26 @@ export async function POST(
     }
 
     const revokedAt = new Date().toISOString();
-    await clinicalSupabaseRequest<unknown>(
-      `questionnaire_invitations?id=eq.${encodeURIComponent(id)}&subject_key=eq.${subjectKey}&completed_at=is.null&revoked_at=is.null`,
-      {
-        method: "PATCH",
-        prefer: "return=minimal",
-        body: JSON.stringify({ revoked_at: revokedAt }),
-      },
-    );
+    try {
+      await clinicalSupabaseRequest<unknown>(
+        `questionnaire_invitations?id=eq.${encodeURIComponent(id)}&subject_key=eq.${subjectKey}&completed_at=is.null&revoked_at=is.null`,
+        {
+          method: "PATCH",
+          prefer: "return=minimal",
+          body: JSON.stringify({ revoked_at: revokedAt, token_ciphertext: null }),
+        },
+      );
+    } catch {
+      // Compatibility before token_ciphertext migration exists.
+      await clinicalSupabaseRequest<unknown>(
+        `questionnaire_invitations?id=eq.${encodeURIComponent(id)}&subject_key=eq.${subjectKey}&completed_at=is.null&revoked_at=is.null`,
+        {
+          method: "PATCH",
+          prefer: "return=minimal",
+          body: JSON.stringify({ revoked_at: revokedAt }),
+        },
+      );
+    }
 
     await clinicalSupabaseRequest<unknown>("audit_events", {
       method: "POST",
