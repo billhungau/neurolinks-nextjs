@@ -16,7 +16,7 @@ type PageProps = { params: Promise<{ token: string }> };
 function BrandHeader() {
   return (
     <div className="nl-form-brand">
-      <img src="/media/images/New-Logo.png" alt="NeuroLinks Neuropsychiatric Centre" />
+      <img src="/billhungau_form_files_Sign.630b082dc732b0.59298118.png" alt="NeuroLinks Neuropsychiatric Centre" />
     </div>
   );
 }
