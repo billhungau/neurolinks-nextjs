@@ -67,6 +67,39 @@ function normalizePhn(value: string) {
   return value.replace(/\D/g, "");
 }
 
+function vcitaToken() {
+  const token = process.env.VCITA_API_TOKEN?.trim();
+  if (!token) throw new Error("[vcita] VCITA_API_TOKEN is not configured.");
+  return token;
+}
+
+async function updateVcitaClientContact(
+  clientId: string,
+  values: { phone?: string; address?: string },
+) {
+  const body: Record<string, string> = {};
+  const phone = values.phone?.trim();
+  const address = values.address?.trim();
+  if (phone) body.phone = phone;
+  if (address) body.address = address;
+  if (Object.keys(body).length === 0) return;
+
+  const response = await fetch(
+    `https://api.vcita.biz/platform/v1/clients/${encodeURIComponent(clientId)}`,
+    {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${vcitaToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    },
+  );
+  if (!response.ok) throw new Error(`[vcita] Client update failed with HTTP ${response.status}.`);
+}
+
 async function completeInvitation(invitationId: string, completedAt: string) {
   try {
     await clinicalSupabaseRequest<unknown>(
@@ -123,6 +156,11 @@ export async function POST(request: Request) {
 
     const dateOfBirth = String(answers.date_of_birth ?? "").trim();
     const phn = normalizePhn(String(answers.phn ?? ""));
+    const phone = String(answers.contact_number ?? "").trim();
+    const streetAddress = String(answers.address ?? "").trim();
+    const province = String(answers.province ?? "").trim();
+    const address = [streetAddress, province].filter(Boolean).join(", ");
+
     if (!validDateOfBirth(dateOfBirth)) {
       return Response.json({ ok: false, error: "Please enter the date of birth as YYYY-MM-DD." }, { status: 400 });
     }
@@ -141,6 +179,12 @@ export async function POST(request: Request) {
         );
       }
 
+      // Always write the submitted values. A later intake invitation therefore
+      // updates existing vcita demographic values rather than skipping fields
+      // that were previously populated.
+      stage = "vcita-client-update";
+      await updateVcitaClientContact(vcitaClientId, { phone, address });
+
       stage = "vcita-matter-update";
       await updateVcitaMatterPhnAndDob(vcitaClientId, { phn, dateOfBirth });
 
@@ -148,8 +192,6 @@ export async function POST(request: Request) {
       const submittedAt = new Date().toISOString();
       await completeInvitation(invitation.invitationId, submittedAt);
 
-      // Audit/touch failures must not tell the patient the intake failed after
-      // vcita was already updated and the one-time invitation was completed.
       try {
         await clinicalSupabaseRequest<unknown>("audit_events", {
           method: "POST",
@@ -161,7 +203,7 @@ export async function POST(request: Request) {
             metadata: {
               questionnaire_code: PATIENT_INTAKE_CODE,
               questionnaire_version: invitation.questionnaire.version,
-              destination: "vcita_matter",
+              destination: "vcita_client_and_matter",
               phi_persisted_in_assessment_results: false,
             },
           }),
