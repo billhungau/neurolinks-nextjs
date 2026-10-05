@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Invitation = {
   id: string;
@@ -17,6 +17,10 @@ type Invitation = {
 type ApiResponse =
   | { ok: true; invitations: Invitation[] }
   | { ok: false; error: string };
+
+type InvitationCreateResponse =
+  | { ok: true; invitationId: string; url: string }
+  | { ok: false; error?: string };
 
 export type RecentInvitationLink = {
   invitationId: string;
@@ -41,10 +45,18 @@ export function InvitationHistoryPanel({
   recentLinks?: RecentInvitationLink[];
 }) {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [replacementLinks, setReplacementLinks] = useState<RecentInvitationLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<string | null>(null);
+  const [replacing, setReplacing] = useState<string | null>(null);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+
+  const allRecentLinks = useMemo(() => {
+    const byId = new Map<string, RecentInvitationLink>();
+    for (const link of [...recentLinks, ...replacementLinks]) byId.set(link.invitationId, link);
+    return [...byId.values()];
+  }, [recentLinks, replacementLinks]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -87,6 +99,61 @@ export function InvitationHistoryPanel({
     }
   }
 
+  async function replaceLink(invitation: Invitation) {
+    if (!invitation.questionnaireCode) {
+      setError("This questionnaire cannot be replaced because its code is unavailable.");
+      return;
+    }
+    if (!window.confirm("Revoke the current link and create a new questionnaire link?")) return;
+
+    setReplacing(invitation.id);
+    setError(null);
+    try {
+      const revokeResponse = await fetch(`/form/api/invitations/${encodeURIComponent(invitation.id)}/revoke/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vcitaUuid }),
+      });
+      const revokeData = (await revokeResponse.json()) as { ok?: boolean; error?: string };
+      if (!revokeData.ok) {
+        setError(revokeData.error ?? "Could not revoke the old invitation.");
+        return;
+      }
+
+      const createResponse = await fetch("/form/api/invitations/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vcitaUuid,
+          questionnaireCode: invitation.questionnaireCode,
+          noExpiry: true,
+        }),
+      });
+      const createData = (await createResponse.json()) as InvitationCreateResponse;
+      if (!createData.ok) {
+        setError(createData.error ?? "The old invitation was revoked, but a replacement link could not be created. Create a new link above.");
+        await load();
+        return;
+      }
+
+      setReplacementLinks((current) => [
+        ...current.filter((link) => link.invitationId !== createData.invitationId),
+        {
+          invitationId: createData.invitationId,
+          questionnaireCode: invitation.questionnaireCode ?? undefined,
+          url: createData.url,
+        },
+      ]);
+      setCopyMessage("Replacement questionnaire link created.");
+      window.setTimeout(() => setCopyMessage(null), 2200);
+      await load();
+    } catch {
+      setError("Could not replace the questionnaire link.");
+    } finally {
+      setReplacing(null);
+    }
+  }
+
   async function copyLink(url: string) {
     try {
       await navigator.clipboard.writeText(url);
@@ -97,9 +164,9 @@ export function InvitationHistoryPanel({
     }
   }
 
-  const recentLinkByInvitation = new Map(recentLinks.map((link) => [link.invitationId, link.url] as const));
+  const recentLinkByInvitation = new Map(allRecentLinks.map((link) => [link.invitationId, link.url] as const));
   const recentLinkByCode = new Map(
-    recentLinks
+    allRecentLinks
       .filter((link) => link.questionnaireCode)
       .map((link) => [link.questionnaireCode!.toLowerCase(), link.url] as const),
   );
@@ -111,11 +178,11 @@ export function InvitationHistoryPanel({
       continue;
     }
     if ((invitation.status === "pending" || invitation.status === "opened") && invitation.questionnaireCode) {
-      const recent = recentLinks.find((link) => link.questionnaireCode?.toLowerCase() === invitation.questionnaireCode?.toLowerCase());
+      const recent = allRecentLinks.find((link) => link.questionnaireCode?.toLowerCase() === invitation.questionnaireCode?.toLowerCase());
       if (recent) matchedRecentIds.add(recent.invitationId);
     }
   }
-  const unmatchedRecentLinks = recentLinks.filter((link) => !matchedRecentIds.has(link.invitationId));
+  const unmatchedRecentLinks = allRecentLinks.filter((link) => !matchedRecentIds.has(link.invitationId));
 
   return (
     <section style={{ marginBottom: "24px", padding: "18px", border: "1px solid #e5e7eb", borderRadius: "12px", background: "#fff" }}>
@@ -149,7 +216,7 @@ export function InvitationHistoryPanel({
 
       {loading ? <p style={{ color: "#6b7280" }}>Loading invitations…</p> : null}
       {error ? <p role="alert" style={{ color: "#991b1b" }}>{error}</p> : null}
-      {!loading && !error && invitations.length === 0 && recentLinks.length === 0 ? (
+      {!loading && !error && invitations.length === 0 && allRecentLinks.length === 0 ? (
         <p style={{ marginBottom: 0, color: "#6b7280" }}>No questionnaire invitations yet.</p>
       ) : null}
 
@@ -162,6 +229,7 @@ export function InvitationHistoryPanel({
               ? recentLinkByCode.get(invitation.questionnaireCode.toLowerCase()) ?? null
               : null;
             const currentUrl = exactUrl ?? fallbackUrl;
+            const canReplace = canRevoke && !currentUrl && Boolean(invitation.questionnaireCode);
             return (
               <div key={invitation.id} style={{ padding: "12px", border: "1px solid #e5e7eb", borderRadius: "9px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start", flexWrap: "wrap" }}>
@@ -177,11 +245,21 @@ export function InvitationHistoryPanel({
                           <a href={currentUrl} target="_blank" rel="noreferrer" style={{ padding: "6px 9px", border: "1px solid #d1d5db", borderRadius: 7, background: "#fff", color: "#1d4ed8", textDecoration: "none", fontWeight: 700, fontSize: 12 }}>Open link</a>
                         </div>
                       </div>
-                    ) : canRevoke ? (
-                      <div style={{ marginTop: 7, color: "#94a3b8", fontSize: 12 }}>Link is not recoverable after the creation view is lost.</div>
+                    ) : canReplace ? (
+                      <div style={{ marginTop: 9 }}>
+                        <div style={{ color: "#64748b", fontSize: 12, marginBottom: 7 }}>The original link is no longer available. Replace it to generate a new link.</div>
+                        <button
+                          type="button"
+                          onClick={() => replaceLink(invitation)}
+                          disabled={replacing === invitation.id}
+                          style={{ padding: "7px 10px", border: 0, borderRadius: 7, background: "#2563eb", color: "#fff", cursor: replacing === invitation.id ? "wait" : "pointer", fontWeight: 700, fontSize: 12 }}
+                        >
+                          {replacing === invitation.id ? "Replacing…" : "Replace link"}
+                        </button>
+                      </div>
                     ) : null}
                   </div>
-                  {canRevoke ? (
+                  {canRevoke && !canReplace ? (
                     <button type="button" onClick={() => revoke(invitation.id)} disabled={revoking === invitation.id} style={{ padding: "7px 10px", border: "1px solid #fecaca", borderRadius: "8px", background: "#fff", cursor: "pointer" }}>
                       {revoking === invitation.id ? "Revoking…" : "Revoke"}
                     </button>
