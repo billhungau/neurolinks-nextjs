@@ -2,9 +2,13 @@ const VCITA_BASE_URL =
   process.env.VCITA_BASE_URL?.trim().replace(/\/+$/, "") ||
   "https://api.vcita.biz/platform/v1";
 
+const VCITA_API_ROOT = "https://api.vcita.biz";
 const NAME_DIRECTORY_TTL_MS = 2 * 60 * 1000;
 const NAME_DIRECTORY_BATCH_PAGES = 5;
 const NAME_DIRECTORY_MAX_PAGES = 10;
+
+const VCITA_PHN_FIELD_UID = "95hr1g1ig5jbp5mn";
+const VCITA_BIRTHDAY_FIELD_UID = "rb4mwxhd674mbdgp";
 
 type VcitaApiEnvelope<T> = {
   status?: string;
@@ -45,12 +49,14 @@ function vcitaToken(): string {
   return token;
 }
 
-async function vcitaRequest<T>(path: string): Promise<T> {
-  const response = await fetch(`${VCITA_BASE_URL}/${path.replace(/^\/+/, "")}`, {
-    method: "GET",
+async function vcitaRawRequest<T>(url: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetch(url, {
+    ...init,
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${vcitaToken()}`,
+      ...(init.body ? { "Content-Type": "application/json" } : {}),
+      ...(init.headers ?? {}),
     },
     cache: "no-store",
   });
@@ -59,11 +65,17 @@ async function vcitaRequest<T>(path: string): Promise<T> {
     throw new Error(`[vcita] Request failed with HTTP ${response.status}.`);
   }
 
-  const json = (await response.json()) as VcitaApiEnvelope<T>;
+  const text = await response.text();
+  if (!text) return {} as T;
+  const json = JSON.parse(text) as VcitaApiEnvelope<T>;
   if (json.status && json.status.toLowerCase() === "error") {
     throw new Error("[vcita] API returned an error.");
   }
   return (json.data ?? json) as T;
+}
+
+async function vcitaRequest<T>(path: string): Promise<T> {
+  return vcitaRawRequest<T>(`${VCITA_BASE_URL}/${path.replace(/^\/+/, "")}`, { method: "GET" });
 }
 
 function normalizeClient(raw: RawVcitaClient): VcitaClientSummary | null {
@@ -86,6 +98,60 @@ function extractClients(data: unknown): RawVcitaClient[] {
     if (Array.isArray(obj.items)) return obj.items as RawVcitaClient[];
   }
   return [];
+}
+
+function extractMatterUid(data: unknown): string | null {
+  const visit = (value: unknown): string | null => {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const found = visit(item);
+        if (found) return found;
+      }
+      return null;
+    }
+    if (!value || typeof value !== "object") return null;
+    const obj = value as Record<string, unknown>;
+    const uid = String(obj.uid ?? obj.id ?? "").trim();
+    if (uid) return uid;
+    for (const key of ["matters", "items", "data", "matter"]) {
+      if (key in obj) {
+        const found = visit(obj[key]);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+  return visit(data);
+}
+
+export async function updateVcitaMatterPhnAndDob(
+  clientId: string,
+  values: { phn: string; dateOfBirth: string },
+) {
+  const id = clientId.trim();
+  if (!id || id.length > 200) throw new Error("[vcita] Invalid client id.");
+
+  const matterList = await vcitaRawRequest<unknown>(
+    `${VCITA_API_ROOT}/business/clients/v1/contacts/${encodeURIComponent(id)}/matters`,
+    { method: "GET" },
+  );
+  const matterUid = extractMatterUid(matterList);
+  if (!matterUid) throw new Error("[vcita] No matter found for client.");
+
+  await vcitaRawRequest<unknown>(
+    `${VCITA_API_ROOT}/business/clients/v1/matters/${encodeURIComponent(matterUid)}`,
+    {
+      method: "PUT",
+      body: JSON.stringify({
+        matter: {
+          fields: [
+            { uid: VCITA_PHN_FIELD_UID, value: values.phn },
+            { uid: VCITA_BIRTHDAY_FIELD_UID, value: `${values.dateOfBirth}T00:00:00.000Z` },
+          ],
+        },
+      }),
+    },
+  );
 }
 
 export async function getVcitaClient(clientId: string): Promise<VcitaClientSummary | null> {
