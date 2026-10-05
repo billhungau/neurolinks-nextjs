@@ -6,7 +6,7 @@ function option(id: string, label: string) {
 
 export const PATIENT_INTAKE_CODE = "intake";
 export const PATIENT_INTAKE_NAME = "Patient Intake Form";
-export const PATIENT_INTAKE_SCHEMA_REVISION = 3;
+export const PATIENT_INTAKE_SCHEMA_REVISION = 4;
 
 export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
   return {
@@ -20,12 +20,14 @@ export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
         id: "date_of_birth",
         label: "Date of birth",
         required: true,
+        placeholder: "",
       },
       {
         kind: "text",
         id: "phn",
         label: "Personal Health Number (PHN)",
         required: true,
+        placeholder: "",
       },
       { kind: "pagebreak", id: "intake_page_health" },
       {
@@ -33,12 +35,14 @@ export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
         id: "presenting_problems",
         label: "What problem(s) are you seeking help for?",
         required: true,
+        placeholder: "",
       },
       {
         kind: "textarea",
         id: "medical_conditions",
         label: "Do you have any of the following or other medical conditions? Please describe.",
         required: false,
+        placeholder: "",
       },
       {
         kind: "single",
@@ -52,6 +56,7 @@ export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
         id: "allergies_details",
         label: "If yes, please provide details of allergies.",
         required: false,
+        placeholder: "",
       },
       {
         kind: "single",
@@ -65,80 +70,27 @@ export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
         id: "substance_use",
         label: "Please advise us about alcohol, cannabis, nicotine, or other substance use that may be relevant to your care.",
         required: false,
+        placeholder: "",
       },
       { kind: "pagebreak", id: "intake_page_contacts" },
-      {
-        kind: "text",
-        id: "email",
-        label: "Email",
-        required: false,
-      },
-      {
-        kind: "text",
-        id: "contact_number",
-        label: "Phone number",
-        required: false,
-      },
-      {
-        kind: "text",
-        id: "address_line1",
-        label: "Address line 1",
-        required: false,
-      },
-      {
-        kind: "text",
-        id: "address_line2",
-        label: "Address line 2",
-        required: false,
-      },
-      {
-        kind: "text",
-        id: "city",
-        label: "City",
-        required: false,
-      },
-      {
-        kind: "text",
-        id: "province",
-        label: "Province",
-        required: false,
-      },
-      {
-        kind: "text",
-        id: "postal_code",
-        label: "Postal code",
-        required: false,
-      },
+      { kind: "text", id: "email", label: "Email", required: false, placeholder: "" },
+      { kind: "text", id: "contact_number", label: "Phone number", required: false, placeholder: "" },
+      { kind: "text", id: "address_line1", label: "Address line 1", required: false, placeholder: "" },
+      { kind: "text", id: "address_line2", label: "Address line 2", required: false, placeholder: "" },
+      { kind: "text", id: "city", label: "City", required: false, placeholder: "" },
+      { kind: "text", id: "province", label: "Province", required: false, placeholder: "" },
+      { kind: "text", id: "postal_code", label: "Postal code", required: false, placeholder: "" },
       {
         kind: "text",
         id: "next_of_kin_name",
         label: "Name of next of kin (relationship)",
         required: false,
+        placeholder: "",
       },
-      {
-        kind: "text",
-        id: "emergency_phone",
-        label: "Next of kin contact number",
-        required: false,
-      },
-      {
-        kind: "text",
-        id: "family_doctor",
-        label: "Family doctor",
-        required: false,
-      },
-      {
-        kind: "text",
-        id: "family_doctor_phone",
-        label: "Family doctor contact number",
-        required: false,
-      },
-      {
-        kind: "text",
-        id: "referred_by",
-        label: "Referred by",
-        required: false,
-      },
+      { kind: "text", id: "emergency_phone", label: "Next of kin contact number", required: false, placeholder: "" },
+      { kind: "text", id: "family_doctor", label: "Family doctor", required: false, placeholder: "" },
+      { kind: "text", id: "family_doctor_phone", label: "Family doctor contact number", required: false, placeholder: "" },
+      { kind: "text", id: "referred_by", label: "Referred by", required: false, placeholder: "" },
       { kind: "pagebreak", id: "intake_page_policy" },
       {
         kind: "paragraph",
