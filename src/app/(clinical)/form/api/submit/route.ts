@@ -7,6 +7,7 @@ import {
   scoreImportedQuestionnaire,
 } from "@/lib/clinical/questionnaires/jotform-import";
 import { scoreNativeQuestionnaire } from "@/lib/clinical/questionnaires/native-builder";
+import { PATIENT_INTAKE_CODE } from "@/lib/clinical/questionnaires/patient-intake";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 
 export const runtime = "nodejs";
@@ -71,6 +72,13 @@ export async function POST(request: Request) {
   const invitation = await resolveQuestionnaireInvitation(token, { markOpened: false });
   if (invitation.status !== "valid" || !invitation.questionnaire || !invitation.invitationId || !invitation.subjectKey || !invitation.questionnaireId) {
     return Response.json({ ok: false, error: "This questionnaire link is no longer valid." }, { status: 400 });
+  }
+
+  if (invitation.questionnaire.code === PATIENT_INTAKE_CODE) {
+    return Response.json(
+      { ok: false, error: "Patient Intake must use the secure intake submission pathway." },
+      { status: 409, headers: { "Cache-Control": "no-store" } },
+    );
   }
 
   let scored: { total: number; severity: string | null; clinicalFlags: Record<string, unknown> };
