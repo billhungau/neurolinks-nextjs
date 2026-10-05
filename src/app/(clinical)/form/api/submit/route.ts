@@ -160,6 +160,12 @@ export async function POST(request: Request) {
     const streetAddress = String(answers.address ?? "").trim();
     const province = String(answers.province ?? "").trim();
     const address = [streetAddress, province].filter(Boolean).join(", ");
+    const nextOfKinName = String(answers.next_of_kin_name ?? "").trim();
+    const nextOfKinRelationship = String(answers.emergency_relationship ?? "").trim();
+    const nextOfKin = nextOfKinName && nextOfKinRelationship
+      ? `${nextOfKinName} (${nextOfKinRelationship})`
+      : nextOfKinName || nextOfKinRelationship;
+    const nextOfKinPhone = String(answers.emergency_phone ?? "").trim();
 
     if (!validDateOfBirth(dateOfBirth)) {
       return Response.json({ ok: false, error: "Please enter the date of birth as YYYY-MM-DD." }, { status: 400 });
@@ -179,14 +185,16 @@ export async function POST(request: Request) {
         );
       }
 
-      // Always write the submitted values. A later intake invitation therefore
-      // updates existing vcita demographic values rather than skipping fields
-      // that were previously populated.
       stage = "vcita-client-update";
       await updateVcitaClientContact(vcitaClientId, { phone, address });
 
       stage = "vcita-matter-update";
-      await updateVcitaMatterPhnAndDob(vcitaClientId, { phn, dateOfBirth });
+      await updateVcitaMatterPhnAndDob(vcitaClientId, {
+        phn,
+        dateOfBirth,
+        nextOfKin,
+        nextOfKinPhone,
+      });
 
       stage = "complete-invitation";
       const submittedAt = new Date().toISOString();
