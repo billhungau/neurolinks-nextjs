@@ -6,7 +6,7 @@ function option(id: string, label: string) {
 
 export const PATIENT_INTAKE_CODE = "intake";
 export const PATIENT_INTAKE_NAME = "Patient Intake Form";
-export const PATIENT_INTAKE_SCHEMA_REVISION = 2;
+export const PATIENT_INTAKE_SCHEMA_REVISION = 3;
 
 export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
   return {
@@ -26,7 +26,6 @@ export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
         id: "phn",
         label: "Personal Health Number (PHN)",
         required: true,
-        placeholder: "10-digit BC Personal Health Number",
       },
       { kind: "pagebreak", id: "intake_page_health" },
       {
@@ -73,84 +72,72 @@ export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
         id: "email",
         label: "Email",
         required: false,
-        placeholder: "Email address",
       },
       {
         kind: "text",
         id: "contact_number",
         label: "Phone number",
         required: false,
-        placeholder: "Phone number",
       },
       {
         kind: "text",
         id: "address_line1",
         label: "Address line 1",
         required: false,
-        placeholder: "Street address",
       },
       {
         kind: "text",
         id: "address_line2",
         label: "Address line 2",
         required: false,
-        placeholder: "Apartment, suite, unit, etc. (optional)",
       },
       {
         kind: "text",
         id: "city",
         label: "City",
         required: false,
-        placeholder: "City",
       },
       {
         kind: "text",
         id: "province",
         label: "Province",
         required: false,
-        placeholder: "Province",
       },
       {
         kind: "text",
         id: "postal_code",
         label: "Postal code",
         required: false,
-        placeholder: "A1A 1A1",
       },
       {
         kind: "text",
         id: "next_of_kin_name",
         label: "Name of next of kin (relationship)",
         required: false,
-        placeholder: "e.g. Jane Smith (spouse)",
       },
       {
         kind: "text",
         id: "emergency_phone",
         label: "Next of kin contact number",
         required: false,
-        placeholder: "Phone number",
       },
       {
         kind: "text",
         id: "family_doctor",
         label: "Family doctor",
         required: false,
-        placeholder: "Doctor or clinic name",
       },
       {
         kind: "text",
         id: "family_doctor_phone",
         label: "Family doctor contact number",
         required: false,
-        placeholder: "Phone number",
       },
       {
         kind: "text",
         id: "referred_by",
         label: "Referred by",
         required: false,
-        placeholder: "Referral source",
       },
       { kind: "pagebreak", id: "intake_page_policy" },
       {
