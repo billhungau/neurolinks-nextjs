@@ -23,6 +23,7 @@ const DESCRIPTIONS: Record<string, string> = {
   pss: "PTSD symptom questionnaire",
   intake: "Patient demographics, health history, PHN and intake information",
 };
+const CURRENT_INTAKE_SCHEMA_REVISION = 2;
 
 export function FormsPortal() {
   const [forms, setForms] = useState<FormRow[]>([]);
@@ -51,25 +52,28 @@ export function FormsPortal() {
     }
   }
 
-  // Persistent Supabase records are read directly. The Patient Intake form is
-  // bootstrapped only when it is genuinely absent, so normal visits still make
-  // only the single fast forms-list request.
   useEffect(() => { void load(); }, []);
 
   useEffect(() => {
-    if (loading || intakeBootstrapAttemptedRef.current || forms.some((form) => form.code === "intake" && form.metadata?.builder_deleted !== true)) return;
+    const hasCurrentIntake = forms.some(
+      (form) =>
+        form.code === "intake" &&
+        form.metadata?.builder_deleted !== true &&
+        Number(form.metadata?.intake_schema_revision ?? 0) >= CURRENT_INTAKE_SCHEMA_REVISION,
+    );
+    if (loading || intakeBootstrapAttemptedRef.current || hasCurrentIntake) return;
     intakeBootstrapAttemptedRef.current = true;
     void (async () => {
       try {
         const response = await fetch("/form/api/forms/import-intake/", { method: "POST" });
         const data = await response.json() as { ok?: boolean; error?: string };
         if (!data.ok) {
-          setError(data.error ?? "Could not create Patient Intake form.");
+          setError(data.error ?? "Could not update Patient Intake form.");
           return;
         }
         await load();
       } catch {
-        setError("Could not create Patient Intake form.");
+        setError("Could not update Patient Intake form.");
       }
     })();
   }, [loading, forms]);
