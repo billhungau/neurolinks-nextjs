@@ -116,8 +116,6 @@ export async function POST(request: Request) {
     }
 
     try {
-      // Use the native validator so all fields marked required in the builder are
-      // enforced, but do not persist these PHI-bearing answers in assessment_results.
       scoreNativeQuestionnaire(schema, answers);
     } catch {
       return Response.json({ ok: false, error: "Please answer every required question." }, { status: 400 });
@@ -132,6 +130,7 @@ export async function POST(request: Request) {
       return Response.json({ ok: false, error: "Please enter a valid 10-digit BC Personal Health Number." }, { status: 400 });
     }
 
+    let stage = "identity";
     try {
       const identities = await patientIdentityRows([invitation.subjectKey]);
       const vcitaClientId = identities[0]?.vcita_client_id?.trim();
@@ -142,27 +141,34 @@ export async function POST(request: Request) {
         );
       }
 
-      // PHN and DOB are sent directly to the patient's vcita Matter. They are not
-      // written to Supabase questionnaire results, logs, audit metadata, or browser storage.
+      stage = "vcita-matter-update";
       await updateVcitaMatterPhnAndDob(vcitaClientId, { phn, dateOfBirth });
 
+      stage = "complete-invitation";
       const submittedAt = new Date().toISOString();
       await completeInvitation(invitation.invitationId, submittedAt);
-      await clinicalSupabaseRequest<unknown>("audit_events", {
-        method: "POST",
-        prefer: "return=minimal",
-        body: JSON.stringify({
-          event_type: "PATIENT_INTAKE_SUBMITTED",
-          subject_key: invitation.subjectKey,
-          invitation_id: invitation.invitationId,
-          metadata: {
-            questionnaire_code: PATIENT_INTAKE_CODE,
-            questionnaire_version: invitation.questionnaire.version,
-            destination: "vcita_matter",
-            phi_persisted_in_assessment_results: false,
-          },
-        }),
-      });
+
+      // Audit/touch failures must not tell the patient the intake failed after
+      // vcita was already updated and the one-time invitation was completed.
+      try {
+        await clinicalSupabaseRequest<unknown>("audit_events", {
+          method: "POST",
+          prefer: "return=minimal",
+          body: JSON.stringify({
+            event_type: "PATIENT_INTAKE_SUBMITTED",
+            subject_key: invitation.subjectKey,
+            invitation_id: invitation.invitationId,
+            metadata: {
+              questionnaire_code: PATIENT_INTAKE_CODE,
+              questionnaire_version: invitation.questionnaire.version,
+              destination: "vcita_matter",
+              phi_persisted_in_assessment_results: false,
+            },
+          }),
+        });
+      } catch (error) {
+        console.warn("[patient-intake] audit failed", error instanceof Error ? error.message : "unknown error");
+      }
       try {
         await touchPatientLastSubmission(invitation.subjectKey, submittedAt);
       } catch {}
@@ -171,7 +177,11 @@ export async function POST(request: Request) {
         { ok: true, totalScore: 0, severity: null },
         { status: 201, headers: { "Cache-Control": "no-store" } },
       );
-    } catch {
+    } catch (error) {
+      console.error("[patient-intake] submission failed", {
+        stage,
+        error: error instanceof Error ? error.message : "unknown error",
+      });
       return Response.json(
         { ok: false, error: "Your intake could not be saved to the clinical record. Please contact NeuroLinks." },
         { status: 502, headers: { "Cache-Control": "no-store" } },
