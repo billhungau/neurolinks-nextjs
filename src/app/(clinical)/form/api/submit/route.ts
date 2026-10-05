@@ -1,5 +1,5 @@
 import { resolveQuestionnaireInvitation } from "@/lib/clinical/invitation";
-import { touchPatientLastSubmission } from "@/lib/clinical/patient-identity-index";
+import { patientIdentityRows, touchPatientLastSubmission } from "@/lib/clinical/patient-identity-index";
 import { scoreBdi2Selections } from "@/lib/clinical/questionnaires/bdii";
 import { BDI2_CODE, BDI2_ITEMS, bdi2OptionId } from "@/lib/clinical/questionnaires/bdii-definition";
 import {
@@ -9,6 +9,7 @@ import {
 import { scoreNativeQuestionnaire } from "@/lib/clinical/questionnaires/native-builder";
 import { PATIENT_INTAKE_CODE } from "@/lib/clinical/questionnaires/patient-intake";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
+import { updateVcitaMatterPhnAndDob } from "@/lib/clinical/vcita";
 
 export const runtime = "nodejs";
 
@@ -55,6 +56,39 @@ function compatibleNativeBdiAnswers(
   return stored;
 }
 
+function validDateOfBirth(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) return false;
+  return date.toISOString().slice(0, 10) === value && date.getTime() < Date.now();
+}
+
+function normalizePhn(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+async function completeInvitation(invitationId: string, completedAt: string) {
+  try {
+    await clinicalSupabaseRequest<unknown>(
+      `questionnaire_invitations?id=eq.${invitationId}&completed_at=is.null&revoked_at=is.null`,
+      {
+        method: "PATCH",
+        prefer: "return=minimal",
+        body: JSON.stringify({ completed_at: completedAt, token_ciphertext: null }),
+      },
+    );
+  } catch {
+    await clinicalSupabaseRequest<unknown>(
+      `questionnaire_invitations?id=eq.${invitationId}&completed_at=is.null&revoked_at=is.null`,
+      {
+        method: "PATCH",
+        prefer: "return=minimal",
+        body: JSON.stringify({ completed_at: completedAt }),
+      },
+    );
+  }
+}
+
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) {
@@ -75,10 +109,74 @@ export async function POST(request: Request) {
   }
 
   if (invitation.questionnaire.code === PATIENT_INTAKE_CODE) {
-    return Response.json(
-      { ok: false, error: "Patient Intake must use the secure intake submission pathway." },
-      { status: 409, headers: { "Cache-Control": "no-store" } },
-    );
+    const answers = body.answers ?? {};
+    const schema = invitation.questionnaire.nativeSchema;
+    if (!schema) {
+      return Response.json({ ok: false, error: "This intake form is not configured correctly." }, { status: 409 });
+    }
+
+    try {
+      // Use the native validator so all fields marked required in the builder are
+      // enforced, but do not persist these PHI-bearing answers in assessment_results.
+      scoreNativeQuestionnaire(schema, answers);
+    } catch {
+      return Response.json({ ok: false, error: "Please answer every required question." }, { status: 400 });
+    }
+
+    const dateOfBirth = String(answers.date_of_birth ?? "").trim();
+    const phn = normalizePhn(String(answers.phn ?? ""));
+    if (!validDateOfBirth(dateOfBirth)) {
+      return Response.json({ ok: false, error: "Please enter the date of birth as YYYY-MM-DD." }, { status: 400 });
+    }
+    if (phn.length !== 10) {
+      return Response.json({ ok: false, error: "Please enter a valid 10-digit BC Personal Health Number." }, { status: 400 });
+    }
+
+    try {
+      const identities = await patientIdentityRows([invitation.subjectKey]);
+      const vcitaClientId = identities[0]?.vcita_client_id?.trim();
+      if (!vcitaClientId) {
+        return Response.json(
+          { ok: false, error: "This intake link could not be matched to the patient record. Please contact NeuroLinks." },
+          { status: 409, headers: { "Cache-Control": "no-store" } },
+        );
+      }
+
+      // PHN and DOB are sent directly to the patient's vcita Matter. They are not
+      // written to Supabase questionnaire results, logs, audit metadata, or browser storage.
+      await updateVcitaMatterPhnAndDob(vcitaClientId, { phn, dateOfBirth });
+
+      const submittedAt = new Date().toISOString();
+      await completeInvitation(invitation.invitationId, submittedAt);
+      await clinicalSupabaseRequest<unknown>("audit_events", {
+        method: "POST",
+        prefer: "return=minimal",
+        body: JSON.stringify({
+          event_type: "PATIENT_INTAKE_SUBMITTED",
+          subject_key: invitation.subjectKey,
+          invitation_id: invitation.invitationId,
+          metadata: {
+            questionnaire_code: PATIENT_INTAKE_CODE,
+            questionnaire_version: invitation.questionnaire.version,
+            destination: "vcita_matter",
+            phi_persisted_in_assessment_results: false,
+          },
+        }),
+      });
+      try {
+        await touchPatientLastSubmission(invitation.subjectKey, submittedAt);
+      } catch {}
+
+      return Response.json(
+        { ok: true, totalScore: 0, severity: null },
+        { status: 201, headers: { "Cache-Control": "no-store" } },
+      );
+    } catch {
+      return Response.json(
+        { ok: false, error: "Your intake could not be saved to the clinical record. Please contact NeuroLinks." },
+        { status: 502, headers: { "Cache-Control": "no-store" } },
+      );
+    }
   }
 
   let scored: { total: number; severity: string | null; clinicalFlags: Record<string, unknown> };
@@ -140,26 +238,7 @@ export async function POST(request: Request) {
     const assessmentId = results[0]?.id;
     if (!assessmentId) throw new Error("No assessment id.");
 
-    try {
-      await clinicalSupabaseRequest<unknown>(
-        `questionnaire_invitations?id=eq.${invitation.invitationId}&completed_at=is.null&revoked_at=is.null`,
-        {
-          method: "PATCH",
-          prefer: "return=minimal",
-          body: JSON.stringify({ completed_at: submittedAt, token_ciphertext: null }),
-        },
-      );
-    } catch {
-      // Compatibility before token_ciphertext migration exists.
-      await clinicalSupabaseRequest<unknown>(
-        `questionnaire_invitations?id=eq.${invitation.invitationId}&completed_at=is.null&revoked_at=is.null`,
-        {
-          method: "PATCH",
-          prefer: "return=minimal",
-          body: JSON.stringify({ completed_at: submittedAt }),
-        },
-      );
-    }
+    await completeInvitation(invitation.invitationId, submittedAt);
 
     await clinicalSupabaseRequest<unknown>("audit_events", {
       method: "POST",
