@@ -107,6 +107,22 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
       }
     }
 
+    // The current vcita client update accepts one address string. Keep the
+    // patient-facing form structured while providing the existing server route
+    // with a normalized complete address. The individual fields exist only in
+    // this transient submission and are never written to assessment_results.
+    if (schema.fields.some((field) => field.id === "address_line1")) {
+      answers.address = [
+        answers.address_line1,
+        answers.address_line2,
+        answers.city,
+        answers.province,
+        answers.postal_code,
+      ].map((value) => String(value ?? "").trim()).filter(Boolean).join(", ");
+      // Avoid the legacy server mapper appending province a second time.
+      answers.province = "";
+    }
+
     const response = await fetch("/form/api/submit/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
