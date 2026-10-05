@@ -18,17 +18,25 @@ type ApiResponse =
   | { ok: true; invitations: Invitation[] }
   | { ok: false; error: string };
 
+export type RecentInvitationLink = {
+  invitationId: string;
+  url: string;
+};
+
 export function InvitationHistoryPanel({
   vcitaUuid,
   refreshKey,
+  recentLinks = [],
 }: {
   vcitaUuid: string;
   refreshKey: number;
+  recentLinks?: RecentInvitationLink[];
 }) {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<string | null>(null);
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -74,6 +82,18 @@ export function InvitationHistoryPanel({
     }
   }
 
+  async function copyLink(url: string) {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopyMessage("Questionnaire link copied.");
+      window.setTimeout(() => setCopyMessage(null), 1800);
+    } catch {
+      setCopyMessage("Could not copy automatically.");
+    }
+  }
+
+  const recentLinkByInvitation = new Map(recentLinks.map((link) => [link.invitationId, link.url] as const));
+
   return (
     <section style={{ marginBottom: "24px", padding: "18px", border: "1px solid #e5e7eb", borderRadius: "12px", background: "#fff" }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "center" }}>
@@ -85,6 +105,7 @@ export function InvitationHistoryPanel({
 
       {loading ? <p style={{ color: "#6b7280" }}>Loading invitations…</p> : null}
       {error ? <p role="alert" style={{ color: "#991b1b" }}>{error}</p> : null}
+      {copyMessage ? <p aria-live="polite" style={{ color: "#166534", fontWeight: 700, fontSize: 14 }}>{copyMessage}</p> : null}
       {!loading && !error && invitations.length === 0 ? (
         <p style={{ marginBottom: 0, color: "#6b7280" }}>No questionnaire invitations yet.</p>
       ) : null}
@@ -93,10 +114,11 @@ export function InvitationHistoryPanel({
         <div style={{ display: "grid", gap: "10px", marginTop: "14px" }}>
           {invitations.map((invitation) => {
             const canRevoke = invitation.status === "pending" || invitation.status === "opened";
+            const currentUrl = recentLinkByInvitation.get(invitation.id) ?? null;
             return (
               <div key={invitation.id} style={{ padding: "12px", border: "1px solid #e5e7eb", borderRadius: "9px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start" }}>
-                  <div>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start", flexWrap: "wrap" }}>
+                  <div style={{ minWidth: 0 }}>
                     <strong>{invitation.questionnaireName ?? "Questionnaire"}</strong>
                     <div style={{ marginTop: "4px", color: "#6b7280", fontSize: "14px" }}>
                       Created {new Date(invitation.createdAt).toLocaleString()}
@@ -104,6 +126,25 @@ export function InvitationHistoryPanel({
                     <div style={{ marginTop: "2px", fontSize: "14px", textTransform: "capitalize" }}>
                       Status: <strong>{invitation.status}</strong>
                     </div>
+                    {currentUrl ? (
+                      <div style={{ marginTop: 9 }}>
+                        <div style={{ overflowWrap: "anywhere", fontSize: 13 }}>
+                          <a href={currentUrl}>{currentUrl}</a>
+                        </div>
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 7 }}>
+                          <button type="button" onClick={() => copyLink(currentUrl)} style={{ padding: "6px 9px", border: "1px solid #d1d5db", borderRadius: 7, background: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 12 }}>
+                            Copy link
+                          </button>
+                          <a href={currentUrl} target="_blank" rel="noreferrer" style={{ padding: "6px 9px", border: "1px solid #d1d5db", borderRadius: 7, background: "#fff", color: "#1d4ed8", textDecoration: "none", fontWeight: 700, fontSize: 12 }}>
+                            Open link
+                          </a>
+                        </div>
+                      </div>
+                    ) : canRevoke ? (
+                      <div style={{ marginTop: 7, color: "#94a3b8", fontSize: 12 }}>
+                        Link is shown only in the session where it was created.
+                      </div>
+                    ) : null}
                   </div>
                   {canRevoke ? (
                     <button
