@@ -28,10 +28,18 @@ export function SubmissionTableClient({ code, rows }: { code: string; rows: Subm
         <label style={{ display: "block" }}>
           <span style={{ display: "block", fontSize: 12, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 6 }}>Filter by patient</span>
           <input
+            type="search"
+            name="patient-submission-search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Type patient name or email"
             autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            enterKeyHint="search"
+            data-form-type="other"
+            data-lpignore="true"
             style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid #cbd5e1", borderRadius: 9, fontSize: 14 }}
           />
         </label>
