@@ -1,6 +1,7 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
+import { PATIENT_INTAKE_CODE } from "@/lib/clinical/questionnaires/patient-intake";
 
 export const runtime = "nodejs";
 
@@ -35,6 +36,16 @@ export async function POST(request: Request, { params }: Props) {
 
   if (String(row.metadata?.builder_status ?? "") !== "draft") {
     return Response.json({ ok: false, error: "Only drafts can be published." }, { status: 409 });
+  }
+
+  if (row.code === PATIENT_INTAKE_CODE || row.metadata?.form_kind === "patient_intake") {
+    return Response.json(
+      {
+        ok: false,
+        error: "Patient Intake is ready for review, but cannot be published until its PHN/DOB submission is wired directly to vcita. This prevents identifying health information from being stored in questionnaire results.",
+      },
+      { status: 409 },
+    );
   }
 
   const schema = row.metadata?.native_schema as NativeQuestionnaireSchema | undefined;
