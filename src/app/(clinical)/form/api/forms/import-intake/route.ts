@@ -3,6 +3,7 @@ import { maxNativeScore } from "@/lib/clinical/questionnaires/native-builder";
 import {
   PATIENT_INTAKE_CODE,
   PATIENT_INTAKE_NAME,
+  PATIENT_INTAKE_SCHEMA_REVISION,
   patientIntakeNativeSchema,
 } from "@/lib/clinical/questionnaires/patient-intake";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
@@ -29,11 +30,15 @@ export async function POST(request: Request) {
     `questionnaires?select=id,version,metadata&code=eq.${PATIENT_INTAKE_CODE}&order=version.desc`,
     { method: "GET" },
   );
-  const existingNative = existing.find(
-    (row) => Boolean(row.metadata?.native_schema) && row.metadata?.builder_deleted !== true,
+
+  const currentRevision = existing.find(
+    (row) =>
+      Boolean(row.metadata?.native_schema) &&
+      row.metadata?.builder_deleted !== true &&
+      Number(row.metadata?.intake_schema_revision ?? 0) >= PATIENT_INTAKE_SCHEMA_REVISION,
   );
-  if (existingNative) {
-    return Response.json({ ok: true, id: existingNative.id, existing: true });
+  if (currentRevision) {
+    return Response.json({ ok: true, id: currentRevision.id, existing: true });
   }
 
   const schema = patientIntakeNativeSchema();
@@ -54,8 +59,21 @@ export async function POST(request: Request) {
           builder_status: "draft",
           native_schema: schema,
           form_kind: "patient_intake",
+          intake_schema_revision: PATIENT_INTAKE_SCHEMA_REVISION,
           contains_phi: true,
-          sensitive_fields: ["date_of_birth", "phn"],
+          sensitive_fields: [
+            "date_of_birth",
+            "phn",
+            "email",
+            "contact_number",
+            "address_line1",
+            "address_line2",
+            "city",
+            "province",
+            "postal_code",
+            "next_of_kin_name",
+            "emergency_phone",
+          ],
           created_by: clinician.id,
           source_jotform_form_id: "222285731953258",
           imported_from_jotform_structure: true,
@@ -67,5 +85,5 @@ export async function POST(request: Request) {
 
   const id = rows[0]?.id;
   if (!id) return Response.json({ ok: false, error: "Could not create Patient Intake draft." }, { status: 500 });
-  return Response.json({ ok: true, id }, { status: 201 });
+  return Response.json({ ok: true, id, upgraded: existing.length > 0 }, { status: 201 });
 }
