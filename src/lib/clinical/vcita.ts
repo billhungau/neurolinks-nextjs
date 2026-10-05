@@ -8,7 +8,7 @@ const NAME_DIRECTORY_BATCH_PAGES = 5;
 const NAME_DIRECTORY_MAX_PAGES = 10;
 
 const VCITA_PHN_FIELD_UID = "95hr1g1ig5jbp5mn";
-const VCITA_BIRTHDAY_FIELD_UID = "rb4mwxhd674mbdgp";
+const VCITA_BIRTHDAY_FIELD_UID = "rb4mwxdh674mbdgp";
 
 type VcitaApiEnvelope<T> = {
   status?: string;
