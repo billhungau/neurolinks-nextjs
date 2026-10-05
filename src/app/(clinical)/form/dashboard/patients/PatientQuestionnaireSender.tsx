@@ -15,10 +15,11 @@ type InvitationResponse =
   | { ok: true; invitationId: string; url: string; expiresAt: string; noExpiry?: boolean }
   | { ok: false; error: string; code?: string };
 
-type QuestionnaireCode = "bdii" | "bai" | "ybocs" | "pss";
+type QuestionnaireCode = "intake" | "bdii" | "bai" | "ybocs" | "pss";
 type CreatedLink = { invitationId: string; code: QuestionnaireCode; url: string };
 
 const QUESTIONNAIRES: Array<{ code: QuestionnaireCode; label: string; emailLabel: string }> = [
+  { code: "intake", label: "Patient Intake Form", emailLabel: "Patient intake form" },
   { code: "bdii", label: "BDI-II", emailLabel: "Depression questionnaire" },
   { code: "bai", label: "Beck Anxiety Inventory (BAI)", emailLabel: "Anxiety questionnaire" },
   { code: "ybocs", label: "Y-BOCS", emailLabel: "OCD questionnaire" },
@@ -29,12 +30,12 @@ function buildEmailDraft(patient: PatientClient, links: CreatedLink[]) {
   const firstName = patient.firstName.trim() || [patient.firstName, patient.lastName].filter(Boolean).join(" ") || "there";
   const linkLines = links.map((link) => {
     const questionnaire = QUESTIONNAIRES.find((item) => item.code === link.code);
-    return `${questionnaire?.emailLabel ?? "Questionnaire"}: ${link.url}`;
+    return `${questionnaire?.emailLabel ?? "Form"}: ${link.url}`;
   });
   return [
     `Hi ${firstName},`,
     "",
-    "Here are some questionnaires needed to be filled out before the next appointment:",
+    "Here are the forms needed to be completed before the next appointment:",
     "",
     ...linkLines,
     "",
@@ -63,7 +64,7 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (selectedCodes.length === 0) {
-      setCreationErrors(["Select at least one questionnaire."]);
+      setCreationErrors(["Select at least one form."]);
       return;
     }
     setSubmitting(true);
@@ -86,7 +87,7 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
         if (data.ok) links.push({ invitationId: data.invitationId, code, url: data.url });
         else errors.push(`${questionnaire?.label ?? code}: ${data.error}`);
       } catch {
-        errors.push(`${questionnaire?.label ?? code}: Could not create questionnaire link.`);
+        errors.push(`${questionnaire?.label ?? code}: Could not create secure link.`);
       }
     }
 
@@ -115,7 +116,7 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
 
   function openEmailApp() {
     if (!patient.email || !emailDraft) return;
-    const subject = "Questionnaires before your next appointment";
+    const subject = "Forms before your next appointment";
     window.location.href = `mailto:${encodeURIComponent(patient.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailDraft)}`;
   }
 
@@ -126,7 +127,7 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
         <p style={{ margin: "0 0 16px", color: "#64748b", fontSize: 14 }}>Select one or more forms and create secure links for this patient.</p>
         <form onSubmit={submit}>
           <fieldset style={{ border: 0, padding: 0, margin: "0 0 16px" }}>
-            <legend style={{ marginBottom: 8, fontWeight: 700 }}>Questionnaires</legend>
+            <legend style={{ marginBottom: 8, fontWeight: 700 }}>Forms</legend>
             <div style={{ display: "grid", gap: 8 }}>
               {QUESTIONNAIRES.map((questionnaire) => (
                 <label key={questionnaire.code} style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 12px", border: "1px solid #d1d5db", borderRadius: 8, cursor: "pointer" }}>
@@ -138,7 +139,7 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
             <div style={{ marginTop: 8, color: "#6b7280", fontSize: 13 }}>Links remain usable until completed or revoked.</div>
           </fieldset>
           <button disabled={submitting || selectedCodes.length === 0} type="submit" style={{ padding: "11px 16px", border: 0, borderRadius: 8, fontWeight: 750, cursor: selectedCodes.length ? "pointer" : "not-allowed", background: "#111827", color: "#fff", opacity: selectedCodes.length ? 1 : 0.5 }}>
-            {submitting ? "Creating links…" : selectedCodes.length > 1 ? "Create questionnaire links" : "Create questionnaire link"}
+            {submitting ? "Creating links…" : selectedCodes.length > 1 ? "Create secure links" : "Create secure link"}
           </button>
         </form>
       </section>
@@ -153,7 +154,7 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
       {emailDraft ? (
         <section style={{ marginBottom: 18, padding: 18, border: "1px solid #d1fae5", borderRadius: 12, background: "#ecfdf5" }}>
           <h3 style={{ margin: "0 0 8px" }}>Email draft</h3>
-          <div style={{ marginBottom: 10, fontSize: 14 }}><strong>To:</strong> {patient.email || "No email address in vcita"}<br /><strong>Subject:</strong> Questionnaires before your next appointment</div>
+          <div style={{ marginBottom: 10, fontSize: 14 }}><strong>To:</strong> {patient.email || "No email address in vcita"}<br /><strong>Subject:</strong> Forms before your next appointment</div>
           {editingDraft ? (
             <textarea value={emailDraft} onChange={(event) => setEmailDraft(event.target.value)} rows={12} style={{ width: "100%", boxSizing: "border-box", padding: 12, border: "1px solid #d1d5db", borderRadius: 8, font: "inherit", lineHeight: 1.5, background: "#fff" }} />
           ) : (
