@@ -54,7 +54,7 @@ function itemBackground(score: number | null | undefined) {
   return SCORE_BACKGROUNDS[index];
 }
 
-function TrendChart({ results }: { results: Result[] }) {
+function TrendChart({ results, onResultClick }: { results: Result[]; onResultClick: (id: string) => void }) {
   const width = 720;
   const height = 230;
   const padLeft = 34;
@@ -98,10 +98,24 @@ function TrendChart({ results }: { results: Result[] }) {
           });
           const showDate = results.length <= 8 || index === 0 || index === results.length - 1 || index === Math.floor((results.length - 1) / 2);
           return (
-            <g key={result.id}>
+            <g
+              key={result.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open ${dateLabel} questionnaire result, score ${result.totalScore}`}
+              onClick={() => onResultClick(result.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onResultClick(result.id);
+                }
+              }}
+              style={{ cursor: "pointer" }}
+            >
               <title>{dateLabel}: score {result.totalScore}</title>
+              <circle cx={x} cy={y} r="10" fill="transparent" />
               <circle cx={x} cy={y} r="5" fill="currentColor" />
-              <text x={x} y={y - 10} textAnchor="middle" fontSize="12" fontWeight="700" fill="currentColor">{result.totalScore}</text>
+              <text x={x} y={y - 10} textAnchor="middle" fontSize="12" fontWeight="700" fill="currentColor" style={{ userSelect: "none" }}>{result.totalScore}</text>
               {showDate ? <text x={x} y={height - 22} textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.7">{dateLabel}</text> : null}
             </g>
           );
@@ -587,7 +601,7 @@ export function PatientResultsPanel({ vcitaUuid, refreshKey }: { vcitaUuid: stri
             ))}
           </div>
 
-          <TrendChart results={activeResults} />
+          <TrendChart results={activeResults} onResultClick={openDetail} />
 
           {activeResults.length > 1 ? (
             <div style={{ marginTop: "16px", padding: "12px 14px", border: "1px solid #e5e7eb", borderRadius: "10px", background: "#f9fafb" }}>
