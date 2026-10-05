@@ -2,8 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
-import { listAllVcitaClients } from "@/lib/clinical/vcita";
-import { subjectKeyFromVcitaUuid } from "@/lib/clinical/pseudonym";
+import { getVcitaClient } from "@/lib/clinical/vcita";
+import { patientIdentityRows } from "@/lib/clinical/patient-identity-index";
 import { BDI2_ITEMS, getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
 import type { ImportedField, ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
 import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
@@ -110,8 +110,14 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
   const questionnaire = assessment ? relation(assessment.questionnaires) : null;
   if (!assessment || !questionnaire || questionnaire.code !== code) redirect(`/form/dashboard/forms/submissions/${encodeURIComponent(code)}/`);
 
-  const clients = await listAllVcitaClients();
-  const client = clients.find((candidate) => subjectKeyFromVcitaUuid(candidate.id) === assessment.subject_key) ?? null;
+  let client = null;
+  try {
+    const identityRows = await patientIdentityRows([assessment.subject_key]);
+    const vcitaId = identityRows[0]?.vcita_client_id;
+    if (vcitaId) client = await getVcitaClient(vcitaId);
+  } catch {
+    // Identity lookup is display-only. The clinical submission itself remains available.
+  }
   const patientName = client ? [client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client" : "Patient not matched in vcita";
 
   let items: Item[] = [];
