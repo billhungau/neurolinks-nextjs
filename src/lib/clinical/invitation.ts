@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { encryptInvitationToken } from "./invitation-token";
 import { clinicalSupabaseRequest } from "./supabase";
 import { subjectKeyFromVcitaUuid } from "./pseudonym";
 import { ensureBdi2Registry } from "./questionnaires/bdii";
@@ -151,6 +152,19 @@ export async function createQuestionnaireInvitation(input: {
   if (!created) {
     throw new Error("[clinical-invitation] Invitation creation failed.");
   }
+
+  // Persist the bearer token encrypted for authenticated clinician redisplay.
+  // This is deliberately best-effort so a pending DB migration never breaks link creation.
+  try {
+    await clinicalSupabaseRequest<unknown>(
+      `questionnaire_invitations?id=eq.${encodeURIComponent(created.id)}&completed_at=is.null&revoked_at=is.null`,
+      {
+        method: "PATCH",
+        prefer: "return=minimal",
+        body: JSON.stringify({ token_ciphertext: encryptInvitationToken(token) }),
+      },
+    );
+  } catch {}
 
   return {
     invitationId: created.id,
