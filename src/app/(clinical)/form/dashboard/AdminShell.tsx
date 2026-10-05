@@ -7,7 +7,6 @@ import { useState } from "react";
 type NavItem = { href: string; label: string; icon: string; submissions?: boolean };
 
 const NAV: NavItem[] = [
-  { href: "/form/dashboard/", label: "Send", icon: "↗" },
   { href: "/form/dashboard/patients/", label: "Patients", icon: "◫" },
   { href: "/form/dashboard/forms/", label: "Forms", icon: "▤" },
   { href: "/form/dashboard/forms/submissions/", label: "Submissions", icon: "≡", submissions: true },
@@ -15,7 +14,6 @@ const NAV: NavItem[] = [
 ];
 
 function activeFor(pathname: string, item: NavItem) {
-  if (item.label === "Send") return pathname === "/form/dashboard" || pathname === "/form/dashboard/";
   if (item.submissions) return pathname.startsWith("/form/dashboard/forms/submissions/");
   if (item.label === "Forms") return pathname.startsWith("/form/dashboard/forms/") && !pathname.includes("/submissions/");
   return pathname.startsWith(item.href);
