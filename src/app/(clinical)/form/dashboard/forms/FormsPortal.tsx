@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type FormRow = {
   id: string;
@@ -15,12 +15,13 @@ type FormRow = {
 
 type ListResponse = { ok: true; forms: FormRow[] } | { ok: false; error: string };
 
-const LABELS: Record<string, string> = { bdii: "BDI-II", bai: "BAI", ybocs: "Y-BOCS", pss: "PSS" };
+const LABELS: Record<string, string> = { bdii: "BDI-II", bai: "BAI", ybocs: "Y-BOCS", pss: "PSS", intake: "Patient Intake" };
 const DESCRIPTIONS: Record<string, string> = {
   bdii: "Depression questionnaire",
   bai: "Anxiety questionnaire",
   ybocs: "Obsessive-compulsive symptoms",
   pss: "PTSD symptom questionnaire",
+  intake: "Patient demographics, health history, PHN and intake information",
 };
 
 export function FormsPortal() {
@@ -33,6 +34,7 @@ export function FormsPortal() {
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const intakeBootstrapAttemptedRef = useRef(false);
 
   async function load() {
     setLoading(true);
@@ -49,11 +51,28 @@ export function FormsPortal() {
     }
   }
 
-  // The native forms are persistent Supabase questionnaire records. Opening the
-  // library should only read them; rebuilding/importing BAI, Y-BOCS and PSS on
-  // every visit caused several unnecessary server mutations before the four
-  // forms could be displayed.
+  // Persistent Supabase records are read directly. The Patient Intake form is
+  // bootstrapped only when it is genuinely absent, so normal visits still make
+  // only the single fast forms-list request.
   useEffect(() => { void load(); }, []);
+
+  useEffect(() => {
+    if (loading || intakeBootstrapAttemptedRef.current || forms.some((form) => form.code === "intake" && form.metadata?.builder_deleted !== true)) return;
+    intakeBootstrapAttemptedRef.current = true;
+    void (async () => {
+      try {
+        const response = await fetch("/form/api/forms/import-intake/", { method: "POST" });
+        const data = await response.json() as { ok?: boolean; error?: string };
+        if (!data.ok) {
+          setError(data.error ?? "Could not create Patient Intake form.");
+          return;
+        }
+        await load();
+      } catch {
+        setError("Could not create Patient Intake form.");
+      }
+    })();
+  }, [loading, forms]);
 
   async function createForm() {
     if (!name.trim()) return;
