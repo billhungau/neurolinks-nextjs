@@ -171,7 +171,7 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
       <InvitationHistoryPanel
         vcitaUuid={patient.id}
         refreshKey={refreshKey}
-        recentLinks={createdLinks.map((link) => ({ invitationId: link.invitationId, url: link.url }))}
+        recentLinks={createdLinks.map((link) => ({ invitationId: link.invitationId, questionnaireCode: link.code, url: link.url }))}
       />
     </div>
   );
