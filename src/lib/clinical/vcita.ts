@@ -9,6 +9,8 @@ const NAME_DIRECTORY_MAX_PAGES = 10;
 
 const VCITA_PHN_FIELD_UID = "95hr1g1ig5jbp5mn";
 const VCITA_BIRTHDAY_FIELD_UID = "rb4mwxdh674mbdgp";
+const VCITA_NEXT_OF_KIN_FIELD_UID = "54utli0slln7cvei";
+const VCITA_NEXT_OF_KIN_PHONE_FIELD_UID = "84s62h5vnj8wsrnq";
 
 type VcitaApiEnvelope<T> = {
   status?: string;
@@ -101,10 +103,6 @@ function extractClients(data: unknown): RawVcitaClient[] {
 }
 
 function extractMatterUid(data: unknown): string | null {
-  // The vcita contacts/{client}/matters endpoint returns a wrapper containing a
-  // `matters` collection. Do not accept an arbitrary parent `uid`/`id`: that can
-  // be the contact identifier rather than the matter identifier and produces a
-  // 422 when used with PUT /business/clients/v1/matters/{uid}.
   const matterUid = (value: unknown): string | null => {
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
     const obj = value as Record<string, unknown>;
@@ -149,7 +147,6 @@ function extractMatterUid(data: unknown): string | null {
     }
   }
 
-  // Some vcita responses return a single matter object directly.
   if (data && typeof data === "object" && !Array.isArray(data)) {
     const obj = data as Record<string, unknown>;
     if (obj.matter) return matterUid(obj.matter);
@@ -160,7 +157,7 @@ function extractMatterUid(data: unknown): string | null {
 
 export async function updateVcitaMatterPhnAndDob(
   clientId: string,
-  values: { phn: string; dateOfBirth: string },
+  values: { phn: string; dateOfBirth: string; nextOfKin?: string; nextOfKinPhone?: string },
 ) {
   const id = clientId.trim();
   if (!id || id.length > 200) throw new Error("[vcita] Invalid client id.");
@@ -172,18 +169,20 @@ export async function updateVcitaMatterPhnAndDob(
   const matterUid = extractMatterUid(matterList);
   if (!matterUid) throw new Error("[vcita] No matter found for client.");
 
+  const fields: Array<{ uid: string; value: string }> = [
+    { uid: VCITA_PHN_FIELD_UID, value: values.phn },
+    { uid: VCITA_BIRTHDAY_FIELD_UID, value: `${values.dateOfBirth}T00:00:00.000Z` },
+  ];
+  const nextOfKin = values.nextOfKin?.trim();
+  const nextOfKinPhone = values.nextOfKinPhone?.trim();
+  if (nextOfKin) fields.push({ uid: VCITA_NEXT_OF_KIN_FIELD_UID, value: nextOfKin });
+  if (nextOfKinPhone) fields.push({ uid: VCITA_NEXT_OF_KIN_PHONE_FIELD_UID, value: nextOfKinPhone });
+
   await vcitaRawRequest<unknown>(
     `${VCITA_API_ROOT}/business/clients/v1/matters/${encodeURIComponent(matterUid)}`,
     {
       method: "PUT",
-      body: JSON.stringify({
-        matter: {
-          fields: [
-            { uid: VCITA_PHN_FIELD_UID, value: values.phn },
-            { uid: VCITA_BIRTHDAY_FIELD_UID, value: `${values.dateOfBirth}T00:00:00.000Z` },
-          ],
-        },
-      }),
+      body: JSON.stringify({ matter: { fields } }),
     },
   );
 }
@@ -280,8 +279,6 @@ async function loadNameDirectory(): Promise<VcitaClientSummary[]> {
 async function nameSearch(term: string) {
   const normalized = normalizeSearchText(term);
 
-  // Try vcita's generic server-side search first because it is cheapest when it
-  // works for the connected account.
   try {
     const direct = await vcitaRequest<unknown>(
       `clients?search_term=${encodeURIComponent(term)}&per_page=25&page=1`,
@@ -292,14 +289,8 @@ async function nameSearch(term: string) {
       .filter((client) => nameMatches(client, normalized))
       .slice(0, 20);
     if (directMatches.length > 0) return directMatches;
-  } catch {
-    // Fall through to the cached directory search.
-  }
+  } catch {}
 
-  // vcita name filtering is not reliable on this account. Load directory pages
-  // in parallel, cache the normalized client list briefly in server memory, and
-  // search locally. This preserves reliable name lookup without the previous
-  // sequential 5-second page walk on every keystroke.
   const directory = await loadNameDirectory();
   return directory.filter((client) => nameMatches(client, normalized)).slice(0, 20);
 }
