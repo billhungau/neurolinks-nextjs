@@ -12,6 +12,7 @@ type Invitation = {
   status: "pending" | "opened" | "completed" | "expired" | "revoked";
   questionnaireCode: string | null;
   questionnaireName: string | null;
+  url: string | null;
 };
 
 type ApiResponse =
@@ -228,7 +229,7 @@ export function InvitationHistoryPanel({
             const fallbackUrl = canRevoke && invitation.questionnaireCode
               ? recentLinkByCode.get(invitation.questionnaireCode.toLowerCase()) ?? null
               : null;
-            const currentUrl = exactUrl ?? fallbackUrl;
+            const currentUrl = invitation.url ?? exactUrl ?? fallbackUrl;
             const canReplace = canRevoke && !currentUrl && Boolean(invitation.questionnaireCode);
             return (
               <div key={invitation.id} style={{ padding: "12px", border: "1px solid #e5e7eb", borderRadius: "9px" }}>
