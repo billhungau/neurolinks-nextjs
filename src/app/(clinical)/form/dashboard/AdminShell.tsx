@@ -41,6 +41,7 @@ export function AdminShell({ children, email }: { children: React.ReactNode; ema
         <div className="sidebar-bottom">
           <details>
             <summary>Admin</summary>
+            <Link href="/form/dashboard/vcita-fields/" onClick={() => setOpen(false)}>vcita Matter fields</Link>
             <Link href="/form/dashboard/import/" onClick={() => setOpen(false)}>Historical migration</Link>
           </details>
           <div className="account"><span>{email}</span><form action="/form/api/auth/logout/" method="post"><button type="submit">Sign out</button></form></div>
