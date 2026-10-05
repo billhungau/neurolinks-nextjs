@@ -20,6 +20,7 @@ type ApiResponse =
 
 export type RecentInvitationLink = {
   invitationId: string;
+  questionnaireCode?: string;
   url: string;
 };
 
@@ -93,6 +94,11 @@ export function InvitationHistoryPanel({
   }
 
   const recentLinkByInvitation = new Map(recentLinks.map((link) => [link.invitationId, link.url] as const));
+  const recentLinkByCode = new Map(
+    recentLinks
+      .filter((link) => link.questionnaireCode)
+      .map((link) => [link.questionnaireCode!.toLowerCase(), link.url] as const),
+  );
 
   return (
     <section style={{ marginBottom: "24px", padding: "18px", border: "1px solid #e5e7eb", borderRadius: "12px", background: "#fff" }}>
@@ -114,7 +120,11 @@ export function InvitationHistoryPanel({
         <div style={{ display: "grid", gap: "10px", marginTop: "14px" }}>
           {invitations.map((invitation) => {
             const canRevoke = invitation.status === "pending" || invitation.status === "opened";
-            const currentUrl = recentLinkByInvitation.get(invitation.id) ?? null;
+            const exactUrl = recentLinkByInvitation.get(invitation.id) ?? null;
+            const fallbackUrl = canRevoke && invitation.questionnaireCode
+              ? recentLinkByCode.get(invitation.questionnaireCode.toLowerCase()) ?? null
+              : null;
+            const currentUrl = exactUrl ?? fallbackUrl;
             return (
               <div key={invitation.id} style={{ padding: "12px", border: "1px solid #e5e7eb", borderRadius: "9px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start", flexWrap: "wrap" }}>
