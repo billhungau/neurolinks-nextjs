@@ -15,7 +15,6 @@ type FormRow = {
 
 type ListResponse = { ok: true; forms: FormRow[] } | { ok: false; error: string };
 
-const CORE_NATIVE_CODES = ["bai", "ybocs", "pss"] as const;
 const LABELS: Record<string, string> = { bdii: "BDI-II", bai: "BAI", ybocs: "Y-BOCS", pss: "PSS" };
 const DESCRIPTIONS: Record<string, string> = {
   bdii: "Depression questionnaire",
@@ -27,7 +26,6 @@ const DESCRIPTIONS: Record<string, string> = {
 export function FormsPortal() {
   const [forms, setForms] = useState<FormRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [preparing, setPreparing] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -38,31 +36,24 @@ export function FormsPortal() {
 
   async function load() {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch("/form/api/forms/", { cache: "no-store" });
       const data = await response.json() as ListResponse;
       if (data.ok) setForms(data.forms);
       else setError(data.error);
-    } finally { setLoading(false); }
+    } catch {
+      setError("Could not load questionnaire forms.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  async function prepareCoreForms() {
-    setPreparing(true); setError(null);
-    try {
-      await fetch("/form/api/forms/remove-phq9/", { method: "POST" });
-      const failures: string[] = [];
-      for (const builtInCode of CORE_NATIVE_CODES) {
-        const response = await fetch("/form/api/forms/import-native/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: builtInCode }) });
-        const data = await response.json() as { ok?: boolean; error?: string };
-        if (!data.ok) failures.push(`${builtInCode.toUpperCase()}: ${data.error ?? "conversion failed"}`);
-      }
-      if (failures.length) setError(failures.join(" · "));
-      await load();
-    } catch { setError("Could not prepare the native questionnaire forms."); await load(); }
-    finally { setPreparing(false); }
-  }
-
-  useEffect(() => { void prepareCoreForms(); }, []);
+  // The native forms are persistent Supabase questionnaire records. Opening the
+  // library should only read them; rebuilding/importing BAI, Y-BOCS and PSS on
+  // every visit caused several unnecessary server mutations before the four
+  // forms could be displayed.
+  useEffect(() => { void load(); }, []);
 
   async function createForm() {
     if (!name.trim()) return;
@@ -128,7 +119,6 @@ export function FormsPortal() {
       </div>
 
       {showCreate ? <section className="create-panel"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Form name" /><input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Code (optional)" /><button className="primary" type="button" onClick={createForm} disabled={creating || !name.trim()}>{creating ? "Creating…" : "Create"}</button></section> : null}
-      {preparing ? <div className="notice info">Preparing native questionnaire forms…</div> : null}
       {error ? <div className="notice error" role="alert">{error}</div> : null}
       {loading ? <div className="loading">Loading forms…</div> : null}
 
