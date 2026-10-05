@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
@@ -7,6 +6,7 @@ import { patientIdentityRows } from "@/lib/clinical/patient-identity-index";
 import { BDI2_ITEMS, getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
 import type { ImportedField, ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
 import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
+import { BackToSubmissions } from "./BackToSubmissions";
 
 export const dynamic = "force-dynamic";
 
@@ -125,10 +125,12 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
   else if (questionnaire.metadata?.native_schema) items = nativeItems(questionnaire.metadata.native_schema, assessment.answers);
   else if (questionnaire.metadata?.schema) items = importedItems(questionnaire.metadata.schema, assessment.answers, code);
 
+  const submissionsHref = `/form/dashboard/forms/submissions/${encodeURIComponent(code)}/`;
+
   return (
     <main style={{ minHeight: "100vh", padding: "28px 24px", background: "#f8fafc" }}>
       <div style={{ maxWidth: 980, margin: "0 auto" }}>
-        <Link href={`/form/dashboard/forms/submissions/${encodeURIComponent(code)}/`} style={{ color: "#334155", textDecoration: "none", fontSize: 14 }}>← Back to submissions</Link>
+        <BackToSubmissions fallbackHref={submissionsHref} />
         <header style={{ margin: "16px 0 20px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
           <div>
             <p style={{ margin: "0 0 5px", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", color: "#64748b" }}>NeuroLinks Admin</p>
