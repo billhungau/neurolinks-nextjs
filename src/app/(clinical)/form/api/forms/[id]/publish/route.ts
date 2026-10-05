@@ -1,7 +1,6 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
-import { PATIENT_INTAKE_CODE } from "@/lib/clinical/questionnaires/patient-intake";
 
 export const runtime = "nodejs";
 
@@ -38,16 +37,6 @@ export async function POST(request: Request, { params }: Props) {
     return Response.json({ ok: false, error: "Only drafts can be published." }, { status: 409 });
   }
 
-  if (row.code === PATIENT_INTAKE_CODE || row.metadata?.form_kind === "patient_intake") {
-    return Response.json(
-      {
-        ok: false,
-        error: "Patient Intake is ready for review, but cannot be published until its PHN/DOB submission is wired directly to vcita. This prevents identifying health information from being stored in questionnaire results.",
-      },
-      { status: 409 },
-    );
-  }
-
   const schema = row.metadata?.native_schema as NativeQuestionnaireSchema | undefined;
   if (!schema || schema.source !== "native" || schema.fields.length === 0) {
     return Response.json({ ok: false, error: "Add at least one field before publishing." }, { status: 400 });
@@ -80,18 +69,13 @@ export async function POST(request: Request, { params }: Props) {
         },
       );
     } catch (error) {
-      // Compensate if retiring the previous live version fails. Restore this row
-      // to its original draft state so the previously published form remains the
-      // unambiguous live version.
       try {
         await clinicalSupabaseRequest<unknown>(`questionnaires?id=eq.${encodeURIComponent(id)}`, {
           method: "PATCH",
           prefer: "return=minimal",
           body: JSON.stringify({ active: row.active, metadata: row.metadata ?? {} }),
         });
-      } catch {
-        // The original error is more useful to the caller than a rollback error.
-      }
+      } catch {}
       throw error;
     }
   } catch {
