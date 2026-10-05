@@ -101,27 +101,61 @@ function extractClients(data: unknown): RawVcitaClient[] {
 }
 
 function extractMatterUid(data: unknown): string | null {
-  const visit = (value: unknown): string | null => {
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        const found = visit(item);
-        if (found) return found;
-      }
-      return null;
-    }
-    if (!value || typeof value !== "object") return null;
+  // The vcita contacts/{client}/matters endpoint returns a wrapper containing a
+  // `matters` collection. Do not accept an arbitrary parent `uid`/`id`: that can
+  // be the contact identifier rather than the matter identifier and produces a
+  // 422 when used with PUT /business/clients/v1/matters/{uid}.
+  const matterUid = (value: unknown): string | null => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return null;
     const obj = value as Record<string, unknown>;
     const uid = String(obj.uid ?? obj.id ?? "").trim();
-    if (uid) return uid;
-    for (const key of ["matters", "items", "data", "matter"]) {
-      if (key in obj) {
-        const found = visit(obj[key]);
-        if (found) return found;
+    return uid || null;
+  };
+
+  const findMatters = (value: unknown): unknown[] | null => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+    const obj = value as Record<string, unknown>;
+    if (Array.isArray(obj.matters)) return obj.matters;
+    for (const key of ["data", "contact", "items"]) {
+      const nested = obj[key];
+      if (nested && typeof nested === "object") {
+        if (Array.isArray(nested)) {
+          for (const item of nested) {
+            const found = findMatters(item);
+            if (found) return found;
+          }
+        } else {
+          const found = findMatters(nested);
+          if (found) return found;
+        }
       }
     }
     return null;
   };
-  return visit(data);
+
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      const uid = matterUid(item);
+      if (uid) return uid;
+    }
+    return null;
+  }
+
+  const matters = findMatters(data);
+  if (matters) {
+    for (const matter of matters) {
+      const uid = matterUid(matter);
+      if (uid) return uid;
+    }
+  }
+
+  // Some vcita responses return a single matter object directly.
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const obj = data as Record<string, unknown>;
+    if (obj.matter) return matterUid(obj.matter);
+  }
+
+  return null;
 }
 
 export async function updateVcitaMatterPhnAndDob(
