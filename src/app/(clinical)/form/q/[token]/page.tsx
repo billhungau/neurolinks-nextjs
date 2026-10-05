@@ -13,29 +13,56 @@ export const metadata: Metadata = {
 
 type PageProps = { params: Promise<{ token: string }> };
 
+function BrandHeader() {
+  return (
+    <div className="nl-form-brand">
+      <img src="/media/images/New-Logo.png" alt="NeuroLinks Neuropsychiatric Centre" />
+    </div>
+  );
+}
+
 function MessageCard({ title, body }: { title: string; body: string }) {
   return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: "24px" }}>
-      <section style={{ width: "100%", maxWidth: "700px", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "16px", padding: "32px", boxShadow: "0 10px 30px rgba(17,24,39,.06)" }}>
-        <p style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase" }}>NeuroLinks</p>
-        <h1 style={{ margin: "0 0 12px", fontSize: "30px" }}>{title}</h1>
-        <p style={{ margin: 0, lineHeight: 1.6, color: "#4b5563" }}>{body}</p>
+    <main className="nl-form-page nl-form-message-page">
+      <section className="nl-form-shell nl-message-shell">
+        <BrandHeader />
+        <div className="nl-form-heading">
+          <h1>{title}</h1>
+          <p>{body}</p>
+        </div>
       </section>
+      <style>{formShellStyles}</style>
     </main>
   );
 }
 
 function QuestionnaireShell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <main style={{ minHeight: "100vh", padding: "28px 18px 60px" }}>
-      <section style={{ maxWidth: "820px", margin: "0 auto", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "16px", padding: "28px", boxShadow: "0 10px 30px rgba(17,24,39,.05)" }}>
-        <p style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em" }}>NeuroLinks</p>
-        <h1 style={{ margin: "0 0 24px", fontSize: "32px" }}>{title}</h1>
+    <main className="nl-form-page">
+      <section className="nl-form-shell">
+        <BrandHeader />
+        <div className="nl-form-heading">
+          <h1>{title}</h1>
+        </div>
         {children}
       </section>
+      <style>{formShellStyles}</style>
     </main>
   );
 }
+
+const formShellStyles = `
+  .nl-form-page{min-height:100vh;padding:34px 18px 72px;background:linear-gradient(180deg,#f5f8fc 0%,#f8fafc 45%,#eef4f8 100%);color:#10233f;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-sizing:border-box}
+  .nl-form-message-page{display:grid;place-items:center}
+  .nl-form-shell{width:100%;max-width:900px;margin:0 auto;background:rgba(255,255,255,.98);border:1px solid #dce5ef;border-radius:22px;padding:34px 38px 38px;box-sizing:border-box;box-shadow:0 18px 55px rgba(15,35,63,.08)}
+  .nl-message-shell{max-width:700px}
+  .nl-form-brand{display:flex;justify-content:center;align-items:center;padding:2px 0 25px;margin-bottom:25px;border-bottom:1px solid #e7edf4}
+  .nl-form-brand img{display:block;width:min(300px,68vw);height:auto;max-height:112px;object-fit:contain}
+  .nl-form-heading{margin-bottom:27px;text-align:center}
+  .nl-form-heading h1{margin:0;color:#112a4b;font-size:clamp(27px,4vw,36px);line-height:1.15;letter-spacing:-.025em;font-weight:750}
+  .nl-form-heading p{max-width:600px;margin:13px auto 0;color:#52647a;font-size:15px;line-height:1.65}
+  @media(max-width:640px){.nl-form-page{padding:18px 10px 46px}.nl-form-shell{border-radius:16px;padding:24px 18px 26px}.nl-form-brand{padding-bottom:19px;margin-bottom:21px}.nl-form-brand img{width:min(250px,74vw)}.nl-form-heading{margin-bottom:22px}}
+`;
 
 export default async function QuestionnaireInvitePage({ params }: PageProps) {
   const { token } = await params;
