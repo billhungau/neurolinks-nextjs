@@ -7,23 +7,26 @@ type SubmitResponse =
   | { ok: true; totalScore: number; severity: string | null }
   | { ok: false; error: string };
 
+type PendingQuestionnaire = { name: string; href: string };
+type PendingResponse =
+  | { ok: true; questionnaires: PendingQuestionnaire[] }
+  | { ok: false; error?: string };
+
 const HALF_WIDTH_IDS = new Set([
-  "date_of_birth",
-  "phn",
-  "email",
-  "contact_number",
-  "city",
-  "province",
-  "postal_code",
-  "next_of_kin_name",
-  "emergency_relationship",
-  "emergency_phone",
-  "family_doctor",
-  "family_doctor_phone",
-  "referred_by",
+  "date_of_birth", "phn", "email", "contact_number", "city", "province",
+  "postal_code", "next_of_kin_name", "emergency_phone", "family_doctor",
+  "family_doctor_phone", "referred_by",
 ]);
 
 const FULL_WIDTH_TEXT_IDS = new Set(["address_line1", "address_line2"]);
+
+const CANADIAN_PROVINCES = [
+  ["AB", "Alberta"], ["BC", "British Columbia"], ["MB", "Manitoba"],
+  ["NB", "New Brunswick"], ["NL", "Newfoundland and Labrador"],
+  ["NT", "Northwest Territories"], ["NS", "Nova Scotia"], ["NU", "Nunavut"],
+  ["ON", "Ontario"], ["PE", "Prince Edward Island"], ["QC", "Quebec"],
+  ["SK", "Saskatchewan"], ["YT", "Yukon"],
+] as const;
 
 function splitPages(fields: NativeField[]) {
   const pages: NativeField[][] = [[]];
@@ -45,18 +48,13 @@ function inputType(fieldId: string) {
 }
 
 function inputMode(fieldId: string): "numeric" | "text" | undefined {
-  if (fieldId === "phn") return "numeric";
-  return undefined;
+  return fieldId === "phn" ? "numeric" : undefined;
 }
 
 function autocomplete(fieldId: string) {
   const values: Record<string, string> = {
-    email: "email",
-    contact_number: "tel",
-    address_line1: "address-line1",
-    address_line2: "address-line2",
-    city: "address-level2",
-    province: "address-level1",
+    email: "email", contact_number: "tel", address_line1: "address-line1",
+    address_line2: "address-line2", city: "address-level2", province: "address-level1",
     postal_code: "postal-code",
   };
   return values[fieldId];
@@ -71,29 +69,65 @@ function fieldSpan(field: NativeField) {
 export function NativeQuestionnaireForm({ token, schema }: { token: string; schema: NativeQuestionnaireSchema }) {
   const [pageIndex, setPageIndex] = useState(0);
   const [result, setResult] = useState<SubmitResponse | null>(null);
+  const [pending, setPending] = useState<PendingQuestionnaire[] | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const pages = useMemo(() => splitPages(schema.fields), [schema.fields]);
   const pageCount = Math.max(1, pages.length);
   const isIntake = schema.patientFacingName.toLowerCase().includes("intake");
   const today = new Date().toISOString().slice(0, 10);
 
-  function validateCurrentPage(form: HTMLFormElement) {
-    const page = form.querySelector(`[data-native-page="${pageIndex}"]`);
-    const controls = page?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea") ?? [];
+  function validatePage(form: HTMLFormElement, index: number) {
+    const page = form.querySelector(`[data-native-page="${index}"]`);
+    const controls = page?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("input, textarea, select") ?? [];
+
     for (const control of Array.from(controls)) {
+      if (control instanceof HTMLInputElement && control.name === "phn") {
+        const digits = control.value.replace(/\D/g, "");
+        control.setCustomValidity(digits.length === 10 ? "" : "Please enter a valid 10-digit BC Personal Health Number.");
+      }
       if (!control.checkValidity()) {
         control.reportValidity();
+        control.focus();
         return false;
       }
     }
     return true;
   }
 
+  function validateAllPages(form: HTMLFormElement) {
+    for (let index = 0; index < pageCount; index += 1) {
+      if (!validatePage(form, index)) {
+        if (index !== pageIndex) setPageIndex(index);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async function loadPendingQuestionnaires() {
+    try {
+      const response = await fetch("/form/api/pending-questionnaires/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+        cache: "no-store",
+      });
+      const payload = await response.json() as PendingResponse;
+      setPending(payload.ok ? payload.questionnaires : []);
+    } catch {
+      setPending([]);
+    }
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    if (!validateAllPages(form)) return;
+
     setSubmitting(true);
     setResult(null);
-    const data = new FormData(event.currentTarget);
+    const data = new FormData(form);
     const answers: Record<string, unknown> = {};
 
     for (const field of schema.fields) {
@@ -107,41 +141,47 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
       }
     }
 
-    // The current vcita client update accepts one address string. Keep the
-    // patient-facing form structured while providing the existing server route
-    // with a normalized complete address. The individual fields exist only in
-    // this transient submission and are never written to assessment_results.
     if (schema.fields.some((field) => field.id === "address_line1")) {
-      answers.address = [
-        answers.address_line1,
-        answers.address_line2,
-        answers.city,
-        answers.province,
-        answers.postal_code,
-      ].map((value) => String(value ?? "").trim()).filter(Boolean).join(", ");
-      // Avoid the legacy server mapper appending province a second time.
+      answers.address = [answers.address_line1, answers.address_line2, answers.city, answers.province, answers.postal_code]
+        .map((value) => String(value ?? "").trim())
+        .filter(Boolean)
+        .join(", ");
       answers.province = "";
     }
 
-    const response = await fetch("/form/api/submit/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, answers }),
-    });
-    const payload = await response.json() as SubmitResponse;
-    setResult(payload);
-    setSubmitting(false);
-    if (payload.ok) window.scrollTo({ top: 0, behavior: "smooth" });
+    try {
+      const response = await fetch("/form/api/submit/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, answers }),
+      });
+      const payload = await response.json() as SubmitResponse;
+      setResult(payload);
+      if (payload.ok) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        void loadPendingQuestionnaires();
+      }
+    } catch {
+      setResult({ ok: false, error: "This form could not be submitted. Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (result?.ok) {
     return (
-      <div className="nl-success" role="status">
-        <div className="nl-success-icon">✓</div>
-        <div>
-          <h2>{isIntake ? "Intake form submitted" : "Questionnaire submitted"}</h2>
-          <p>Thank you. Your responses have been submitted.</p>
+      <div className="nl-completion" role="status">
+        <div className="nl-success">
+          <div className="nl-success-icon">✓</div>
+          <div><h2>{isIntake ? "Intake form submitted" : "Questionnaire submitted"}</h2><p>Thank you. Your responses have been submitted.</p></div>
         </div>
+        {pending === null ? <p className="nl-pending-copy">Checking for other forms…</p> : pending.length > 0 ? (
+          <div className="nl-pending">
+            <h3>Forms still to complete</h3>
+            <p>Please continue with any remaining forms assigned to you.</p>
+            <div className="nl-pending-links">{pending.map((item) => <a key={item.href} href={item.href}>{item.name}<span>Continue →</span></a>)}</div>
+          </div>
+        ) : <p className="nl-all-done">You have completed all questionnaires currently assigned to you.</p>}
         <style jsx>{nativeStyles}</style>
       </div>
     );
@@ -150,25 +190,25 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
   function renderField(field: NativeField) {
     const spanClass = fieldSpan(field) === "half" ? "nl-field nl-half" : "nl-field nl-full";
 
-    if (field.kind === "paragraph") return (
-      <div key={field.id} className="nl-field nl-full nl-paragraph">
-        <p>{field.text}</p>
-      </div>
+    if (field.kind === "paragraph") return <div key={field.id} className="nl-field nl-full nl-paragraph"><p>{field.text}</p></div>;
+
+    if (field.kind === "text" && field.id === "province") return (
+      <label key={field.id} className={spanClass}>
+        <span className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</span>
+        <select className="nl-input" name={field.id} required={field.required} autoComplete="address-level1" defaultValue="">
+          <option value="">Select province or territory</option>
+          {CANADIAN_PROVINCES.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
+        </select>
+      </label>
     );
 
     if (field.kind === "text") return (
       <label key={field.id} className={spanClass}>
         <span className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</span>
-        <input
-          className="nl-input"
-          type={inputType(field.id)}
-          name={field.id}
-          required={field.required}
-          placeholder={field.placeholder}
-          inputMode={inputMode(field.id)}
-          autoComplete={autocomplete(field.id)}
+        <input className="nl-input" type={inputType(field.id)} name={field.id} required={field.required}
+          placeholder={field.placeholder} inputMode={inputMode(field.id)} autoComplete={autocomplete(field.id)}
           max={field.id === "date_of_birth" ? today : undefined}
-        />
+          onInput={field.id === "phn" ? (event) => event.currentTarget.setCustomValidity("") : undefined} />
       </label>
     );
 
@@ -182,70 +222,35 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
     if (field.kind === "single") return (
       <fieldset key={field.id} className="nl-field nl-full nl-fieldset">
         <legend className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</legend>
-        <div className="nl-options">{field.options.map((option) => (
-          <label key={option.id} className="nl-option">
-            <input type="radio" name={field.id} value={option.id} required={field.required} />
-            <span>{option.label}</span>
-          </label>
-        ))}</div>
+        <div className="nl-options">{field.options.map((option) => <label key={option.id} className="nl-option"><input type="radio" name={field.id} value={option.id} required={field.required} /><span>{option.label}</span></label>)}</div>
       </fieldset>
     );
 
     if (field.kind === "multiple") return (
       <fieldset key={field.id} className="nl-field nl-full nl-fieldset">
         <legend className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</legend>
-        <div className="nl-options">{field.options.map((option, index) => (
-          <label key={option.id} className="nl-option">
-            <input type="checkbox" name={field.id} value={option.id} required={field.required && index === 0} />
-            <span>{option.label}</span>
-          </label>
-        ))}</div>
+        <div className="nl-options">{field.options.map((option, index) => <label key={option.id} className="nl-option"><input type="checkbox" name={field.id} value={option.id} required={field.required && index === 0} /><span>{option.label}</span></label>)}</div>
       </fieldset>
     );
 
     if (field.kind === "matrix") return (
       <fieldset key={field.id} className="nl-field nl-full nl-fieldset">
         <legend className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</legend>
-        <div className="nl-matrix">{field.rows.map((row) => (
-          <fieldset key={row.id} className="nl-matrix-row">
-            <legend>{row.label}</legend>
-            <div className="nl-matrix-options">{field.columns.map((column) => (
-              <label key={column.id} className="nl-matrix-option">
-                <input type="radio" name={`${field.id}:${row.id}`} value={column.id} required={field.required} />
-                <span>{column.label}</span>
-              </label>
-            ))}</div>
-          </fieldset>
-        ))}</div>
+        <div className="nl-matrix">{field.rows.map((row) => <fieldset key={row.id} className="nl-matrix-row"><legend>{row.label}</legend><div className="nl-matrix-options">{field.columns.map((column) => <label key={column.id} className="nl-matrix-option"><input type="radio" name={`${field.id}:${row.id}`} value={column.id} required={field.required} /><span>{column.label}</span></label>)}</div></fieldset>)}</div>
       </fieldset>
     );
     return null;
   }
 
   return (
-    <form className="nl-native-form" onSubmit={submit}>
+    <form className="nl-native-form" onSubmit={submit} noValidate>
       {schema.description ? <p className="nl-description">{schema.description}</p> : null}
-      {pageCount > 1 ? (
-        <div className="nl-progress" aria-label={`Page ${pageIndex + 1} of ${pageCount}`}>
-          <div className="nl-progress-copy"><strong>Step {pageIndex + 1} of {pageCount}</strong><span>{Math.round(((pageIndex + 1) / pageCount) * 100)}%</span></div>
-          <div className="nl-progress-track"><div className="nl-progress-value" style={{ width: `${((pageIndex + 1) / pageCount) * 100}%` }} /></div>
-        </div>
-      ) : null}
-      {pages.map((page, index) => (
-        <div key={index} data-native-page={index} className="nl-form-grid" style={{ display: index === pageIndex ? "grid" : "none" }}>
-          {page.map(renderField)}
-        </div>
-      ))}
+      {pageCount > 1 ? <div className="nl-progress" aria-label={`Page ${pageIndex + 1} of ${pageCount}`}><div className="nl-progress-copy"><strong>Step {pageIndex + 1} of {pageCount}</strong><span>{Math.round(((pageIndex + 1) / pageCount) * 100)}%</span></div><div className="nl-progress-track"><div className="nl-progress-value" style={{ width: `${((pageIndex + 1) / pageCount) * 100}%` }} /></div></div> : null}
+      {pages.map((page, index) => <div key={index} data-native-page={index} className="nl-form-grid" style={{ display: index === pageIndex ? "grid" : "none" }}>{page.map(renderField)}</div>)}
       {result && !result.ok ? <div role="alert" className="nl-error">{result.error}</div> : null}
       <div className="nl-actions">
-        {pageIndex > 0 ? (
-          <button className="nl-button nl-button-secondary" type="button" onClick={() => { setPageIndex((value) => value - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Previous</button>
-        ) : <span />}
-        {pageIndex < pageCount - 1 ? (
-          <button className="nl-button nl-button-primary" type="button" onClick={(event) => { const form = event.currentTarget.form!; if (validateCurrentPage(form)) { setPageIndex((value) => value + 1); window.scrollTo({ top: 0, behavior: "smooth" }); } }}>Continue</button>
-        ) : (
-          <button className="nl-button nl-button-primary" type="submit" disabled={submitting}>{submitting ? "Submitting…" : isIntake ? "Submit intake form" : "Submit questionnaire"}</button>
-        )}
+        {pageIndex > 0 ? <button className="nl-button nl-button-secondary" type="button" onClick={() => { setPageIndex((value) => value - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Previous</button> : <span />}
+        {pageIndex < pageCount - 1 ? <button className="nl-button nl-button-primary" type="button" onClick={(event) => { const form = event.currentTarget.form!; if (validatePage(form, pageIndex)) { setPageIndex((value) => value + 1); window.scrollTo({ top: 0, behavior: "smooth" }); } }}>Continue</button> : <button className="nl-button nl-button-primary" type="submit" disabled={submitting}>{submitting ? "Submitting…" : isIntake ? "Submit intake form" : "Submit questionnaire"}</button>}
       </div>
       <style jsx>{nativeStyles}</style>
     </form>
@@ -253,5 +258,6 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
 }
 
 const nativeStyles = `
-  .nl-native-form{color:#152a46}.nl-description{margin:-8px auto 25px;max-width:650px;text-align:center;color:#607086;font-size:15px;line-height:1.6}.nl-progress{margin:0 0 29px;padding:14px 16px;background:#f6f9fc;border:1px solid #e1e9f1;border-radius:13px}.nl-progress-copy{display:flex;justify-content:space-between;gap:16px;margin-bottom:9px;color:#53657b;font-size:13px}.nl-progress-copy strong{color:#1b3659}.nl-progress-track{height:6px;overflow:hidden;background:#dfe7ef;border-radius:999px}.nl-progress-value{height:100%;background:linear-gradient(90deg,#00a6d6,#17365d);border-radius:999px;transition:width .2s ease}.nl-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:22px}.nl-field{min-width:0;margin:0}.nl-full{grid-column:1/-1}.nl-half{grid-column:span 1}.nl-label{display:block;margin:0 0 8px;color:#162d4b;font-size:15px;font-weight:700;line-height:1.35}.nl-required{color:#b42318}.nl-input{display:block;width:100%;box-sizing:border-box;border:1px solid #cdd8e4;border-radius:11px;background:#fff;padding:12px 13px;color:#14263f;font:inherit;font-size:15px;line-height:1.4;outline:none;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}.nl-input::placeholder{color:#94a3b8}.nl-input:hover{border-color:#afbdcc}.nl-input:focus{border-color:#188eb8;box-shadow:0 0 0 3px rgba(0,166,214,.12)}.nl-textarea{min-height:120px;resize:vertical}.nl-fieldset{border:0;padding:0}.nl-options{display:grid;gap:9px}.nl-option{display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border:1px solid #dce5ee;border-radius:11px;background:#fff;cursor:pointer;line-height:1.45;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}.nl-option:hover{border-color:#a9bdcf;background:#f9fbfd}.nl-option:has(input:checked){border-color:#1692bd;background:#f0faff;box-shadow:0 0 0 1px rgba(0,166,214,.08)}.nl-option input,.nl-matrix-option input{accent-color:#0e7fa8;margin-top:3px}.nl-paragraph{padding:16px 18px;background:#f7f9fc;border-left:3px solid #18a6cf;border-radius:4px 11px 11px 4px}.nl-paragraph p{white-space:pre-line;margin:0;color:#44566c;font-size:14.5px;line-height:1.7}.nl-matrix{display:grid;gap:13px}.nl-matrix-row{border:1px solid #dce5ee;border-radius:12px;padding:15px 16px}.nl-matrix-row>legend{padding:0 6px;color:#253b57;font-weight:650}.nl-matrix-options{display:grid;gap:8px;margin-top:7px}.nl-matrix-option{display:flex;gap:9px;align-items:flex-start;color:#354b65}.nl-error{margin-top:20px;padding:12px 14px;border:1px solid #fecaca;border-radius:10px;background:#fff2f2;color:#9b1c1c;font-size:14px}.nl-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:30px;padding-top:22px;border-top:1px solid #e7edf3}.nl-button{min-width:112px;border-radius:10px;padding:12px 19px;font:inherit;font-size:14px;font-weight:750;cursor:pointer;transition:transform .1s ease,box-shadow .15s ease,background .15s ease}.nl-button:active{transform:translateY(1px)}.nl-button-primary{border:0;background:#17365d;color:#fff;box-shadow:0 5px 14px rgba(23,54,93,.17)}.nl-button-primary:hover{background:#0f2d50}.nl-button-primary:disabled{opacity:.55;cursor:not-allowed}.nl-button-secondary{border:1px solid #cbd7e3;background:#fff;color:#29415f}.nl-button-secondary:hover{background:#f6f9fc}.nl-success{display:flex;gap:15px;align-items:flex-start;padding:21px 22px;border:1px solid #b8e4d1;border-radius:14px;background:#f0fbf6;color:#174b35}.nl-success-icon{display:grid;place-items:center;flex:0 0 auto;width:31px;height:31px;border-radius:999px;background:#1d8f61;color:#fff;font-weight:800}.nl-success h2{margin:1px 0 5px;font-size:20px}.nl-success p{margin:0;color:#416a59;line-height:1.5}@media(max-width:640px){.nl-form-grid{grid-template-columns:1fr;gap:19px}.nl-half,.nl-full{grid-column:1}.nl-description{text-align:left}.nl-progress{margin-bottom:23px}.nl-actions{margin-top:25px}.nl-button{min-width:104px}.nl-paragraph{padding:14px 15px}}
+.nl-native-form{color:#152a46}.nl-description{margin:-8px auto 25px;max-width:650px;text-align:center;color:#607086;font-size:15px;line-height:1.6}.nl-progress{margin:0 0 29px;padding:14px 16px;background:#f6f9fc;border:1px solid #e1e9f1;border-radius:13px}.nl-progress-copy{display:flex;justify-content:space-between;gap:16px;margin-bottom:9px;color:#53657b;font-size:13px}.nl-progress-copy strong{color:#1b3659}.nl-progress-track{height:6px;overflow:hidden;background:#dfe7ef;border-radius:999px}.nl-progress-value{height:100%;background:linear-gradient(90deg,#00a6d6,#17365d);border-radius:999px}.nl-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:22px}.nl-field{min-width:0;margin:0}.nl-full{grid-column:1/-1}.nl-half{grid-column:span 1}.nl-label{display:block;margin:0 0 8px;color:#162d4b;font-size:15px;font-weight:700;line-height:1.35}.nl-required{color:#b42318}.nl-input{display:block;width:100%;box-sizing:border-box;border:1px solid #cdd8e4;border-radius:11px;background:#fff;padding:12px 13px;color:#14263f;font:inherit;font-size:15px;line-height:1.4;outline:none}.nl-input:focus{border-color:#188eb8;box-shadow:0 0 0 3px rgba(0,166,214,.12)}.nl-textarea{min-height:120px;resize:vertical}.nl-fieldset{border:0;padding:0}.nl-options{display:grid;gap:9px}.nl-option{display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border:1px solid #dce5ee;border-radius:11px;background:#fff;cursor:pointer;line-height:1.45}.nl-option:has(input:checked){border-color:#1692bd;background:#f0faff}.nl-option input,.nl-matrix-option input{accent-color:#0e7fa8;margin-top:3px}.nl-paragraph{padding:16px 18px;background:#f7f9fc;border-left:3px solid #18a6cf;border-radius:4px 11px 11px 4px}.nl-paragraph p{white-space:pre-line;margin:0;color:#44566c;font-size:14.5px;line-height:1.7}.nl-matrix{display:grid;gap:13px}.nl-matrix-row{border:1px solid #dce5ee;border-radius:12px;padding:15px 16px}.nl-matrix-row>legend{padding:0 6px;color:#253b57;font-weight:650}.nl-matrix-options{display:grid;gap:8px;margin-top:7px}.nl-matrix-option{display:flex;gap:9px;align-items:flex-start;color:#354b65}.nl-error{margin-top:20px;padding:12px 14px;border:1px solid #fecaca;border-radius:10px;background:#fff2f2;color:#9b1c1c;font-size:14px}.nl-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:30px;padding-top:22px;border-top:1px solid #e7edf3}.nl-button{min-width:112px;border-radius:10px;padding:12px 19px;font:inherit;font-size:14px;font-weight:750;cursor:pointer}.nl-button-primary{border:0;background:#17365d;color:#fff;box-shadow:0 5px 14px rgba(23,54,93,.17)}.nl-button-primary:hover{background:#0f2d50}.nl-button-primary:disabled{opacity:.55;cursor:not-allowed}.nl-button-secondary{border:1px solid #cbd7e3;background:#fff;color:#29415f}.nl-completion{display:grid;gap:18px}.nl-success{display:flex;gap:15px;align-items:flex-start;padding:21px 22px;border:1px solid #b8e4d1;border-radius:14px;background:#f0fbf6;color:#174b35}.nl-success h2{margin:0 0 5px;font-size:21px}.nl-success p{margin:0;line-height:1.55}.nl-success-icon{display:grid;place-items:center;flex:0 0 auto;width:31px;height:31px;border-radius:999px;background:#1d8c61;color:#fff;font-weight:800}.nl-pending,.nl-all-done,.nl-pending-copy{padding:18px 20px;border:1px solid #dce5ef;border-radius:14px;background:#f8fafc}.nl-pending h3{margin:0 0 5px;color:#17365d}.nl-pending p,.nl-all-done,.nl-pending-copy{color:#53657b;line-height:1.55}.nl-pending p{margin:0 0 14px}.nl-pending-links{display:grid;gap:9px}.nl-pending-links a{display:flex;justify-content:space-between;gap:16px;padding:12px 14px;border:1px solid #cbdbe8;border-radius:10px;background:#fff;color:#17365d;font-weight:700;text-decoration:none}.nl-pending-links a span{color:#0e7fa8;font-size:13px}.nl-all-done,.nl-pending-copy{margin:0}
+@media(max-width:640px){.nl-form-grid{grid-template-columns:1fr}.nl-half,.nl-full{grid-column:1/-1}.nl-actions{margin-top:24px}.nl-button{min-width:100px}.nl-success{padding:17px 16px}.nl-pending-links a{align-items:center}}
 `;
