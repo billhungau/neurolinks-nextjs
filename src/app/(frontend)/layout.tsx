@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import { AnchorOffset } from "@/components/AnchorOffset";
 import { ClinicJsonLd } from "@/components/ClinicJsonLd";
 import { MotionReady } from "@/components/MotionReady";
@@ -93,6 +94,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <ClinicJsonLd />
         <MotionReady />
         {children}
+        <Analytics />
       </body>
     </html>
   );
