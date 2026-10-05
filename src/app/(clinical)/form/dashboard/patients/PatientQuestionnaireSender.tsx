@@ -12,11 +12,11 @@ export type PatientClient = {
 };
 
 type InvitationResponse =
-  | { ok: true; url: string; expiresAt: string; noExpiry?: boolean }
+  | { ok: true; invitationId: string; url: string; expiresAt: string; noExpiry?: boolean }
   | { ok: false; error: string; code?: string };
 
 type QuestionnaireCode = "bdii" | "bai" | "ybocs" | "pss";
-type CreatedLink = { code: QuestionnaireCode; url: string };
+type CreatedLink = { invitationId: string; code: QuestionnaireCode; url: string };
 
 const QUESTIONNAIRES: Array<{ code: QuestionnaireCode; label: string; emailLabel: string }> = [
   { code: "bdii", label: "BDI-II", emailLabel: "Depression questionnaire" },
@@ -56,9 +56,7 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
 
   function toggleQuestionnaire(code: QuestionnaireCode) {
     setSelectedCodes((current) => current.includes(code) ? current.filter((item) => item !== code) : [...current, code]);
-    setCreatedLinks([]);
     setCreationErrors([]);
-    setEmailDraft("");
     setEditingDraft(false);
   }
 
@@ -69,7 +67,6 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
       return;
     }
     setSubmitting(true);
-    setCreatedLinks([]);
     setCreationErrors([]);
     setEmailDraft("");
     setEditingDraft(false);
@@ -86,14 +83,18 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
           body: JSON.stringify({ vcitaUuid: patient.id, questionnaireCode: code, noExpiry: true }),
         });
         const data = (await response.json()) as InvitationResponse;
-        if (data.ok) links.push({ code, url: data.url });
+        if (data.ok) links.push({ invitationId: data.invitationId, code, url: data.url });
         else errors.push(`${questionnaire?.label ?? code}: ${data.error}`);
       } catch {
         errors.push(`${questionnaire?.label ?? code}: Could not create questionnaire link.`);
       }
     }
 
-    setCreatedLinks(links);
+    setCreatedLinks((current) => {
+      const byId = new Map(current.map((link) => [link.invitationId, link] as const));
+      for (const link of links) byId.set(link.invitationId, link);
+      return [...byId.values()];
+    });
     setCreationErrors(errors);
     if (links.length > 0) {
       setEmailDraft(buildEmailDraft(patient, links));
@@ -149,37 +150,29 @@ export function PatientQuestionnaireSender({ patient }: { patient: PatientClient
         </div>
       ) : null}
 
-      {createdLinks.length > 0 ? (
+      {emailDraft ? (
         <section style={{ marginBottom: 18, padding: 18, border: "1px solid #d1fae5", borderRadius: 12, background: "#ecfdf5" }}>
-          <h3 style={{ margin: "0 0 12px" }}>Questionnaire links created</h3>
-          <div style={{ display: "grid", gap: 9 }}>
-            {createdLinks.map((link) => {
-              const questionnaire = QUESTIONNAIRES.find((item) => item.code === link.code);
-              return <div key={link.code} style={{ padding: "10px 12px", background: "#fff", border: "1px solid #d1fae5", borderRadius: 8 }}>
-                <strong>{questionnaire?.label ?? link.code}</strong>
-                <div style={{ overflowWrap: "anywhere", marginTop: 4 }}><a href={link.url}>{link.url}</a></div>
-              </div>;
-            })}
+          <h3 style={{ margin: "0 0 8px" }}>Email draft</h3>
+          <div style={{ marginBottom: 10, fontSize: 14 }}><strong>To:</strong> {patient.email || "No email address in vcita"}<br /><strong>Subject:</strong> Questionnaires before your next appointment</div>
+          {editingDraft ? (
+            <textarea value={emailDraft} onChange={(event) => setEmailDraft(event.target.value)} rows={12} style={{ width: "100%", boxSizing: "border-box", padding: 12, border: "1px solid #d1d5db", borderRadius: 8, font: "inherit", lineHeight: 1.5, background: "#fff" }} />
+          ) : (
+            <div style={{ whiteSpace: "pre-wrap", padding: 14, border: "1px solid #d1d5db", borderRadius: 8, background: "#fff", lineHeight: 1.55 }}>{emailDraft}</div>
+          )}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+            <button type="button" onClick={() => setEditingDraft((value) => !value)} style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 8, background: "#fff", cursor: "pointer", fontWeight: 700 }}>{editingDraft ? "Done editing" : "Edit email"}</button>
+            <button type="button" onClick={() => copyText(emailDraft, "Email copied.")} style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 8, background: "#fff", cursor: "pointer", fontWeight: 700 }}>Copy email</button>
+            {patient.email ? <button type="button" onClick={openEmailApp} style={{ padding: "9px 12px", border: 0, borderRadius: 8, background: "#111827", color: "#fff", cursor: "pointer", fontWeight: 700 }}>Open in email app</button> : null}
           </div>
-          <div style={{ marginTop: 20, paddingTop: 18, borderTop: "1px solid #bbf7d0" }}>
-            <h3 style={{ margin: "0 0 8px" }}>Email draft</h3>
-            <div style={{ marginBottom: 10, fontSize: 14 }}><strong>To:</strong> {patient.email || "No email address in vcita"}<br /><strong>Subject:</strong> Questionnaires before your next appointment</div>
-            {editingDraft ? (
-              <textarea value={emailDraft} onChange={(event) => setEmailDraft(event.target.value)} rows={12} style={{ width: "100%", boxSizing: "border-box", padding: 12, border: "1px solid #d1d5db", borderRadius: 8, font: "inherit", lineHeight: 1.5, background: "#fff" }} />
-            ) : (
-              <div style={{ whiteSpace: "pre-wrap", padding: 14, border: "1px solid #d1d5db", borderRadius: 8, background: "#fff", lineHeight: 1.55 }}>{emailDraft}</div>
-            )}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
-              <button type="button" onClick={() => setEditingDraft((value) => !value)} style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 8, background: "#fff", cursor: "pointer", fontWeight: 700 }}>{editingDraft ? "Done editing" : "Edit email"}</button>
-              <button type="button" onClick={() => copyText(emailDraft, "Email copied.")} style={{ padding: "9px 12px", border: "1px solid #d1d5db", borderRadius: 8, background: "#fff", cursor: "pointer", fontWeight: 700 }}>Copy email</button>
-              {patient.email ? <button type="button" onClick={openEmailApp} style={{ padding: "9px 12px", border: 0, borderRadius: 8, background: "#111827", color: "#fff", cursor: "pointer", fontWeight: 700 }}>Open in email app</button> : null}
-            </div>
-            {copyMessage ? <div aria-live="polite" style={{ marginTop: 8, color: "#166534", fontSize: 14, fontWeight: 700 }}>{copyMessage}</div> : null}
-          </div>
+          {copyMessage ? <div aria-live="polite" style={{ marginTop: 8, color: "#166534", fontSize: 14, fontWeight: 700 }}>{copyMessage}</div> : null}
         </section>
       ) : null}
 
-      <InvitationHistoryPanel vcitaUuid={patient.id} refreshKey={refreshKey} />
+      <InvitationHistoryPanel
+        vcitaUuid={patient.id}
+        refreshKey={refreshKey}
+        recentLinks={createdLinks.map((link) => ({ invitationId: link.invitationId, url: link.url }))}
+      />
     </div>
   );
 }
