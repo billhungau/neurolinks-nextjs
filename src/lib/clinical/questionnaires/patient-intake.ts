@@ -120,16 +120,9 @@ export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
       {
         kind: "text",
         id: "next_of_kin_name",
-        label: "Name of next of kin",
+        label: "Name of next of kin (relationship)",
         required: false,
-        placeholder: "Full name",
-      },
-      {
-        kind: "text",
-        id: "emergency_relationship",
-        label: "Relationship",
-        required: false,
-        placeholder: "Relationship",
+        placeholder: "e.g. Jane Smith (spouse)",
       },
       {
         kind: "text",
