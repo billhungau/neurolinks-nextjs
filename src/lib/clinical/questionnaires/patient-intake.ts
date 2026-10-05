@@ -6,32 +6,25 @@ function option(id: string, label: string) {
 
 export const PATIENT_INTAKE_CODE = "intake";
 export const PATIENT_INTAKE_NAME = "Patient Intake Form";
+export const PATIENT_INTAKE_SCHEMA_REVISION = 2;
 
 export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
   return {
     source: "native",
     title: PATIENT_INTAKE_NAME,
     patientFacingName: "Patient intake form",
-    description:
-      "Please complete this form before your appointment. The secure link already identifies your NeuroLinks record, so your name is not requested here.",
+    description: "Please complete this form before your appointment.",
     fields: [
-      {
-        kind: "paragraph",
-        id: "intake_privacy_notice",
-        text:
-          "Please provide the requested health and contact information. Your name is intentionally not requested because this secure link is already associated with your NeuroLinks record.",
-      },
       {
         kind: "text",
         id: "date_of_birth",
-        label: "Date of Birth",
+        label: "Date of birth",
         required: true,
-        placeholder: "YYYY-MM-DD",
       },
       {
         kind: "text",
         id: "phn",
-        label: "Healthcard Number (PHN)",
+        label: "Personal Health Number (PHN)",
         required: true,
         placeholder: "10-digit BC Personal Health Number",
       },
@@ -78,22 +71,37 @@ export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
       {
         kind: "text",
         id: "email",
-        label: "E-mail",
+        label: "Email",
         required: false,
         placeholder: "Email address",
       },
       {
         kind: "text",
         id: "contact_number",
-        label: "Contact number",
+        label: "Phone number",
         required: false,
         placeholder: "Phone number",
       },
       {
-        kind: "textarea",
-        id: "address",
-        label: "Address",
+        kind: "text",
+        id: "address_line1",
+        label: "Address line 1",
         required: false,
+        placeholder: "Street address",
+      },
+      {
+        kind: "text",
+        id: "address_line2",
+        label: "Address line 2",
+        required: false,
+        placeholder: "Apartment, suite, unit, etc. (optional)",
+      },
+      {
+        kind: "text",
+        id: "city",
+        label: "City",
+        required: false,
+        placeholder: "City",
       },
       {
         kind: "text",
@@ -104,22 +112,29 @@ export function patientIntakeNativeSchema(): NativeQuestionnaireSchema {
       },
       {
         kind: "text",
+        id: "postal_code",
+        label: "Postal code",
+        required: false,
+        placeholder: "A1A 1A1",
+      },
+      {
+        kind: "text",
         id: "next_of_kin_name",
-        label: "Next of kin / emergency contact name",
+        label: "Name of next of kin",
         required: false,
         placeholder: "Full name",
       },
       {
         kind: "text",
         id: "emergency_relationship",
-        label: "Relationship to next of kin / emergency contact",
+        label: "Relationship",
         required: false,
         placeholder: "Relationship",
       },
       {
         kind: "text",
         id: "emergency_phone",
-        label: "Next of kin / emergency contact phone number",
+        label: "Next of kin contact number",
         required: false,
         placeholder: "Phone number",
       },
