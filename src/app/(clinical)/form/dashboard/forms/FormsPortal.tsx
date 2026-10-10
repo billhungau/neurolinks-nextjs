@@ -23,7 +23,7 @@ const DESCRIPTIONS: Record<string, string> = {
   pss: "PTSD symptom questionnaire",
   intake: "Patient demographics, health history, PHN and intake information",
 };
-const CURRENT_INTAKE_SCHEMA_REVISION = 4;
+const CURRENT_INTAKE_SCHEMA_REVISION = 5;
 
 export function FormsPortal() {
   const [forms, setForms] = useState<FormRow[]>([]);
