@@ -1,7 +1,10 @@
+import type { SignatureStrokeData } from "@/lib/clinical/signature-strokes";
+
 type PdfItem = {
   label: string;
   answer: string;
   score: number | null;
+  signature?: SignatureStrokeData | null;
 };
 
 export type QuestionnairePdfInput = {
@@ -38,15 +41,9 @@ function wrap(value: string, max = 92) {
   const lines: string[] = [];
   let line = "";
   for (const word of words) {
-    if (!line) {
-      line = word;
-      continue;
-    }
-    if (`${line} ${word}`.length <= max) line += ` ${word}`;
-    else {
-      lines.push(line);
-      line = word;
-    }
+    if (!line) line = word;
+    else if (`${line} ${word}`.length <= max) line += ` ${word}`;
+    else { lines.push(line); line = word; }
   }
   if (line) lines.push(line);
   return lines;
@@ -58,6 +55,23 @@ function text(font: "F1" | "F2", size: number, x: number, y: number, value: stri
 
 function line(x1: number, y1: number, x2: number, y2: number, gray = 0.86) {
   return `${gray} G 0.7 w ${x1} ${y1} m ${x2} ${y2} l S 0 G`;
+}
+
+function signatureCommands(signature: SignatureStrokeData, x: number, topY: number, width = 360, height = 82) {
+  const out: string[] = [];
+  out.push(`0 G 1.15 w 1 J 1 j`);
+  for (const stroke of signature.strokes) {
+    if (!stroke.length) continue;
+    const first = stroke[0];
+    out.push(`${(x + first.x * width).toFixed(2)} ${(topY - first.y * height).toFixed(2)} m`);
+    for (let index = 1; index < stroke.length; index += 1) {
+      const point = stroke[index];
+      out.push(`${(x + point.x * width).toFixed(2)} ${(topY - point.y * height).toFixed(2)} l`);
+    }
+    if (stroke.length > 1) out.push("S");
+  }
+  out.push("0 G");
+  return out.join("\n");
 }
 
 function pageStream(input: QuestionnairePdfInput, pageItems: PdfItem[], pageNumber: number, pageCount: number, startIndex: number) {
@@ -89,16 +103,22 @@ function pageStream(input: QuestionnairePdfInput, pageItems: PdfItem[], pageNumb
 
   pageItems.forEach((item, localIndex) => {
     const itemNo = startIndex + localIndex + 1;
-    const labelLines = wrap(`${itemNo}. ${item.label}`, 78);
-    for (const label of labelLines) {
+    for (const label of wrap(`${itemNo}. ${item.label}`, 78)) {
       out.push(text("F2", 9.5, 48, y, label));
       y -= 13;
     }
-    const answerLines = wrap(item.answer || "-", 88);
-    for (const answer of answerLines) {
-      out.push(text("F1", 9, 58, y, answer));
-      y -= 12;
+
+    if (item.signature) {
+      out.push(line(58, y - 86, 430, y - 86, 0.9));
+      out.push(signatureCommands(item.signature, 62, y - 3));
+      y -= 94;
+    } else {
+      for (const answer of wrap(item.answer || "-", 88)) {
+        out.push(text("F1", 9, 58, y, answer));
+        y -= 12;
+      }
     }
+
     if (item.score !== null) {
       out.push(text("F2", 8.5, 58, y, `Item score: ${item.score}`));
       y -= 11;
@@ -120,7 +140,9 @@ function paginate(input: QuestionnairePdfInput) {
 
   for (let i = 0; i < input.items.length; i += 1) {
     const item = input.items[i];
-    const units = Math.max(3, wrap(item.label, 78).length + wrap(item.answer, 88).length + (item.score === null ? 0 : 1) + 1);
+    const units = item.signature
+      ? 11
+      : Math.max(3, wrap(item.label, 78).length + wrap(item.answer, 88).length + (item.score === null ? 0 : 1) + 1);
     if (current.length && currentUnits + units > 43) {
       pages.push({ items: current, startIndex });
       startIndex += current.length;
@@ -137,8 +159,6 @@ function paginate(input: QuestionnairePdfInput) {
 export function buildQuestionnairePdf(input: QuestionnairePdfInput): Uint8Array {
   const pages = paginate(input);
   const objects: string[] = [];
-
-  // 1 catalog, 2 pages root, 3 regular font, 4 bold font
   objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
   objects[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
   objects[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>";
@@ -163,9 +183,7 @@ export function buildQuestionnairePdf(input: QuestionnairePdfInput): Uint8Array 
   }
   const xref = Buffer.byteLength(pdf, "ascii");
   pdf += `xref\n0 ${objects.length}\n0000000000 65535 f \n`;
-  for (let i = 1; i < objects.length; i += 1) {
-    pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
-  }
+  for (let i = 1; i < objects.length; i += 1) pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
   pdf += `trailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
   return new Uint8Array(Buffer.from(pdf, "ascii"));
 }
