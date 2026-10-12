@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getClinicianSession } from "@/lib/clinical/auth";
-import { FormBuilder } from "./FormBuilder";
+import { FormBuilderV2 } from "./FormBuilderV2";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export default async function FormEditorPage({ params }: Props) {
             <div style={{ marginTop: "7px", fontSize: "12px", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", color: "#8b95a5" }}>NeuroLinks Form Builder</div>
           </div>
         </header>
-        <FormBuilder formId={id} />
+        <FormBuilderV2 formId={id} />
       </div>
     </main>
   );
