@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 50;
 const VCITA_CONCURRENCY = 8;
-const LABELS: Record<string, string> = { bdii: "BDI-II", bai: "BAI", ybocs: "Y-BOCS", pss: "PSS" };
+const LABELS: Record<string, string> = { bdii: "BDI-II", bai: "BAI", ybocs: "Y-BOCS", pss: "PSS", "tms-consent": "TMS Consent Form" };
 
 type QuestionnaireRow = { id: string; name: string };
 type AssessmentRow = {
@@ -55,6 +55,7 @@ export default async function QuestionnaireSubmissionsPage({
   const { code: rawCode } = await params;
   const { page: rawPage } = await searchParams;
   const code = rawCode.toLowerCase();
+  const isConsent = code === "tms-consent";
   const page = Math.max(1, Number.parseInt(rawPage ?? "1", 10) || 1);
   const offset = (page - 1) * PAGE_SIZE;
 
@@ -112,12 +113,12 @@ export default async function QuestionnaireSubmissionsPage({
     <main style={{ minHeight: "100vh", padding: "28px 24px", background: "#f8fafc" }}>
       <div style={{ maxWidth: 1120, margin: "0 auto" }}>
         <header style={{ marginBottom: 22 }}>
-          <Link href="/form/dashboard/forms/" style={{ color: "#334155", textDecoration: "none", fontSize: 14 }}>← Back to forms</Link>
+          <Link href="/form/dashboard/forms/submissions/" style={{ color: "#334155", textDecoration: "none", fontSize: 14 }}>← Back to submissions</Link>
           <div style={{ marginTop: 16, display: "flex", justifyContent: "space-between", alignItems: "end", gap: 16, flexWrap: "wrap" }}>
             <div>
               <p style={{ margin: "0 0 5px", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", color: "#64748b" }}>NeuroLinks Admin</p>
               <h1 style={{ margin: 0, fontSize: 30 }}>{questionnaireName} submissions</h1>
-              <p style={{ margin: "7px 0 0", color: "#64748b" }}>Newest first · 50 submissions per page</p>
+              <p style={{ margin: "7px 0 0", color: "#64748b" }}>{isConsent ? "Signed consent submissions" : "Newest first"} · 50 submissions per page</p>
             </div>
             <div style={{ fontSize: 14, color: "#475569", background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: "8px 12px" }}>Page {page}</div>
           </div>
@@ -127,7 +128,7 @@ export default async function QuestionnaireSubmissionsPage({
           {rows.length === 0 ? (
             <div style={{ padding: 28, color: "#64748b" }}>No submissions on this page.</div>
           ) : (
-            <SubmissionTableClient code={code} rows={rows} />
+            <SubmissionTableClient code={code} rows={rows} mode={isConsent ? "consent" : "questionnaire"} />
           )}
         </section>
 
