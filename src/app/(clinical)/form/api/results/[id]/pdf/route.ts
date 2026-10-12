@@ -1,4 +1,5 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
+import { buildConsentPdf } from "@/lib/clinical/consent-pdf";
 import { subjectKeyFromVcitaUuid } from "@/lib/clinical/pseudonym";
 import { BDI2_ITEMS, getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
 import type { ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
@@ -123,23 +124,34 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     const clients = await listAllVcitaClients();
     const client = clients.find((candidate) => subjectKeyFromVcitaUuid(candidate.id) === assessment.subject_key) ?? null;
     const patientName = client ? [client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client" : "Patient not matched in vcita";
-
-    let items: Item[] = [];
-    if (questionnaire.code === "bdii") items = bdiItems(assessment.answers);
-    else if (questionnaire.metadata?.native_schema) items = nativeItems(questionnaire.metadata.native_schema, assessment.answers);
-    else if (questionnaire.metadata?.schema) items = importedItems(questionnaire.metadata.schema, assessment.answers, questionnaire.code);
-
     const submitted = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Vancouver" }).format(new Date(assessment.submitted_at));
-    const bytes = buildQuestionnairePdf({ patientName, patientEmail: client?.email ?? null, questionnaireName: questionnaire.name, questionnaireCode: questionnaire.code, submittedAt: submitted, totalScore: assessment.total_score, severity: assessment.severity, obsessionScore: typeof assessment.clinical_flags?.obsession_score === "number" ? assessment.clinical_flags.obsession_score : null, compulsionScore: typeof assessment.clinical_flags?.compulsion_score === "number" ? assessment.clinical_flags.compulsion_score : null, items });
 
-    await clinicalSupabaseRequest<unknown>("audit_events", { method: "POST", prefer: "return=minimal", body: JSON.stringify({ event_type: "RESULT_PDF_DOWNLOADED", subject_key: assessment.subject_key, assessment_id: assessment.id, metadata: { questionnaire_code: questionnaire.code, clinician_user_id: clinician.id } }) });
+    let bytes: Uint8Array;
+    if (questionnaire.code === "tms-consent" && questionnaire.metadata?.native_schema) {
+      bytes = buildConsentPdf({
+        patientName,
+        patientEmail: client?.email ?? null,
+        submittedAt: submitted,
+        schema: questionnaire.metadata.native_schema,
+        answers: assessment.answers,
+      });
+    } else {
+      let items: Item[] = [];
+      if (questionnaire.code === "bdii") items = bdiItems(assessment.answers);
+      else if (questionnaire.metadata?.native_schema) items = nativeItems(questionnaire.metadata.native_schema, assessment.answers);
+      else if (questionnaire.metadata?.schema) items = importedItems(questionnaire.metadata.schema, assessment.answers, questionnaire.code);
+
+      bytes = buildQuestionnairePdf({ patientName, patientEmail: client?.email ?? null, questionnaireName: questionnaire.name, questionnaireCode: questionnaire.code, submittedAt: submitted, totalScore: assessment.total_score, severity: assessment.severity, obsessionScore: typeof assessment.clinical_flags?.obsession_score === "number" ? assessment.clinical_flags.obsession_score : null, compulsionScore: typeof assessment.clinical_flags?.compulsion_score === "number" ? assessment.clinical_flags.compulsion_score : null, items });
+    }
+
+    await clinicalSupabaseRequest<unknown>("audit_events", { method: "POST", prefer: "return=minimal", body: JSON.stringify({ event_type: "RESULT_PDF_PREVIEWED", subject_key: assessment.subject_key, assessment_id: assessment.id, metadata: { questionnaire_code: questionnaire.code, clinician_user_id: clinician.id } }) });
 
     const date = assessment.submitted_at.slice(0, 10);
     const filename = `${filePart(patientName)}-${filePart(questionnaire.code.toUpperCase())}-${date}.pdf`;
     const body = new ArrayBuffer(bytes.byteLength);
     new Uint8Array(body).set(bytes);
-    return new Response(body, { status: 200, headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="${filename}"`, "Cache-Control": "no-store, private", "X-Content-Type-Options": "nosniff" } });
+    return new Response(body, { status: 200, headers: { "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="${filename}"`, "Cache-Control": "no-store, private", "X-Content-Type-Options": "nosniff" } });
   } catch {
-    return Response.json({ ok: false, error: "Could not generate this questionnaire PDF." }, { status: 500, headers: { "Cache-Control": "no-store, private" } });
+    return Response.json({ ok: false, error: "Could not generate this PDF." }, { status: 500, headers: { "Cache-Control": "no-store, private" } });
   }
 }
