@@ -15,15 +15,24 @@ type FormRow = {
 
 type ListResponse = { ok: true; forms: FormRow[] } | { ok: false; error: string };
 
-const LABELS: Record<string, string> = { bdii: "BDI-II", bai: "BAI", ybocs: "Y-BOCS", pss: "PSS", intake: "Patient Intake" };
+const LABELS: Record<string, string> = {
+  bdii: "BDI-II",
+  bai: "BAI",
+  ybocs: "Y-BOCS",
+  pss: "PSS",
+  intake: "Patient Intake",
+  "tms-consent": "TMS Consent",
+};
 const DESCRIPTIONS: Record<string, string> = {
   bdii: "Depression questionnaire",
   bai: "Anxiety questionnaire",
   ybocs: "Obsessive-compulsive symptoms",
   pss: "PTSD symptom questionnaire",
   intake: "Patient demographics, health history, PHN and intake information",
+  "tms-consent": "Repetitive Transcranial Magnetic Stimulation treatment consent",
 };
 const CURRENT_INTAKE_SCHEMA_REVISION = 5;
+const CURRENT_TMS_CONSENT_SCHEMA_REVISION = 1;
 
 export function FormsPortal() {
   const [forms, setForms] = useState<FormRow[]>([]);
@@ -36,6 +45,7 @@ export function FormsPortal() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const intakeBootstrapAttemptedRef = useRef(false);
+  const tmsConsentBootstrapAttemptedRef = useRef(false);
 
   async function load() {
     setLoading(true);
@@ -74,6 +84,30 @@ export function FormsPortal() {
         await load();
       } catch {
         setError("Could not update Patient Intake form.");
+      }
+    })();
+  }, [loading, forms]);
+
+  useEffect(() => {
+    const hasCurrentTmsConsent = forms.some(
+      (form) =>
+        form.code === "tms-consent" &&
+        form.metadata?.builder_deleted !== true &&
+        Number(form.metadata?.tms_consent_schema_revision ?? 0) >= CURRENT_TMS_CONSENT_SCHEMA_REVISION,
+    );
+    if (loading || tmsConsentBootstrapAttemptedRef.current || hasCurrentTmsConsent) return;
+    tmsConsentBootstrapAttemptedRef.current = true;
+    void (async () => {
+      try {
+        const response = await fetch("/form/api/forms/import-tms-consent/", { method: "POST" });
+        const data = await response.json() as { ok?: boolean; error?: string };
+        if (!data.ok) {
+          setError(data.error ?? "Could not create TMS Consent form.");
+          return;
+        }
+        await load();
+      } catch {
+        setError("Could not create TMS Consent form.");
       }
     })();
   }, [loading, forms]);
