@@ -142,7 +142,7 @@ function consentAnswer(field: Exclude<NativeField, { kind: "paragraph" | "pagebr
   if (field.kind === "matrix") {
     return field.rows.map((row) => {
       const selected = String(answers[`${field.id}:${row.id}`] ?? "");
-      return `${row.label}: ${field.columns.find((option) => option.id === selected)?.label ?? selected || "—"}`;
+      return `${row.label}: ${field.columns.find((option) => option.id === selected)?.label ?? (selected || "—")}`;
     }).join("\n");
   }
   return String(answers[field.id] ?? "").trim();
@@ -223,7 +223,7 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
             <h1 style={{ margin: 0, fontSize: 30 }}>{LABELS[code] ?? questionnaire.name} submission</h1>
             <p style={{ margin: "8px 0 0", color: "#64748b" }}>{patientName} · {formatSubmittedAt(assessment.submitted_at)}</p>
           </div>
-          <a href={`/form/api/results/${encodeURIComponent(assessment.id)}/pdf/`} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 14px", borderRadius: 9, background: "#111827", color: "#fff", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>{isConsent ? "Preview PDF" : "Preview PDF"}</a>
+          <a href={`/form/api/results/${encodeURIComponent(assessment.id)}/pdf/`} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 14px", borderRadius: 9, background: "#111827", color: "#fff", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>Preview PDF</a>
         </header>
 
         {isConsent ? (
