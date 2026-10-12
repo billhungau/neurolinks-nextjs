@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import type { NativeField, NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
 
 type SubmitResponse =
@@ -15,7 +15,8 @@ type PendingResponse =
 const HALF_WIDTH_IDS = new Set([
   "date_of_birth", "phn", "email", "contact_number", "city", "province",
   "postal_code", "next_of_kin_name", "emergency_phone", "family_doctor",
-  "family_doctor_phone", "referred_by",
+  "family_doctor_phone", "referred_by", "consent_date", "patient_first_name",
+  "patient_last_name", "physician_name",
 ]);
 
 const FULL_WIDTH_TEXT_IDS = new Set(["address_line1", "address_line2"]);
@@ -42,7 +43,7 @@ function splitPages(fields: NativeField[]) {
 }
 
 function inputType(fieldId: string) {
-  if (fieldId === "date_of_birth") return "date";
+  if (fieldId === "date_of_birth" || fieldId === "consent_date") return "date";
   if (fieldId === "email") return "email";
   if (["contact_number", "emergency_phone", "family_doctor_phone"].includes(fieldId)) return "tel";
   return "text";
@@ -56,7 +57,7 @@ function autocomplete(fieldId: string) {
   const values: Record<string, string> = {
     email: "email", contact_number: "tel", address_line1: "address-line1",
     address_line2: "address-line2", city: "address-level2", province: "address-level1",
-    postal_code: "postal-code",
+    postal_code: "postal-code", patient_first_name: "given-name", patient_last_name: "family-name",
   };
   return values[fieldId];
 }
@@ -67,6 +68,93 @@ function fieldSpan(field: NativeField) {
   return HALF_WIDTH_IDS.has(field.id) ? "half" : "full";
 }
 
+function SignaturePad({ field }: { field: Extract<NativeField, { kind: "textarea" }> }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const drawingRef = useRef(false);
+  const [value, setValue] = useState("");
+
+  function position(event: ReactPointerEvent<HTMLCanvasElement>) {
+    const canvas = event.currentTarget;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (event.clientX - rect.left) * (canvas.width / rect.width),
+      y: (event.clientY - rect.top) * (canvas.height / rect.height),
+    };
+  }
+
+  function start(event: ReactPointerEvent<HTMLCanvasElement>) {
+    event.preventDefault();
+    const canvas = event.currentTarget;
+    canvas.setPointerCapture(event.pointerId);
+    const point = position(event);
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    context.lineWidth = 2.4;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.beginPath();
+    context.moveTo(point.x, point.y);
+    drawingRef.current = true;
+  }
+
+  function move(event: ReactPointerEvent<HTMLCanvasElement>) {
+    if (!drawingRef.current) return;
+    event.preventDefault();
+    const point = position(event);
+    const context = event.currentTarget.getContext("2d");
+    if (!context) return;
+    context.lineTo(point.x, point.y);
+    context.stroke();
+  }
+
+  function finish(event: ReactPointerEvent<HTMLCanvasElement>) {
+    if (!drawingRef.current) return;
+    drawingRef.current = false;
+    try { event.currentTarget.releasePointerCapture(event.pointerId); } catch {}
+    setValue(event.currentTarget.toDataURL("image/png"));
+  }
+
+  function clear() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+    setValue("");
+  }
+
+  return (
+    <div className="nl-field nl-full nl-signature-field">
+      <div className="nl-signature-head">
+        <span className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</span>
+        <button type="button" className="nl-signature-clear" onClick={clear}>Clear</button>
+      </div>
+      <canvas
+        ref={canvasRef}
+        className="nl-signature-canvas"
+        width={800}
+        height={180}
+        tabIndex={0}
+        aria-label="Signature pad"
+        data-signature-canvas={field.id}
+        onPointerDown={start}
+        onPointerMove={move}
+        onPointerUp={finish}
+        onPointerCancel={finish}
+      />
+      <p className="nl-signature-help">Sign above using your mouse, finger, or stylus.</p>
+      <input
+        className="nl-signature-value"
+        type="text"
+        name={field.id}
+        value={value}
+        readOnly
+        required={field.required}
+        data-signature-value="true"
+        aria-label={`${field.label} captured value`}
+      />
+    </div>
+  );
+}
+
 export function NativeQuestionnaireForm({ token, schema }: { token: string; schema: NativeQuestionnaireSchema }) {
   const [pageIndex, setPageIndex] = useState(0);
   const [result, setResult] = useState<SubmitResponse | null>(null);
@@ -75,6 +163,7 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
   const pages = useMemo(() => splitPages(schema.fields), [schema.fields]);
   const pageCount = Math.max(1, pages.length);
   const isIntake = schema.patientFacingName.toLowerCase().includes("intake");
+  const isTmsConsent = schema.patientFacingName.toLowerCase().includes("tms consent");
   const today = new Date().toISOString().slice(0, 10);
 
   function validatePage(form: HTMLFormElement, index: number) {
@@ -86,9 +175,16 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
         const digits = control.value.replace(/\D/g, "");
         control.setCustomValidity(digits.length === 10 ? "" : "Please enter a valid 10-digit BC Personal Health Number.");
       }
+      if (control instanceof HTMLInputElement && control.dataset.signatureValue === "true") {
+        control.setCustomValidity(control.value ? "" : "Please provide your signature.");
+      }
       if (!control.checkValidity()) {
         control.reportValidity();
-        control.focus();
+        if (control instanceof HTMLInputElement && control.dataset.signatureValue === "true") {
+          page?.querySelector<HTMLCanvasElement>(`[data-signature-canvas="${control.name}"]`)?.focus();
+        } else {
+          control.focus();
+        }
         return false;
       }
     }
@@ -174,7 +270,7 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
       <div className="nl-completion" role="status">
         <div className="nl-success">
           <div className="nl-success-icon">✓</div>
-          <div><h2>{isIntake ? "Intake form submitted" : "Questionnaire submitted"}</h2><p>Thank you. Your responses have been submitted.</p></div>
+          <div><h2>{isIntake ? "Intake form submitted" : isTmsConsent ? "TMS consent submitted" : "Questionnaire submitted"}</h2><p>Thank you. Your responses have been submitted.</p></div>
         </div>
         {pending === null ? <p className="nl-pending-copy">Checking for other forms…</p> : pending.length > 0 ? (
           <div className="nl-pending">
@@ -220,10 +316,12 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
         <span className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</span>
         <input className="nl-input" type={inputType(field.id)} name={field.id} required={field.required}
           placeholder={field.placeholder} inputMode={inputMode(field.id)} autoComplete={autocomplete(field.id)}
-          max={field.id === "date_of_birth" ? today : undefined}
+          max={field.id === "date_of_birth" || field.id === "consent_date" ? today : undefined}
           onInput={field.id === "phn" ? (event) => event.currentTarget.setCustomValidity("") : undefined} />
       </label>
     );
+
+    if (field.kind === "textarea" && field.id === "patient_signature") return <SignaturePad key={field.id} field={field} />;
 
     if (field.kind === "textarea") return (
       <label key={field.id} className="nl-field nl-full">
@@ -263,7 +361,7 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
       {result && !result.ok ? <div role="alert" className="nl-error">{result.error}</div> : null}
       <div className="nl-actions">
         {pageIndex > 0 ? <button className="nl-button nl-button-secondary" type="button" onClick={() => { setPageIndex((value) => value - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Previous</button> : <span />}
-        {pageIndex < pageCount - 1 ? <button className="nl-button nl-button-primary" type="button" onClick={(event) => { const form = event.currentTarget.form!; if (validatePage(form, pageIndex)) { setPageIndex((value) => value + 1); window.scrollTo({ top: 0, behavior: "smooth" }); } }}>Continue</button> : <button className="nl-button nl-button-primary" type="submit" disabled={submitting}>{submitting ? "Submitting…" : isIntake ? "Submit intake form" : "Submit questionnaire"}</button>}
+        {pageIndex < pageCount - 1 ? <button className="nl-button nl-button-primary" type="button" onClick={(event) => { const form = event.currentTarget.form!; if (validatePage(form, pageIndex)) { setPageIndex((value) => value + 1); window.scrollTo({ top: 0, behavior: "smooth" }); } }}>Continue</button> : <button className="nl-button nl-button-primary" type="submit" disabled={submitting}>{submitting ? "Submitting…" : isIntake ? "Submit intake form" : isTmsConsent ? "Submit consent" : "Submit questionnaire"}</button>}
       </div>
       <style jsx>{nativeStyles}</style>
     </form>
@@ -271,6 +369,6 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
 }
 
 const nativeStyles = `
-.nl-native-form{color:#152a46}.nl-description{margin:-8px auto 25px;max-width:650px;text-align:center;color:#607086;font-size:15px;line-height:1.6}.nl-progress{margin:0 0 29px;padding:14px 16px;background:#f6f9fc;border:1px solid #e1e9f1;border-radius:13px}.nl-progress-copy{display:flex;justify-content:space-between;gap:16px;margin-bottom:9px;color:#53657b;font-size:13px}.nl-progress-copy strong{color:#1b3659}.nl-progress-track{height:6px;overflow:hidden;background:#dfe7ef;border-radius:999px}.nl-progress-value{height:100%;background:linear-gradient(90deg,#00a6d6,#17365d);border-radius:999px}.nl-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:22px}.nl-field{min-width:0;margin:0}.nl-full{grid-column:1/-1}.nl-half{grid-column:span 1}.nl-label{display:block;margin:0 0 8px;color:#162d4b;font-size:15px;font-weight:700;line-height:1.35}.nl-required{color:#b42318}.nl-input{display:block;width:100%;box-sizing:border-box;border:1px solid #cdd8e4;border-radius:11px;background:#fff;padding:12px 13px;color:#14263f;font:inherit;font-size:15px;line-height:1.4;outline:none}.nl-input:focus{border-color:#188eb8;box-shadow:0 0 0 3px rgba(0,166,214,.12)}.nl-textarea{min-height:120px;resize:vertical}.nl-fieldset{border:0;padding:0}.nl-options{display:grid;gap:9px}.nl-option{display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border:1px solid #dce5ee;border-radius:11px;background:#fff;cursor:pointer;line-height:1.45}.nl-option:has(input:checked){border-color:#1692bd;background:#f0faff}.nl-option input,.nl-matrix-option input{accent-color:#0e7fa8;margin-top:3px}.nl-paragraph{padding:16px 18px;background:#f7f9fc;border-left:3px solid #18a6cf;border-radius:4px 11px 11px 4px}.nl-paragraph p{white-space:pre-line;margin:0;color:#44566c;font-size:14.5px;line-height:1.7}.nl-policy-scroll{box-sizing:border-box;max-height:240px;overflow-y:auto;border:1px solid #d8e2ec;border-left:3px solid #18a6cf;scrollbar-gutter:stable;overscroll-behavior:contain}.nl-policy-scroll:focus{outline:2px solid #188eb8;outline-offset:2px}.nl-matrix{display:grid;gap:13px}.nl-matrix-row{border:1px solid #dce5ee;border-radius:12px;padding:15px 16px}.nl-matrix-row>legend{padding:0 6px;color:#253b57;font-weight:650}.nl-matrix-options{display:grid;gap:8px;margin-top:7px}.nl-matrix-option{display:flex;gap:9px;align-items:flex-start;color:#354b65}.nl-error{margin-top:20px;padding:12px 14px;border:1px solid #fecaca;border-radius:10px;background:#fff2f2;color:#9b1c1c;font-size:14px}.nl-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:30px;padding-top:22px;border-top:1px solid #e7edf3}.nl-button{min-width:112px;border-radius:10px;padding:12px 19px;font:inherit;font-size:14px;font-weight:750;cursor:pointer}.nl-button-primary{border:0;background:#17365d;color:#fff;box-shadow:0 5px 14px rgba(23,54,93,.17)}.nl-button-primary:hover{background:#0f2d50}.nl-button-primary:disabled{opacity:.55;cursor:not-allowed}.nl-button-secondary{border:1px solid #cbd7e3;background:#fff;color:#29415f}.nl-completion{display:grid;gap:18px}.nl-success{display:flex;gap:15px;align-items:flex-start;padding:21px 22px;border:1px solid #b8e4d1;border-radius:14px;background:#f0fbf6;color:#174b35}.nl-success h2{margin:0 0 5px;font-size:21px}.nl-success p{margin:0;line-height:1.55}.nl-success-icon{display:grid;place-items:center;flex:0 0 auto;width:31px;height:31px;border-radius:999px;background:#1d8c61;color:#fff;font-weight:800}.nl-pending,.nl-all-done,.nl-pending-copy{padding:18px 20px;border:1px solid #dce5ef;border-radius:14px;background:#f8fafc}.nl-pending h3{margin:0 0 5px;color:#17365d}.nl-pending p,.nl-all-done,.nl-pending-copy{color:#53657b;line-height:1.55}.nl-pending p{margin:0 0 14px}.nl-pending-links{display:grid;gap:9px}.nl-pending-links a{display:flex;justify-content:space-between;gap:16px;padding:12px 14px;border:1px solid #cbdbe8;border-radius:10px;background:#fff;color:#17365d;font-weight:700;text-decoration:none}.nl-pending-links a span{color:#0e7fa8;font-size:13px}.nl-all-done,.nl-pending-copy{margin:0}
-@media(max-width:640px){.nl-form-grid{grid-template-columns:1fr}.nl-half,.nl-full{grid-column:1/-1}.nl-actions{margin-top:24px}.nl-button{min-width:100px}.nl-success{padding:17px 16px}.nl-pending-links a{align-items:center}.nl-policy-scroll{max-height:220px}}
+.nl-native-form{color:#152a46}.nl-description{margin:-8px auto 25px;max-width:650px;text-align:center;color:#607086;font-size:15px;line-height:1.6}.nl-progress{margin:0 0 29px;padding:14px 16px;background:#f6f9fc;border:1px solid #e1e9f1;border-radius:13px}.nl-progress-copy{display:flex;justify-content:space-between;gap:16px;margin-bottom:9px;color:#53657b;font-size:13px}.nl-progress-copy strong{color:#1b3659}.nl-progress-track{height:6px;overflow:hidden;background:#dfe7ef;border-radius:999px}.nl-progress-value{height:100%;background:linear-gradient(90deg,#00a6d6,#17365d);border-radius:999px}.nl-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:22px}.nl-field{min-width:0;margin:0}.nl-full{grid-column:1/-1}.nl-half{grid-column:span 1}.nl-label{display:block;margin:0 0 8px;color:#162d4b;font-size:15px;font-weight:700;line-height:1.35}.nl-required{color:#b42318}.nl-input{display:block;width:100%;box-sizing:border-box;border:1px solid #cdd8e4;border-radius:11px;background:#fff;padding:12px 13px;color:#14263f;font:inherit;font-size:15px;line-height:1.4;outline:none}.nl-input:focus{border-color:#188eb8;box-shadow:0 0 0 3px rgba(0,166,214,.12)}.nl-textarea{min-height:120px;resize:vertical}.nl-fieldset{border:0;padding:0}.nl-options{display:grid;gap:9px}.nl-option{display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border:1px solid #dce5ee;border-radius:11px;background:#fff;cursor:pointer;line-height:1.45}.nl-option:has(input:checked){border-color:#1692bd;background:#f0faff}.nl-option input,.nl-matrix-option input{accent-color:#0e7fa8;margin-top:3px}.nl-paragraph{padding:16px 18px;background:#f7f9fc;border-left:3px solid #18a6cf;border-radius:4px 11px 11px 4px}.nl-paragraph p{white-space:pre-line;margin:0;color:#44566c;font-size:14.5px;line-height:1.7}.nl-policy-scroll{box-sizing:border-box;max-height:240px;overflow-y:auto;border:1px solid #d8e2ec;border-left:3px solid #18a6cf;scrollbar-gutter:stable;overscroll-behavior:contain}.nl-policy-scroll:focus{outline:2px solid #188eb8;outline-offset:2px}.nl-signature-field{position:relative}.nl-signature-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.nl-signature-clear{border:0;background:transparent;color:#0e7fa8;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.nl-signature-canvas{display:block;width:100%;height:180px;box-sizing:border-box;border:1px solid #cdd8e4;border-radius:11px;background:#fff;touch-action:none;cursor:crosshair}.nl-signature-canvas:focus{border-color:#188eb8;box-shadow:0 0 0 3px rgba(0,166,214,.12);outline:none}.nl-signature-help{margin:7px 0 0;color:#64748b;font-size:12.5px}.nl-signature-value{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:0;bottom:0;padding:0!important;border:0!important}.nl-matrix{display:grid;gap:13px}.nl-matrix-row{border:1px solid #dce5ee;border-radius:12px;padding:15px 16px}.nl-matrix-row>legend{padding:0 6px;color:#253b57;font-weight:650}.nl-matrix-options{display:grid;gap:8px;margin-top:7px}.nl-matrix-option{display:flex;gap:9px;align-items:flex-start;color:#354b65}.nl-error{margin-top:20px;padding:12px 14px;border:1px solid #fecaca;border-radius:10px;background:#fff2f2;color:#9b1c1c;font-size:14px}.nl-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:30px;padding-top:22px;border-top:1px solid #e7edf3}.nl-button{min-width:112px;border-radius:10px;padding:12px 19px;font:inherit;font-size:14px;font-weight:750;cursor:pointer}.nl-button-primary{border:0;background:#17365d;color:#fff;box-shadow:0 5px 14px rgba(23,54,93,.17)}.nl-button-primary:hover{background:#0f2d50}.nl-button-primary:disabled{opacity:.55;cursor:not-allowed}.nl-button-secondary{border:1px solid #cbd7e3;background:#fff;color:#29415f}.nl-completion{display:grid;gap:18px}.nl-success{display:flex;gap:15px;align-items:flex-start;padding:21px 22px;border:1px solid #b8e4d1;border-radius:14px;background:#f0fbf6;color:#174b35}.nl-success h2{margin:0 0 5px;font-size:21px}.nl-success p{margin:0;line-height:1.55}.nl-success-icon{display:grid;place-items:center;flex:0 0 auto;width:31px;height:31px;border-radius:999px;background:#1d8c61;color:#fff;font-weight:800}.nl-pending,.nl-all-done,.nl-pending-copy{padding:18px 20px;border:1px solid #dce5ef;border-radius:14px;background:#f8fafc}.nl-pending h3{margin:0 0 5px;color:#17365d}.nl-pending p,.nl-all-done,.nl-pending-copy{color:#53657b;line-height:1.55}.nl-pending p{margin:0 0 14px}.nl-pending-links{display:grid;gap:9px}.nl-pending-links a{display:flex;justify-content:space-between;gap:16px;padding:12px 14px;border:1px solid #cbdbe8;border-radius:10px;background:#fff;color:#17365d;font-weight:700;text-decoration:none}.nl-pending-links a span{color:#0e7fa8;font-size:13px}.nl-all-done,.nl-pending-copy{margin:0}
+@media(max-width:640px){.nl-form-grid{grid-template-columns:1fr}.nl-half,.nl-full{grid-column:1/-1}.nl-actions{margin-top:24px}.nl-button{min-width:100px}.nl-success{padding:17px 16px}.nl-pending-links a{align-items:center}.nl-policy-scroll{max-height:220px}.nl-signature-canvas{height:160px}}
 `;
