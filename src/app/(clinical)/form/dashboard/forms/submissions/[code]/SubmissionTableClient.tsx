@@ -12,8 +12,11 @@ type SubmissionRow = {
   severity: string | null;
 };
 
-export function SubmissionTableClient({ code, rows }: { code: string; rows: SubmissionRow[] }) {
+type SubmissionMode = "questionnaire" | "consent";
+
+export function SubmissionTableClient({ code, rows, mode = "questionnaire" }: { code: string; rows: SubmissionRow[]; mode?: SubmissionMode }) {
   const [query, setQuery] = useState("");
+  const isConsent = mode === "consent";
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase();
     if (!q) return rows;
@@ -49,24 +52,40 @@ export function SubmissionTableClient({ code, rows }: { code: string; rows: Subm
         <div style={{ padding: 28, color: "#64748b" }}>No matching submissions on this page.</div>
       ) : (
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 760 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: isConsent ? 700 : 760 }}>
             <thead><tr style={{ background: "#f8fafc", color: "#64748b", textAlign: "left", fontSize: 12, textTransform: "uppercase", letterSpacing: ".05em" }}>
-              <th style={{ padding: "12px 16px" }}>Patient</th><th style={{ padding: "12px 16px" }}>Submitted</th><th style={{ padding: "12px 16px" }}>Score</th><th style={{ padding: "12px 16px" }}>Severity</th><th style={{ padding: "12px 16px" }}></th>
+              <th style={{ padding: "12px 16px" }}>Patient</th>
+              <th style={{ padding: "12px 16px" }}>Submitted</th>
+              {!isConsent ? <><th style={{ padding: "12px 16px" }}>Score</th><th style={{ padding: "12px 16px" }}>Severity</th></> : null}
+              <th style={{ padding: "12px 16px", textAlign: "right" }}>{isConsent ? "Actions" : ""}</th>
             </tr></thead>
-            <tbody>{filtered.map((row) => (
-              <tr key={row.id} style={{ borderTop: "1px solid #eef2f7" }}>
-                <td style={{ padding: "14px 16px" }}>
-                  <div style={{ fontWeight: 750, color: "#0f172a" }}>{row.patientName}</div>
-                  {row.patientEmail ? <div style={{ marginTop: 3, color: "#64748b", fontSize: 13 }}>{row.patientEmail}</div> : null}
-                </td>
-                <td style={{ padding: "14px 16px", color: "#334155", whiteSpace: "nowrap" }}>{row.submittedLabel}</td>
-                <td style={{ padding: "14px 16px", fontWeight: 800, fontSize: 16 }}>{row.totalScore}</td>
-                <td style={{ padding: "14px 16px", color: "#475569" }}>{row.severity || "—"}</td>
-                <td style={{ padding: "14px 16px", textAlign: "right" }}>
-                  <Link href={`/form/dashboard/forms/submissions/${encodeURIComponent(code)}/${row.id}/`} style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>View details →</Link>
-                </td>
-              </tr>
-            ))}</tbody>
+            <tbody>{filtered.map((row) => {
+              const detailHref = `/form/dashboard/forms/submissions/${encodeURIComponent(code)}/${row.id}/`;
+              const pdfHref = `/form/api/results/${encodeURIComponent(row.id)}/pdf/`;
+              return (
+                <tr key={row.id} style={{ borderTop: "1px solid #eef2f7" }}>
+                  <td style={{ padding: "14px 16px" }}>
+                    <div style={{ fontWeight: 750, color: "#0f172a" }}>{row.patientName}</div>
+                    {row.patientEmail ? <div style={{ marginTop: 3, color: "#64748b", fontSize: 13 }}>{row.patientEmail}</div> : null}
+                  </td>
+                  <td style={{ padding: "14px 16px", color: "#334155", whiteSpace: "nowrap" }}>{row.submittedLabel}</td>
+                  {!isConsent ? <>
+                    <td style={{ padding: "14px 16px", fontWeight: 800, fontSize: 16 }}>{row.totalScore}</td>
+                    <td style={{ padding: "14px 16px", color: "#475569" }}>{row.severity || "—"}</td>
+                  </> : null}
+                  <td style={{ padding: "14px 16px", textAlign: "right" }}>
+                    {isConsent ? (
+                      <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "flex-end", gap: 8, whiteSpace: "nowrap" }}>
+                        <Link href={detailHref} style={{ display: "inline-flex", alignItems: "center", padding: "8px 11px", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a", background: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>View data</Link>
+                        <a href={pdfHref} style={{ display: "inline-flex", alignItems: "center", padding: "8px 11px", borderRadius: 8, color: "#fff", background: "#111827", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>PDF</a>
+                      </div>
+                    ) : (
+                      <Link href={detailHref} style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>View details →</Link>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}</tbody>
           </table>
         </div>
       )}
