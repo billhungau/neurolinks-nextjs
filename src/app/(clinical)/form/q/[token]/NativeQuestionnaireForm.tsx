@@ -2,6 +2,8 @@
 
 import { FormEvent, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import type { NativeField, NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
+import { sanitizeRichHtml } from "@/lib/clinical/questionnaires/rich-text";
+import type { SignaturePoint, SignatureStrokeData } from "@/lib/clinical/signature-strokes";
 
 type SubmitResponse =
   | { ok: true; totalScore: number; severity: string | null }
@@ -11,6 +13,7 @@ type PendingQuestionnaire = { name: string; href: string };
 type PendingResponse =
   | { ok: true; questionnaires: PendingQuestionnaire[] }
   | { ok: false; error?: string };
+type EnhancedField = NativeField & { width?: "full" | "half"; richText?: string };
 
 const HALF_WIDTH_IDS = new Set([
   "date_of_birth", "phn", "email", "contact_number", "city", "province",
@@ -63,23 +66,43 @@ function autocomplete(fieldId: string) {
 }
 
 function fieldSpan(field: NativeField) {
-  if (field.kind !== "text") return "full";
-  if (FULL_WIDTH_TEXT_IDS.has(field.id)) return "full";
+  if (field.kind === "paragraph" || field.kind === "pagebreak" || field.kind === "matrix" || field.id === "patient_signature") return "full";
+  const explicit = (field as EnhancedField).width;
+  if (explicit === "half" || explicit === "full") return explicit;
+  if (field.kind === "text" && FULL_WIDTH_TEXT_IDS.has(field.id)) return "full";
   return HALF_WIDTH_IDS.has(field.id) ? "half" : "full";
+}
+
+function rounded(value: number) {
+  return Math.round(value * 10000) / 10000;
 }
 
 function SignaturePad({ field }: { field: Extract<NativeField, { kind: "textarea" }> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
+  const strokesRef = useRef<SignaturePoint[][]>([]);
+  const activeStrokeRef = useRef<SignaturePoint[] | null>(null);
   const [value, setValue] = useState("");
 
   function position(event: ReactPointerEvent<HTMLCanvasElement>) {
     const canvas = event.currentTarget;
     const rect = canvas.getBoundingClientRect();
+    const px = Math.max(0, Math.min(canvas.width, (event.clientX - rect.left) * (canvas.width / rect.width)));
+    const py = Math.max(0, Math.min(canvas.height, (event.clientY - rect.top) * (canvas.height / rect.height)));
     return {
-      x: (event.clientX - rect.left) * (canvas.width / rect.width),
-      y: (event.clientY - rect.top) * (canvas.height / rect.height),
+      pixel: { x: px, y: py },
+      normalized: { x: rounded(px / canvas.width), y: rounded(py / canvas.height) },
     };
+  }
+
+  function syncValue(canvas: HTMLCanvasElement) {
+    const payload: SignatureStrokeData = {
+      format: "strokes-v1",
+      width: canvas.width,
+      height: canvas.height,
+      strokes: strokesRef.current.filter((stroke) => stroke.length > 0),
+    };
+    setValue(payload.strokes.length ? JSON.stringify(payload) : "");
   }
 
   function start(event: ReactPointerEvent<HTMLCanvasElement>) {
@@ -89,35 +112,45 @@ function SignaturePad({ field }: { field: Extract<NativeField, { kind: "textarea
     const point = position(event);
     const context = canvas.getContext("2d");
     if (!context) return;
+    const stroke = [point.normalized];
+    strokesRef.current.push(stroke);
+    activeStrokeRef.current = stroke;
     context.lineWidth = 2.4;
     context.lineCap = "round";
     context.lineJoin = "round";
     context.beginPath();
-    context.moveTo(point.x, point.y);
+    context.moveTo(point.pixel.x, point.pixel.y);
     drawingRef.current = true;
   }
 
   function move(event: ReactPointerEvent<HTMLCanvasElement>) {
-    if (!drawingRef.current) return;
+    if (!drawingRef.current || !activeStrokeRef.current) return;
     event.preventDefault();
     const point = position(event);
+    const stroke = activeStrokeRef.current;
+    const previous = stroke[stroke.length - 1];
+    if (previous && Math.hypot(point.normalized.x - previous.x, point.normalized.y - previous.y) < 0.0015) return;
+    stroke.push(point.normalized);
     const context = event.currentTarget.getContext("2d");
     if (!context) return;
-    context.lineTo(point.x, point.y);
+    context.lineTo(point.pixel.x, point.pixel.y);
     context.stroke();
   }
 
   function finish(event: ReactPointerEvent<HTMLCanvasElement>) {
     if (!drawingRef.current) return;
     drawingRef.current = false;
+    activeStrokeRef.current = null;
     try { event.currentTarget.releasePointerCapture(event.pointerId); } catch {}
-    setValue(event.currentTarget.toDataURL("image/png"));
+    syncValue(event.currentTarget);
   }
 
   function clear() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+    strokesRef.current = [];
+    activeStrokeRef.current = null;
     setValue("");
   }
 
@@ -230,11 +263,18 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
     for (const field of schema.fields) {
       if (field.kind === "single") answers[field.id] = String(data.get(field.id) ?? "");
       if (field.kind === "multiple") answers[field.id] = data.getAll(field.id).map(String);
-      if (field.kind === "text" || field.kind === "textarea") answers[field.id] = String(data.get(field.id) ?? "");
-      if (field.kind === "matrix") {
-        for (const row of field.rows) {
-          answers[`${field.id}:${row.id}`] = String(data.get(`${field.id}:${row.id}`) ?? "");
+      if (field.kind === "text") answers[field.id] = String(data.get(field.id) ?? "");
+      if (field.kind === "textarea") {
+        const raw = String(data.get(field.id) ?? "");
+        if (field.id === "patient_signature" && raw) {
+          try { answers[field.id] = JSON.parse(raw) as SignatureStrokeData; }
+          catch { answers[field.id] = ""; }
+        } else {
+          answers[field.id] = raw;
         }
+      }
+      if (field.kind === "matrix") {
+        for (const row of field.rows) answers[`${field.id}:${row.id}`] = String(data.get(`${field.id}:${row.id}`) ?? "");
       }
     }
 
@@ -289,14 +329,10 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
 
     if (field.kind === "paragraph") {
       const scrollable = SCROLLABLE_PARAGRAPH_IDS.has(field.id);
+      const richText = (field as EnhancedField).richText;
       return (
-        <div
-          key={field.id}
-          className={`nl-field nl-full nl-paragraph${scrollable ? " nl-policy-scroll" : ""}`}
-          tabIndex={scrollable ? 0 : undefined}
-          aria-label={scrollable ? "Clinical Documentation Assistant policy" : undefined}
-        >
-          <p>{field.text}</p>
+        <div key={field.id} className={`nl-field nl-full nl-paragraph${scrollable ? " nl-policy-scroll" : ""}`} tabIndex={scrollable ? 0 : undefined} aria-label={scrollable ? "Clinical Documentation Assistant policy" : undefined}>
+          {richText ? <div className="nl-rich-content" dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(richText) }} /> : <p>{field.text}</p>}
         </div>
       );
     }
@@ -314,31 +350,28 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
     if (field.kind === "text") return (
       <label key={field.id} className={spanClass}>
         <span className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</span>
-        <input className="nl-input" type={inputType(field.id)} name={field.id} required={field.required}
-          placeholder={field.placeholder} inputMode={inputMode(field.id)} autoComplete={autocomplete(field.id)}
-          max={field.id === "date_of_birth" || field.id === "consent_date" ? today : undefined}
-          onInput={field.id === "phn" ? (event) => event.currentTarget.setCustomValidity("") : undefined} />
+        <input className="nl-input" type={inputType(field.id)} name={field.id} required={field.required} placeholder={field.placeholder} inputMode={inputMode(field.id)} autoComplete={autocomplete(field.id)} max={field.id === "date_of_birth" || field.id === "consent_date" ? today : undefined} onInput={field.id === "phn" ? (event) => event.currentTarget.setCustomValidity("") : undefined} />
       </label>
     );
 
     if (field.kind === "textarea" && field.id === "patient_signature") return <SignaturePad key={field.id} field={field} />;
 
     if (field.kind === "textarea") return (
-      <label key={field.id} className="nl-field nl-full">
+      <label key={field.id} className={spanClass}>
         <span className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</span>
         <textarea className="nl-input nl-textarea" name={field.id} required={field.required} placeholder={field.placeholder} rows={5} />
       </label>
     );
 
     if (field.kind === "single") return (
-      <fieldset key={field.id} className="nl-field nl-full nl-fieldset">
+      <fieldset key={field.id} className={`${spanClass} nl-fieldset`}>
         <legend className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</legend>
         <div className="nl-options">{field.options.map((option) => <label key={option.id} className="nl-option"><input type="radio" name={field.id} value={option.id} required={field.required} /><span>{option.label}</span></label>)}</div>
       </fieldset>
     );
 
     if (field.kind === "multiple") return (
-      <fieldset key={field.id} className="nl-field nl-full nl-fieldset">
+      <fieldset key={field.id} className={`${spanClass} nl-fieldset`}>
         <legend className="nl-label">{field.label}{field.required ? <b className="nl-required"> *</b> : null}</legend>
         <div className="nl-options">{field.options.map((option, index) => <label key={option.id} className="nl-option"><input type="checkbox" name={field.id} value={option.id} required={field.required && index === 0} /><span>{option.label}</span></label>)}</div>
       </fieldset>
@@ -369,6 +402,6 @@ export function NativeQuestionnaireForm({ token, schema }: { token: string; sche
 }
 
 const nativeStyles = `
-.nl-native-form{color:#152a46}.nl-description{margin:-8px auto 25px;max-width:650px;text-align:center;color:#607086;font-size:15px;line-height:1.6}.nl-progress{margin:0 0 29px;padding:14px 16px;background:#f6f9fc;border:1px solid #e1e9f1;border-radius:13px}.nl-progress-copy{display:flex;justify-content:space-between;gap:16px;margin-bottom:9px;color:#53657b;font-size:13px}.nl-progress-copy strong{color:#1b3659}.nl-progress-track{height:6px;overflow:hidden;background:#dfe7ef;border-radius:999px}.nl-progress-value{height:100%;background:linear-gradient(90deg,#00a6d6,#17365d);border-radius:999px}.nl-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:22px}.nl-field{min-width:0;margin:0}.nl-full{grid-column:1/-1}.nl-half{grid-column:span 1}.nl-label{display:block;margin:0 0 8px;color:#162d4b;font-size:15px;font-weight:700;line-height:1.35}.nl-required{color:#b42318}.nl-input{display:block;width:100%;box-sizing:border-box;border:1px solid #cdd8e4;border-radius:11px;background:#fff;padding:12px 13px;color:#14263f;font:inherit;font-size:15px;line-height:1.4;outline:none}.nl-input:focus{border-color:#188eb8;box-shadow:0 0 0 3px rgba(0,166,214,.12)}.nl-textarea{min-height:120px;resize:vertical}.nl-fieldset{border:0;padding:0}.nl-options{display:grid;gap:9px}.nl-option{display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border:1px solid #dce5ee;border-radius:11px;background:#fff;cursor:pointer;line-height:1.45}.nl-option:has(input:checked){border-color:#1692bd;background:#f0faff}.nl-option input,.nl-matrix-option input{accent-color:#0e7fa8;margin-top:3px}.nl-paragraph{padding:16px 18px;background:#f7f9fc;border-left:3px solid #18a6cf;border-radius:4px 11px 11px 4px}.nl-paragraph p{white-space:pre-line;margin:0;color:#44566c;font-size:14.5px;line-height:1.7}.nl-policy-scroll{box-sizing:border-box;max-height:240px;overflow-y:auto;border:1px solid #d8e2ec;border-left:3px solid #18a6cf;scrollbar-gutter:stable;overscroll-behavior:contain}.nl-policy-scroll:focus{outline:2px solid #188eb8;outline-offset:2px}.nl-signature-field{position:relative}.nl-signature-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.nl-signature-clear{border:0;background:transparent;color:#0e7fa8;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.nl-signature-canvas{display:block;width:100%;height:180px;box-sizing:border-box;border:1px solid #cdd8e4;border-radius:11px;background:#fff;touch-action:none;cursor:crosshair}.nl-signature-canvas:focus{border-color:#188eb8;box-shadow:0 0 0 3px rgba(0,166,214,.12);outline:none}.nl-signature-help{margin:7px 0 0;color:#64748b;font-size:12.5px}.nl-signature-value{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:0;bottom:0;padding:0!important;border:0!important}.nl-matrix{display:grid;gap:13px}.nl-matrix-row{border:1px solid #dce5ee;border-radius:12px;padding:15px 16px}.nl-matrix-row>legend{padding:0 6px;color:#253b57;font-weight:650}.nl-matrix-options{display:grid;gap:8px;margin-top:7px}.nl-matrix-option{display:flex;gap:9px;align-items:flex-start;color:#354b65}.nl-error{margin-top:20px;padding:12px 14px;border:1px solid #fecaca;border-radius:10px;background:#fff2f2;color:#9b1c1c;font-size:14px}.nl-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:30px;padding-top:22px;border-top:1px solid #e7edf3}.nl-button{min-width:112px;border-radius:10px;padding:12px 19px;font:inherit;font-size:14px;font-weight:750;cursor:pointer}.nl-button-primary{border:0;background:#17365d;color:#fff;box-shadow:0 5px 14px rgba(23,54,93,.17)}.nl-button-primary:hover{background:#0f2d50}.nl-button-primary:disabled{opacity:.55;cursor:not-allowed}.nl-button-secondary{border:1px solid #cbd7e3;background:#fff;color:#29415f}.nl-completion{display:grid;gap:18px}.nl-success{display:flex;gap:15px;align-items:flex-start;padding:21px 22px;border:1px solid #b8e4d1;border-radius:14px;background:#f0fbf6;color:#174b35}.nl-success h2{margin:0 0 5px;font-size:21px}.nl-success p{margin:0;line-height:1.55}.nl-success-icon{display:grid;place-items:center;flex:0 0 auto;width:31px;height:31px;border-radius:999px;background:#1d8c61;color:#fff;font-weight:800}.nl-pending,.nl-all-done,.nl-pending-copy{padding:18px 20px;border:1px solid #dce5ef;border-radius:14px;background:#f8fafc}.nl-pending h3{margin:0 0 5px;color:#17365d}.nl-pending p,.nl-all-done,.nl-pending-copy{color:#53657b;line-height:1.55}.nl-pending p{margin:0 0 14px}.nl-pending-links{display:grid;gap:9px}.nl-pending-links a{display:flex;justify-content:space-between;gap:16px;padding:12px 14px;border:1px solid #cbdbe8;border-radius:10px;background:#fff;color:#17365d;font-weight:700;text-decoration:none}.nl-pending-links a span{color:#0e7fa8;font-size:13px}.nl-all-done,.nl-pending-copy{margin:0}
+.nl-native-form{color:#152a46}.nl-description{margin:-8px auto 25px;max-width:650px;text-align:center;color:#607086;font-size:15px;line-height:1.6}.nl-progress{margin:0 0 29px;padding:14px 16px;background:#f6f9fc;border:1px solid #e1e9f1;border-radius:13px}.nl-progress-copy{display:flex;justify-content:space-between;gap:16px;margin-bottom:9px;color:#53657b;font-size:13px}.nl-progress-copy strong{color:#1b3659}.nl-progress-track{height:6px;overflow:hidden;background:#dfe7ef;border-radius:999px}.nl-progress-value{height:100%;background:linear-gradient(90deg,#00a6d6,#17365d);border-radius:999px}.nl-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:22px}.nl-field{min-width:0;margin:0}.nl-full{grid-column:1/-1}.nl-half{grid-column:span 1}.nl-label{display:block;margin:0 0 8px;color:#162d4b;font-size:15px;font-weight:700;line-height:1.35}.nl-required{color:#b42318}.nl-input{display:block;width:100%;box-sizing:border-box;border:1px solid #cdd8e4;border-radius:11px;background:#fff;padding:12px 13px;color:#14263f;font:inherit;font-size:15px;line-height:1.4;outline:none}.nl-input:focus{border-color:#188eb8;box-shadow:0 0 0 3px rgba(0,166,214,.12)}.nl-textarea{min-height:120px;resize:vertical}.nl-fieldset{border:0;padding:0}.nl-options{display:grid;gap:9px}.nl-option{display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border:1px solid #dce5ee;border-radius:11px;background:#fff;cursor:pointer;line-height:1.45}.nl-option:has(input:checked){border-color:#1692bd;background:#f0faff}.nl-option input,.nl-matrix-option input{accent-color:#0e7fa8;margin-top:3px}.nl-paragraph{padding:16px 18px;background:#f7f9fc;border-left:3px solid #18a6cf;border-radius:4px 11px 11px 4px}.nl-paragraph p{white-space:pre-line;margin:0;color:#44566c;font-size:14.5px;line-height:1.7}.nl-rich-content{color:#44566c;font-size:14.5px;line-height:1.7}.nl-rich-content p{white-space:normal;margin:.45em 0}.nl-rich-content h3{margin:.2em 0 .55em;color:#17365d;font-size:17px}.nl-rich-content ul,.nl-rich-content ol{margin:.45em 0;padding-left:1.45em}.nl-policy-scroll{box-sizing:border-box;max-height:240px;overflow-y:auto;border:1px solid #d8e2ec;border-left:3px solid #18a6cf;scrollbar-gutter:stable;overscroll-behavior:contain}.nl-policy-scroll:focus{outline:2px solid #188eb8;outline-offset:2px}.nl-signature-field{position:relative}.nl-signature-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.nl-signature-clear{border:0;background:transparent;color:#0e7fa8;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.nl-signature-canvas{display:block;width:100%;height:180px;box-sizing:border-box;border:1px solid #cdd8e4;border-radius:11px;background:#fff;touch-action:none;cursor:crosshair}.nl-signature-canvas:focus{border-color:#188eb8;box-shadow:0 0 0 3px rgba(0,166,214,.12);outline:none}.nl-signature-help{margin:7px 0 0;color:#64748b;font-size:12.5px}.nl-signature-value{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;left:0;bottom:0;padding:0!important;border:0!important}.nl-matrix{display:grid;gap:13px}.nl-matrix-row{border:1px solid #dce5ee;border-radius:12px;padding:15px 16px}.nl-matrix-row>legend{padding:0 6px;color:#253b57;font-weight:650}.nl-matrix-options{display:grid;gap:8px;margin-top:7px}.nl-matrix-option{display:flex;gap:9px;align-items:flex-start;color:#354b65}.nl-error{margin-top:20px;padding:12px 14px;border:1px solid #fecaca;border-radius:10px;background:#fff2f2;color:#9b1c1c;font-size:14px}.nl-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:30px;padding-top:22px;border-top:1px solid #e7edf3}.nl-button{min-width:112px;border-radius:10px;padding:12px 19px;font:inherit;font-size:14px;font-weight:750;cursor:pointer}.nl-button-primary{border:0;background:#17365d;color:#fff;box-shadow:0 5px 14px rgba(23,54,93,.17)}.nl-button-primary:hover{background:#0f2d50}.nl-button-primary:disabled{opacity:.55;cursor:not-allowed}.nl-button-secondary{border:1px solid #cbd7e3;background:#fff;color:#29415f}.nl-completion{display:grid;gap:18px}.nl-success{display:flex;gap:15px;align-items:flex-start;padding:21px 22px;border:1px solid #b8e4d1;border-radius:14px;background:#f0fbf6;color:#174b35}.nl-success h2{margin:0 0 5px;font-size:21px}.nl-success p{margin:0;line-height:1.55}.nl-success-icon{display:grid;place-items:center;flex:0 0 auto;width:31px;height:31px;border-radius:999px;background:#1d8c61;color:#fff;font-weight:800}.nl-pending,.nl-all-done,.nl-pending-copy{padding:18px 20px;border:1px solid #dce5ef;border-radius:14px;background:#f8fafc}.nl-pending h3{margin:0 0 5px;color:#17365d}.nl-pending p,.nl-all-done,.nl-pending-copy{color:#53657b;line-height:1.55}.nl-pending p{margin:0 0 14px}.nl-pending-links{display:grid;gap:9px}.nl-pending-links a{display:flex;justify-content:space-between;gap:16px;padding:12px 14px;border:1px solid #cbdbe8;border-radius:10px;background:#fff;color:#17365d;font-weight:700;text-decoration:none}.nl-pending-links a span{color:#0e7fa8;font-size:13px}.nl-all-done,.nl-pending-copy{margin:0}
 @media(max-width:640px){.nl-form-grid{grid-template-columns:1fr}.nl-half,.nl-full{grid-column:1/-1}.nl-actions{margin-top:24px}.nl-button{min-width:100px}.nl-success{padding:17px 16px}.nl-pending-links a{align-items:center}.nl-policy-scroll{max-height:220px}.nl-signature-canvas{height:160px}}
 `;
