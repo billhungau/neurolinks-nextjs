@@ -24,7 +24,7 @@ type AssessmentRow = {
   answers: Record<string, unknown>;
   questionnaires: QuestionnaireRelation;
 };
-type Item = { key: string; label: string; answer: string; score: number | null; signature?: SignatureStrokeData | null };
+type Item = { key: string; label: string; answer: string; score: number | null; signature?: SignatureStrokeData | null; legacySignature?: string | null };
 
 function relation(value: QuestionnaireRelation) { return Array.isArray(value) ? value[0] ?? null : value; }
 function numericPrefix(value: string) { const match = value.trim().match(/^([0-9]+)(?:[.\s]|$)/); return match ? Number(match[1]) : null; }
@@ -94,7 +94,8 @@ function nativeItems(schema: NativeQuestionnaireSchema, answers: Record<string, 
     if (field.id === "patient_signature") {
       const value = answers[field.id];
       const signature = isSignatureStrokeData(value) ? value : null;
-      items.push({ key: field.id, label: field.label, answer: signature ? "Handwritten signature" : "—", score: null, signature });
+      const legacySignature = typeof value === "string" && value.startsWith("data:image/png;base64,") ? value : null;
+      items.push({ key: field.id, label: field.label, answer: signature || legacySignature ? "Handwritten signature" : "—", score: null, signature, legacySignature });
       continue;
     }
     const answer = String(answers[field.id] ?? "").trim();
@@ -166,7 +167,10 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
           <div style={{ padding: "16px 18px", borderBottom: "1px solid #e2e8f0" }}><h2 style={{ margin: 0, fontSize: 19 }}>Item responses and scores</h2></div>
           {items.length === 0 ? <div style={{ padding: 22, color: "#64748b" }}>Item-level questionnaire definition is unavailable for this submission.</div> : items.map((item, index) => (
             <div key={item.key} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 86px", gap: 16, padding: "14px 18px", borderTop: index ? "1px solid #eef2f7" : undefined, alignItems: "start" }}>
-              <div><div style={{ fontWeight: 750, color: "#0f172a" }}>{item.label}</div>{item.signature ? <SignatureView signature={item.signature} /> : <div style={{ marginTop: 5, color: "#475569", lineHeight: 1.45 }}>{item.answer}</div>}</div>
+              <div>
+                <div style={{ fontWeight: 750, color: "#0f172a" }}>{item.label}</div>
+                {item.signature ? <SignatureView signature={item.signature} /> : item.legacySignature ? <div style={{ marginTop: 8, border: "1px solid #d7e0ea", borderRadius: 10, background: "#fff", padding: 8, maxWidth: 620 }}><img src={item.legacySignature} alt="Patient handwritten signature" style={{ display: "block", maxWidth: "100%", maxHeight: 160 }} /></div> : <div style={{ marginTop: 5, color: "#475569", lineHeight: 1.45 }}>{item.answer}</div>}
+              </div>
               <div style={{ textAlign: "center", borderRadius: 9, padding: "8px 6px", background: item.score === null ? "#f8fafc" : "#eff6ff", color: item.score === null ? "#94a3b8" : "#1d4ed8", fontWeight: 800 }}>{item.score === null ? "—" : item.score}<div style={{ marginTop: 2, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em" }}>Score</div></div>
             </div>
           ))}
