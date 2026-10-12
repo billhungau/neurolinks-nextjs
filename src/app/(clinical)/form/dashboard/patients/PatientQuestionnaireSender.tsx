@@ -15,11 +15,12 @@ type InvitationResponse =
   | { ok: true; invitationId: string; url: string; expiresAt: string; noExpiry?: boolean }
   | { ok: false; error: string; code?: string };
 
-type QuestionnaireCode = "intake" | "bdii" | "bai" | "ybocs" | "pss";
+type QuestionnaireCode = "intake" | "tms-consent" | "bdii" | "bai" | "ybocs" | "pss";
 type CreatedLink = { invitationId: string; code: QuestionnaireCode; url: string };
 
 const QUESTIONNAIRES: Array<{ code: QuestionnaireCode; label: string; emailLabel: string }> = [
   { code: "intake", label: "Patient Intake Form", emailLabel: "Patient intake form" },
+  { code: "tms-consent", label: "TMS Consent Form", emailLabel: "TMS consent form" },
   { code: "bdii", label: "BDI-II", emailLabel: "Depression questionnaire" },
   { code: "bai", label: "Beck Anxiety Inventory (BAI)", emailLabel: "Anxiety questionnaire" },
   { code: "ybocs", label: "Y-BOCS", emailLabel: "OCD questionnaire" },
