@@ -1,3 +1,4 @@
+import { hasMeaningfulSignature } from "@/lib/clinical/signature-strokes";
 import { BDI2_INSTRUCTIONS, BDI2_ITEMS, BDI2_NAME } from "./bdii-definition";
 import type {
   ImportedField,
@@ -152,8 +153,6 @@ function convertImportedField(code: ImportedQuestionnaireCode, field: ImportedFi
     }];
   }
 
-  // Checkbox matrices are uncommon in the current instruments. Represent each
-  // row as a separate multiple-choice field so no patient response is lost.
   return field.rows.map((row, rowIndex) => ({
     kind: "multiple" as const,
     id: `${id}_r${rowIndex}`,
@@ -268,8 +267,14 @@ function fieldScore(field: NativeField, answers: Record<string, unknown>) {
     }
   }
   if (field.kind === "text" || field.kind === "textarea") {
-    const value = String(answers[field.id] ?? "").trim();
-    if (field.required && !value) throw new Error("Incomplete response.");
+    if (field.id === "patient_signature") {
+      const signature = answers[field.id];
+      if (field.required && !hasMeaningfulSignature(signature)) throw new Error("Incomplete response.");
+      if (signature !== undefined && signature !== null && signature !== "" && !hasMeaningfulSignature(signature)) throw new Error("Invalid signature response.");
+    } else {
+      const value = String(answers[field.id] ?? "").trim();
+      if (field.required && !value) throw new Error("Incomplete response.");
+    }
   }
   return total;
 }
