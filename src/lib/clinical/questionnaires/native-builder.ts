@@ -12,14 +12,20 @@ export type NativeOption = {
   score: number;
 };
 
-export type NativeField =
+type NativeFieldMeta = {
+  width?: "full" | "half";
+  richText?: string;
+};
+
+export type NativeField = NativeFieldMeta & (
   | { kind: "paragraph"; id: string; text: string }
   | { kind: "pagebreak"; id: string }
   | { kind: "text"; id: string; label: string; required: boolean; placeholder?: string }
   | { kind: "textarea"; id: string; label: string; required: boolean; placeholder?: string }
   | { kind: "single"; id: string; label: string; required: boolean; options: NativeOption[] }
   | { kind: "multiple"; id: string; label: string; required: boolean; options: NativeOption[] }
-  | { kind: "matrix"; id: string; label: string; required: boolean; rows: Array<{ id: string; label: string }>; columns: NativeOption[] };
+  | { kind: "matrix"; id: string; label: string; required: boolean; rows: Array<{ id: string; label: string }>; columns: NativeOption[] }
+);
 
 export type SeverityBand = {
   min: number;
