@@ -4,8 +4,8 @@ import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
 import { getVcitaClient } from "@/lib/clinical/vcita";
 import { patientIdentityRows } from "@/lib/clinical/patient-identity-index";
 import { BDI2_ITEMS, getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
-import type { ImportedField, ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
-import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
+import type { ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
+import type { NativeField, NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
 import { isSignatureStrokeData, signatureSvgPolylines, type SignatureStrokeData } from "@/lib/clinical/signature-strokes";
 import { BackToSubmissions } from "./BackToSubmissions";
 
@@ -30,6 +30,21 @@ function relation(value: QuestionnaireRelation) { return Array.isArray(value) ? 
 function numericPrefix(value: string) { const match = value.trim().match(/^([0-9]+)(?:[.\s]|$)/); return match ? Number(match[1]) : null; }
 function formatSubmittedAt(value: string) {
   return new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Vancouver" }).format(new Date(value));
+}
+function plainRichText(value: string) {
+  return value
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|h[1-6]|li)>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "• ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function bdiItems(answers: Record<string, unknown>): Item[] {
@@ -115,6 +130,57 @@ function SignatureView({ signature }: { signature: SignatureStrokeData }) {
   );
 }
 
+function consentAnswer(field: Exclude<NativeField, { kind: "paragraph" | "pagebreak" }>, answers: Record<string, unknown>) {
+  if (field.kind === "single") {
+    const selected = String(answers[field.id] ?? "");
+    return field.options.find((option) => option.id === selected)?.label ?? selected;
+  }
+  if (field.kind === "multiple") {
+    const selected = Array.isArray(answers[field.id]) ? (answers[field.id] as unknown[]).map(String) : [];
+    return selected.map((id) => field.options.find((option) => option.id === id)?.label ?? id).join(", ");
+  }
+  if (field.kind === "matrix") {
+    return field.rows.map((row) => {
+      const selected = String(answers[`${field.id}:${row.id}`] ?? "");
+      return `${row.label}: ${field.columns.find((option) => option.id === selected)?.label ?? selected || "—"}`;
+    }).join("\n");
+  }
+  return String(answers[field.id] ?? "").trim();
+}
+
+function ConsentFormView({ schema, answers }: { schema: NativeQuestionnaireSchema; answers: Record<string, unknown> }) {
+  return (
+    <section style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 16, boxShadow: "0 8px 26px rgba(15,23,42,.05)", overflow: "hidden" }}>
+      <div style={{ padding: "16px 18px", borderBottom: "1px solid #e2e8f0" }}><h2 style={{ margin: 0, fontSize: 19 }}>Signed consent form</h2></div>
+      <div style={{ padding: "22px 22px 26px" }}>
+        {schema.fields.map((field) => {
+          if (field.kind === "pagebreak") return <hr key={field.id} style={{ border: 0, borderTop: "1px solid #e2e8f0", margin: "24px 0" }} />;
+          if (field.kind === "paragraph") {
+            const content = field.richText?.trim() ? plainRichText(field.richText) : field.text;
+            return <div key={field.id} style={{ whiteSpace: "pre-wrap", color: "#334155", lineHeight: 1.65, margin: "0 0 18px" }}>{content}</div>;
+          }
+          if (field.id === "patient_signature") {
+            const value = answers[field.id];
+            return (
+              <div key={field.id} style={{ margin: "18px 0 20px" }}>
+                <div style={{ fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>{field.label}</div>
+                {isSignatureStrokeData(value) ? <SignatureView signature={value} /> : typeof value === "string" && value.startsWith("data:image/png;base64,") ? <div style={{ border: "1px solid #d7e0ea", borderRadius: 10, padding: 8, maxWidth: 620 }}><img src={value} alt="Patient handwritten signature" style={{ display: "block", maxWidth: "100%", maxHeight: 160 }} /></div> : <div style={{ color: "#64748b" }}>Signature unavailable</div>}
+              </div>
+            );
+          }
+          const answer = consentAnswer(field, answers) || "—";
+          return (
+            <div key={field.id} style={{ display: "grid", gridTemplateColumns: field.width === "half" ? "minmax(0,1fr)" : "minmax(0,1fr)", gap: 5, padding: "12px 0", borderBottom: "1px solid #eef2f7" }}>
+              <div style={{ fontWeight: 800, color: "#0f172a" }}>{field.label}</div>
+              <div style={{ whiteSpace: "pre-wrap", color: "#475569", lineHeight: 1.5 }}>{answer}</div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default async function SubmissionDetailPage({ params }: { params: Promise<{ code: string; id: string }> }) {
   const session = await getClinicianSession();
   if (!session) redirect("/form/login/");
@@ -136,11 +202,14 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
     if (vcitaId) client = await getVcitaClient(vcitaId);
   } catch {}
   const patientName = client ? [client.firstName, client.lastName].filter(Boolean).join(" ") || "Unnamed vcita client" : "Patient not matched in vcita";
+  const isConsent = code === "tms-consent";
 
   let items: Item[] = [];
-  if (code === "bdii") items = bdiItems(assessment.answers);
-  else if (questionnaire.metadata?.native_schema) items = nativeItems(questionnaire.metadata.native_schema, assessment.answers);
-  else if (questionnaire.metadata?.schema) items = importedItems(questionnaire.metadata.schema, assessment.answers, code);
+  if (!isConsent) {
+    if (code === "bdii") items = bdiItems(assessment.answers);
+    else if (questionnaire.metadata?.native_schema) items = nativeItems(questionnaire.metadata.native_schema, assessment.answers);
+    else if (questionnaire.metadata?.schema) items = importedItems(questionnaire.metadata.schema, assessment.answers, code);
+  }
 
   const submissionsHref = `/form/dashboard/forms/submissions/${encodeURIComponent(code)}/`;
 
@@ -154,27 +223,38 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
             <h1 style={{ margin: 0, fontSize: 30 }}>{LABELS[code] ?? questionnaire.name} submission</h1>
             <p style={{ margin: "8px 0 0", color: "#64748b" }}>{patientName} · {formatSubmittedAt(assessment.submitted_at)}</p>
           </div>
-          <a href={`/form/api/results/${encodeURIComponent(assessment.id)}/pdf/`} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 14px", borderRadius: 9, background: "#111827", color: "#fff", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>Download PDF</a>
+          <a href={`/form/api/results/${encodeURIComponent(assessment.id)}/pdf/`} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 14px", borderRadius: 9, background: "#111827", color: "#fff", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>{isConsent ? "Preview PDF" : "Preview PDF"}</a>
         </header>
 
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 12, marginBottom: 18 }}>
-          <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 15 }}><div style={{ color: "#64748b", fontSize: 12 }}>Total score</div><strong style={{ fontSize: 26 }}>{assessment.total_score}</strong></div>
-          <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 15 }}><div style={{ color: "#64748b", fontSize: 12 }}>Severity</div><strong style={{ fontSize: 18 }}>{assessment.severity || "—"}</strong></div>
-          <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 15 }}><div style={{ color: "#64748b", fontSize: 12 }}>Patient</div><strong style={{ fontSize: 16 }}>{patientName}</strong>{client?.email ? <div style={{ marginTop: 3, color: "#64748b", fontSize: 13 }}>{client.email}</div> : null}</div>
-        </section>
+        {isConsent ? (
+          <section style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 12, marginBottom: 18 }}>
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 15 }}><div style={{ color: "#64748b", fontSize: 12 }}>Patient</div><strong style={{ fontSize: 16 }}>{patientName}</strong>{client?.email ? <div style={{ marginTop: 3, color: "#64748b", fontSize: 13 }}>{client.email}</div> : null}</div>
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 15 }}><div style={{ color: "#64748b", fontSize: 12 }}>Submitted</div><strong style={{ fontSize: 16 }}>{formatSubmittedAt(assessment.submitted_at)}</strong></div>
+          </section>
+        ) : (
+          <section style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 12, marginBottom: 18 }}>
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 15 }}><div style={{ color: "#64748b", fontSize: 12 }}>Total score</div><strong style={{ fontSize: 26 }}>{assessment.total_score}</strong></div>
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 15 }}><div style={{ color: "#64748b", fontSize: 12 }}>Severity</div><strong style={{ fontSize: 18 }}>{assessment.severity || "—"}</strong></div>
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 15 }}><div style={{ color: "#64748b", fontSize: 12 }}>Patient</div><strong style={{ fontSize: 16 }}>{patientName}</strong>{client?.email ? <div style={{ marginTop: 3, color: "#64748b", fontSize: 13 }}>{client.email}</div> : null}</div>
+          </section>
+        )}
 
-        <section style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 16, boxShadow: "0 8px 26px rgba(15,23,42,.05)", overflow: "hidden" }}>
-          <div style={{ padding: "16px 18px", borderBottom: "1px solid #e2e8f0" }}><h2 style={{ margin: 0, fontSize: 19 }}>Item responses and scores</h2></div>
-          {items.length === 0 ? <div style={{ padding: 22, color: "#64748b" }}>Item-level questionnaire definition is unavailable for this submission.</div> : items.map((item, index) => (
-            <div key={item.key} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 86px", gap: 16, padding: "14px 18px", borderTop: index ? "1px solid #eef2f7" : undefined, alignItems: "start" }}>
-              <div>
-                <div style={{ fontWeight: 750, color: "#0f172a" }}>{item.label}</div>
-                {item.signature ? <SignatureView signature={item.signature} /> : item.legacySignature ? <div style={{ marginTop: 8, border: "1px solid #d7e0ea", borderRadius: 10, background: "#fff", padding: 8, maxWidth: 620 }}><img src={item.legacySignature} alt="Patient handwritten signature" style={{ display: "block", maxWidth: "100%", maxHeight: 160 }} /></div> : <div style={{ marginTop: 5, color: "#475569", lineHeight: 1.45 }}>{item.answer}</div>}
+        {isConsent && questionnaire.metadata?.native_schema ? (
+          <ConsentFormView schema={questionnaire.metadata.native_schema} answers={assessment.answers} />
+        ) : (
+          <section style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 16, boxShadow: "0 8px 26px rgba(15,23,42,.05)", overflow: "hidden" }}>
+            <div style={{ padding: "16px 18px", borderBottom: "1px solid #e2e8f0" }}><h2 style={{ margin: 0, fontSize: 19 }}>Item responses and scores</h2></div>
+            {items.length === 0 ? <div style={{ padding: 22, color: "#64748b" }}>Item-level questionnaire definition is unavailable for this submission.</div> : items.map((item, index) => (
+              <div key={item.key} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 86px", gap: 16, padding: "14px 18px", borderTop: index ? "1px solid #eef2f7" : undefined, alignItems: "start" }}>
+                <div>
+                  <div style={{ fontWeight: 750, color: "#0f172a" }}>{item.label}</div>
+                  {item.signature ? <SignatureView signature={item.signature} /> : item.legacySignature ? <div style={{ marginTop: 8, border: "1px solid #d7e0ea", borderRadius: 10, background: "#fff", padding: 8, maxWidth: 620 }}><img src={item.legacySignature} alt="Patient handwritten signature" style={{ display: "block", maxWidth: "100%", maxHeight: 160 }} /></div> : <div style={{ marginTop: 5, color: "#475569", lineHeight: 1.45 }}>{item.answer}</div>}
+                </div>
+                <div style={{ textAlign: "center", borderRadius: 9, padding: "8px 6px", background: item.score === null ? "#f8fafc" : "#eff6ff", color: item.score === null ? "#94a3b8" : "#1d4ed8", fontWeight: 800 }}>{item.score === null ? "—" : item.score}<div style={{ marginTop: 2, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em" }}>Score</div></div>
               </div>
-              <div style={{ textAlign: "center", borderRadius: 9, padding: "8px 6px", background: item.score === null ? "#f8fafc" : "#eff6ff", color: item.score === null ? "#94a3b8" : "#1d4ed8", fontWeight: 800 }}>{item.score === null ? "—" : item.score}<div style={{ marginTop: 2, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em" }}>Score</div></div>
-            </div>
-          ))}
-        </section>
+            ))}
+          </section>
+        )}
       </div>
     </main>
   );
