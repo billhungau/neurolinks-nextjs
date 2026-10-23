@@ -61,7 +61,13 @@ function TrendChart({ results, onResultClick }: { results: Result[]; onResultCli
   const padRight = 24;
   const padTop = 30;
   const padBottom = 52;
-  // PSS has 17 scored symptoms (0–3 each), maximum 51. Some imported\n  // questionnaire metadata incorrectly reports 18. Never clip recorded scores.\n  const maxScore = Math.max(\n    1,\n    results[0]?.questionnaireCode === "pss" ? 51 : (results[0]?.maxScore ?? 0),\n    ...results.map((result) => result.totalScore),\n  );
+  // PSS has 17 scored symptoms (0–3 each), maximum 51. Some imported
+  // questionnaire metadata incorrectly reports 18. Never clip recorded scores.
+  const maxScore = Math.max(
+    1,
+    results[0]?.questionnaireCode === "pss" ? 51 : (results[0]?.maxScore ?? 0),
+    ...results.map((result) => result.totalScore),
+  );
 
   const points = useMemo(() => {
     if (!results.length) return "";
