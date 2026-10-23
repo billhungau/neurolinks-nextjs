@@ -23,11 +23,13 @@ export const MAX_CONTACT_BODY_BYTES = 32 * 1024;
 export const JOTFORM_SUBMIT_TIMEOUT_MS = 12_000;
 
 /** Non-sensitive origin of the shared contact form. Never include PHI. */
-export const CONTACT_SOURCES = ["contact", "advertising-landing", "veterans"] as const;
+export const CONTACT_SOURCES = ["contact", "advertising-landing", "veterans", "veterans-tms-landing"] as const;
 export type ContactSource = (typeof CONTACT_SOURCES)[number];
 export const ADVERTISING_LANDING_SOURCE = "advertising-landing" as const;
 export const ADVERTISING_LANDING_MESSAGE_PREFIX = "[Advertising landing page]";
 export const VETERANS_SOURCE = "veterans" as const;
+export const VETERANS_TMS_LANDING_SOURCE = "veterans-tms-landing" as const;
+export const VETERANS_TMS_LANDING_MESSAGE_PREFIX = "[Veterans TMS advertising landing page]";
 export const VETERANS_MESSAGE_PREFIX = "[Veterans page]";
 export const CONTACT_NAME_LIMIT = CONTACT_LIMITS.firstName + CONTACT_LIMITS.lastName;
 
@@ -203,6 +205,7 @@ export function parseContactPayload(raw: unknown): ValidatedContact {
 export function parseContactSource(raw: unknown): ContactSource {
   if (raw === ADVERTISING_LANDING_SOURCE) return ADVERTISING_LANDING_SOURCE;
   if (raw === VETERANS_SOURCE) return VETERANS_SOURCE;
+  if (raw === VETERANS_TMS_LANDING_SOURCE) return VETERANS_TMS_LANDING_SOURCE;
   return "contact";
 }
 
@@ -212,6 +215,9 @@ export function jotformMessageForSource(message: string, source: ContactSource):
   }
   if (source === VETERANS_SOURCE) {
     return `${VETERANS_MESSAGE_PREFIX}\n\n${message}`;
+  }
+  if (source === VETERANS_TMS_LANDING_SOURCE) {
+    return `${VETERANS_TMS_LANDING_MESSAGE_PREFIX}\n\n${message}`;
   }
   return message;
 }
