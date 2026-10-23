@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ContactForm } from "@/components/forms/ContactForm";
+import { VETERANS_TMS_LANDING_SOURCE } from "@/lib/contact-form";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { TmsVideo } from "@/components/tms/TmsVideo";
 import { VeteransLandingHeader } from "@/components/veterans/VeteransLandingHeader";
@@ -177,7 +178,7 @@ export default function VeteransTmsLandingPage() {
             <div id="inquiry" className="vtms-contact-card" aria-label="Check VAC coverage">
               <h3>Check Your VAC Coverage</h3>
               <p>Send us a message and our team will follow up about TMS, assessment and VAC authorization.</p>
-              <ContactForm showReferralNote={false} submitLabel="Request TMS Information" />
+              <ContactForm source={VETERANS_TMS_LANDING_SOURCE} showReferralNote={false} submitLabel="Request TMS Information" />
             </div>
           </div>
         </section>
