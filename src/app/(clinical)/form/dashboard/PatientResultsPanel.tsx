@@ -772,9 +772,11 @@ export function PatientResultsPanel({ vcitaUuid, refreshKey }: { vcitaUuid: stri
                 <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                   <a
                     href={`/form/api/results/${encodeURIComponent(selectedDetail.id)}/pdf/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{ display: "inline-flex", alignItems: "center", padding: "8px 11px", borderRadius: 8, background: "#111827", color: "#fff", textDecoration: "none", fontSize: 13, fontWeight: 800 }}
                   >
-                    Download PDF
+                    View / Download PDF
                   </a>
                   <button type="button" onClick={() => setSelectedDetail(null)} style={{ border: 0, background: "transparent", textDecoration: "underline", cursor: "pointer" }}>
                     Close
