@@ -47,7 +47,7 @@ export async function recoverPssPageTwo(
 
   try {
     const audits = await clinicalSupabaseRequest<OriginalImportAudit[]>(
-      `audit_events?select=metadata&assessment_id=eq.${encodeURIComponent(assessmentId)}&event_type=in.(HISTORICAL_RESULT_IMPORTED,JOTFORM_RESULT_SYNCED)&order=created_at.desc&limit=10`,
+      `audit_events?select=metadata&assessment_id=eq.${encodeURIComponent(assessmentId)}&event_type=in.(HISTORICAL_RESULT_IMPORTED,JOTFORM_RESULT_SYNCED)&order=occurred_at.desc&limit=10`,
       { method: "GET" },
     );
     const submissionId = audits
