@@ -1,6 +1,7 @@
 import { getClinicianSession } from "@/lib/clinical/auth";
 import { subjectKeyFromVcitaUuid } from "@/lib/clinical/pseudonym";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
+import { recoverPssPageTwo } from "@/lib/clinical/questionnaires/pss-page-two";
 import { BDI2_ITEMS, bdi2OptionId, getBdi2OptionById } from "@/lib/clinical/questionnaires/bdii-definition";
 import type { ImportedField, ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/jotform-import";
 import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
@@ -237,6 +238,12 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
         ? normalizeBdiAnswers(projected.answers, questionnaire.metadata.native_schema)
         : projected.answers;
       resultSchema = projected.schema;
+    }
+
+    if (questionnaire.code === "pss") {
+      const recovered = await recoverPssPageTwo(row.id, resultAnswers, resultSchema);
+      resultAnswers = recovered.answers;
+      resultSchema = recovered.schema;
     }
 
     return Response.json(
