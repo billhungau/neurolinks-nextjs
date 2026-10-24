@@ -1,4 +1,4 @@
-import type { ImportedQuestionnaireSchema } from "./jotform-import";
+import type { ImportedField, ImportedQuestionnaireSchema } from "./jotform-import";
 import { fetchImportedSchema } from "./jotform-import";
 import {
   fetchHistoricalSubmission,
@@ -12,7 +12,8 @@ type OriginalImportAudit = {
 
 function symptomMatrix(schema: ImportedQuestionnaireSchema | null) {
   return schema?.fields.find(
-    (field) => field.kind === "matrix_radio" && field.rows.length >= 17,
+    (field): field is Extract<ImportedField, { kind: "matrix_radio" }> =>
+      field.kind === "matrix_radio" && field.rows.length >= 17,
   );
 }
 
@@ -58,7 +59,7 @@ export async function recoverPssPageTwo(
       fetchHistoricalSubmission("pss", submissionId),
       fetchImportedSchema("pss"),
     ]);
-    if (!original || String(original.form_id ?? "") !== "223175090048048") {
+    if (!original || (original.form_id && String(original.form_id) !== "223175090048048")) {
       return { answers, schema };
     }
     const matrix = symptomMatrix(fullSchema);
