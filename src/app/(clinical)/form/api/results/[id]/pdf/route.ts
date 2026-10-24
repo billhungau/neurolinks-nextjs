@@ -7,6 +7,7 @@ import type { NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/na
 import { buildQuestionnairePdf } from "@/lib/clinical/simple-pdf";
 import { isSignatureStrokeData, type SignatureStrokeData } from "@/lib/clinical/signature-strokes";
 import { clinicalSupabaseRequest } from "@/lib/clinical/supabase";
+import { recoverPssPageTwo } from "@/lib/clinical/questionnaires/pss-page-two";
 import { listAllVcitaClients } from "@/lib/clinical/vcita";
 
 export const runtime = "nodejs";
@@ -140,6 +141,13 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
       if (questionnaire.code === "bdii") items = bdiItems(assessment.answers);
       else if (questionnaire.metadata?.native_schema) items = nativeItems(questionnaire.metadata.native_schema, assessment.answers);
       else if (questionnaire.metadata?.schema) items = importedItems(questionnaire.metadata.schema, assessment.answers, questionnaire.code);
+
+      if (questionnaire.code === "pss") {
+        const recovered = await recoverPssPageTwo(assessment.id, assessment.answers, questionnaire.metadata?.schema ?? null);
+        if (recovered.schema?.fields.some((field) => field.kind === "matrix_radio" && field.rows.length >= 17)) {
+          items = importedItems(recovered.schema, recovered.answers, "pss");
+        }
+      }
 
       bytes = buildQuestionnairePdf({ patientName, patientEmail: client?.email ?? null, questionnaireName: questionnaire.name, questionnaireCode: questionnaire.code, submittedAt: submitted, totalScore: assessment.total_score, severity: assessment.severity, obsessionScore: typeof assessment.clinical_flags?.obsession_score === "number" ? assessment.clinical_flags.obsession_score : null, compulsionScore: typeof assessment.clinical_flags?.compulsion_score === "number" ? assessment.clinical_flags.compulsion_score : null, items });
     }

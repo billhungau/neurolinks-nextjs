@@ -210,7 +210,69 @@ function comparisonItems(detail: ResultDetail): ComparisonItem[] {
   return detail.schema.fields.flatMap((field) => importedFieldItems(detail, field));
 }
 
+function PssPageTwo({ detail }: { detail: ResultDetail }) {
+  const matrix = detail.schema?.fields.find(
+    (field) => field.kind === "matrix_radio" && field.rows.length >= 17,
+  );
+  if (!matrix || matrix.kind !== "matrix_radio") return null;
+
+  const interference = detail.schema?.fields.find(
+    (field) => field.kind === "checkbox" &&
+      /interfered|interference/i.test(field.text),
+  );
+  const rawInterference = interference ? detail.answers[interference.qid] : null;
+  const selectedInterference = Array.isArray(rawInterference)
+    ? rawInterference.map(String)
+    : rawInterference ? [String(rawInterference)] : [];
+
+  return (
+    <div style={{ marginTop: 16, display: "grid", gap: 16 }}>
+      <div>
+        <h5 style={{ margin: "0 0 8px", fontSize: 15 }}>PTSD symptom ratings (last two weeks)</h5>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 13 }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: "left", padding: 8, borderBottom: "1px solid #d1d5db" }}>Symptom</th>
+                <th style={{ textAlign: "right", padding: 8, borderBottom: "1px solid #d1d5db" }}>Score (0–3)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matrix.rows.map((label, index) => {
+                const selected = detail.answers[`${matrix.qid}:${index}`];
+                const value = selected === undefined || selected === null ? "" : String(selected);
+                const score = matrix.columns.indexOf(value);
+                return (
+                  <tr key={index}>
+                    <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb" }}>{index + 1}. {label}</td>
+                    <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", textAlign: "right", fontWeight: 700 }}>
+                      {score < 0 ? (value || "—") : (Number(value.match(/^\d/)?.[0] ?? score))}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {interference ? (
+        <div>
+          <h5 style={{ margin: "0 0 8px", fontSize: 15 }}>Areas of functional interference</h5>
+          {selectedInterference.length ? (
+            <ul style={{ margin: 0, paddingLeft: 22 }}>
+              {selectedInterference.map((area) => <li key={area}>{area}</li>)}
+            </ul>
+          ) : <p style={{ color: "#6b7280" }}>No interference responses recorded.</p>}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function ImportedAnswers({ detail }: { detail: ResultDetail }) {
+  if (detail.questionnaireCode === "pss" && detail.schema?.fields.some((field) => field.kind === "matrix_radio" && field.rows.length >= 17)) {
+    return <PssPageTwo detail={detail} />;
+  }
   const items = comparisonItems(detail);
   if (!items.length) {
     return <p style={{ color: "#6b7280" }}>Exact questionnaire schema is unavailable for this result.</p>;
