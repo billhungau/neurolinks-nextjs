@@ -207,6 +207,13 @@ function comparisonItems(detail: ResultDetail): ComparisonItem[] {
     return BDI2_ITEMS.map((item) => bdiItem(detail, item.key));
   }
   if (!detail.schema) return [];
+  if (detail.questionnaireCode === "pss") {
+    // PSS longitudinal comparisons should contain only the 17 scored symptoms.
+    // Trauma-event history and functional interference are not scored items.
+    return detail.schema.fields
+      .filter((field) => field.kind === "matrix_radio" && field.rows.length >= 17)
+      .flatMap((field) => importedFieldItems(detail, field));
+  }
   return detail.schema.fields.flatMap((field) => importedFieldItems(detail, field));
 }
 
@@ -216,14 +223,6 @@ function PssPageTwo({ detail }: { detail: ResultDetail }) {
   );
   if (!matrix || matrix.kind !== "matrix_radio") return null;
 
-  const interference = detail.schema?.fields.find(
-    (field) => field.kind === "checkbox" &&
-      /interfered|interference/i.test(field.text),
-  );
-  const rawInterference = interference ? detail.answers[interference.qid] : null;
-  const selectedInterference = Array.isArray(rawInterference)
-    ? rawInterference.map(String)
-    : rawInterference ? [String(rawInterference)] : [];
 
   return (
     <div style={{ marginTop: 16, display: "grid", gap: 16 }}>
@@ -255,16 +254,7 @@ function PssPageTwo({ detail }: { detail: ResultDetail }) {
           </table>
         </div>
       </div>
-      {interference ? (
-        <div>
-          <h5 style={{ margin: "0 0 8px", fontSize: 15 }}>Areas of functional interference</h5>
-          {selectedInterference.length ? (
-            <ul style={{ margin: 0, paddingLeft: 22 }}>
-              {selectedInterference.map((area) => <li key={area}>{area}</li>)}
-            </ul>
-          ) : <p style={{ color: "#6b7280" }}>No interference responses recorded.</p>}
-        </div>
-      ) : null}
+
     </div>
   );
 }
