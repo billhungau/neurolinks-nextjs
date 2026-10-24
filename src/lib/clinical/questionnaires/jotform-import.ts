@@ -114,9 +114,11 @@ function normalize(raw: RawQuestion): ImportedField | null {
     const rows = splitPipe(raw.mrows);
     const columns = splitPipe(raw.mcolumns);
     const inputType = String(raw.inputType ?? "Radio Button").toLowerCase();
-    if (!text || !rows.length || !columns.length) return null;
+    // Jotform allows an unnamed matrix (the PSS symptom grid is one).
+    // Dropping it loses every symptom rating in imported historical results.
+    if (!rows.length || !columns.length) return null;
     if (inputType.includes("radio")) {
-      return { kind: "matrix_radio", qid, text, order, rows, columns, required };
+      return { kind: "matrix_radio", qid, text: text || "Symptom ratings", order, rows, columns, required };
     }
     if (inputType.includes("check")) {
       return { kind: "matrix_checkbox", qid, text, order, rows, columns, required };
