@@ -240,12 +240,16 @@ function PssPageTwo({ detail }: { detail: ResultDetail }) {
               {matrix.rows.map((label, index) => {
                 const selected = detail.answers[`${matrix.qid}:${index}`];
                 const value = selected === undefined || selected === null ? "" : String(selected);
-                const score = matrix.columns.indexOf(value);
+                const columnIndex = matrix.columns.indexOf(value);
+                const parsedScore = numericPrefix(value);
+                const score = parsedScore !== null && parsedScore >= 0 && parsedScore <= 3
+                  ? parsedScore
+                  : columnIndex >= 0 ? columnIndex : null;
                 return (
                   <tr key={index}>
                     <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb" }}>{index + 1}. {label}</td>
-                    <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", textAlign: "right", fontWeight: 700 }}>
-                      {score < 0 ? (value || "—") : (Number(value.match(/^\d/)?.[0] ?? score))}
+                    <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", textAlign: "right", fontWeight: 700, background: itemBackground(score) }}>
+                      {score ?? (value || "—")}
                     </td>
                   </tr>
                 );
