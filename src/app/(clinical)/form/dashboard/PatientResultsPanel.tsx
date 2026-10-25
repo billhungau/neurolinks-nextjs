@@ -223,42 +223,33 @@ function PssPageTwo({ detail }: { detail: ResultDetail }) {
   );
   if (!matrix || matrix.kind !== "matrix_radio") return null;
 
-
   return (
-    <div style={{ marginTop: 16, display: "grid", gap: 16 }}>
-      <div>
-        <h5 style={{ margin: "0 0 8px", fontSize: 15 }}>PTSD symptom ratings (last two weeks)</h5>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 13 }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: "left", padding: 8, borderBottom: "1px solid #d1d5db" }}>Symptom</th>
-                <th style={{ textAlign: "right", padding: 8, borderBottom: "1px solid #d1d5db" }}>Score (0–3)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {matrix.rows.map((label, index) => {
-                const selected = detail.answers[`${matrix.qid}:${index}`];
-                const value = selected === undefined || selected === null ? "" : String(selected);
-                const columnIndex = matrix.columns.indexOf(value);
-                const parsedScore = numericPrefix(value);
-                const score = parsedScore !== null && parsedScore >= 0 && parsedScore <= 3
-                  ? parsedScore
-                  : columnIndex >= 0 ? columnIndex : null;
-                return (
-                  <tr key={index}>
-                    <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb" }}>{index + 1}. {label}</td>
-                    <td style={{ padding: 8, borderBottom: "1px solid #e5e7eb", textAlign: "right", fontWeight: 700, background: itemBackground(score) }}>
-                      {score ?? (value || "—")}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
+    <div style={{ display: "grid", gap: "9px", marginTop: "14px" }}>
+      {matrix.rows.map((label, index) => {
+        const selected = detail.answers[`${matrix.qid}:${index}`];
+        const value = selected === undefined || selected === null ? "" : String(selected);
+        const columnIndex = matrix.columns.indexOf(value);
+        const parsedScore = numericPrefix(value);
+        const score = parsedScore !== null && parsedScore >= 0 && parsedScore <= 3
+          ? parsedScore
+          : columnIndex >= 0 ? columnIndex : null;
+        return (
+          <div
+            key={`${matrix.qid}:${index}`}
+            style={{
+              padding: "10px 12px",
+              border: "1px solid #e5e7eb",
+              borderRadius: "8px",
+              background: itemBackground(score),
+            }}
+          >
+            <strong>{index + 1}. {label}</strong>
+            <div style={{ marginTop: "4px", whiteSpace: "pre-line" }}>
+              {score === null ? (value || "—") : String(score)}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
