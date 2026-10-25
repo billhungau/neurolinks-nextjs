@@ -11,6 +11,8 @@ import {
   JOTFORM_FIELD_KEYS,
   VETERANS_MESSAGE_PREFIX,
   VETERANS_SOURCE,
+  VETERANS_TMS_LANDING_SOURCE,
+  VETERANS_TMS_LANDING_MESSAGE_PREFIX,
   createSubmitLock,
   isJotformSuccessPayload,
   jotformMessageForSource,
@@ -250,4 +252,16 @@ test("built client bundles do not contain the Jotform API key env name", () => {
     const src = readFileSync(file, "utf8");
     assert.equal(src.includes("JOTFORM_API_KEY"), false, file);
   }
+});
+
+
+test("Veterans TMS ads submissions retain distinct attribution and all 11 phone digits", () => {
+  const phone = "12505551234";
+  const parsed = parseContactPayload({ ...valid, phone, source: VETERANS_TMS_LANDING_SOURCE });
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+  assert.equal(parseContactSource(VETERANS_TMS_LANDING_SOURCE), VETERANS_TMS_LANDING_SOURCE);
+  const body = jotformSubmissionBody(parsed.fields, VETERANS_TMS_LANDING_SOURCE);
+  assert.equal(body.get("submission[4_full]"), phone);
+  assert.equal(body.get("submission[5]"), `${VETERANS_TMS_LANDING_MESSAGE_PREFIX}\n\n${valid.message}`);
 });
