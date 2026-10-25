@@ -478,7 +478,7 @@ function ComparisonTable({ details }: { details: ResultDetail[] }) {
                         }}
                       >
                         <div style={{ lineHeight: 1.4 }}>{item?.answer ?? "—"}</div>
-                        {item?.score !== null && item?.score !== undefined ? (
+                        {sorted[index].questionnaireCode !== "pss" && item?.score !== null && item?.score !== undefined ? (
                           <div style={{ color: "#4b5563", marginTop: "5px", fontWeight: 700 }}>Score {item.score}</div>
                         ) : null}
                       </td>
