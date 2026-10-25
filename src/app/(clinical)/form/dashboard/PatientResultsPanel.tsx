@@ -47,6 +47,11 @@ const LABELS: Record<string, string> = {
 };
 
 const SCORE_BACKGROUNDS = ["#f8fbff", "#e7f1ff", "#bdd8ff", "#7faef2"];
+const PSS_SCORE_LABELS = ["Not at all", "One in a while", "Half the time", "Almost always"] as const;
+
+function pssScoreLabel(score: number) {
+  return PSS_SCORE_LABELS[score] ?? "";
+}
 
 function itemBackground(score: number | null | undefined) {
   if (score === null || score === undefined || !Number.isFinite(score)) return "#fff";
@@ -177,7 +182,12 @@ function importedFieldItems(detail: ResultDetail, field: ImportedField): Compari
       return {
         key: `${field.qid}:${rowIndex}`,
         label: row,
-        answer: value || "—",
+        answer: detail.questionnaireCode === "pss" && value
+          ? (() => {
+              const score = numericPrefix(value) ?? (columnIndex >= 0 ? columnIndex : null);
+              return score !== null && score >= 0 && score <= 3 ? `${score}. ${pssScoreLabel(score)}` : value;
+            })()
+          : value || "—",
         score: value ? numericPrefix(value) ?? (columnIndex >= 0 ? columnIndex : null) : null,
       };
     });
@@ -245,7 +255,7 @@ function PssPageTwo({ detail }: { detail: ResultDetail }) {
           >
             <strong>{index + 1}. {label}</strong>
             <div style={{ marginTop: "4px", whiteSpace: "pre-line" }}>
-              {score === null ? (value || "—") : String(score)}
+              {score === null ? (value || "—") : `${score}. ${pssScoreLabel(score)}`}
             </div>
           </div>
         );
