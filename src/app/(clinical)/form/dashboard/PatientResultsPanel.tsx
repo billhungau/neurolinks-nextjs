@@ -478,7 +478,7 @@ function ComparisonTable({ details }: { details: ResultDetail[] }) {
                         }}
                       >
                         <div style={{ lineHeight: 1.4 }}>{item?.answer ?? "—"}</div>
-                        {sorted[index].questionnaireCode !== "pss" && item?.score !== null && item?.score !== undefined ? (
+                        {!["pss", "bdii", "bai"].includes(sorted[index].questionnaireCode) && item?.score !== null && item?.score !== undefined ? (
                           <div style={{ color: "#4b5563", marginTop: "5px", fontWeight: 700 }}>Score {item.score}</div>
                         ) : null}
                       </td>
@@ -518,7 +518,7 @@ function ComparisonTable({ details }: { details: ResultDetail[] }) {
                   >
                     <div className="comparison-date">
                       <span>{new Date(sorted[index].submittedAt).toLocaleDateString()}</span>
-                      <span>Total {sorted[index].totalScore}{item?.score !== null && item?.score !== undefined ? ` · Item ${item.score}` : ""}</span>
+                      <span>Total {sorted[index].totalScore}{!["pss", "bdii", "bai"].includes(sorted[index].questionnaireCode) && item?.score !== null && item?.score !== undefined ? ` · Item ${item.score}` : ""}</span>
                     </div>
                     <div className="comparison-answer">{item?.answer ?? "—"}</div>
                   </div>
