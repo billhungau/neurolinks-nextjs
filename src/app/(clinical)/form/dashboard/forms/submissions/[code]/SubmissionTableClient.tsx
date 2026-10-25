@@ -77,7 +77,7 @@ export function SubmissionTableClient({ code, rows, mode = "questionnaire" }: { 
                     {isConsent ? (
                       <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "flex-end", gap: 8, whiteSpace: "nowrap" }}>
                         <Link href={detailHref} style={{ display: "inline-flex", alignItems: "center", padding: "8px 11px", border: "1px solid #cbd5e1", borderRadius: 8, color: "#0f172a", background: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>View data</Link>
-                        <a href={pdfHref} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", padding: "8px 11px", borderRadius: 8, color: "#fff", background: "#111827", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>Preview PDF</a>
+                        <a href={pdfHref} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", padding: "8px 11px", borderRadius: 8, color: "#fff", background: "#111827", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>View / Download PDF</a>
                       </div>
                     ) : (
                       <Link href={detailHref} style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>View details →</Link>

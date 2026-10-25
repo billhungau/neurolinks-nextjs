@@ -8,7 +8,6 @@ import type { ImportedQuestionnaireSchema } from "@/lib/clinical/questionnaires/
 import type { NativeField, NativeQuestionnaireSchema } from "@/lib/clinical/questionnaires/native-builder";
 import { isSignatureStrokeData, signatureSvgPolylines, type SignatureStrokeData } from "@/lib/clinical/signature-strokes";
 import { BackToSubmissions } from "./BackToSubmissions";
-import { PdfPreviewClient } from "./PdfPreviewClient";
 
 export const dynamic = "force-dynamic";
 
@@ -225,7 +224,7 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
             <h1 style={{ margin: 0, fontSize: 30 }}>{LABELS[code] ?? questionnaire.name} submission</h1>
             <p style={{ margin: "8px 0 0", color: "#64748b" }}>{patientName} · {formatSubmittedAt(assessment.submitted_at)}</p>
           </div>
-          {isConsent ? <PdfPreviewClient href={pdfHref} /> : <a href={pdfHref} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 14px", borderRadius: 9, background: "#111827", color: "#fff", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>Preview PDF</a>}
+          <a href={pdfHref} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 14px", borderRadius: 9, background: "#111827", color: "#fff", textDecoration: "none", fontWeight: 800, fontSize: 14 }}>View / Download PDF</a>
         </header>
 
         {isConsent ? (
