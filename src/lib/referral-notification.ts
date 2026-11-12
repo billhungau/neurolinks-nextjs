@@ -112,8 +112,10 @@ function referralNotificationText(context: ReferralNotificationContext) {
 function tableRow(label: string, value: string, isLast = false) {
   const border = isLast ? "" : "border-bottom:1px solid #e5e7eb;";
   return `<tr>
-    <td style="width:180px;padding:11px 14px;background:#f6f8fa;${border}font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.45;font-weight:600;color:#344054;vertical-align:top;">${escapeHtml(label)}</td>
-    <td style="padding:11px 14px;${border}font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#1f2937;vertical-align:top;word-break:break-word;">${value}</td>
+    <td style="padding:12px 14px;${border}font-family:Arial,Helvetica,sans-serif;vertical-align:top;">
+      <div style="margin:0 0 4px 0;font-size:12px;line-height:1.4;font-weight:700;color:#344054;">${escapeHtml(label)}</div>
+      <div style="font-size:14px;line-height:1.6;font-weight:400;color:#1f2937;white-space:pre-wrap;overflow-wrap:anywhere;word-wrap:break-word;">${value}</div>
+    </td>
   </tr>`;
 }
 
@@ -176,8 +178,8 @@ function referralNotificationHtml(context: ReferralNotificationContext) {
 <body style="margin:0;padding:0;background:#f4f6f8;color:#1f2937;-webkit-text-size-adjust:100%;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:#f4f6f8;border-collapse:collapse;">
     <tr>
-      <td align="center" style="padding:24px 12px;">
-        <table role="presentation" width="680" cellpadding="0" cellspacing="0" border="0" class="email-shell" style="width:680px;max-width:680px;background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;border-collapse:separate;">
+      <td align="center" style="padding:16px 8px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="email-shell" style="width:100%;max-width:680px;background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;border-collapse:separate;">
           <tr>
             <td class="email-padding" style="padding:28px 32px 18px 32px;border-bottom:1px solid #e5e7eb;">
               <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.4;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#667085;">NeuroLinks</div>
@@ -198,7 +200,7 @@ function referralNotificationHtml(context: ReferralNotificationContext) {
                       ${tableRow("Diagnosis", htmlList(fields.diagnoses), true)}
                     </table>
                     <div style="margin:12px 0 6px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.4;font-weight:600;color:#344054;">Clinical details</div>
-                    <div style="padding:13px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1f2937;white-space:pre-wrap;word-break:break-word;">${htmlValue(fields.clinicalDetails)}</div>
+                    <div style="padding:13px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1f2937;white-space:pre-wrap;overflow-wrap:anywhere;word-wrap:break-word;">${htmlValue(fields.clinicalDetails)}</div>
                   </td>
                 </tr>
                 ${sectionTable("Treatment considerations", treatmentRows)}
@@ -206,7 +208,7 @@ function referralNotificationHtml(context: ReferralNotificationContext) {
                   ? `<tr>
                   <td style="padding:0 0 22px 0;">
                     <div style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.4;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#163b65;">Other information</div>
-                    <div style="padding:13px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1f2937;white-space:pre-wrap;word-break:break-word;">${escapeHtml(otherInformation)}</div>
+                    <div style="padding:13px 14px;border:1px solid #e5e7eb;border-radius:8px;background:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1f2937;white-space:pre-wrap;overflow-wrap:anywhere;word-wrap:break-word;">${escapeHtml(otherInformation)}</div>
                   </td>
                 </tr>`
                   : ""}
