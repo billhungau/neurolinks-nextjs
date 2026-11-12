@@ -95,6 +95,12 @@ test("Resend referral notification includes all referral fields", async () => {
 
       const html = String(body.html);
       assert.equal(html.includes("New Physician Referral"), true);
+      // Mobile email fields should stack labels above full-width values.
+      assert.equal(html.includes("width:180px"), false);
+      assert.equal(html.includes('class="email-shell" style="width:100%;max-width:680px;'), true);
+      assert.equal(html.includes("overflow-wrap:anywhere"), true);
+      assert.equal(html.includes("0000000000"), true);
+      assert.equal(html.includes("clinical-detail-placeholder"), true);
       assert.equal(html.includes("Patient information"), true);
       assert.equal(html.includes("Referrer information"), true);
       assert.equal(html.includes("Clinical information"), true);
